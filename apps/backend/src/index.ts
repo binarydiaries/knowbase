@@ -3,7 +3,7 @@ import openapi from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
-import { chat } from './modules/chat/chat';
+import { Chat } from './modules/chat/chat';
 import { Chatbot } from './modules/chatbot/chatbot';
 import { document } from './modules/document/document';
 import { message } from './modules/message/message';
@@ -28,14 +28,7 @@ const app = new Elysia()
     }),
   )
   .use(cors())
-  .get('/', () => {
-    return {
-      status: 'ok',
-      service: 'knowbase',
-      time: new Date().toISOString(),
-    };
-  })
-  .use(chat)
+  .use(Chat)
   .use(message)
   .use(document)
   .use(Chatbot)

@@ -13,8 +13,8 @@ const app = new Elysia()
     openapi({
       path: '/docs',
       mapJsonSchema: {
-        zod: (schema: schemas.$ZodType) => {
-          return z.toJSONSchema(schema, {
+        zod: (schema: schemas.$ZodType) =>
+          z.toJSONSchema(schema, {
             unrepresentable: 'any',
             override: (ctx) => {
               const def = ctx.zodSchema._zod.def;
@@ -23,13 +23,12 @@ const app = new Elysia()
                 ctx.jsonSchema.format = 'date-time';
               }
             },
-          });
-        },
+          }),
       },
     }),
   )
   .use(cors())
-  .get('/health', () => {
+  .get('/', () => {
     return {
       status: 'ok',
       service: 'knowbase',

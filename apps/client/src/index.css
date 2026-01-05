@@ -1,0 +1,6 @@
+@import "@knowbase/ui/globals.css";
+
+body,
+#root {
+  height: 100vh;
+}

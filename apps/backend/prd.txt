@@ -1,0 +1,1 @@
+KnowBase is a backend service that lets users upload knowledge and chat with it using AI.

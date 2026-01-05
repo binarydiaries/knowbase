@@ -1,0 +1,18 @@
+import { createId } from '@paralleldrive/cuid2';
+import { jsonb, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+
+export const roleEnum = pgEnum('role', ['system', 'user', 'assistant']);
+
+export const messages = pgTable('messages', {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  conversationId: text().notNull(),
+  role: roleEnum().notNull(),
+  parts: jsonb(),
+  updatedAt: timestamp({ withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+});

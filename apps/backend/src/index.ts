@@ -25,6 +25,12 @@ const app = new Elysia()
             },
           }),
       },
+      documentation: {
+        info: {
+          title: 'Knowbase Documentation',
+          version: '1.0.0',
+        },
+      },
     }),
   )
   .use(cors())

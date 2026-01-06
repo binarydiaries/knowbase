@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { DocumentService } from './service';
 
-export const document = new Elysia({ prefix: 'documents', tags: ['Documents'] })
+export const Document = new Elysia({ prefix: 'documents', tags: ['Documents'] })
   .get('', () => {})
   .post(
     '',

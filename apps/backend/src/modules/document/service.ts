@@ -4,14 +4,16 @@ import { documents, embeddings as embeddingsTable } from '../../db/schema';
 import { EmbeddingService } from '../embedding/service';
 
 export abstract class DocumentService {
-  static async create(content: string) {
+  static async create(data: typeof documents.$inferInsert) {
     const [document] = await db.transaction(async (transaction) => {
       const [doc] = await transaction
         .insert(documents)
-        .values({ content })
+        .values(data)
         .returning();
 
-      const embeddings = await EmbeddingService.generateEmbeddings(content);
+      const embeddings = await EmbeddingService.generateEmbeddings(
+        data.content,
+      );
       await transaction.insert(embeddingsTable).values(
         embeddings.map((embedding) => ({
           documentId: doc.id,
@@ -33,9 +35,6 @@ export abstract class DocumentService {
   static single(id: string) {
     return db.query.documents.findFirst({
       where: eq(documents.id, id),
-      with: {
-        embeddings: true,
-      },
     });
   }
 

@@ -13,11 +13,11 @@ import {
   Frame,
   GalleryVerticalEnd,
   Map,
+  MessageCircleCodeIcon,
   PieChart,
   Settings2,
   SquareTerminal,
 } from 'lucide-react';
-import { NavMain } from '../NavMain/NavMain.tsx';
 import { NavProjects } from '../NavProjects/NavProjects.tsx';
 import { NavUser } from '../NavUser/NavUser.tsx';
 import { TeamSwitcher } from '../TeamSwitcher/TeamSwitcher.tsx';
@@ -135,6 +135,11 @@ const data = {
   ],
   projects: [
     {
+      name: 'Chatbots',
+      url: '/chatbots',
+      icon: MessageCircleCodeIcon,
+    },
+    {
       name: 'Design Engineering',
       url: '#',
       icon: Frame,
@@ -159,7 +164,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>

@@ -91,8 +91,42 @@ function RouteComponent() {
             </CardContent>
           </Card>
         </div>
-        <div className="w-1/2 p-5">
-          <Chatbot />
+        <div className="w-1/2 p-5 h-full">
+          <Chatbot
+            messages={[
+              {
+                type: 'system',
+                message: 'Hi! What can I help you with?',
+              },
+              {
+                type: 'user',
+                message: 'What is the weather in dubai?',
+              },
+              {
+                type: 'system',
+                message:
+                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
+              },
+              {
+                type: 'user',
+                message: 'What is the weather in dubai?',
+              },
+              {
+                type: 'system',
+                message:
+                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
+              },
+              {
+                type: 'user',
+                message: 'What is the weather in dubai?',
+              },
+              {
+                type: 'system',
+                message:
+                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
+              },
+            ]}
+          />
         </div>
       </div>
     </>

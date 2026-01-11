@@ -15,7 +15,6 @@
     "utils": "@knowbase/ui/lib/utils",
     "hooks": "@knowbase/ui/hooks",
     "lib": "@knowbase/ui/lib",
-    "ui": "@knowbase/ui/components",
-    "widgets": "@knowbase/ui/widgets"
+    "ui": "@knowbase/ui/components"
   }
 }

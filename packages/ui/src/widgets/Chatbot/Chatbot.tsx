@@ -1,25 +1,38 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { SendHorizonal, X } from 'lucide-react';
-import type { ComponentProps } from 'react';
+import { Ellipsis, SendHorizonal, X } from 'lucide-react';
+import { type ComponentProps, useState } from 'react';
 import type { IChatMessage } from './Chatbot.types';
 import { ChatMessage } from './ChatMessage';
 import iconSvg from './icon2.png';
 
 interface IChatbotProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
+  onSendMessage?: (message: string) => void;
+  isLoading?: boolean;
 }
 
 export const Chatbot = ({
   messages,
   className,
+  onSendMessage,
+  isLoading,
   ...otherProps
 }: IChatbotProps) => {
+  const [input, setInput] = useState('');
+
+  const submitForm = () => {
+    if (input.trim()) {
+      onSendMessage?.(input);
+      setInput('');
+    }
+  };
+
   return (
     <div
       className={cn(
-        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] rounded-3xl h-[600px] overflow-hidden flex flex-col',
+        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden flex flex-col',
         className,
       )}
       {...otherProps}
@@ -40,20 +53,37 @@ export const Chatbot = ({
             systemTitle="Siri"
             type={message.type}
             message={message.message}
-            key={message}
+            key={message.id}
           />
         ))}
+
+        {isLoading && (
+          <div className="flex">
+            <div className="rounded-2xl px-4 py-2 bg-[#F0F0F0]">
+              <Ellipsis />
+            </div>
+          </div>
+        )}
       </div>
       <div className="p-5 flex flex-col gap-2">
         <div className="relative">
           <Textarea
             className="min-h-12 rounded-2xl pr-14 py-3 resize-none"
             placeholder="Type your message..."
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // prevent new line
+                submitForm();
+              }
+            }}
           />
           <Button
             variant="ghost"
             size="icon-sm"
             className="absolute right-3 top-2"
+            disabled={input.trim().length === 0}
           >
             <SendHorizonal className="size-6" />
           </Button>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Suspense } from 'react';
-import ChatBox from '@/components/ChatBox/ChatBox.tsx';
 import { useQueryParams } from '@/hooks/useQueryParams.ts';
+import ChatBoxWidget from '@/widgets/ChatBoxWidget/ChatBoxWidget.tsx';
 
 function App() {
   const { params } = useQueryParams();
@@ -21,7 +21,7 @@ function App() {
   const messagePromise = getMessages();
   return (
     <Suspense fallback={<p>waiting for message...</p>}>
-      <ChatBox messagePromise={messagePromise} />
+      <ChatBoxWidget messagePromise={messagePromise} />
     </Suspense>
   );
 }

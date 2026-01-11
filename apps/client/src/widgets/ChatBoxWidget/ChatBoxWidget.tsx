@@ -16,7 +16,7 @@ interface IChatBoxProps {
   messagePromise: Promise<UIMessage[]>;
 }
 
-const ChatBox = ({ messagePromise }: IChatBoxProps) => {
+const ChatBoxWidget = ({ messagePromise }: IChatBoxProps) => {
   const existingMessages = use(messagePromise);
 
   const { params, setQueryParams } = useQueryParams();
@@ -101,4 +101,4 @@ const ChatBox = ({ messagePromise }: IChatBoxProps) => {
     </div>
   );
 };
-export default ChatBox;
+export default ChatBoxWidget;

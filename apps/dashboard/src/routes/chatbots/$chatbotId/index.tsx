@@ -25,6 +25,7 @@ import {
 } from '@knowbase/ui/components/item';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 
@@ -58,8 +59,8 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
-      <div className="flex">
-        <div className="w-1/2 p-5">
+      <div className="flex flex-1">
+        <div className="w-1/2 p-5 shadow-none">
           <Card className="w-full">
             <CardHeader>
               <CardTitle>Knowledge Sources</CardTitle>
@@ -90,7 +91,9 @@ function RouteComponent() {
             </CardContent>
           </Card>
         </div>
-        <div>bbb</div>
+        <div className="w-1/2 p-5">
+          <Chatbot />
+        </div>
       </div>
     </>
   );

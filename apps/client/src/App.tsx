@@ -1,7 +1,3 @@
-import axios from 'axios';
-import { Suspense } from 'react';
-import { useQueryParams } from '@/hooks/useQueryParams.ts';
-import ChatBoxWidget2 from '@/widgets/ChatBoxWidget2/ChatBoxWidget2.tsx';
 import { ChatbotWidget } from '@/widgets/ChatbotWidget/ChatbotWidget.tsx';
 
 function App() {

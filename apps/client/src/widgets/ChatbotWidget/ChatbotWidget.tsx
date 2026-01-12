@@ -34,6 +34,9 @@ export const ChatbotWidget = () => {
         type: value.role === 'user' ? 'user' : 'system',
       }))}
       onSendMessage={(message) => sendMessage({ text: message })}
+      onClose={() => {
+        window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
+      }}
     />
   );
 };

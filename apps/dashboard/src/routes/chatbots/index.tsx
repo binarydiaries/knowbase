@@ -8,7 +8,7 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import { getChatbots } from '@/services';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -42,9 +42,11 @@ const chatbots: Chatbot[] = [
 ];
 
 function RouteComponent() {
+  const [chatbots, setChatbots] = useState([])
   useEffect(() => {
     getChatbots().then((value) => {
       console.log(value.data.chatbots);
+      // setChatbots(value.data.chatbots);
     });
   }, []);
 

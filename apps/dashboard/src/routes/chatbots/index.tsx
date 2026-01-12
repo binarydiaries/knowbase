@@ -69,7 +69,11 @@ function RouteComponent() {
         {/* Chatbot List */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {chatbots.map((bot) => (
-            <Link to={`/chatbots/${bot.id}`} key={bot.id}>
+            <Link
+              to={`/chatbots/$chatbotId`}
+              params={{ chatbotId: bot.id }}
+              key={bot.id}
+            >
               <Card key={bot.id} className="hover:shadow-sm transition">
                 <CardHeader className="flex flex-row items-start justify-between space-y-0">
                   <CardTitle className="text-base font-medium">

@@ -1,5 +1,5 @@
 import { index, pgTable, text, vector } from 'drizzle-orm/pg-core';
-import { cuid2PrimaryKey } from '../../utils/columns.utils';
+import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { documents } from './documents';
 
 export const embeddings = pgTable(
@@ -9,6 +9,7 @@ export const embeddings = pgTable(
     documentId: text().references(() => documents.id, { onDelete: 'cascade' }),
     content: text().notNull(),
     embedding: vector({ dimensions: 1536 }).notNull(),
+    ...timestamps,
   },
   (table) => ({
     embeddingIndex: index('embeddingIndex').using(

@@ -9,5 +9,56 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.ChatConfig = {
+        chatbotId: "cb_123",
+        theme: "dark"
+      };
+      (() => {
+        if (window.__CHAT_EMBED_LOADED__) return;
+        window.__CHAT_EMBED_LOADED__ = true;
+
+        // 1. Create launcher
+        const btn = document.createElement("button");
+        btn.innerText = "💬";
+        btn.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    z-index: 999999;
+    background: #000;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+  `;
+        document.body.appendChild(btn);
+
+        let iframe;
+
+        // 2. Lazy-load iframe on click
+        btn.onclick = () => {
+          if (!iframe) {
+            iframe = document.createElement("iframe");
+            iframe.src = "http://localhost:5173/";
+            iframe.style.cssText = `
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 400px;
+        height: 600px;
+        border: none;
+        z-index: 999999;
+        border-radius: 1.5rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+      `;
+            document.body.appendChild(iframe);
+          } else {
+            iframe.style.display =
+                    iframe.style.display === "none" ? "block" : "none";
+          }
+        };
+      })();
+    </script>
   </body>
 </html>

@@ -21,8 +21,15 @@ const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>,
+    <>
+      <StrictMode>
+        <RouterProvider router={router} />
+      </StrictMode>
+      {/*<iframe*/}
+      {/*  title="Chatbot"*/}
+      {/*  src="http://localhost:5173/"*/}
+      {/*  className="fixed bottom-10 right-10 h-full max-h-175 w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden "*/}
+      {/*/>*/}
+    </>,
   );
 }

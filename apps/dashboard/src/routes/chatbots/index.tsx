@@ -45,10 +45,23 @@ function RouteComponent() {
   const [chatbots, setChatbots] = useState([])
   useEffect(() => {
     getChatbots().then((value) => {
+      setChatbots(
+          value.data.chatbots.map((bot: any): Chatbot => ({
+            id: bot.id,
+            name: bot.name,
+            status: bot.status,
+            conversations: bot.conversations ?? 0,   // ✅ default
+            lastTrained: bot.updatedAt
+                ? new Date(bot.updatedAt).toLocaleDateString()
+                : 'Never',
+            createdAt: bot.createdAt ? new Date(bot.createdAt) : undefined,
+            updatedAt: bot.updatedAt ? new Date(bot.updatedAt) : undefined,
+          }))
+      );
       console.log(value.data.chatbots);
-      // setChatbots(value.data.chatbots);
     });
   }, []);
+
 
   return (
     <>

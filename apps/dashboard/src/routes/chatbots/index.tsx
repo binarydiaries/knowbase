@@ -8,8 +8,8 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import {useEffect, useState} from 'react';
-import { getChatbots } from '@/services';
+import { useEffect, useState } from 'react';
+import { getChatbots, postChatbots } from '@/services';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
 export const Route = createFileRoute('/chatbots/')({
@@ -24,44 +24,39 @@ type Chatbot = {
   status: 'live' | 'draft';
 };
 
-const chatbots: Chatbot[] = [
-  {
-    id: '1',
-    name: 'Website Support Bot',
-    conversations: 1234,
-    lastTrained: '2 days ago',
-    status: 'live',
-  },
-  {
-    id: '2',
-    name: 'Pricing Assistant',
-    conversations: 342,
-    lastTrained: '5 days ago',
-    status: 'draft',
-  },
-];
-
 function RouteComponent() {
-  const [chatbots, setChatbots] = useState([])
+  const [chatbots, setChatbots] = useState([]);
   useEffect(() => {
+    getAllChatbots();
+  }, [chatbots]);
+
+  const getAllChatbots = () => {
     getChatbots().then((value) => {
       setChatbots(
-          value.data.chatbots.map((bot: any): Chatbot => ({
+        value.data.chatbots.map(
+          (bot: any): Chatbot => ({
             id: bot.id,
             name: bot.name,
             status: bot.status,
-            conversations: bot.conversations ?? 0,   // ✅ default
+            conversations: bot.conversations ?? 0, // ✅ default
             lastTrained: bot.updatedAt
-                ? new Date(bot.updatedAt).toLocaleDateString()
-                : 'Never',
+              ? new Date(bot.updatedAt).toLocaleDateString()
+              : 'Never',
             createdAt: bot.createdAt ? new Date(bot.createdAt) : undefined,
             updatedAt: bot.updatedAt ? new Date(bot.updatedAt) : undefined,
-          }))
+          }),
+        ),
       );
-      console.log(value.data.chatbots);
     });
-  }, []);
+  };
 
+  async function handleCreateChatbot(name: string) {
+    await postChatbots({
+      body: { name },
+    });
+
+    getAllChatbots();
+  }
 
   return (
     <>
@@ -73,7 +68,7 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-base font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog />
+          <CreateChatbotDialog onCreate={handleCreateChatbot} />
         </div>
       </header>
       <Separator />

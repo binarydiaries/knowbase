@@ -5,12 +5,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Bot, Ellipsis } from 'lucide-react';
+import { Bot, Copy, Ellipsis, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getChatbots, postChatbots } from '@/services';
+import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -55,8 +61,24 @@ function RouteComponent() {
     await postChatbots({
       body: { name },
     });
-
     getAllChatbots();
+  }
+
+  async function handleDeleteChatbot(id: string) {
+    console.log('Deleting chatbot:', id);
+
+    try {
+      await deleteChatbotsById({
+        pathParams: {
+          id,
+        },
+      });
+
+      // 🔥 update UI immediately
+      setChatbots((prev) => prev.filter((bot) => bot.id !== id));
+    } catch (err) {
+      console.error('Delete failed', err);
+    }
   }
 
   return (
@@ -113,9 +135,38 @@ function RouteComponent() {
                     </div>
 
                     {/* Menu */}
-                    <div className="text-muted-foreground">
-                      <Ellipsis className="h-5 w-5" />
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="text-muted-foreground  cursor-pointer px-1 py-0.5  hover:rounded-l hover:bg-gray-200 hover:text-foreground">
+                          <Ellipsis className="h-5 w-5" />
+                        </button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="end" className="w-40 ">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            console.log('Duplicate clicked', bot.id);
+                          }}
+                          className="flex items-center  cursor-pointer gap-2"
+                        >
+                          <Copy className="h-4 w-4" />
+                          Duplicate
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('Delete this chatbot?')) {
+                              handleDeleteChatbot(bot.id);
+                            }
+                          }}
+                          className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 text-red" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   {/* Description (optional / placeholder) */}
                   <p className="mt-1 text-sm text-muted-foreground">

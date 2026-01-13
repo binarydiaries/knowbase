@@ -12,18 +12,6 @@ export const launcherStyle = `
   z-index: 999999;
 `;
 
-export const iframeStyle = `
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 400px;
-    height: 600px;
-    border: none;
-    z-index: 999999;
-    border-radius: 1.5rem;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-`;
-
 export const BASE_STYLE = `
    position: fixed;
     bottom: 90px;

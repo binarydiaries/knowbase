@@ -1,8 +1,9 @@
-import { BASE_STYLE, iframeStyle } from './styles';
+import { BASE_STYLE } from './styles';
 
 let iframe: HTMLIFrameElement | null = null;
 let isLoading = false;
 let isReady = false;
+let isVisible = false;
 
 export function openIframe(
   chatUrl: string,
@@ -39,6 +40,11 @@ export function hideIframe() {
   iframe.style.opacity = '0';
   iframe.style.transform = 'translateY(16px)';
   iframe.style.pointerEvents = 'none';
+  isVisible = false;
+}
+
+export function isIframeVisible(): boolean {
+  return isVisible;
 }
 
 function showIframe() {
@@ -48,5 +54,6 @@ function showIframe() {
     iframe!.style.opacity = '1';
     iframe!.style.transform = 'translateY(0)';
     iframe!.style.pointerEvents = 'auto';
+    isVisible = true;
   });
 }

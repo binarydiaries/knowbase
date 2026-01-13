@@ -1,4 +1,4 @@
-import { openIframe } from './iframe';
+import { hideIframe, isIframeVisible, openIframe } from './iframe';
 import { showIcon, showSpinner } from './spinner';
 import { launcherStyle } from './styles';
 
@@ -8,11 +8,15 @@ export function createLauncher(chatUrl: string) {
   btn.style.cssText = launcherStyle;
 
   btn.onclick = () => {
-    openIframe(
-      chatUrl,
-      () => showSpinner(btn), // loading
-      () => showIcon(btn), // ready
-    );
+    if (isIframeVisible()) {
+      hideIframe();
+    } else {
+      openIframe(
+        chatUrl,
+        () => showSpinner(btn), // loading
+        () => showIcon(btn), // ready
+      );
+    }
   };
 
   document.body.appendChild(btn);

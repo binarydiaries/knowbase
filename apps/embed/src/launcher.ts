@@ -7,6 +7,24 @@ export function createLauncher(chatUrl: string) {
   btn.innerHTML = '💬';
   btn.style.cssText = launcherStyle;
 
+  // Hover enlarge
+  btn.addEventListener('mouseenter', () => {
+    btn.style.transform = 'scale(1.08)';
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = 'scale(1)';
+  });
+
+  // Press feedback
+  btn.addEventListener('mousedown', () => {
+    btn.style.transform = 'scale(0.95)';
+  });
+
+  btn.addEventListener('mouseup', () => {
+    btn.style.transform = 'scale(1.08)';
+  });
+
   btn.onclick = () => {
     if (isIframeVisible()) {
       hideIframe();

@@ -10,6 +10,11 @@ export const launcherStyle = `
   border: none;
   cursor: pointer;
   z-index: 999999;
+  
+  transform: scale(1);
+  transition:
+    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 1000ms ease;
 `;
 
 export const BASE_STYLE = `

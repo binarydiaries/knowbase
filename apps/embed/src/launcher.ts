@@ -1,10 +1,19 @@
-import { toggleIframe } from './iframe';
+import { openIframe } from './iframe';
+import { showIcon, showSpinner } from './spinner';
 import { launcherStyle } from './styles';
 
 export function createLauncher(chatUrl: string) {
   const btn = document.createElement('button');
-  btn.innerText = '💬';
+  btn.innerHTML = '💬';
   btn.style.cssText = launcherStyle;
-  btn.onclick = () => toggleIframe(chatUrl);
+
+  btn.onclick = () => {
+    openIframe(
+      chatUrl,
+      () => showSpinner(btn), // loading
+      () => showIcon(btn), // ready
+    );
+  };
+
   document.body.appendChild(btn);
 }

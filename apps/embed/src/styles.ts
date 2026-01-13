@@ -23,3 +23,23 @@ export const iframeStyle = `
     border-radius: 1.5rem;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
 `;
+
+export const BASE_STYLE = `
+   position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 400px;
+    height: 600px;
+    border: none;
+    z-index: 999999;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+
+  transition:
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+`;

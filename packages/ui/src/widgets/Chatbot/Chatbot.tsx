@@ -11,6 +11,7 @@ interface IChatbotProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
   onSendMessage?: (message: string) => void;
   isLoading?: boolean;
+  onClose?: () => void;
 }
 
 export const Chatbot = ({
@@ -18,6 +19,7 @@ export const Chatbot = ({
   className,
   onSendMessage,
   isLoading,
+  onClose,
   ...otherProps
 }: IChatbotProps) => {
   const [input, setInput] = useState('');
@@ -43,7 +45,7 @@ export const Chatbot = ({
           <h2 className="text-base font-semibold">Gini</h2>
           <p className="text-sm">Customer support assistance</p>
         </div>
-        <Button size="icon-sm">
+        <Button size="icon-sm" onClick={onClose}>
           <X className="text-white size-5" />
         </Button>
       </div>
@@ -84,6 +86,7 @@ export const Chatbot = ({
             size="icon-sm"
             className="absolute right-3 top-2"
             disabled={input.trim().length === 0}
+            onClick={submitForm}
           >
             <SendHorizonal className="size-6" />
           </Button>

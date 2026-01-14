@@ -45,18 +45,20 @@ export const Document = new Elysia({
       404: 'NotFoundResponse',
     },
   })
+  .resolve(async ({ params, status }) => {
+    const document = await DocumentService.single(params.id);
+
+    if (!document) {
+      return status(404, {
+        code: 'NOT_FOUND',
+        message: 'Document not found',
+      });
+    }
+    return { document };
+  })
   .get(
     '/:id',
-    async ({ params, status }) => {
-      const document = await DocumentService.single(params.id);
-
-      if (!document) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Document not found',
-        });
-      }
-
+    async ({ document }) => {
       return {
         document,
       };
@@ -69,14 +71,7 @@ export const Document = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body, status }) => {
-      const document = await DocumentService.single(params.id);
-      if (!document) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Document not found',
-        });
-      }
+    async ({ params, body }) => {
       return {
         document: await DocumentService.update(params.id, body.content),
       };
@@ -91,19 +86,12 @@ export const Document = new Elysia({
   .delete(
     '/:id',
     async ({ params, status }) => {
-      const document = await DocumentService.single(params.id);
-      if (!document) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Document not found',
-        });
-      }
       await DocumentService.delete(params.id);
-      return {};
+      return status(204, undefined);
     },
     {
       response: {
-        200: z.object({}),
+        204: z.undefined(),
       },
     },
   );

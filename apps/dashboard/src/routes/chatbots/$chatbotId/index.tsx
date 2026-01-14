@@ -6,28 +6,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@knowbase/ui/components/breadcrumb';
-import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@knowbase/ui/components/item';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
+import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 
 export const Route = createFileRoute('/chatbots/$chatbotId/')({
   component: RouteComponent,
@@ -61,35 +44,7 @@ function RouteComponent() {
       <Separator />
       <div className="flex flex-1">
         <div className="w-1/2 p-5 shadow-none">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Knowledge Sources</CardTitle>
-              <CardDescription>
-                You stored knowledge used for chatbot
-              </CardDescription>
-              <CardAction>
-                <Button variant="outline">Add</Button>
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <Item variant="outline">
-                <ItemMedia variant="icon">
-                  <ShieldAlertIcon />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Security Alert</ItemTitle>
-                  <ItemDescription>
-                    New login detected from unknown device.
-                  </ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <Button size="icon" variant="ghost">
-                    <MoreHorizontal />
-                  </Button>
-                </ItemActions>
-              </Item>
-            </CardContent>
-          </Card>
+          <DocumentsWidget />
         </div>
         <div className="w-1/2 p-5 h-full">
           <Chatbot

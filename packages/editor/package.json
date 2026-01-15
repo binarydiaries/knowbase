@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {},
   "dependencies": {
+    "@lexical/react": "^0.39.0",
+    "@lexical/utils": "^0.39.0",
+    "lexical": "^0.39.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

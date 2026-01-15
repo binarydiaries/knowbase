@@ -77,7 +77,7 @@ function RouteComponent() {
 
     try {
       await deleteChatbotsById({
-        pathParams: {
+        path: {
           id,
         },
       });

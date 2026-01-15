@@ -8,7 +8,7 @@ import {
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import { Bold, Italic, Underline } from 'lucide-react';
+import { Bold, Italic, Strikethrough, Underline } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function ToolbarPlugin() {
@@ -16,14 +16,14 @@ export default function ToolbarPlugin() {
   const toolbarRef = useRef(null);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
+  const [isStrike, setIsStrike] = useState(false);
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
-      setIsUnderline(selection.hasFormat('underline'));
+      setIsStrike(selection.hasFormat('strikethrough'));
     }
   }, []);
 
@@ -70,12 +70,12 @@ export default function ToolbarPlugin() {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={isUnderline}
+        pressed={isStrike}
         onPressedChange={() =>
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
         }
       >
-        <Underline />
+        <Strikethrough />
       </Toggle>
     </div>
   );

@@ -1,3 +1,12 @@
+import { Button } from '@knowbase/ui/components/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
+import { Separator } from '@knowbase/ui/components/separator';
 import { Toggle } from '@knowbase/ui/components/toggle';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { mergeRegister } from '@lexical/utils';
@@ -8,7 +17,7 @@ import {
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import { Bold, Italic, Strikethrough, Underline } from 'lucide-react';
+import { Bold, Italic, Strikethrough, Type } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function ToolbarPlugin() {
@@ -49,7 +58,26 @@ export default function ToolbarPlugin() {
   }, [editor, $updateToolbar]);
 
   return (
-    <div className="flex gap-1 bg-gray-50 px-2 py-1" ref={toolbarRef}>
+    <div className="flex gap-1 px-2 py-1 h-10 items-center" ref={toolbarRef}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm">
+            <Type />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="start">
+          <DropdownMenuGroup>
+            <DropdownMenuItem>Normal</DropdownMenuItem>
+            <DropdownMenuItem>H1</DropdownMenuItem>
+            <DropdownMenuItem>H2</DropdownMenuItem>
+            <DropdownMenuItem>H3</DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5"
+      />
       <Toggle
         size="sm"
         pressed={isBold}

@@ -101,13 +101,16 @@
       "name": "@knowbase/editor",
       "version": "0.0.0",
       "dependencies": {
+        "@knowbase/ui": "*",
         "@lexical/react": "^0.39.0",
         "@lexical/utils": "^0.39.0",
         "lexical": "^0.39.0",
         "react": "^19.1.1",
         "react-dom": "^19.1.1",
+        "tailwindcss": "^4.1.18",
       },
       "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.18",
         "@types/node": "^20.19.9",
         "@types/react": "^19.1.9",
         "@types/react-dom": "^19.1.7",
@@ -118,6 +121,8 @@
       "name": "@knowbase/ui",
       "version": "0.0.0",
       "dependencies": {
+        "@lexical/react": "^0.39.0",
+        "@lexical/utils": "^0.39.0",
         "@radix-ui/react-avatar": "^1.1.11",
         "@radix-ui/react-collapsible": "^1.1.12",
         "@radix-ui/react-dialog": "^1.1.15",
@@ -129,6 +134,7 @@
         "@radix-ui/react-tooltip": "^1.2.8",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "lexical": "^0.39.0",
         "lucide-react": "^0.562.0",
         "postcss": "^8.5.6",
         "react": "^19.1.1",

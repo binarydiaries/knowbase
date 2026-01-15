@@ -1,4 +1,3 @@
-import { RichEditor } from '@knowbase/editor/components/RichEditor/RichEditor';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Card,
@@ -28,6 +27,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@knowbase/ui/components/sheet';
+import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 
 export const DocumentsWidget = () => {

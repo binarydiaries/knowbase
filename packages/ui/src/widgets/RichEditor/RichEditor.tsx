@@ -1,5 +1,3 @@
-import './styles.css';
-
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -134,7 +132,7 @@ const editorConfig = {
 export function RichEditor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="editor-container">
+      <div className="bg-red-500">
         <ToolbarPlugin />
         <div className="editor-inner">
           <RichTextPlugin

@@ -45,18 +45,19 @@ export const Chatbot = new Elysia({
       404: 'NotFoundResponse',
     },
   })
+  .resolve(async ({ params, status }) => {
+    const chatbot = await ChatbotService.single({ id: params.id });
+    if (!chatbot) {
+      return status(404, {
+        code: 'NOT_FOUND',
+        message: 'Chatbot not found',
+      });
+    }
+    return { chatbot };
+  })
   .get(
     '/:id',
-    async ({ params, status }) => {
-      const chatbot = await ChatbotService.single({ id: params.id });
-
-      if (!chatbot) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Team not found',
-        });
-      }
-
+    async ({ chatbot }) => {
       return {
         chatbot,
       };
@@ -69,14 +70,7 @@ export const Chatbot = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body, status }) => {
-      const team = await ChatbotService.single({ id: params.id });
-      if (!team) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Team not found',
-        });
-      }
+    async ({ params, body }) => {
       return {
         chatbot: await ChatbotService.update(params.id, body),
       };
@@ -91,15 +85,8 @@ export const Chatbot = new Elysia({
   .delete(
     '/:id',
     async ({ params, status }) => {
-      const team = await ChatbotService.single({ id: params.id });
-      if (!team) {
-        return status(404, {
-          code: 'NOT_FOUND',
-          message: 'Team not found',
-        });
-      }
       await ChatbotService.delete(params.id);
-      return status(204, {});
+      return status(204, undefined);
     },
     {
       response: {

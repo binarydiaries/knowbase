@@ -1,0 +1,20 @@
+{
+  "name": "@knowbase/editor",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.9",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "typescript": "^5.9.2"
+  },
+  "exports": {
+    "./components/*": "./src/components/*.tsx"
+  }
+}

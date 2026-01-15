@@ -1,3 +1,4 @@
+import { RichEditor } from '@knowbase/editor/components/RichEditor/RichEditor';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Card,
@@ -81,10 +82,7 @@ export const DocumentsWidget = () => {
           </div>
           <div className="grid gap-3">
             <Label htmlFor="sheet-demo-username">Content</Label>
-            <Input
-              id="sheet-demo-username"
-              placeholder="Enter the text content..."
-            />
+            <RichEditor />
           </div>
         </div>
         <SheetFooter>

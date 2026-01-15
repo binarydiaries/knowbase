@@ -13,20 +13,22 @@ import { Label } from '@knowbase/ui/components/label';
 import * as React from 'react';
 
 type CreateChatbotDialogProps = {
-  onCreate?: (name: string) => void;
+  onCreate?: (name: string, description: string) => void;
 };
 
 export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState('');
+  const [desc, setDesc] = React.useState('');
 
   function handleCreate() {
     if (!name.trim()) return;
 
-    onCreate?.(name.trim());
+    onCreate?.(name.trim(), desc.trim());
 
     // reset + close
     setName('');
+    setDesc('');
     setOpen(false);
   }
 
@@ -48,10 +50,19 @@ export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
           <Label htmlFor="chatbot-name">Chatbot name</Label>
           <Input
             id="chatbot-name"
-            placeholder="Website Support Bot"
+            placeholder="eg., Customer Support Bot"
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
+          />
+        </div>
+        <div className="grid gap-2 ">
+          <Label htmlFor="chatbot-desc">Chatbot description</Label>
+          <Input
+            id="chatbot-desc"
+            placeholder="What will this chatbot do?"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
           />
         </div>
 

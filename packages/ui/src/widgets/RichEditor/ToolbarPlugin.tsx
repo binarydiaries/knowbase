@@ -9,16 +9,24 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { Toggle } from '@knowbase/ui/components/toggle';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $createHeadingNode } from '@lexical/rich-text';
+import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
 import {
+  $createParagraphNode,
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
+  createCommand,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
 import { Bold, Italic, Strikethrough, Type } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+export const SET_BLOCK_TYPE_COMMAND = createCommand<
+  'paragraph' | 'h1' | 'h2' | 'h3'
+>();
 
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -54,6 +62,23 @@ export default function ToolbarPlugin() {
         },
         COMMAND_PRIORITY_LOW,
       ),
+      editor.registerCommand(
+        SET_BLOCK_TYPE_COMMAND,
+        (type) => {
+          editor.update(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) return;
+
+            if (type === 'paragraph') {
+              $setBlocksType(selection, () => $createParagraphNode());
+            } else {
+              $setBlocksType(selection, () => $createHeadingNode(type));
+            }
+          });
+          return true;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
     );
   }, [editor, $updateToolbar]);
 
@@ -67,10 +92,34 @@ export default function ToolbarPlugin() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuGroup>
-            <DropdownMenuItem>Normal</DropdownMenuItem>
-            <DropdownMenuItem>H1</DropdownMenuItem>
-            <DropdownMenuItem>H2</DropdownMenuItem>
-            <DropdownMenuItem>H3</DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'paragraph')
+              }
+            >
+              Normal
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h1')
+              }
+            >
+              H1
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h2')
+              }
+            >
+              H2
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h3')
+              }
+            >
+              H3
+            </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

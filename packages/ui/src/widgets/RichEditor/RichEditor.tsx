@@ -4,6 +4,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { HeadingNode } from '@lexical/rich-text';
 import {
   $isTextNode,
   type DOMConversionMap,
@@ -16,7 +17,6 @@ import {
   ParagraphNode,
   TextNode,
 } from 'lexical';
-
 import ExampleTheme from './ExampleTheme';
 import { parseAllowedColor, parseAllowedFontSize } from './styleConfig';
 import ToolbarPlugin from './ToolbarPlugin';
@@ -118,15 +118,15 @@ const constructImportMap = (): DOMConversionMap => {
 
 const editorConfig = {
   html: {
-    export: exportMap,
-    import: constructImportMap(),
+    // export: exportMap,
+    // import: constructImportMap(),
   },
   namespace: 'React.js Demo',
-  nodes: [ParagraphNode, TextNode],
+  nodes: [HeadingNode],
   onError(error: Error) {
     throw error;
   },
-  theme: ExampleTheme,
+  // theme: ExampleTheme,
 };
 
 export function RichEditor() {

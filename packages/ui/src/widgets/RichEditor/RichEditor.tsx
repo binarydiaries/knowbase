@@ -132,13 +132,13 @@ const editorConfig = {
 export function RichEditor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="bg-red-500">
+      <div className="border border-input px-3 py-1 rounded-md">
         <ToolbarPlugin />
         <div className="editor-inner">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="editor-input"
+                className="min-h-37.5 outline-0"
                 aria-placeholder={placeholder}
                 placeholder={
                   <div className="editor-placeholder">{placeholder}</div>

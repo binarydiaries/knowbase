@@ -57,9 +57,9 @@ function RouteComponent() {
     });
   };
 
-  async function handleCreateChatbot(name: string) {
+  async function handleCreateChatbot(name: string, description: string) {
     await postChatbots({
-      body: { name },
+      body: { name, description },
     });
     getAllChatbots();
   }
@@ -109,7 +109,7 @@ function RouteComponent() {
               <Card className="rounded-xl border bg-background shadow-sm hover:shadow-md transition">
                 <CardContent className="">
                   {/* Top row */}
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-2">
                     {/* Icon */}
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                       <Bot className="h-5 w-5" />
@@ -156,9 +156,10 @@ function RouteComponent() {
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm('Delete this chatbot?')) {
-                              handleDeleteChatbot(bot.id);
-                            }
+                            handleDeleteChatbot(bot.id);
+                            // if (confirm('Delete this chatbot?')) {
+                            //   handleDeleteChatbot(bot.id);
+                            // }
                           }}
                           className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                         >

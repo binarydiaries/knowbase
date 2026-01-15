@@ -40,9 +40,9 @@ export const DocumentsWidget = () => {
             You stored knowledge used for chatbot
           </CardDescription>
           <CardAction>
-            <SheetTrigger asChild>
-              <Button variant="outline">Add</Button>
-            </SheetTrigger>
+            {/*<SheetTrigger asChild>*/}
+            <Button variant="outline">Add</Button>
+            {/*</SheetTrigger>*/}
           </CardAction>
         </CardHeader>
         <CardContent>

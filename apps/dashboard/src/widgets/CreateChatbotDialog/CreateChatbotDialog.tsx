@@ -10,6 +10,7 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
+import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 
 type CreateChatbotDialogProps = {
@@ -20,16 +21,22 @@ export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [desc, setDesc] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
   function handleCreate() {
     if (!name.trim()) return;
 
-    onCreate?.(name.trim(), desc.trim());
+    setLoading(true);
 
-    // reset + close
-    setName('');
-    setDesc('');
-    setOpen(false);
+    try {
+      onCreate?.(name.trim(), desc.trim());
+    } finally {
+      setLoading(false);
+      // reset + close
+      setName('');
+      setDesc('');
+      setOpen(false);
+    }
   }
 
   return (
@@ -70,8 +77,15 @@ export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim()}>
-            Create
+          <Button onClick={handleCreate} disabled={!name.trim() || loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 text-white w-4 animate-spin" />
+                Creating…
+              </>
+            ) : (
+              'Create'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

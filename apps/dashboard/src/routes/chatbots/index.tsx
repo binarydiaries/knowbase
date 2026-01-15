@@ -156,15 +156,15 @@ function RouteComponent() {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40 ">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              console.log('Duplicate clicked', bot.id);
-                            }}
-                            className="flex items-center  cursor-pointer gap-2"
-                          >
-                            <Copy className="h-4 w-4" />
-                            Duplicate
-                          </DropdownMenuItem>
+                          {/*<DropdownMenuItem*/}
+                          {/*  onClick={() => {*/}
+                          {/*    console.log('Duplicate clicked', bot.id);*/}
+                          {/*  }}*/}
+                          {/*  className="flex items-center  cursor-pointer gap-2"*/}
+                          {/*>*/}
+                          {/*  <Copy className="h-4 w-4" />*/}
+                          {/*  Duplicate*/}
+                          {/*</DropdownMenuItem>*/}
 
                           <DropdownMenuItem
                             onClick={(e) => {

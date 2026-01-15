@@ -63,7 +63,6 @@ export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
             placeholder="What will this chatbot do?"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            autoFocus
           />
         </div>
 

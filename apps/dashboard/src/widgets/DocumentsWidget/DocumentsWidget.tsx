@@ -65,7 +65,7 @@ export const DocumentsWidget = () => {
         </CardContent>
       </Card>
 
-      <SheetContent className="sm:max-w-175 ">
+      <SheetContent className="sm:max-w-175 overflow-auto">
         <SheetHeader>
           <SheetTitle>Text Source</SheetTitle>
           <SheetDescription>

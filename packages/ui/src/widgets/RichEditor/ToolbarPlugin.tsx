@@ -9,13 +9,14 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { Toggle } from '@knowbase/ui/components/toggle';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode, HeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
 import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
+  $isRootOrShadowRoot,
   COMMAND_PRIORITY_LOW,
   createCommand,
   FORMAT_TEXT_COMMAND,
@@ -34,13 +35,35 @@ export default function ToolbarPlugin() {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isStrike, setIsStrike] = useState(false);
+  const [blockType, setBlockType] = useState<'paragraph' | 'h1' | 'h2' | 'h3'>(
+    'paragraph',
+  );
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      setIsBold(selection.hasFormat('bold'));
-      setIsItalic(selection.hasFormat('italic'));
-      setIsStrike(selection.hasFormat('strikethrough'));
+    if (!$isRangeSelection(selection)) return;
+
+    // inline formats
+    setIsBold(selection.hasFormat('bold'));
+    setIsItalic(selection.hasFormat('italic'));
+    setIsStrike(selection.hasFormat('strikethrough'));
+
+    // block type
+    const anchorNode = selection.anchor.getNode();
+    let element =
+      anchorNode.getKey() === 'root'
+        ? anchorNode
+        : anchorNode.getTopLevelElementOrThrow();
+
+    if ($isRootOrShadowRoot(element)) {
+      setBlockType('paragraph');
+      return;
+    }
+
+    if (element instanceof HeadingNode) {
+      setBlockType(element.getTag()); // 'h1' | 'h2' | 'h3'
+    } else {
+      setBlockType('paragraph');
     }
   }, []);
 
@@ -85,16 +108,17 @@ export default function ToolbarPlugin() {
   return (
     <div className="flex gap-1 px-2 py-1 h-10 items-center" ref={toolbarRef}>
       <Select
+        value={blockType}
         onValueChange={(value) =>
           editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, value)
         }
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select a fruit" />
+          <SelectValue placeholder="Select block type" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="normal">Normal</SelectItem>
+            <SelectItem value="paragraph">Normal</SelectItem>
             <SelectItem value="h1">H1</SelectItem>
             <SelectItem value="h2">H2</SelectItem>
             <SelectItem value="h3">H3</SelectItem>

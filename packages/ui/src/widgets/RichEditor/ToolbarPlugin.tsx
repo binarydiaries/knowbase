@@ -1,11 +1,11 @@
-import { Button } from '@knowbase/ui/components/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@knowbase/ui/components/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@knowbase/ui/components/select';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Toggle } from '@knowbase/ui/components/toggle';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -21,7 +21,7 @@ import {
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import { Bold, Italic, Strikethrough, Type } from 'lucide-react';
+import { Bold, Italic, Strikethrough } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const SET_BLOCK_TYPE_COMMAND = createCommand<
@@ -84,45 +84,23 @@ export default function ToolbarPlugin() {
 
   return (
     <div className="flex gap-1 px-2 py-1 h-10 items-center" ref={toolbarRef}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm">
-            <Type />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              onSelect={() =>
-                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'paragraph')
-              }
-            >
-              Normal
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() =>
-                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h1')
-              }
-            >
-              H1
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() =>
-                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h2')
-              }
-            >
-              H2
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() =>
-                editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, 'h3')
-              }
-            >
-              H3
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Select
+        onValueChange={(value) =>
+          editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, value)
+        }
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select a fruit" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="normal">Normal</SelectItem>
+            <SelectItem value="h1">H1</SelectItem>
+            <SelectItem value="h2">H2</SelectItem>
+            <SelectItem value="h3">H3</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <Separator
         orientation="vertical"
         className="data-[orientation=vertical]:h-5"

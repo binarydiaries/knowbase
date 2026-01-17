@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { ErrorModel } from '../../common/models/error';
 import { DocumentModel } from './model';
-import { DocumentServiceV1 } from './service';
+import { DocumentService } from './service';
 
 export const Document = new Elysia({
   prefix: '/documents',
@@ -13,7 +13,7 @@ export const Document = new Elysia({
   .post(
     '',
     async ({ body }) => {
-      const document = await DocumentServiceV1.create({
+      const document = await DocumentService.create({
         ...body,
         createdBy: '111',
         orgId: '112',
@@ -30,7 +30,7 @@ export const Document = new Elysia({
   .get(
     '',
     async () => {
-      const documents = await DocumentServiceV1.list();
+      const documents = await DocumentService.list();
       return {
         documents,
       };
@@ -46,7 +46,7 @@ export const Document = new Elysia({
     },
   })
   .resolve(async ({ params, status }) => {
-    const document = await DocumentServiceV1.single(params.id);
+    const document = await DocumentService.single(params.id);
 
     if (!document) {
       return status(404, {
@@ -73,7 +73,7 @@ export const Document = new Elysia({
     '/:id',
     async ({ params, body }) => {
       return {
-        document: await DocumentServiceV1.update(params.id, body.content),
+        document: await DocumentService.update(params.id, body.content),
       };
     },
     {
@@ -86,7 +86,7 @@ export const Document = new Elysia({
   .delete(
     '/:id',
     async ({ params, status }) => {
-      await DocumentServiceV1.delete(params.id);
+      await DocumentService.delete(params.id);
       return status(204, undefined);
     },
     {

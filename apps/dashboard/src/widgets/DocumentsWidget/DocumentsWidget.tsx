@@ -35,7 +35,7 @@ export const DocumentsWidget = () => {
     <Sheet>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Knowledge Sources</CardTitle>
+          <CardTitle className={'text-xl'}>Knowledge Sources</CardTitle>
           <CardDescription>
             You stored knowledge used for chatbot
           </CardDescription>

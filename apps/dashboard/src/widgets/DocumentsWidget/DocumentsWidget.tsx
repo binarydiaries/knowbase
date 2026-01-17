@@ -8,6 +8,20 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
+import {
   Item,
   ItemActions,
   ItemContent,
@@ -19,7 +33,7 @@ import { Sheet } from '@knowbase/ui/components/sheet';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
-
+// import {DropdownMenu} from "@knowbase/ui/components/dropdown-menu";
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   return (
@@ -31,12 +45,16 @@ export const DocumentsWidget = () => {
             You stored knowledge used for chatbot
           </CardDescription>
           <CardAction>
-            <Button
-              variant="outline"
-              onClick={() => setIsTextContentSheetOpen(true)}
-            >
-              Add
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Add</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>Text</DropdownMenuItem>
+                <DropdownMenuItem>Q&A</DropdownMenuItem>
+                <DropdownMenuItem>PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardAction>
         </CardHeader>
         <CardContent>

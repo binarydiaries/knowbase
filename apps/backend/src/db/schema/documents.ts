@@ -9,9 +9,11 @@ import { chatbots } from './chatbots';
 
 export const documents = pgTable('documents', {
   id: cuid2PrimaryKey,
+  title: text().notNull(),
   contentSerialized: jsonb().notNull(),
   /** VERSIONING **/
   version: integer().notNull().default(1),
+  type: text().$type<'text' | 'qna'>().notNull(),
   /** TRAINING STATUS **/
   status: text()
     .$type<'draft' | 'ready' | 'indexing' | 'indexed' | 'failed'>()

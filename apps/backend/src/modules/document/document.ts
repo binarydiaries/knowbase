@@ -13,7 +13,7 @@ export const Document = new Elysia({
   .post(
     '',
     async ({ body }) => {
-      const document = await DocumentService.createV1({
+      const document = await DocumentService.create({
         ...body,
         createdBy: '111',
         orgId: '112',
@@ -29,14 +29,17 @@ export const Document = new Elysia({
   )
   .get(
     '',
-    async () => {
-      const documents = await DocumentService.list();
+    async ({ query }) => {
+      const documents = await DocumentService.list({
+        chatbotId: query.chatbotId,
+      });
       return {
         documents,
       };
     },
     {
       response: 'ManyDocumentsResponse',
+      query: 'ChatbotDocumentsParams',
     },
   )
   .guard({
@@ -71,9 +74,13 @@ export const Document = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body }) => {
+    async ({ params, body, document }) => {
       return {
-        document: await DocumentService.update(params.id, body.content),
+        document: await DocumentService.update(params.id, {
+          ...body,
+          version: document.version + 1,
+          status: 'ready',
+        }),
       };
     },
     {

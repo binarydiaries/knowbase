@@ -3,21 +3,26 @@ import { z } from 'zod';
 
 const Document = z.object({
   id: z.string(),
-  content: z.string(),
+  title: z.string(),
+  contentSerialized: z.unknown(),
   chatbotId: z.string(),
   createdBy: z.string(),
   orgId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  type: z.enum(['text', 'qna']),
 });
 
 const CreateDocumentBody = z.object({
-  content: z.string(),
   chatbotId: z.string(),
+  title: z.string(),
+  contentSerialized: z.unknown(),
+  type: z.enum(['text', 'qna']),
 });
 
 const UpdateDocumentBody = z.object({
-  content: z.string(),
+  title: z.string(),
+  contentSerialized: z.unknown(),
 });
 
 const OneDocumentResponse = z.object({
@@ -26,6 +31,10 @@ const OneDocumentResponse = z.object({
 
 const ManyDocumentsResponse = z.object({
   documents: z.array(Document),
+});
+
+export const ChatbotDocumentsParams = z.object({
+  chatbotId: z.string(),
 });
 
 export const OneDocumentParams = z.object({
@@ -39,4 +48,5 @@ export const DocumentModel = new Elysia().model({
   OneDocumentResponse,
   ManyDocumentsResponse,
   OneDocumentParams,
+  ChatbotDocumentsParams,
 });

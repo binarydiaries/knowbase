@@ -32,7 +32,7 @@ export const OneDocumentParams = z.object({
   id: z.string(),
 });
 
-export const DocumentModelV1 = new Elysia().model({
+export const DocumentModel = new Elysia().model({
   Document,
   CreateDocumentBody,
   UpdateDocumentBody,

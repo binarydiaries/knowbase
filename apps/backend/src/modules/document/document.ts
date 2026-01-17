@@ -1,14 +1,14 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { ErrorModel } from '../../common/models/error';
-import { DocumentModelV1 } from './model';
+import { DocumentModel } from './model';
 import { DocumentServiceV1 } from './service';
 
-export const DocumentV1 = new Elysia({
+export const Document = new Elysia({
   prefix: '/documents',
   tags: ['Document'],
 })
-  .use(DocumentModelV1)
+  .use(DocumentModel)
   .use(ErrorModel)
   .post(
     '',

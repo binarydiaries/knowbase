@@ -8,6 +8,8 @@ import { embeddings } from '../../db/schema';
 const model = openai.embedding('text-embedding-3-small');
 
 export abstract class EmbeddingService {
+  static startEmbedding = async (chatbotId: string) => {};
+
   static generateChunks = async (input: string): Promise<string[]> => {
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 400,

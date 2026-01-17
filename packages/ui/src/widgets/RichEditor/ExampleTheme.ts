@@ -3,9 +3,9 @@ import type { EditorThemeClasses } from 'lexical';
 export const editorTheme: EditorThemeClasses = {
   // code: 'editor-code',
   heading: {
-    h1: 'text-2xl',
-    h2: 'text-xl',
-    h3: 'text-lg',
+    h1: 'text-2xl font-bold',
+    h2: 'text-xl font-bold',
+    h3: 'text-lg font-bold',
   },
   paragraph: 'text-base',
   // image: 'editor-image',

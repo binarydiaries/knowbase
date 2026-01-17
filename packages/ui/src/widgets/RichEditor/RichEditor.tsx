@@ -42,7 +42,7 @@ const editorConfig: InitialConfigType = {
 export function RichEditor() {
   const [editorState, setEditorState] = useState<EditorState>();
 
-  console.log(editorState?.toJSON());
+  console.log(JSON.stringify(editorState?.toJSON()));
 
   return (
     <LexicalComposer initialConfig={editorConfig}>

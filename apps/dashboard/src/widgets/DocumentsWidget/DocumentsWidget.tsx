@@ -10,15 +10,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@knowbase/ui/components/dropdown-menu';
 import {
@@ -33,7 +25,7 @@ import { Sheet } from '@knowbase/ui/components/sheet';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
-// import {DropdownMenu} from "@knowbase/ui/components/dropdown-menu";
+
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   return (
@@ -50,7 +42,11 @@ export const DocumentsWidget = () => {
                 <Button variant="outline">Add</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>Text</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setIsTextContentSheetOpen(true)}
+                >
+                  Text
+                </DropdownMenuItem>
                 <DropdownMenuItem>Q&A</DropdownMenuItem>
                 <DropdownMenuItem>PDF</DropdownMenuItem>
               </DropdownMenuContent>

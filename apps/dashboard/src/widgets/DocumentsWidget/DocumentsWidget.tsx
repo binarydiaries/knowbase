@@ -8,6 +8,12 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
+import {
   Item,
   ItemActions,
   ItemContent,
@@ -18,25 +24,37 @@ import {
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
+  const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   return (
     <>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Knowledge Sources</CardTitle>
+          <CardTitle className={'text-xl'}>Knowledge Sources</CardTitle>
           <CardDescription>
             You stored knowledge used for chatbot
           </CardDescription>
           <CardAction>
-            <Button
-              variant="outline"
-              onClick={() => setIsTextContentSheetOpen(true)}
-            >
-              Add
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Add</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => setIsTextContentSheetOpen(true)}
+                >
+                  Text
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
+                  Q&A
+                </DropdownMenuItem>
+                <DropdownMenuItem>PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -63,6 +81,9 @@ export const DocumentsWidget = () => {
         onOpenChange={setIsTextContentSheetOpen}
       >
         <TextContentWidget />
+      </Sheet>
+      <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
+        <QAContentWidget />
       </Sheet>
     </>
   );

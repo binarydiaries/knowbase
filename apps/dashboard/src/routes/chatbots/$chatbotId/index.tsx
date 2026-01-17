@@ -11,6 +11,7 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
+import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
 
 export const Route = createFileRoute('/chatbots/$chatbotId/')({
   component: RouteComponent,
@@ -43,8 +44,9 @@ function RouteComponent() {
       </header>
       <Separator />
       <div className="flex flex-1">
-        <div className="w-1/2 p-5 shadow-none">
+        <div className="w-1/2 p-5 shadow-none flex-col flex gap-5">
           <DocumentsWidget />
+          <SettingsCard />
         </div>
         <div className="w-1/2 p-5 h-full">
           <Chatbot

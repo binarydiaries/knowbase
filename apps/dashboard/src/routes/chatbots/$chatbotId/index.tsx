@@ -6,18 +6,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@knowbase/ui/components/breadcrumb';
-import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
-import { Input } from '@knowbase/ui/components/input';
-import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';

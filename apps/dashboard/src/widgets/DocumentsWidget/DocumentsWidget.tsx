@@ -24,10 +24,12 @@ import {
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
+  const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   return (
     <>
       <Card className="w-full">
@@ -47,7 +49,9 @@ export const DocumentsWidget = () => {
                 >
                   Text
                 </DropdownMenuItem>
-                <DropdownMenuItem>Q&A</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
+                  Q&A
+                </DropdownMenuItem>
                 <DropdownMenuItem>PDF</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -77,6 +81,9 @@ export const DocumentsWidget = () => {
         onOpenChange={setIsTextContentSheetOpen}
       >
         <TextContentWidget />
+      </Sheet>
+      <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
+        <QAContentWidget />
       </Sheet>
     </>
   );

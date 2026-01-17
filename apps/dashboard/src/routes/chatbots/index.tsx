@@ -1,11 +1,6 @@
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
+import { Card, CardContent } from '@knowbase/ui/components/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,14 +10,7 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import {
-  Bot,
-  Copy,
-  Ellipsis,
-  Loader2,
-  MoreHorizontal,
-  Trash2,
-} from 'lucide-react';
+import { Bot, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
@@ -182,9 +170,6 @@ function RouteComponent() {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteChatbot(bot.id);
-                              // if (confirm('Delete this chatbot?')) {
-                              //   handleDeleteChatbot(bot.id);
-                              // }
                             }}
                             className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                           >

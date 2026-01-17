@@ -72,9 +72,9 @@ export const QAContentWidget = () => {
             <CardContent className="space-y-4">
               <div>
                 <div>
-                  <div className={'flex flex-row justify-between'}>
+                  <div className={'flex flex-row justify-between items-center'}>
                     <div>
-                      <p className="text-sm text-muted-foreground ">
+                      <p className="text-sm text-muted-foreground mb-2">
                         Question {index + 1}
                       </p>
                     </div>

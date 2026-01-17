@@ -1,14 +1,14 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 
-const DocumentContentQna = z.array(
+export const DocumentContentQna = z.array(
   z.object({
     question: z.string(),
     answer: z.string(),
   }),
 );
 
-const DocumentContent = z.discriminatedUnion('type', [
+export const DocumentContent = z.discriminatedUnion('type', [
   z.object({ type: z.literal('text'), data: z.unknown() }),
   z.object({ type: z.literal('qna'), data: DocumentContentQna }),
 ]);

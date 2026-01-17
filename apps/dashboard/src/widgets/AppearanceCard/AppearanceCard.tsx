@@ -33,12 +33,6 @@ const AppearanceCard = () => {
           <Label>Primary Color</Label>
 
           <div className="flex items-center gap-3">
-            {/* Color preview */}
-            {/*<div*/}
-            {/*  className="h-10 w-10 rounded-md border"*/}
-            {/*  style={{ backgroundColor: primaryColor }}*/}
-            {/*/>*/}
-
             {/* Color input */}
             <Input
               type="color"

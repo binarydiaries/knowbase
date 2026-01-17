@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
+import type { z } from 'zod';
 import { db } from '../../db';
 import { documents, embeddings as embeddingsTable } from '../../db/schema';
+import type { Document } from './model';
 
 export abstract class DocumentService {
   static async create(data: typeof documents.$inferInsert) {
@@ -31,17 +33,19 @@ export abstract class DocumentService {
   //   return document;
   // }
 
-  static list({ chatbotId }: { chatbotId: string }) {
-    return db
+  static async list({ chatbotId }: { chatbotId: string }) {
+    const docs = await db
       .select()
       .from(documents)
       .where(eq(documents.chatbotId, chatbotId));
+    return docs;
   }
 
-  static single(id: string) {
-    return db.query.documents.findFirst({
+  static async single(id: string) {
+    const doc = await db.query.documents.findFirst({
       where: eq(documents.id, id),
     });
+    return doc;
   }
 
   static async update(
@@ -103,5 +107,18 @@ export abstract class DocumentService {
 
       return deletedDoc;
     });
+  }
+
+  static transformDocument(
+    doc: typeof documents.$inferSelect,
+  ): z.infer<typeof Document> {
+    return {
+      ...doc,
+      content: {
+        // biome-ignore lint/suspicious/noExplicitAny: This is difficult to type
+        data: doc.contentSerialized as any,
+        type: doc.type,
+      },
+    };
   }
 }

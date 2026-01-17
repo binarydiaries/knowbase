@@ -15,11 +15,13 @@ export const Document = new Elysia({
     async ({ body }) => {
       const document = await DocumentService.create({
         ...body,
+        contentSerialized: body.content.data,
+        type: body.content.type,
         createdBy: '111',
         orgId: '112',
       });
       return {
-        document,
+        document: DocumentService.transformDocument(document),
       };
     },
     {
@@ -34,7 +36,7 @@ export const Document = new Elysia({
         chatbotId: query.chatbotId,
       });
       return {
-        documents,
+        documents: documents.map(DocumentService.transformDocument),
       };
     },
     {
@@ -63,7 +65,7 @@ export const Document = new Elysia({
     '/:id',
     async ({ document }) => {
       return {
-        document,
+        document: DocumentService.transformDocument(document),
       };
     },
     {
@@ -75,12 +77,15 @@ export const Document = new Elysia({
   .patch(
     '/:id',
     async ({ params, body, document }) => {
+      const updatedDocument = await DocumentService.update(params.id, {
+        ...body,
+        contentSerialized: body.content.data,
+        type: body.content.type,
+        version: document.version + 1,
+        status: 'ready',
+      });
       return {
-        document: await DocumentService.update(params.id, {
-          ...body,
-          version: document.version + 1,
-          status: 'ready',
-        }),
+        document: DocumentService.transformDocument(updatedDocument),
       };
     },
     {

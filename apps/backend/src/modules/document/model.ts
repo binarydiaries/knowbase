@@ -1,28 +1,38 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 
-const Document = z.object({
+const DocumentContentQna = z.array(
+  z.object({
+    question: z.string(),
+    answer: z.string(),
+  }),
+);
+
+const DocumentContent = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('text'), data: z.unknown() }),
+  z.object({ type: z.literal('qna'), data: DocumentContentQna }),
+]);
+
+export const Document = z.object({
   id: z.string(),
   title: z.string(),
-  contentSerialized: z.unknown(),
+  content: DocumentContent,
   chatbotId: z.string(),
   createdBy: z.string(),
   orgId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  type: z.enum(['text', 'qna']),
 });
 
 const CreateDocumentBody = z.object({
   chatbotId: z.string(),
   title: z.string(),
-  contentSerialized: z.unknown(),
-  type: z.enum(['text', 'qna']),
+  content: DocumentContent,
 });
 
 const UpdateDocumentBody = z.object({
-  title: z.string(),
-  contentSerialized: z.unknown(),
+  title: z.string().optional(),
+  content: DocumentContent,
 });
 
 const OneDocumentResponse = z.object({

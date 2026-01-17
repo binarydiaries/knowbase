@@ -13,7 +13,7 @@ export const Document = new Elysia({
   .post(
     '',
     async ({ body }) => {
-      const document = await DocumentService.create({
+      const document = await DocumentService.createV1({
         ...body,
         createdBy: '111',
         orgId: '112',

@@ -4,7 +4,8 @@ import { documents, embeddings as embeddingsTable } from '../../db/schema';
 import { EmbeddingService } from '../embedding/service';
 
 export abstract class DocumentService {
-  static async create(data: typeof documents.$inferInsert) {
+  create(data: typeof documents.$inferInsert) {}
+  static async createV1(data: typeof documents.$inferInsert) {
     const [document] = await db.transaction(async (transaction) => {
       const [doc] = await transaction
         .insert(documents)

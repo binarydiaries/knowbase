@@ -1,4 +1,4 @@
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkOrgIdColumn,
   clerkUserId,
@@ -9,7 +9,15 @@ import { chatbots } from './chatbots';
 
 export const documents = pgTable('documents', {
   id: cuid2PrimaryKey,
-  content: text().notNull(),
+  contentSerialized: jsonb().notNull(),
+  /** VERSIONING **/
+  version: integer().notNull().default(1),
+  /** TRAINING STATUS **/
+  status: text()
+    .$type<'draft' | 'ready' | 'indexing' | 'indexed' | 'failed'>()
+    .notNull()
+    .default('draft'),
+  lastIndexedVersion: integer(),
   chatbotId: text()
     .notNull()
     .references(() => chatbots.id),

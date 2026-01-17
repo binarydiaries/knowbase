@@ -27,53 +27,53 @@ const AppearanceCard = () => {
         <CardDescription>Customize how your chatbot looks</CardDescription>
       </CardHeader>
 
-      {/*<CardContent className="space-y-6">*/}
-      {/*  /!* Primary Color *!/*/}
-      {/*  <div className="space-y-2">*/}
-      {/*    <Label>Primary Color</Label>*/}
+      <CardContent className="space-y-6">
+        {/* Primary Color */}
+        <div className="space-y-2">
+          <Label>Primary Color</Label>
 
-      {/*    <div className="flex items-center gap-3">*/}
-      {/*      /!* Color preview *!/*/}
-      {/*      <div*/}
-      {/*        className="h-10 w-10 rounded-md border"*/}
-      {/*        style={{ backgroundColor: primaryColor }}*/}
-      {/*      />*/}
+          <div className="flex items-center gap-3">
+            {/* Color preview */}
+            {/*<div*/}
+            {/*  className="h-10 w-10 rounded-md border"*/}
+            {/*  style={{ backgroundColor: primaryColor }}*/}
+            {/*/>*/}
 
-      {/*      /!* Color input *!/*/}
-      {/*      <Input*/}
-      {/*        type="color"*/}
-      {/*        value={primaryColor}*/}
-      {/*        onChange={(e) => setPrimaryColor(e.target.value)}*/}
-      {/*        className="h-10 w-14 cursor-pointer p-1"*/}
-      {/*      />*/}
+            {/* Color input */}
+            <Input
+              type="color"
+              value={primaryColor}
+              onChange={(e) => setPrimaryColor(e.target.value)}
+              className="h-10 w-14 cursor-pointer p-1"
+            />
 
-      {/*      /!* Hex input *!/*/}
-      {/*      <Input*/}
-      {/*        value={primaryColor}*/}
-      {/*        onChange={(e) => setPrimaryColor(e.target.value)}*/}
-      {/*        className="max-w-[140px]"*/}
-      {/*      />*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
+            {/* Hex input */}
+            <Input
+              value={primaryColor}
+              onChange={(e) => setPrimaryColor(e.target.value)}
+              className="max-w-[140px]"
+            />
+          </div>
+        </div>
 
-      {/*  /!* Widget Position *!/*/}
-      {/*  <div className="space-y-2">*/}
-      {/*    <Label>Widget Position</Label>*/}
+        {/* Widget Position */}
+        <div className="space-y-2">
+          <Label>Widget Position</Label>
 
-      {/*    <Select value={widgetPosition} onValueChange={setWidgetPosition}>*/}
-      {/*      <SelectTrigger className="w-full">*/}
-      {/*        <SelectValue placeholder="Select position" />*/}
-      {/*      </SelectTrigger>*/}
+          <Select value={widgetPosition} onValueChange={setWidgetPosition}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select position" />
+            </SelectTrigger>
 
-      {/*      <SelectContent>*/}
-      {/*        <SelectItem value="bottom-right">Bottom Right</SelectItem>*/}
-      {/*        <SelectItem value="bottom-left">Bottom Left</SelectItem>*/}
-      {/*        <SelectItem value="top-right">Top Right</SelectItem>*/}
-      {/*        <SelectItem value="top-left">Top Left</SelectItem>*/}
-      {/*      </SelectContent>*/}
-      {/*    </Select>*/}
-      {/*  </div>*/}
-      {/*</CardContent>*/}
+            <SelectContent>
+              <SelectItem value="bottom-right">Bottom Right</SelectItem>
+              <SelectItem value="bottom-left">Bottom Left</SelectItem>
+              <SelectItem value="top-right">Top Right</SelectItem>
+              <SelectItem value="top-left">Top Left</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardContent>
     </Card>
   );
 };

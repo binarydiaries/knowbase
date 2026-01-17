@@ -1,10 +1,6 @@
 import { Badge } from '@knowbase/ui/components/badge';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
+import { Button } from '@knowbase/ui/components/button';
+import { Card, CardContent } from '@knowbase/ui/components/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +10,7 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Bot, Copy, Ellipsis, Loader2, Trash2 } from 'lucide-react';
+import { Bot, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
@@ -122,7 +118,7 @@ function RouteComponent() {
                 <Card className="rounded-xl border bg-background shadow-sm hover:shadow-md transition">
                   <CardContent className="">
                     {/* Top row */}
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-4">
                       {/* Icon */}
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                         <Bot className="h-5 w-5" />
@@ -130,7 +126,7 @@ function RouteComponent() {
 
                       {/* Title + status */}
                       <div className={'flex-1'}>
-                        <div className="flex flex-col  gap-2">
+                        <div className="flex flex-col gap-2">
                           <h3 className="text-base font-semibold leading-none">
                             {bot.name}
                           </h3>
@@ -150,29 +146,30 @@ function RouteComponent() {
                       {/* Menu */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-muted-foreground  cursor-pointer py-0.5  hover:rounded-l hover:bg-gray-200 hover:text-foreground">
-                            <Ellipsis className="h-5 w-5" />
-                          </button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-muted-foreground  cursor-pointer "
+                          >
+                            <MoreHorizontal />
+                          </Button>
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40 ">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              console.log('Duplicate clicked', bot.id);
-                            }}
-                            className="flex items-center  cursor-pointer gap-2"
-                          >
-                            <Copy className="h-4 w-4" />
-                            Duplicate
-                          </DropdownMenuItem>
+                          {/*<DropdownMenuItem*/}
+                          {/*  onClick={() => {*/}
+                          {/*    console.log('Duplicate clicked', bot.id);*/}
+                          {/*  }}*/}
+                          {/*  className="flex items-center  cursor-pointer gap-2"*/}
+                          {/*>*/}
+                          {/*  <Copy className="h-4 w-4" />*/}
+                          {/*  Duplicate*/}
+                          {/*</DropdownMenuItem>*/}
 
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteChatbot(bot.id);
-                              // if (confirm('Delete this chatbot?')) {
-                              //   handleDeleteChatbot(bot.id);
-                              // }
                             }}
                             className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                           >

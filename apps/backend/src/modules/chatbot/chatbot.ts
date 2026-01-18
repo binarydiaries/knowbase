@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { ErrorModel } from '../../common/models/error';
+import { DocumentService } from '../document/service';
 import { ChatbotModel } from './model';
 import { ChatbotService } from './service';
 
@@ -62,9 +63,11 @@ export const Chatbot = new Elysia({
   })
   .get(
     '/:id',
-    async ({ chatbot }) => {
+    async ({ chatbot, params }) => {
+      const documents = await DocumentService.list({ chatbotId: params.id });
       return {
         chatbot,
+        documents: documents.map(DocumentService.transformDocument),
       };
     },
     {
@@ -89,7 +92,7 @@ export const Chatbot = new Elysia({
     {
       body: 'UpdateChatbotBody',
       response: {
-        200: 'OneChatbotResponse',
+        200: 'OneSmallChatbotResponse',
       },
     },
   )

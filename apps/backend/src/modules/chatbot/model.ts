@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import { Document } from '../document/model';
 
 const ChatbotStatus = z.enum(['draft', 'live', 'archived']);
 
@@ -40,6 +41,7 @@ const CreateChatbotBody = z.object({
 
 const OneChatbotResponse = z.object({
   chatbot: Chatbot,
+  documents: z.array(Document),
 });
 const OneSmallChatbotResponse = z.object({
   chatbot: SmallChatbot,

@@ -19,7 +19,7 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 
 function RouteComponent() {
   return (
-    <>
+    <div className="h-screen flex flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -43,12 +43,12 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
-      <div className="flex flex-1">
-        <div className="w-1/2 p-5 shadow-none flex-col flex gap-5">
+      <div className="flex flex-1 h-full overflow-hidden">
+        <div className="w-1/2 p-5 shadow-none flex-col flex gap-5 h-full overflow-auto">
           <DocumentsWidget />
           <SettingsCard />
         </div>
-        <div className="w-1/2 p-5 h-full">
+        <div className="w-1/2 p-5">
           <Chatbot
             className="h-150"
             messages={[
@@ -94,6 +94,6 @@ function RouteComponent() {
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }

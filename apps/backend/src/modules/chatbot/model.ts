@@ -23,6 +23,16 @@ const Chatbot = z.object({
   updatedAt: z.date(),
 });
 
+const SmallChatbot = Chatbot.pick({
+  id: true,
+  name: true,
+  description: true,
+  status: true,
+  createdBy: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 const CreateChatbotBody = z.object({
   name: z.string(),
   description: z.string().optional(),
@@ -31,9 +41,12 @@ const CreateChatbotBody = z.object({
 const OneChatbotResponse = z.object({
   chatbot: Chatbot,
 });
+const OneSmallChatbotResponse = z.object({
+  chatbot: SmallChatbot,
+});
 
 const ManyChatbotResponse = z.object({
-  chatbots: z.array(Chatbot),
+  chatbots: z.array(SmallChatbot),
 });
 
 export const OneChatbotParams = z.object({
@@ -56,4 +69,5 @@ export const ChatbotModel = new Elysia().model({
   OneChatbotParams,
   UpdateChatbotBody,
   DeleteChatbotResponse,
+  OneSmallChatbotResponse,
 });

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { chatbots } from '../../db/schema/chatbots';
+import { chatbots } from '../../db/schema';
 
 export abstract class ChatbotService {
   static async create(data: typeof chatbots.$inferInsert) {

@@ -29,7 +29,7 @@ export const Chatbot = new Elysia({
     },
     {
       body: 'CreateChatbotBody',
-      response: 'OneChatbotResponse',
+      response: 'OneSmallChatbotResponse',
     },
   )
   .get(

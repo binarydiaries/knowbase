@@ -1,10 +1,11 @@
+import { bubbleIcon } from './icons';
 import { hideIframe, isIframeVisible, openIframe } from './iframe';
 import { showIcon, showSpinner } from './spinner';
 import { launcherStyle } from './styles';
 
 export function createLauncher(chatUrl: string) {
   const btn = document.createElement('button');
-  btn.innerHTML = '💬';
+  btn.innerHTML = bubbleIcon;
   btn.style.cssText = launcherStyle;
 
   // Hover enlarge

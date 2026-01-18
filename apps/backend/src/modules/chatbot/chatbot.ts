@@ -14,6 +14,11 @@ export const Chatbot = new Elysia({
     async ({ body }) => {
       const chatbot = await ChatbotService.create({
         ...body,
+        settings: {
+          displayName: body.name,
+          welcomeMessage: 'Hi! How can I help you today?',
+          primaryColor: '#000000',
+        },
         status: 'draft',
         createdBy: '123',
         orgId: '123',
@@ -70,9 +75,15 @@ export const Chatbot = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body }) => {
+    async ({ params, body, chatbot }) => {
       return {
-        chatbot: await ChatbotService.update(params.id, body),
+        chatbot: await ChatbotService.update(params.id, {
+          ...body,
+          settings: {
+            ...chatbot.settings,
+            ...body.settings,
+          },
+        }),
       };
     },
     {

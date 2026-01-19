@@ -19,6 +19,8 @@ export const conversations = pgTable('conversations', {
     .references(() => chatbots.id),
   channel: conversationChannel().notNull(),
   visitorId: text().notNull(),
+  lastUserQuestion: text().notNull(),
+  lastAssistantUtterance: text().notNull(),
   lastMessageAt: timestamp({ withTimezone: true }).notNull(),
   ...clerkOrgIdColumn,
   ...timestamps,

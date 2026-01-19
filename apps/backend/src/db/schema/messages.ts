@@ -2,7 +2,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { jsonb, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { conversations } from './conversations';
 
-export const roleEnum = pgEnum('role', ['system', 'user', 'assistant']);
+export const roleEnum = pgEnum('role', ['user', 'assistant']);
 
 export const messages = pgTable('messages', {
   id: text()
@@ -12,7 +12,7 @@ export const messages = pgTable('messages', {
     .notNull()
     .references(() => conversations.id),
   role: roleEnum().notNull(),
-  parts: jsonb(),
+  content: text().notNull(),
   metadata: jsonb(),
   updatedAt: timestamp({ withTimezone: true })
     .defaultNow()

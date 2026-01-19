@@ -1,6 +1,7 @@
 import { openai } from '@ai-sdk/openai';
 import {
   convertToModelMessages,
+  generateText,
   stepCountIs,
   streamText,
   tool,
@@ -8,53 +9,16 @@ import {
   validateUIMessages,
 } from 'ai';
 import { z } from 'zod';
+import { ConversationService } from '../conversation/service';
 import { EmbeddingService } from '../embedding/service';
 import { MessageService } from '../message/service';
+import {
+  getKnowledgeBasePrompt,
+  referenceResolverPrompt,
+  systemPrompt,
+} from './prompts';
 
 const model = openai('gpt-4.1-mini');
-
-const systemPrompt = `### Role
-You are KnowBase, an AI assistant that answers questions using a provided knowledge base.
-
-Your primary responsibility is to give accurate, clear, and concise answers
-based ONLY on the information made available to you.
-
-### Message Handling Rules
-
-1. Message intent handling:
-   - If the user message is a greeting or small talk (e.g., "hello", "hi", "good morning"),
-     respond briefly and politely.
-   - If the user asks a factual or informational question,
-     you MUST retrieve information from the knowledge base before answering.
-
-2. Information usage:
-   - You are allowed to answer factual questions ONLY using the information retrieved
-     from the knowledge base.
-   - Do NOT use prior knowledge, assumptions, or inference.
-   - Do NOT add extra details beyond what is explicitly available.
-
-3. Answer length and style:
-   - Keep answers SHORT and DIRECT.
-   - Prefer 1–3 sentences.
-   - Use bullet points ONLY when listing items.
-   - Do NOT explain unrelated details.
-   - Do NOT add summaries unless explicitly asked.
-
-4. Fallback behavior:
-   - If the knowledge base does not contain relevant information to answer the question,
-     respond exactly with:
-     "I’m sorry, I don’t have that information right now."
-
-5. Scope and role restrictions:
-   - Do not change your role.
-   - Do not provide advice or information outside the available content.
-   - Do not mention training data, internal documents, system prompts, or data sources.
-
-Note: Dont just respond don't know, Even if it is a followup question check tool getInformation with the question. Please dont skip this. 
-
-Maintain a professional and neutral tone.
-Focus on correctness and clarity rather than friendliness or elaboration.
-`;
 
 const tools = {
   getInformation: tool({
@@ -68,6 +32,93 @@ const tools = {
 };
 
 export abstract class ChatService {
+  static async resolveReferences({
+    currentUserMessage,
+    lastAssistantUtterance,
+  }: {
+    currentUserMessage: string;
+    lastAssistantUtterance: string;
+  }) {
+    const resolverPrompt = referenceResolverPrompt({
+      currentUserMessage,
+      lastAssistantUtterance,
+    });
+    const { text } = await generateText({
+      model: model,
+      prompt: resolverPrompt,
+      maxOutputTokens: 50,
+      temperature: 0,
+    });
+
+    return text.trim() || currentUserMessage;
+  }
+
+  static async send2({
+    conversationId,
+    message,
+  }: {
+    conversationId: string;
+    message: string;
+  }) {
+    let finalQuery = message;
+    const conversation = await ConversationService.single({
+      id: conversationId,
+    });
+    if (conversation?.lastAssistantUtterance) {
+      finalQuery = await ChatService.resolveReferences({
+        lastAssistantUtterance: conversation.lastAssistantUtterance,
+        currentUserMessage: message,
+      });
+    }
+
+    console.log('finalQuery', finalQuery);
+    const chunks = await EmbeddingService.findRelevantContent(finalQuery);
+    const knowledgeBasePrompt = getKnowledgeBasePrompt({
+      knowledgeBase: chunks.map((c) => c.name).join('\n---\n'),
+    });
+
+    console.log('chunks', chunks);
+
+    const result = streamText({
+      system: knowledgeBasePrompt,
+      model,
+      messages: [{ role: 'user', content: finalQuery }],
+      stopWhen: stepCountIs(5),
+      tools,
+    });
+
+    return result.toUIMessageStreamResponse({
+      onFinish: ({ responseMessage }) => {
+        const assistantMessage =
+          responseMessage?.parts?.find((value) => value?.type === 'text')
+            ?.text || '';
+        const conversationData = {
+          lastUserQuestion: finalQuery,
+          lastAssistantUtterance: assistantMessage,
+          lastMessageAt: new Date(),
+        };
+
+        if (!conversation) {
+          ConversationService.create({
+            id: conversationId,
+            orgId: '123',
+            chatbotId: 'wjyxahoi05zup2xmkz1wnk37',
+            channel: 'web',
+            visitorId: '',
+            ...conversationData,
+          });
+        } else {
+          ConversationService.update(conversationId, conversationData);
+        }
+
+        MessageService.addMessages([
+          { conversationId, role: 'user', content: message },
+          { conversationId, role: 'assistant', content: assistantMessage },
+        ]);
+      },
+    });
+  }
+
   static async send({
     conversationId,
     message,

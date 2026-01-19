@@ -1,35 +1,11 @@
 import { openai } from '@ai-sdk/openai';
-import {
-  convertToModelMessages,
-  generateText,
-  stepCountIs,
-  streamText,
-  tool,
-  type UIMessage,
-  validateUIMessages,
-} from 'ai';
-import { z } from 'zod';
+import { generateText, stepCountIs, streamText } from 'ai';
 import { ConversationService } from '../conversation/service';
 import { EmbeddingService } from '../embedding/service';
 import { MessageService } from '../message/service';
-import {
-  getKnowledgeBasePrompt,
-  referenceResolverPrompt,
-  systemPrompt,
-} from './prompts';
+import { getKnowledgeBasePrompt, referenceResolverPrompt } from './prompts';
 
 const model = openai('gpt-4.1-mini');
-
-const tools = {
-  getInformation: tool({
-    description: `Retrieve relevant information from the knowledge base`,
-    inputSchema: z.object({
-      question: z.string().describe('the users question'),
-    }),
-    execute: async ({ question }) =>
-      EmbeddingService.findRelevantContent(question),
-  }),
-};
 
 export abstract class ChatService {
   static async resolveReferences({
@@ -53,7 +29,7 @@ export abstract class ChatService {
     return text.trim() || currentUserMessage;
   }
 
-  static async send2({
+  static async send({
     conversationId,
     message,
   }: {
@@ -70,21 +46,16 @@ export abstract class ChatService {
         currentUserMessage: message,
       });
     }
-
-    console.log('finalQuery', finalQuery);
     const chunks = await EmbeddingService.findRelevantContent(finalQuery);
     const knowledgeBasePrompt = getKnowledgeBasePrompt({
       knowledgeBase: chunks.map((c) => c.name).join('\n---\n'),
     });
-
-    console.log('chunks', chunks);
 
     const result = streamText({
       system: knowledgeBasePrompt,
       model,
       messages: [{ role: 'user', content: finalQuery }],
       stopWhen: stepCountIs(5),
-      tools,
     });
 
     return result.toUIMessageStreamResponse({
@@ -115,45 +86,6 @@ export abstract class ChatService {
           { conversationId, role: 'user', content: message },
           { conversationId, role: 'assistant', content: assistantMessage },
         ]);
-      },
-    });
-  }
-
-  static async send({
-    conversationId,
-    message,
-  }: {
-    conversationId: string;
-    message: UIMessage;
-  }) {
-    const existingMessages = await MessageService.getMessages(conversationId);
-    const messages: UIMessage[] = [
-      ...(existingMessages as unknown as UIMessage[]),
-      message,
-    ];
-
-    const validatedMessages = await validateUIMessages({
-      messages,
-    });
-
-    const result = streamText({
-      system: systemPrompt,
-      model,
-      messages: await convertToModelMessages(validatedMessages),
-      stopWhen: stepCountIs(5),
-      tools,
-    });
-
-    return result.toUIMessageStreamResponse({
-      originalMessages: messages,
-      onFinish: ({ messages }) => {
-        MessageService.addMessages(
-          messages.slice(-2).map((message) => ({
-            conversationId,
-            role: message.role,
-            parts: message.parts,
-          })),
-        );
       },
     });
   }

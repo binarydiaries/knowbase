@@ -122,7 +122,13 @@ ${chunk}
       userQueryEmbedded,
     )})`;
     return db
-      .select({ name: embeddings.content, similarity })
+      .select({
+        similarity,
+        content: embeddings.content,
+        documentId: embeddings.documentId,
+        documentVersion: embeddings.documentVersion,
+        chunkIndex: embeddings.chunkIndex,
+      })
       .from(embeddings)
       .where(gt(similarity, 0.5))
       .orderBy((t) => desc(t.similarity))

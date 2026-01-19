@@ -1,5 +1,7 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs, streamText } from 'ai';
+import type { z } from 'zod';
+import type { conversationChannel } from '../conversation/model';
 import { ConversationService } from '../conversation/service';
 import { EmbeddingService } from '../embedding/service';
 import { MessageService } from '../message/service';
@@ -32,9 +34,17 @@ export abstract class ChatService {
   static async send({
     conversationId,
     message,
+    chatbotId,
+    channel,
+    orgId,
+    visitorId,
   }: {
     conversationId: string;
     message: string;
+    chatbotId: string;
+    channel: z.infer<typeof conversationChannel>;
+    orgId: string;
+    visitorId: string;
   }) {
     let finalQuery = message;
     const conversation = await ConversationService.single({
@@ -48,7 +58,7 @@ export abstract class ChatService {
     }
     const chunks = await EmbeddingService.findRelevantContent(finalQuery);
     const knowledgeBasePrompt = getKnowledgeBasePrompt({
-      knowledgeBase: chunks.map((c) => c.name).join('\n---\n'),
+      knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
     });
 
     const result = streamText({
@@ -59,7 +69,7 @@ export abstract class ChatService {
     });
 
     return result.toUIMessageStreamResponse({
-      onFinish: ({ responseMessage }) => {
+      onFinish: async ({ responseMessage }) => {
         const assistantMessage =
           responseMessage?.parts?.find((value) => value?.type === 'text')
             ?.text || '';
@@ -70,21 +80,41 @@ export abstract class ChatService {
         };
 
         if (!conversation) {
-          ConversationService.create({
+          await ConversationService.create({
             id: conversationId,
-            orgId: '123',
-            chatbotId: 'wjyxahoi05zup2xmkz1wnk37',
-            channel: 'web',
-            visitorId: '',
+            orgId,
+            chatbotId,
+            channel,
+            visitorId,
             ...conversationData,
           });
         } else {
-          ConversationService.update(conversationId, conversationData);
+          await ConversationService.update(conversationId, conversationData);
         }
 
-        MessageService.addMessages([
-          { conversationId, role: 'user', content: message },
-          { conversationId, role: 'assistant', content: assistantMessage },
+        await MessageService.addMessages([
+          {
+            conversationId,
+            role: 'user',
+            content: message,
+            systemMetadata: { finalQuery },
+          },
+          {
+            conversationId,
+            role: 'assistant',
+            content: assistantMessage,
+            metadata: {
+              confidenceScore:
+                chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) /
+                chunks.length,
+              sources: chunks.map((chunk) => ({
+                documentId: chunk.documentId,
+                documentVersion: chunk.documentVersion,
+                chunkIndex: chunk.chunkIndex,
+                similarity: chunk.similarity,
+              })),
+            },
+          },
         ]);
       },
     });

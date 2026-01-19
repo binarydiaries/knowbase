@@ -11,6 +11,10 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       return ChatService.send({
         conversationId: id,
         message: message.text,
+        channel: 'web',
+        orgId: '111',
+        visitorId: '11',
+        chatbotId: 'bck7gzqvj2jrt870xm5bwpi8',
       });
     },
     {

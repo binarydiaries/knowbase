@@ -37,14 +37,12 @@ export abstract class ChatService {
     chatbotId,
     channel,
     orgId,
-    visitorId,
   }: {
     conversationId: string;
     message: string;
     chatbotId: string;
     channel: z.infer<typeof conversationChannel>;
     orgId: string;
-    visitorId: string;
   }) {
     let finalQuery = message;
     const conversation = await ConversationService.single({
@@ -85,7 +83,6 @@ export abstract class ChatService {
             orgId,
             chatbotId,
             channel,
-            visitorId,
             ...conversationData,
           });
         } else {

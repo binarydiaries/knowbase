@@ -8,8 +8,8 @@ import {
 } from '@knowbase/ui/components/breadcrumb';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
 
@@ -49,49 +49,7 @@ function RouteComponent() {
           <SettingsCard />
         </div>
         <div className="w-1/2 p-5">
-          <Chatbot
-            className="h-150"
-            messages={[
-              {
-                id: '1',
-                type: 'system',
-                message: 'Hi! What can I help you with?',
-              },
-              {
-                id: '2',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '3',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-              {
-                id: '4',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '5',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-              {
-                id: '6',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '7',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-            ]}
-          />
+          <ChatbotPreview />
         </div>
       </div>
     </div>

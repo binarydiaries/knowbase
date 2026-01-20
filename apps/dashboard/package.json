@@ -10,10 +10,12 @@
     "openapi-ts": "openapi-ts"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.44",
     "@hey-api/openapi-ts": "^0.90.2",
     "@knowbase/ui": "*",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "^1.144.0",
+    "ai": "^6.0.42",
     "axios": "^1.13.2",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",

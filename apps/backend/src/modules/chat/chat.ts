@@ -7,13 +7,12 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .post(
     '',
     async ({ body }) => {
-      const { id, message } = body;
+      const { message, chatbotId, conversationId } = body;
       return ChatService.send({
-        conversationId: id,
-        message: message.text,
+        conversationId,
+        message: message,
         channel: 'web',
-        orgId: '111',
-        chatbotId: 'bck7gzqvj2jrt870xm5bwpi8',
+        chatbotId,
       });
     },
     {

@@ -1,9 +1,5 @@
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
-import {
-  clerkOrgIdColumn,
-  cuid2PrimaryKey,
-  timestamps,
-} from '../../utils/columns.utils';
+import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
 
 export const conversationChannel = pgEnum('channel', [
@@ -21,6 +17,5 @@ export const conversations = pgTable('conversations', {
   lastUserQuestion: text().notNull(),
   lastAssistantUtterance: text().notNull(),
   lastMessageAt: timestamp({ withTimezone: true }).notNull(),
-  ...clerkOrgIdColumn,
   ...timestamps,
 });

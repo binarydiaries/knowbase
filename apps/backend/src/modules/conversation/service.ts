@@ -9,6 +9,12 @@ export abstract class ConversationService {
     });
   }
 
+  static list({ chatbotId }: { chatbotId: string }) {
+    return db.query.conversations.findMany({
+      where: eq(conversations.chatbotId, chatbotId),
+    });
+  }
+
   static async create(data: typeof conversations.$inferInsert) {
     const [doc] = await db.insert(conversations).values(data).returning();
     return doc;

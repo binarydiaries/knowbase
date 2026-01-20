@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
 import { Chat } from './modules/chat/chat';
 import { Chatbot } from './modules/chatbot/chatbot';
+import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
 import { Embedding } from './modules/embedding/embedding';
 import { message } from './modules/message/message';
@@ -40,6 +41,7 @@ const app = new Elysia()
   .use(Document)
   .use(Chatbot)
   .use(Embedding)
+  .use(Conversation)
   .listen(3000);
 
 console.log(

@@ -14,6 +14,7 @@
     "@hey-api/openapi-ts": "^0.90.2",
     "@knowbase/ui": "*",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-router": "^1.144.0",
     "ai": "^6.0.42",
     "axios": "^1.13.2",

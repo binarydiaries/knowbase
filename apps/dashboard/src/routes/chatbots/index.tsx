@@ -9,9 +9,9 @@ import {
 } from '@knowbase/ui/components/dropdown-menu';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Bot, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
@@ -20,70 +20,47 @@ export const Route = createFileRoute('/chatbots/')({
   component: RouteComponent,
 });
 
-type Chatbot = {
-  id: string;
-  name: string;
-  conversations: number;
-  lastTrained: string;
-  status: 'live' | 'draft';
-};
-
 function RouteComponent() {
-  const [chatbots, setChatbots] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const query = useQuery({
+    queryKey: ['chatbots'],
+    queryFn: () => {
+      return getChatbots();
+    },
+  });
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    getAllChatbots();
-  }, []);
+  // Mutations
+  const createChatbotMutation = useMutation({
+    mutationFn: async ({
+      name,
+      description,
+    }: {
+      name: string;
+      description: string;
+    }) => {
+      await postChatbots({
+        body: { name, description },
+      });
+    },
+    onSuccess: () => {
+      console.log('postChatbots done');
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+    },
+  });
 
-  const getAllChatbots = async () => {
-    setLoading(true);
-
-    try {
-      const value = await getChatbots();
-
-      setChatbots(
-        value.data.chatbots.map(
-          (bot: any): Chatbot => ({
-            id: bot.id,
-            name: bot.name,
-            description: bot.description,
-            status: bot.status,
-            conversations: bot.conversations ?? 0,
-            lastTrained: bot.updatedAt ? timeAgo(bot.updatedAt) : 'Never',
-            createdAt: bot.createdAt ? new Date(bot.createdAt) : undefined,
-            updatedAt: bot.updatedAt ? new Date(bot.updatedAt) : undefined,
-          }),
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  async function handleCreateChatbot(name: string, description: string) {
-    await postChatbots({
-      body: { name, description },
-    });
-    getAllChatbots();
-  }
-
-  async function handleDeleteChatbot(id: string) {
-    console.log('Deleting chatbot:', id);
-
-    try {
+  const archiveChatbotMutation = useMutation({
+    mutationFn: async (id: string) => {
       await deleteChatbotsById({
         path: {
           id,
         },
       });
-
-      // 🔥 update UI immediately
-      setChatbots((prev) => prev.filter((bot) => bot.id !== id));
-    } catch (err) {
-      console.error('Delete failed', err);
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+    },
+  });
 
   return (
     <>
@@ -95,20 +72,24 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-base font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog onCreate={handleCreateChatbot} />
+          <CreateChatbotDialog
+            onCreate={(name, description) => {
+              createChatbotMutation.mutate({ name, description });
+            }}
+          />
         </div>
       </header>
       <Separator />
 
       <div className="p-5">
         {/* Chatbot List */}
-        {loading ? (
+        {query.isLoading ? (
           <div className="flex h-[300px] items-center justify-center">
             <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {chatbots.map((bot) => (
+            {query?.data?.data.chatbots.map((bot) => (
               <Link
                 key={bot.id}
                 to={`/chatbots/$chatbotId`}
@@ -169,7 +150,7 @@ function RouteComponent() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteChatbot(bot.id);
+                              archiveChatbotMutation.mutate(bot.id);
                             }}
                             className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                           >
@@ -186,10 +167,8 @@ function RouteComponent() {
 
                     {/* Bottom row */}
                     <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                      <span>
-                        {bot.conversations.toLocaleString()} conversations
-                      </span>
-                      <span>Updated {bot.lastTrained}</span>
+                      <span>0 conversations</span>
+                      <span>Updated {timeAgo(bot.updatedAt)}</span>
                     </div>
                   </CardContent>
                 </Card>

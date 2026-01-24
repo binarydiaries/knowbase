@@ -1,3 +1,4 @@
+export * from './behaviors';
 export * from './chatbots';
 export * from './conversations';
 export * from './documents';

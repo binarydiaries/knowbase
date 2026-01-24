@@ -20,13 +20,24 @@ const OneBehaviourResponse = z.object({
   behaviour: Behaviour,
 });
 
+const ManyBehaviourResponse = z.object({
+  behaviours: z.array(Behaviour),
+});
+
 const OneBehaviourParams = z.object({
   id: z.string(),
 });
-export const UpdateBehaviourBody = z.object({});
+export const UpdateBehaviourBody = Behaviour.pick({
+  tone: true,
+  systemPrompt: true,
+  guardrails: true,
+  verbosity: true,
+  fallbackMessage: true,
+}).partial();
 
 export const BehaviourModel = new Elysia().model({
   UpdateBehaviourBody,
   OneBehaviourResponse,
   OneBehaviourParams,
+  ManyBehaviourResponse,
 });

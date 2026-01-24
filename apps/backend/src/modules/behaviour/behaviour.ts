@@ -9,6 +9,18 @@ export const Behaviour = new Elysia({
 })
   .use(BehaviourModel)
   .use(ErrorModel)
+  .get(
+    '',
+    async () => {
+      const behaviours = await BehaviourService.list();
+      return {
+        behaviours,
+      };
+    },
+    {
+      response: 'ManyBehaviourResponse',
+    },
+  )
   .guard({
     params: 'OneBehaviourParams',
     response: {

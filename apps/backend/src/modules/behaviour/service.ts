@@ -9,6 +9,10 @@ export abstract class BehaviourService {
     });
   }
 
+  static list() {
+    return db.select().from(behaviors);
+  }
+
   static async update(
     id: string,
     data: Partial<typeof behaviors.$inferInsert>,

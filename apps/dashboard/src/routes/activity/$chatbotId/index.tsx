@@ -8,11 +8,8 @@ import {
 } from '@knowbase/ui/components/breadcrumb';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import ConversationsDashboard from '@/components/ConversationsDashboard/ConversationsDashboard.tsx';
-import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
-import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
 
 export const Route = createFileRoute('/activity/$chatbotId/')({
   component: RouteComponent,

@@ -52,7 +52,7 @@ const data = {
       icon: Bot,
     },
     {
-      name: 'Activity',
+      name: 'Activities',
       url: '/activity',
       icon: Activity,
     },

@@ -31,7 +31,7 @@ function RouteComponent() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <Link to={'/chatbots'}>
+                <Link to={'/activity'}>
                   <BreadcrumbLink>Activity</BreadcrumbLink>
                 </Link>
               </BreadcrumbItem>

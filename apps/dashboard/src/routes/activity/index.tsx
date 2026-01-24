@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { getChatbots } from '@/services';
@@ -45,40 +46,15 @@ export const Route = createFileRoute('/activity/')({
 
 function RouteComponent() {
   const navigate = useNavigate();
-  const [chatbots, setChatbots] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const getAllChatbots = async () => {
-    setLoading(true);
-
-    try {
-      const value = await getChatbots();
-
-      setChatbots(
-        value.data.chatbots.map(
-          (bot: any): Chatbot => ({
-            id: bot.id,
-            name: bot.name,
-            description: bot.description,
-            status: bot.status,
-            conversations: bot.conversations ?? 0,
-            lastTrained: bot.updatedAt ? timeAgo(bot.updatedAt) : 'Never',
-            createdAt: bot.createdAt ? new Date(bot.createdAt) : undefined,
-            updatedAt: bot.updatedAt ? new Date(bot.updatedAt) : undefined,
-          }),
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getAllChatbots();
-  }, []);
+  const query = useQuery({
+    queryKey: ['chatbots'],
+    queryFn: () => {
+      return getChatbots();
+    },
+  });
 
   return (
-    <Card>
+    <Card className={'m-6'}>
       <CardHeader>
         <CardTitle>Chatbots</CardTitle>
       </CardHeader>
@@ -94,7 +70,7 @@ function RouteComponent() {
           </TableHeader>
 
           <TableBody>
-            {chatbots.map((bot) => (
+            {query?.data?.data.chatbots.map((bot) => (
               <TableRow
                 key={bot.id}
                 className="cursor-pointer hover:bg-muted"

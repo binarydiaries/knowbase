@@ -4,7 +4,7 @@ import { z } from 'zod';
 const BehaviourTone = z.enum(['friendly', 'professional', 'neutral']);
 const BehaviourVerbosity = z.enum(['short', 'balanced', 'detailed']);
 
-const Behaviour = z.object({
+export const Behaviour = z.object({
   id: z.string(),
   chatbotId: z.string(),
   systemPrompt: z.string(),

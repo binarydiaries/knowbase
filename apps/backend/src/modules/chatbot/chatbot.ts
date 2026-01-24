@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { ErrorModel } from '../../common/models/error';
+import { BehaviourService } from '../behaviour/service';
 import { DocumentService } from '../document/service';
 import { ChatbotModel } from './model';
 import { ChatbotService } from './service';
@@ -65,8 +66,10 @@ export const Chatbot = new Elysia({
     '/:id',
     async ({ chatbot, params }) => {
       const documents = await DocumentService.list({ chatbotId: params.id });
+      const behaviour = await BehaviourService.singleByChatbot(params.id);
       return {
         chatbot,
+        behaviour: behaviour,
         documents: documents.map(DocumentService.transformDocument),
       };
     },

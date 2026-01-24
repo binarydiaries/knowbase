@@ -9,6 +9,12 @@ export abstract class BehaviourService {
     });
   }
 
+  static singleByChatbot(chatbotId: string) {
+    return db.query.behaviors.findFirst({
+      where: eq(behaviors.chatbotId, chatbotId),
+    });
+  }
+
   static list() {
     return db.select().from(behaviors);
   }

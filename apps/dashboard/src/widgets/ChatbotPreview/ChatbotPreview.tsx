@@ -26,7 +26,7 @@ export const ChatbotPreview = () => {
 
   return (
     <Chatbot
-      className="h-full"
+      className="max-h-175 h-full"
       isLoading={status === 'submitted'}
       messages={messages.map((value) => ({
         id: value.id,

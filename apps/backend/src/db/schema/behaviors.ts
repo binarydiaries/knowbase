@@ -1,12 +1,6 @@
 import { relations } from 'drizzle-orm';
-import { jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
-import type { z } from 'zod';
-import type { ChatbotSettings } from '../../modules/chatbot/model';
-import {
-  clerkUserId,
-  cuid2PrimaryKey,
-  timestamps,
-} from '../../utils/columns.utils';
+import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
+import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
 
 export const behaviorTone = pgEnum('tone', [

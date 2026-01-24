@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { behaviors, chatbots } from '../../db/schema';
+import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
 
 export abstract class ChatbotService {
   static async create(data: typeof chatbots.$inferInsert) {
@@ -12,12 +13,7 @@ export abstract class ChatbotService {
         .insert(behaviors)
         .values({
           chatbotId,
-          systemPrompt:
-            'You are a helpful support assistant. Answer using the provided sources only.',
-          tone: 'neutral',
-          verbosity: 'balanced',
-          fallbackMessage:
-            "I don't know the answer to that based on the information I have.",
+          ...DEFAULT_BEHAVIOR,
         })
         .returning();
 

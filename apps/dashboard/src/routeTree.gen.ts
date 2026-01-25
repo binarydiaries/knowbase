@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
+import { Route as ActivityIndexRouteImport } from './routes/activity/index'
 import { Route as ChatbotsChatbotIdIndexRouteImport } from './routes/chatbots/$chatbotId/index'
+import { Route as ActivityChatbotIdIndexRouteImport } from './routes/activity/$chatbotId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,39 +25,73 @@ const ChatbotsIndexRoute = ChatbotsIndexRouteImport.update({
   path: '/chatbots/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivityIndexRoute = ActivityIndexRouteImport.update({
+  id: '/activity/',
+  path: '/activity/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatbotsChatbotIdIndexRoute = ChatbotsChatbotIdIndexRouteImport.update({
   id: '/chatbots/$chatbotId/',
   path: '/chatbots/$chatbotId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivityChatbotIdIndexRoute = ActivityChatbotIdIndexRouteImport.update({
+  id: '/activity/$chatbotId/',
+  path: '/activity/$chatbotId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activity': typeof ActivityIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
+  '/activity/$chatbotId': typeof ActivityChatbotIdIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activity': typeof ActivityIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
+  '/activity/$chatbotId': typeof ActivityChatbotIdIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activity/': typeof ActivityIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
+  '/activity/$chatbotId/': typeof ActivityChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chatbots' | '/chatbots/$chatbotId'
+  fullPaths:
+    | '/'
+    | '/activity'
+    | '/chatbots'
+    | '/activity/$chatbotId'
+    | '/chatbots/$chatbotId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chatbots' | '/chatbots/$chatbotId'
-  id: '__root__' | '/' | '/chatbots/' | '/chatbots/$chatbotId/'
+  to:
+    | '/'
+    | '/activity'
+    | '/chatbots'
+    | '/activity/$chatbotId'
+    | '/chatbots/$chatbotId'
+  id:
+    | '__root__'
+    | '/'
+    | '/activity/'
+    | '/chatbots/'
+    | '/activity/$chatbotId/'
+    | '/chatbots/$chatbotId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivityIndexRoute: typeof ActivityIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
+  ActivityChatbotIdIndexRoute: typeof ActivityChatbotIdIndexRoute
   ChatbotsChatbotIdIndexRoute: typeof ChatbotsChatbotIdIndexRoute
 }
 
@@ -75,6 +111,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatbotsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activity/': {
+      id: '/activity/'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chatbots/$chatbotId/': {
       id: '/chatbots/$chatbotId/'
       path: '/chatbots/$chatbotId'
@@ -82,12 +125,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatbotsChatbotIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activity/$chatbotId/': {
+      id: '/activity/$chatbotId/'
+      path: '/activity/$chatbotId'
+      fullPath: '/activity/$chatbotId'
+      preLoaderRoute: typeof ActivityChatbotIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivityIndexRoute: ActivityIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
+  ActivityChatbotIdIndexRoute: ActivityChatbotIdIndexRoute,
   ChatbotsChatbotIdIndexRoute: ChatbotsChatbotIdIndexRoute,
 }
 export const routeTree = rootRouteImport

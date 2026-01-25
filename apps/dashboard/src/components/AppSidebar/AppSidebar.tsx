@@ -6,6 +6,7 @@ import {
   SidebarRail,
 } from '@knowbase/ui/components/sidebar';
 import {
+  Activity,
   AudioWaveform,
   Bot,
   Command,
@@ -49,6 +50,11 @@ const data = {
       name: 'Chatbots',
       url: '/chatbots',
       icon: Bot,
+    },
+    {
+      name: 'Activity',
+      url: '/activity',
+      icon: Activity,
     },
     {
       name: 'Analytics',

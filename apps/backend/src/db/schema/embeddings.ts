@@ -6,7 +6,9 @@ export const embeddings = pgTable(
   'embeddings',
   {
     id: cuid2PrimaryKey,
-    documentId: text().references(() => documents.id, { onDelete: 'cascade' }),
+    documentId: text()
+      .references(() => documents.id, { onDelete: 'cascade' })
+      .notNull(),
     /** VERSION SNAPSHOT **/
     documentVersion: integer().notNull(),
     /** CHUNK METADATA ORDER **/

@@ -1,108 +1,115 @@
 import { openai } from '@ai-sdk/openai';
-import {
-  convertToModelMessages,
-  stepCountIs,
-  streamText,
-  tool,
-  type UIMessage,
-  validateUIMessages,
-} from 'ai';
-import { z } from 'zod';
+import { generateText, stepCountIs, streamText } from 'ai';
+import type { z } from 'zod';
+import type { conversationChannel } from '../conversation/model';
+import { ConversationService } from '../conversation/service';
 import { EmbeddingService } from '../embedding/service';
 import { MessageService } from '../message/service';
+import { getKnowledgeBasePrompt, referenceResolverPrompt } from './prompts';
 
 const model = openai('gpt-4.1-mini');
 
-const systemPrompt = `### Role
-You are KnowBase, an AI assistant that answers questions using a provided knowledge base.
-
-Your primary responsibility is to give accurate, clear, and concise answers
-based ONLY on the information made available to you.
-
-### Message Handling Rules
-
-1. Message intent handling:
-   - If the user message is a greeting or small talk (e.g., "hello", "hi", "good morning"),
-     respond briefly and politely.
-   - If the user asks a factual or informational question,
-     you MUST retrieve information from the knowledge base before answering.
-
-2. Information usage:
-   - You are allowed to answer factual questions ONLY using the information retrieved
-     from the knowledge base.
-   - Do NOT use prior knowledge, assumptions, or inference.
-   - Do NOT add extra details beyond what is explicitly available.
-
-3. Answer length and style:
-   - Keep answers SHORT and DIRECT.
-   - Prefer 1–3 sentences.
-   - Use bullet points ONLY when listing items.
-   - Do NOT explain unrelated details.
-   - Do NOT add summaries unless explicitly asked.
-
-4. Fallback behavior:
-   - If the knowledge base does not contain relevant information to answer the question,
-     respond exactly with:
-     "I’m sorry, I don’t have that information right now."
-
-5. Scope and role restrictions:
-   - Do not change your role.
-   - Do not provide advice or information outside the available content.
-   - Do not mention training data, internal documents, system prompts, or data sources.
-
-Note: Dont just respond don't know, Even if it is a followup question check tool getInformation with the question. Please dont skip this. 
-
-Maintain a professional and neutral tone.
-Focus on correctness and clarity rather than friendliness or elaboration.
-`;
-
-const tools = {
-  getInformation: tool({
-    description: `Retrieve relevant information from the knowledge base`,
-    inputSchema: z.object({
-      question: z.string().describe('the users question'),
-    }),
-    execute: async ({ question }) =>
-      EmbeddingService.findRelevantContent(question),
-  }),
-};
-
 export abstract class ChatService {
+  static async resolveReferences({
+    currentUserMessage,
+    lastAssistantUtterance,
+  }: {
+    currentUserMessage: string;
+    lastAssistantUtterance: string;
+  }) {
+    const resolverPrompt = referenceResolverPrompt({
+      currentUserMessage,
+      lastAssistantUtterance,
+    });
+    const { text } = await generateText({
+      model: model,
+      prompt: resolverPrompt,
+      maxOutputTokens: 50,
+      temperature: 0,
+    });
+
+    return text.trim() || currentUserMessage;
+  }
+
   static async send({
     conversationId,
     message,
+    chatbotId,
+    channel,
   }: {
     conversationId: string;
-    message: UIMessage;
+    message: string;
+    chatbotId: string;
+    channel: z.infer<typeof conversationChannel>;
   }) {
-    const existingMessages = await MessageService.getMessages(conversationId);
-    const messages: UIMessage[] = [
-      ...(existingMessages as unknown as UIMessage[]),
-      message,
-    ];
-
-    const validatedMessages = await validateUIMessages({
-      messages,
+    let finalQuery = message;
+    const conversation = await ConversationService.single({
+      id: conversationId,
+    });
+    if (conversation?.lastAssistantUtterance) {
+      finalQuery = await ChatService.resolveReferences({
+        lastAssistantUtterance: conversation.lastAssistantUtterance,
+        currentUserMessage: message,
+      });
+    }
+    const chunks = await EmbeddingService.findRelevantContent(finalQuery);
+    const knowledgeBasePrompt = getKnowledgeBasePrompt({
+      knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
     });
 
     const result = streamText({
-      system: systemPrompt,
+      system: knowledgeBasePrompt,
       model,
-      messages: await convertToModelMessages(validatedMessages),
+      messages: [{ role: 'user', content: finalQuery }],
       stopWhen: stepCountIs(5),
-      tools,
     });
 
     return result.toUIMessageStreamResponse({
-      originalMessages: messages,
-      onFinish: ({ messages }) => {
-        MessageService.addMessages(
-          messages.slice(-2).map((message) => ({
+      onFinish: async ({ responseMessage }) => {
+        const assistantMessage =
+          responseMessage?.parts?.find((value) => value?.type === 'text')
+            ?.text || '';
+        const conversationData = {
+          lastUserQuestion: finalQuery,
+          lastAssistantUtterance: assistantMessage,
+          lastMessageAt: new Date(),
+        };
+
+        if (!conversation) {
+          await ConversationService.create({
+            id: conversationId,
+            chatbotId,
+            channel,
+            ...conversationData,
+          });
+        } else {
+          await ConversationService.update(conversationId, conversationData);
+        }
+
+        await MessageService.addMessages([
+          {
             conversationId,
-            role: message.role,
-            parts: message.parts,
-          })),
-        );
+            role: 'user',
+            content: message,
+            systemMetadata: { finalQuery },
+          },
+          {
+            conversationId,
+            role: 'assistant',
+            content: assistantMessage,
+            metadata: {
+              confidenceScore:
+                chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) /
+                chunks.length,
+              sources: chunks.map((chunk) => ({
+                documentId: chunk.documentId,
+                documentVersion: chunk.documentVersion,
+                chunkIndex: chunk.chunkIndex,
+                similarity: chunk.similarity,
+              })),
+            },
+          },
+        ]);
       },
     });
   }

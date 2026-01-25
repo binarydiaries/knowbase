@@ -1,5 +1,7 @@
 import { Elysia } from 'elysia';
 import { ErrorModel } from '../../common/models/error';
+import { BehaviourService } from '../behaviour/service';
+import { DocumentService } from '../document/service';
 import { ChatbotModel } from './model';
 import { ChatbotService } from './service';
 
@@ -14,6 +16,11 @@ export const Chatbot = new Elysia({
     async ({ body }) => {
       const chatbot = await ChatbotService.create({
         ...body,
+        settings: {
+          displayName: body.name,
+          welcomeMessage: 'Hi! How can I help you today?',
+          primaryColor: '#000000',
+        },
         status: 'draft',
         createdBy: '123',
         orgId: '123',
@@ -24,7 +31,7 @@ export const Chatbot = new Elysia({
     },
     {
       body: 'CreateChatbotBody',
-      response: 'OneChatbotResponse',
+      response: 'OneSmallChatbotResponse',
     },
   )
   .get(
@@ -57,9 +64,13 @@ export const Chatbot = new Elysia({
   })
   .get(
     '/:id',
-    async ({ chatbot }) => {
+    async ({ chatbot, params }) => {
+      const documents = await DocumentService.list({ chatbotId: params.id });
+      const behaviour = await BehaviourService.singleByChatbot(params.id);
       return {
         chatbot,
+        behaviour: behaviour,
+        documents: documents.map(DocumentService.transformDocument),
       };
     },
     {
@@ -70,15 +81,21 @@ export const Chatbot = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body }) => {
+    async ({ params, body, chatbot }) => {
       return {
-        chatbot: await ChatbotService.update(params.id, body),
+        chatbot: await ChatbotService.update(params.id, {
+          ...body,
+          settings: {
+            ...chatbot.settings,
+            ...body.settings,
+          },
+        }),
       };
     },
     {
       body: 'UpdateChatbotBody',
       response: {
-        200: 'OneChatbotResponse',
+        200: 'OneSmallChatbotResponse',
       },
     },
   )

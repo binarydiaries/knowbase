@@ -43,10 +43,10 @@ const ActivityChatbotIdIndexRoute = ActivityChatbotIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/activity/': typeof ActivityIndexRoute
-  '/chatbots/': typeof ChatbotsIndexRoute
-  '/activity/$chatbotId/': typeof ActivityChatbotIdIndexRoute
-  '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
+  '/activity': typeof ActivityIndexRoute
+  '/chatbots': typeof ChatbotsIndexRoute
+  '/activity/$chatbotId': typeof ActivityChatbotIdIndexRoute
+  '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,10 +67,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/activity/'
-    | '/chatbots/'
-    | '/activity/$chatbotId/'
-    | '/chatbots/$chatbotId/'
+    | '/activity'
+    | '/chatbots'
+    | '/activity/$chatbotId'
+    | '/chatbots/$chatbotId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -107,28 +107,28 @@ declare module '@tanstack/react-router' {
     '/chatbots/': {
       id: '/chatbots/'
       path: '/chatbots'
-      fullPath: '/chatbots/'
+      fullPath: '/chatbots'
       preLoaderRoute: typeof ChatbotsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activity/': {
       id: '/activity/'
       path: '/activity'
-      fullPath: '/activity/'
+      fullPath: '/activity'
       preLoaderRoute: typeof ActivityIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chatbots/$chatbotId/': {
       id: '/chatbots/$chatbotId/'
       path: '/chatbots/$chatbotId'
-      fullPath: '/chatbots/$chatbotId/'
+      fullPath: '/chatbots/$chatbotId'
       preLoaderRoute: typeof ChatbotsChatbotIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activity/$chatbotId/': {
       id: '/activity/$chatbotId/'
       path: '/activity/$chatbotId'
-      fullPath: '/activity/$chatbotId/'
+      fullPath: '/activity/$chatbotId'
       preLoaderRoute: typeof ActivityChatbotIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

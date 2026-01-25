@@ -8,10 +8,11 @@ import {
 } from '@knowbase/ui/components/breadcrumb';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
+import {Badge} from "@knowbase/ui/components/badge";
 
 export const Route = createFileRoute('/chatbots/$chatbotId/')({
   component: RouteComponent,
@@ -19,7 +20,7 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 
 function RouteComponent() {
   return (
-    <>
+    <div className="h-screen flex flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -43,57 +44,18 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
-      <div className="flex flex-1">
-        <div className="w-1/2 p-5 shadow-none flex-col flex gap-5">
+      <div className="flex flex-1 h-full overflow-hidden">
+        <div className="grow p-5 shadow-none flex-col flex gap-5 h-full overflow-auto border-r">
           <DocumentsWidget />
           <SettingsCard />
         </div>
-        <div className="w-1/2 p-5 h-full">
-          <Chatbot
-            className="h-150"
-            messages={[
-              {
-                id: '1',
-                type: 'system',
-                message: 'Hi! What can I help you with?',
-              },
-              {
-                id: '2',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '3',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-              {
-                id: '4',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '5',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-              {
-                id: '6',
-                type: 'user',
-                message: 'What is the weather in dubai?',
-              },
-              {
-                id: '7',
-                type: 'system',
-                message:
-                  "It's currently peak winter season in Dubai (November-March), offering pleasant, sunny, and mild weather (around 15-30°C), perfect for outdoor activities, beaches, and major events like the Dubai Shopping Festival, contrasting sharply with the scorching hot, humid summers.",
-              },
-            ]}
-          />
+        <div className="w-130 shrink-0 flex flex-col gap-5">
+          <Badge variant="secondary" className="rounded-l-none">Web Preview</Badge>
+          <div className="h-full flex justify-center">
+            <ChatbotPreview />
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

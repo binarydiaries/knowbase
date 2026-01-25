@@ -1,3 +1,5 @@
+import { bubbleIcon } from './icons';
+
 export function showSpinner(btn: HTMLButtonElement) {
   btn.innerHTML = `
     <span style="
@@ -15,7 +17,7 @@ export function showSpinner(btn: HTMLButtonElement) {
 }
 
 export function showIcon(btn: HTMLButtonElement) {
-  btn.innerHTML = '💬';
+  btn.innerHTML = bubbleIcon;
 }
 
 function injectSpinnerKeyframes() {

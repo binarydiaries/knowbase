@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { MessageModel } from './model';
 import { MessageService } from './service';
 
-export const message = new Elysia({ prefix: '/message', tags: ['Messages'] })
+export const message = new Elysia({ prefix: '/messages', tags: ['Message'] })
   .use(MessageModel)
   .get(
     '',

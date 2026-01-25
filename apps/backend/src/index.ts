@@ -3,6 +3,7 @@ import openapi from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
+import { Behaviour } from './modules/behaviour/behaviour';
 import { Chat } from './modules/chat/chat';
 import { Chatbot } from './modules/chatbot/chatbot';
 import { Conversation } from './modules/conversation/conversation';
@@ -42,6 +43,7 @@ const app = new Elysia()
   .use(Chatbot)
   .use(Embedding)
   .use(Conversation)
+  .use(Behaviour)
   .listen(3000);
 
 console.log(

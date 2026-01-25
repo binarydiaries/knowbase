@@ -12,6 +12,7 @@ import {
 } from '@knowbase/ui/components/sheet';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { getDocuments, postDocuments } from '@/services';
@@ -24,12 +25,13 @@ type QA = {
 export const QAContentWidget = () => {
   const [qaList, setQaList] = useState<QA[]>([{ question: '', answer: '' }]);
   const [title, setTitle] = useState('');
+  const { chatbotId } = useParams({ strict: false });
 
   const query = useQuery({
     queryKey: ['documents'],
     queryFn: () => {
       return getDocuments({
-        params: { chatbotId: 'c3jxhu918l5g2o8ykmnlkzxe' },
+        params: { chatbotId: chatbotId },
       });
     },
   });
@@ -46,11 +48,11 @@ export const QAContentWidget = () => {
     mutationFn: async ({ title, qaList }: { title: string; qaList: QA[] }) => {
       await postDocuments({
         body: JSON.stringify({
-          chatbotId: 'c3jxhu918l5g2o8ykmnlkzxe',
+          chatbotId: chatbotId,
           title,
           content: {
             type: 'qna',
-            data: qaList, // 👈 EXACT backend requirement
+            data: qaList,
           },
         }),
       });

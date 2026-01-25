@@ -5,11 +5,9 @@ export type ClientOptions = {
 };
 
 export type ChatBody = {
-    id: string;
-    message: {
-        id: string;
-        text: string;
-    };
+    conversationId: string;
+    message: string;
+    chatbotId: string;
 };
 
 export type GetMessageQuery = {
@@ -18,7 +16,17 @@ export type GetMessageQuery = {
 
 export type Document = {
     id: string;
-    content: string;
+    title: string;
+    content: {
+        type: string;
+        data: unknown;
+    } | {
+        type: string;
+        data: Array<{
+            question: string;
+            answer: string;
+        }>;
+    };
     chatbotId: string;
     createdBy: string;
     orgId: string;
@@ -27,18 +35,48 @@ export type Document = {
 };
 
 export type CreateDocumentBody = {
-    content: string;
     chatbotId: string;
+    title: string;
+    content: {
+        type: string;
+        data: unknown;
+    } | {
+        type: string;
+        data: Array<{
+            question: string;
+            answer: string;
+        }>;
+    };
 };
 
 export type UpdateDocumentBody = {
-    content: string;
+    title?: string;
+    content: {
+        type: string;
+        data: unknown;
+    } | {
+        type: string;
+        data: Array<{
+            question: string;
+            answer: string;
+        }>;
+    };
 };
 
 export type OneDocumentResponse = {
     document: {
         id: string;
-        content: string;
+        title: string;
+        content: {
+            type: string;
+            data: unknown;
+        } | {
+            type: string;
+            data: Array<{
+                question: string;
+                answer: string;
+            }>;
+        };
         chatbotId: string;
         createdBy: string;
         orgId: string;
@@ -50,7 +88,17 @@ export type OneDocumentResponse = {
 export type ManyDocumentsResponse = {
     documents: Array<{
         id: string;
-        content: string;
+        title: string;
+        content: {
+            type: string;
+            data: unknown;
+        } | {
+            type: string;
+            data: Array<{
+                question: string;
+                answer: string;
+            }>;
+        };
         chatbotId: string;
         createdBy: string;
         orgId: string;
@@ -63,6 +111,10 @@ export type OneDocumentParams = {
     id: string;
 };
 
+export type ChatbotDocumentsParams = {
+    chatbotId: string;
+};
+
 export type NotFoundResponse = {
     code: 'NOT_FOUND';
     message: string;
@@ -73,6 +125,13 @@ export type Chatbot = {
     name: string;
     description?: string | unknown;
     status: 'draft' | 'live' | 'archived';
+    settings: {
+        displayName: string;
+        subtitle?: string;
+        welcomeMessage: string;
+        inputPlaceholder?: string;
+        primaryColor: string;
+    };
     createdBy: string;
     orgId: string;
     createdAt: string;
@@ -90,8 +149,45 @@ export type OneChatbotResponse = {
         name: string;
         description?: string | unknown;
         status: 'draft' | 'live' | 'archived';
+        settings: {
+            displayName: string;
+            subtitle?: string;
+            welcomeMessage: string;
+            inputPlaceholder?: string;
+            primaryColor: string;
+        };
         createdBy: string;
         orgId: string;
+        createdAt: string;
+        updatedAt: string;
+    };
+    documents: Array<{
+        id: string;
+        title: string;
+        content: {
+            type: string;
+            data: unknown;
+        } | {
+            type: string;
+            data: Array<{
+                question: string;
+                answer: string;
+            }>;
+        };
+        chatbotId: string;
+        createdBy: string;
+        orgId: string;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+    behaviour?: {
+        id: string;
+        chatbotId: string;
+        systemPrompt: string;
+        tone: 'friendly' | 'professional' | 'neutral';
+        verbosity: 'short' | 'balanced' | 'detailed';
+        fallbackMessage: string;
+        guardrails?: string | unknown;
         createdAt: string;
         updatedAt: string;
     };
@@ -104,7 +200,6 @@ export type ManyChatbotResponse = {
         description?: string | unknown;
         status: 'draft' | 'live' | 'archived';
         createdBy: string;
-        orgId: string;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -118,10 +213,92 @@ export type UpdateChatbotBody = {
     name: string;
     description?: string | unknown;
     status: 'draft' | 'live' | 'archived';
+    settings: {
+        displayName: string;
+        subtitle?: string;
+        welcomeMessage: string;
+        inputPlaceholder?: string;
+        primaryColor: string;
+    };
 };
 
-export type DeleteChatbotResponse = {
-    [key: string]: never;
+export type DeleteChatbotResponse = unknown;
+
+export type OneSmallChatbotResponse = {
+    chatbot: {
+        id: string;
+        name: string;
+        description?: string | unknown;
+        status: 'draft' | 'live' | 'archived';
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type EmbedStartBody = {
+    chatbotId: string;
+};
+
+export type EmbedStartResponse = {
+    message: string;
+};
+
+export type ListConversation = {
+    chatbotId: string;
+};
+
+export type ManyConversationResponse = {
+    conversations: Array<{
+        id: string;
+        chatbotId: string;
+        channel: 'web' | 'instagram' | 'whatsapp';
+        lastUserQuestion: string;
+        lastAssistantUtterance: string;
+        lastMessageAt: string;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type UpdateBehaviourBody = {
+    tone?: 'friendly' | 'professional' | 'neutral';
+    systemPrompt?: string;
+    guardrails?: string | unknown;
+    verbosity?: 'short' | 'balanced' | 'detailed';
+    fallbackMessage?: string;
+};
+
+export type OneBehaviourResponse = {
+    behaviour: {
+        id: string;
+        chatbotId: string;
+        systemPrompt: string;
+        tone: 'friendly' | 'professional' | 'neutral';
+        verbosity: 'short' | 'balanced' | 'detailed';
+        fallbackMessage: string;
+        guardrails?: string | unknown;
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type OneBehaviourParams = {
+    id: string;
+};
+
+export type ManyBehaviourResponse = {
+    behaviours: Array<{
+        id: string;
+        chatbotId: string;
+        systemPrompt: string;
+        tone: 'friendly' | 'professional' | 'neutral';
+        verbosity: 'short' | 'balanced' | 'detailed';
+        fallbackMessage: string;
+        guardrails?: string | unknown;
+        createdAt: string;
+        updatedAt: string;
+    }>;
 };
 
 export type PostChatData = {
@@ -131,11 +308,11 @@ export type PostChatData = {
     url: '/chat';
 };
 
-export type GetMessageData = {
+export type GetMessagesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/message';
+    url: '/messages';
 };
 
 export type GetDocumentsData = {
@@ -188,14 +365,10 @@ export type DeleteDocumentsByIdError = DeleteDocumentsByIdErrors[keyof DeleteDoc
 
 export type DeleteDocumentsByIdResponses = {
     /**
-     * Response for status 200
+     * Response for status 204
      */
-    200: {
-        [key: string]: never;
-    };
+    204: unknown;
 };
-
-export type DeleteDocumentsByIdResponse = DeleteDocumentsByIdResponses[keyof DeleteDocumentsByIdResponses];
 
 export type GetDocumentsByIdData = {
     body?: never;
@@ -274,7 +447,7 @@ export type PostChatbotsResponses = {
     /**
      * Response for status 200
      */
-    200: OneChatbotResponse;
+    200: OneSmallChatbotResponse;
 };
 
 export type PostChatbotsResponse = PostChatbotsResponses[keyof PostChatbotsResponses];
@@ -299,10 +472,8 @@ export type DeleteChatbotsByIdResponses = {
     /**
      * Response for status 204
      */
-    204: DeleteChatbotResponse;
+    204: unknown;
 };
-
-export type DeleteChatbotsByIdResponse = DeleteChatbotsByIdResponses[keyof DeleteChatbotsByIdResponses];
 
 export type GetChatbotsByIdData = {
     body?: never;
@@ -349,7 +520,71 @@ export type PatchChatbotsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: OneChatbotResponse;
+    200: OneSmallChatbotResponse;
 };
 
 export type PatchChatbotsByIdResponse = PatchChatbotsByIdResponses[keyof PatchChatbotsByIdResponses];
+
+export type PostEmbeddingData = {
+    body: EmbedStartBody;
+    path?: never;
+    query?: never;
+    url: '/embedding';
+};
+
+export type GetConversationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/conversations';
+};
+
+export type GetConversationsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyConversationResponse;
+};
+
+export type GetConversationsResponse = GetConversationsResponses[keyof GetConversationsResponses];
+
+export type GetBehaviourData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/behaviour';
+};
+
+export type GetBehaviourResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyBehaviourResponse;
+};
+
+export type GetBehaviourResponse = GetBehaviourResponses[keyof GetBehaviourResponses];
+
+export type PatchBehaviourByIdData = {
+    body: UpdateBehaviourBody;
+    path?: never;
+    query?: never;
+    url: '/behaviour/{id}';
+};
+
+export type PatchBehaviourByIdErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PatchBehaviourByIdError = PatchBehaviourByIdErrors[keyof PatchBehaviourByIdErrors];
+
+export type PatchBehaviourByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneBehaviourResponse;
+};
+
+export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof PatchBehaviourByIdResponses];

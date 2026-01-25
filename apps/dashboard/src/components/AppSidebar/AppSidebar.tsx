@@ -52,8 +52,8 @@ const data = {
       icon: Bot,
     },
     {
-      name: 'Activity',
-      url: '/activity',
+      name: 'Activities',
+      url: '/activities',
       icon: Activity,
     },
     {

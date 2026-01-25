@@ -1,10 +1,5 @@
 import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
+import { Card, CardContent } from '@knowbase/ui/components/card';
 import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
@@ -16,8 +11,11 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { Textarea } from '@knowbase/ui/components/textarea';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { getDocuments, postDocuments } from '@/services';
 
 type QA = {
   question: string;
@@ -26,6 +24,37 @@ type QA = {
 
 export const QAContentWidget = () => {
   const [qaList, setQaList] = useState<QA[]>([{ question: '', answer: '' }]);
+  const [title, setTitle] = useState('');
+  const { chatbotId } = useParams({ strict: false });
+
+  const queryClient = useQueryClient();
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    if (qaList.some((qa) => !qa.question.trim() || !qa.answer.trim())) return;
+
+    createQnAMutation.mutate({ title, qaList });
+  };
+  // Mutations
+  const createQnAMutation = useMutation({
+    mutationFn: async ({ title, qaList }: { title: string; qaList: QA[] }) => {
+      await postDocuments({
+        body: JSON.stringify({
+          chatbotId: chatbotId,
+          title,
+          content: {
+            type: 'qna',
+            data: qaList,
+          },
+        }),
+      });
+    },
+    onSuccess: () => {
+      console.log('qna done');
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
 
   const addQuestion = () => {
     setQaList([...qaList, { question: '', answer: '' }]);
@@ -40,6 +69,7 @@ export const QAContentWidget = () => {
     updated[index][field] = value;
     setQaList(updated);
   };
+
   const deleteQuestion = (index: number) => {
     setQaList(qaList.filter((_, i) => i !== index));
   };
@@ -58,6 +88,8 @@ export const QAContentWidget = () => {
           <Input
             id="sheet-demo-name"
             placeholder="Enter a title for this Q&A group"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className=" flex flex-row  justify-between">
@@ -115,7 +147,13 @@ export const QAContentWidget = () => {
         ))}
       </div>
       <SheetFooter>
-        <Button type="submit">Save changes</Button>
+        <Button
+          onClick={handleSave}
+          disabled={createQnAMutation.isPending}
+          type="submit"
+        >
+          Save changes
+        </Button>
         <SheetClose asChild>
           <Button variant="outline">Close</Button>
         </SheetClose>

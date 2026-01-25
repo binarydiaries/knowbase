@@ -1,3 +1,4 @@
+import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Card,
@@ -22,14 +23,28 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import { Sheet } from '@knowbase/ui/components/sheet';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
+
 import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { getDocuments } from '@/services';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
+  const { chatbotId } = useParams({ strict: false });
+
+  const query = useQuery({
+    queryKey: ['documents'],
+    queryFn: () => {
+      return getDocuments({
+        query: { chatbotId: chatbotId },
+      });
+    },
+  });
   return (
     <>
       <Card className="w-full">
@@ -57,24 +72,32 @@ export const DocumentsWidget = () => {
             </DropdownMenu>
           </CardAction>
         </CardHeader>
-        <CardContent>
-          <Item variant="outline">
-            <ItemMedia variant="icon">
-              <ShieldAlertIcon />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>Security Alert</ItemTitle>
-              <ItemDescription>
-                New login detected from unknown device.
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <Button size="icon" variant="ghost">
-                <MoreHorizontal />
-              </Button>
-            </ItemActions>
-          </Item>
-        </CardContent>
+        {query.data?.data.documents.map((doc) => (
+          <CardContent key={doc.id}>
+            <Item variant="outline">
+              <ItemMedia variant="icon">
+                <ShieldAlertIcon />
+              </ItemMedia>
+              <ItemContent>
+                <div className={'flex flex-row gap-4'}>
+                  <ItemTitle>{doc.title}</ItemTitle>
+                  <Badge>{doc.content.type === 'qna' ? 'Q&A' : 'Text'}</Badge>
+                </div>
+
+                <ItemDescription>
+                  {doc.content?.type === 'qna'
+                    ? `${doc.content.data.length} questions`
+                    : String(doc.content?.data)}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <Button size="icon" variant="ghost">
+                  <MoreHorizontal />
+                </Button>
+              </ItemActions>
+            </Item>
+          </CardContent>
+        ))}
       </Card>
       <Sheet
         open={isTextContentSheetOpen}

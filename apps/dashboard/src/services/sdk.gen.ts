@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteChatbotsByIdData, DeleteChatbotsByIdErrors, DeleteChatbotsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsResponses, GetMessageData, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChatbotsData, PostChatbotsResponses, PostChatData, PostDocumentsData, PostDocumentsResponses } from './types.gen';
+import type { DeleteChatbotsByIdData, DeleteChatbotsByIdErrors, DeleteChatbotsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsResponses, GetConversationsData, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsResponses, GetMessagesData, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChatbotsData, PostChatbotsResponses, PostChatData, PostDocumentsData, PostDocumentsResponses, PostEmbeddingData } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -27,7 +27,7 @@ export const postChat = <ThrowOnError extends boolean = true>(options: Options<P
     }
 });
 
-export const getMessage = <ThrowOnError extends boolean = true>(options?: Options<GetMessageData, ThrowOnError>) => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/message', ...options });
+export const getMessages = <ThrowOnError extends boolean = true>(options?: Options<GetMessagesData, ThrowOnError>) => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/messages', ...options });
 
 export const getDocuments = <ThrowOnError extends boolean = true>(options?: Options<GetDocumentsData, ThrowOnError>) => (options?.client ?? client).get<GetDocumentsResponses, unknown, ThrowOnError>({
     responseType: 'json',
@@ -83,11 +83,7 @@ export const postChatbots = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const deleteChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<DeleteChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).delete<DeleteChatbotsByIdResponses, DeleteChatbotsByIdErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/chatbots/{id}',
-    ...options
-});
+export const deleteChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<DeleteChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).delete<DeleteChatbotsByIdResponses, DeleteChatbotsByIdErrors, ThrowOnError>({ url: '/chatbots/{id}', ...options });
 
 export const getChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<GetChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetChatbotsByIdResponses, GetChatbotsByIdErrors, ThrowOnError>({
     responseType: 'json',
@@ -98,6 +94,37 @@ export const getChatbotsById = <ThrowOnError extends boolean = true>(options?: O
 export const patchChatbotsById = <ThrowOnError extends boolean = true>(options: Options<PatchChatbotsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchChatbotsByIdResponses, PatchChatbotsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/chatbots/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const postEmbedding = <ThrowOnError extends boolean = true>(options: Options<PostEmbeddingData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
+    url: '/embedding',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getConversations = <ThrowOnError extends boolean = true>(options?: Options<GetConversationsData, ThrowOnError>) => (options?.client ?? client).get<GetConversationsResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/conversations',
+    ...options
+});
+
+export const getBehaviour = <ThrowOnError extends boolean = true>(options?: Options<GetBehaviourData, ThrowOnError>) => (options?.client ?? client).get<GetBehaviourResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/behaviour',
+    ...options
+});
+
+export const patchBehaviourById = <ThrowOnError extends boolean = true>(options: Options<PatchBehaviourByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchBehaviourByIdResponses, PatchBehaviourByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/behaviour/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',

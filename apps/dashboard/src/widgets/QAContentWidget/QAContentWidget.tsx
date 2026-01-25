@@ -27,14 +27,6 @@ export const QAContentWidget = () => {
   const [title, setTitle] = useState('');
   const { chatbotId } = useParams({ strict: false });
 
-  const query = useQuery({
-    queryKey: ['documents'],
-    queryFn: () => {
-      return getDocuments({
-        params: { chatbotId: chatbotId },
-      });
-    },
-  });
   const queryClient = useQueryClient();
 
   const handleSave = () => {
@@ -60,7 +52,7 @@ export const QAContentWidget = () => {
     onSuccess: () => {
       console.log('qna done');
       // Invalidate and refetch
-      // queryClient.invalidateQueries({ queryKey: ['documents'] });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
 

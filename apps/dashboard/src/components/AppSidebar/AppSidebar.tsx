@@ -53,7 +53,7 @@ const data = {
     },
     {
       name: 'Activities',
-      url: '/activity',
+      url: '/activities',
       icon: Activity,
     },
     {

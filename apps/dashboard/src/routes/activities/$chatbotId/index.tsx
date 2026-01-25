@@ -11,7 +11,7 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import ConversationsDashboard from '@/components/ConversationsDashboard/ConversationsDashboard.tsx';
 
-export const Route = createFileRoute('/activity/$chatbotId/')({
+export const Route = createFileRoute('/activities/$chatbotId/')({
   component: RouteComponent,
 });
 
@@ -28,7 +28,7 @@ function RouteComponent() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <Link to={'/activity'}>
+                <Link to={'/activities'}>
                   <BreadcrumbLink>Activity</BreadcrumbLink>
                 </Link>
               </BreadcrumbItem>

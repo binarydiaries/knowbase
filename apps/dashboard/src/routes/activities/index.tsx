@@ -40,7 +40,7 @@ type Chatbot = {
 //   },
 // ];
 
-export const Route = createFileRoute('/activity/')({
+export const Route = createFileRoute('/activities/')({
   component: RouteComponent,
 });
 
@@ -76,7 +76,7 @@ function RouteComponent() {
                 className="cursor-pointer hover:bg-muted"
                 onClick={() =>
                   navigate({
-                    to: '/activity/$chatbotId',
+                    to: '/activities/$chatbotId',
                     params: { chatbotId: bot.id },
                   })
                 }

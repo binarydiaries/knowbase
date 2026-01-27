@@ -5,14 +5,21 @@ import { cosineDistance, desc, eq, gt, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
 import { documents, embeddings } from '../../db/schema';
+import { MarkdownHeaderTextSplitter } from '../../utils/MarkdownHeaderTextSplitter';
 import type { DocumentContent, DocumentContentQna } from '../document/model';
 import { DocumentService } from '../document/service';
 
 const model = openai.embedding('text-embedding-3-small');
 
+const splitter = new MarkdownHeaderTextSplitter([
+  ['#', 'h1'],
+  ['##', 'h2'],
+  ['###', 'h3'],
+]);
+
 export abstract class EmbeddingService {
   static embedDocument = async (document: typeof documents.$inferSelect) => {
-    await db.transaction(async (transaction) => {
+    return await db.transaction(async (transaction) => {
       await transaction
         .update(documents)
         .set({
@@ -26,10 +33,17 @@ export abstract class EmbeddingService {
       } as z.infer<typeof DocumentContent>;
 
       let generatedEmbeddings: { embedding: number[]; content: string }[] = [];
+
       if (documentContent.type === 'qna') {
         const chunks = await EmbeddingService.chunkLargeQnA({
           title: document.title,
           questions: documentContent.data,
+        });
+        generatedEmbeddings = await EmbeddingService.generateEmbeddings(chunks);
+      } else if (documentContent.type === 'text') {
+        const chunks = await EmbeddingService.chunkText({
+          title: document.title,
+          content: documentContent.data,
         });
         generatedEmbeddings = await EmbeddingService.generateEmbeddings(chunks);
       }
@@ -81,11 +95,45 @@ ${chunk}
     return (await Promise.all(chunkPromises)).flat();
   }
 
+  static async chunkText({
+    title,
+    content,
+  }: {
+    title: string;
+    content: string;
+  }) {
+    const documentChunks = splitter.splitText(content);
+    const documentChunkPromise = documentChunks.map(async (doc, index) => {
+      const headerString = Object.values(doc.metadata).join(' → ');
+      const header = title + (headerString ? ` - ${headerString}` : '');
+
+      const recursiveChunks = await EmbeddingService.generateRecursiveChunks(
+        doc.pageContent,
+      );
+
+      return recursiveChunks.map((recursiveChunk, index) => {
+        return `${header} (part ${index + 1}/${recursiveChunks.length})
+
+${recursiveChunk}
+      `.trim();
+      });
+    });
+
+    return (await Promise.all(documentChunkPromise)).flat();
+  }
+
   static startEmbedding = async (chatbotId: string) => {
     const documents = await DocumentService.list({ chatbotId });
-    documents.forEach((document) => {
-      this.embedDocument(document);
-    });
+    return Promise.all(
+      documents
+        .filter(
+          (document) =>
+            document.status === 'draft' || document.status === 'ready',
+        )
+        .map(async (document) => {
+          return await this.embedDocument(document);
+        }),
+    );
   };
 
   static generateRecursiveChunks = async (input: string): Promise<string[]> => {

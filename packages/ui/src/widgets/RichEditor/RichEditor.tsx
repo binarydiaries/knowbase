@@ -1,3 +1,4 @@
+import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import {
   type InitialConfigType,
@@ -19,14 +20,19 @@ const placeholder = 'Enter some rich text...';
 function MyOnChangePlugin({
   onChange,
 }: {
-  onChange: (editorState: EditorState) => void;
+  onChange: (markdown: string) => void;
 }) {
   const [editor] = useLexicalComposerContext();
+
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
-      onChange(editorState);
+      editorState.read(() => {
+        const markdown = $convertToMarkdownString(TRANSFORMERS);
+        onChange(markdown);
+      });
     });
   }, [editor, onChange]);
+
   return null;
 }
 
@@ -40,9 +46,9 @@ const editorConfig: InitialConfigType = {
 };
 
 export function RichEditor() {
-  const [editorState, setEditorState] = useState<EditorState>();
+  const [editorState, setEditorState] = useState('');
 
-  console.log(JSON.stringify(editorState?.toJSON()));
+  console.log(editorState);
 
   return (
     <LexicalComposer initialConfig={editorConfig}>

@@ -1,3 +1,4 @@
+import { Badge } from '@knowbase/ui/components/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +13,6 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
-import {Badge} from "@knowbase/ui/components/badge";
 
 export const Route = createFileRoute('/chatbots/$chatbotId/')({
   component: RouteComponent,
@@ -50,8 +50,10 @@ function RouteComponent() {
           <SettingsCard />
         </div>
         <div className="w-130 shrink-0 flex flex-col gap-5">
-          <Badge variant="secondary" className="rounded-l-none">Web Preview</Badge>
-          <div className="h-full flex justify-center">
+          <Badge variant="secondary" className="rounded-l-none">
+            Web Preview
+          </Badge>
+          <div className="h-full flex justify-center pb-5">
             <ChatbotPreview />
           </div>
         </div>

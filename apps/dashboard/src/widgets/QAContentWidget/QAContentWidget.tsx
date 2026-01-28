@@ -11,11 +11,11 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { Textarea } from '@knowbase/ui/components/textarea';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getDocuments, patchDocumentsById, postDocuments } from '@/services';
+import { patchDocumentsById, postDocuments } from '@/services';
 
 type QA = {
   question: string;
@@ -86,38 +86,8 @@ export const QAContentWidget = ({ mode = 'add', document, onClose }: Props) => {
     },
   });
 
-  const createQnAMutation = useMutation({
-    mutationFn: async ({ title, qaList }: { title: string; qaList: QA[] }) => {
-      await postDocuments({
-        body: JSON.stringify({
-          chatbotId: chatbotId,
-          title,
-          content: {
-            type: 'qna',
-            data: qaList,
-          },
-        }),
-      });
-    },
-    onSuccess: () => {
-      console.log('qna done');
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
-    },
-  });
-
   const addQuestion = () => {
     setQaList([...qaList, { question: '', answer: '' }]);
-  };
-
-  const updateQA1 = (
-    index: number,
-    field: 'question' | 'answer',
-    value: string,
-  ) => {
-    const updated = [...qaList];
-    updated[index][field] = value;
-    setQaList(updated);
   };
 
   const updateQA = (

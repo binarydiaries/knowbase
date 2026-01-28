@@ -26,7 +26,7 @@ import { Sheet } from '@knowbase/ui/components/sheet';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 
-import { MoreHorizontal, ShieldAlertIcon } from 'lucide-react';
+import { Edit, MoreHorizontal, ShieldAlertIcon, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { getDocuments } from '@/services';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
@@ -36,6 +36,8 @@ export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   const { chatbotId } = useParams({ strict: false });
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [isEdit, setIsEdit] = useState(false);
 
   const query = useQuery({
     queryKey: ['documents'],
@@ -64,7 +66,12 @@ export const DocumentsWidget = () => {
                 >
                   Text
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setIsEdit(false);
+                    setIsQASheetOpen(true);
+                  }}
+                >
                   Q&A
                 </DropdownMenuItem>
                 <DropdownMenuItem>PDF</DropdownMenuItem>
@@ -91,9 +98,51 @@ export const DocumentsWidget = () => {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Button size="icon" variant="ghost">
-                  <MoreHorizontal />
-                </Button>
+                {/*<Button size="icon" variant="ghost">*/}
+                {/*  <MoreHorizontal />*/}
+                {/*</Button>*/}
+                {/* Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-muted-foreground  cursor-pointer "
+                    >
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-40 ">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedDocument(doc);
+                        setIsEdit(true);
+
+                        if (doc.content.type === 'text') {
+                          setIsTextContentSheetOpen(true);
+                        } else if (doc.content.type === 'qna') {
+                          setIsQASheetOpen(true);
+                        }
+                      }}
+                      className="flex items-center cursor-pointer gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // archiveChatbotMutation.mutate(bot.id);
+                      }}
+                      className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 text-red" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </ItemActions>
             </Item>
           </CardContent>
@@ -106,7 +155,14 @@ export const DocumentsWidget = () => {
         <TextContentWidget />
       </Sheet>
       <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
-        <QAContentWidget />
+        <QAContentWidget
+          mode={isEdit ? 'edit' : 'add'}
+          document={selectedDocument}
+          onClose={() => {
+            setIsQASheetOpen(false);
+            setSelectedDocument(null);
+          }}
+        />
       </Sheet>
     </>
   );

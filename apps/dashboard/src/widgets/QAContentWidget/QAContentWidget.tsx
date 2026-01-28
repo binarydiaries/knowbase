@@ -14,28 +14,78 @@ import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { getDocuments, postDocuments } from '@/services';
+import { useEffect, useState } from 'react';
+import { getDocuments, patchDocumentsById, postDocuments } from '@/services';
 
 type QA = {
   question: string;
   answer: string;
 };
+type Props = {
+  mode?: 'add' | 'edit';
+  document?: any;
+  onClose?: () => void;
+};
 
-export const QAContentWidget = () => {
+export const QAContentWidget = ({ mode = 'add', document, onClose }: Props) => {
   const [qaList, setQaList] = useState<QA[]>([{ question: '', answer: '' }]);
   const [title, setTitle] = useState('');
   const { chatbotId } = useParams({ strict: false });
 
+  useEffect(() => {
+    if (mode === 'edit' && document) {
+      setTitle(document.title);
+      setQaList(document.content.data);
+    }
+  }, [mode, document]);
+
+  useEffect(() => {
+    if (mode === 'add') {
+      setTitle('');
+      setQaList([{ question: '', answer: '' }]);
+    }
+  }, [mode]);
+
   const queryClient = useQueryClient();
 
   const handleSave = () => {
-    if (!title.trim()) return;
-    if (qaList.some((qa) => !qa.question.trim() || !qa.answer.trim())) return;
-
-    createQnAMutation.mutate({ title, qaList });
+    saveQnAMutation.mutate();
   };
   // Mutations
+  const saveQnAMutation = useMutation({
+    mutationFn: async () => {
+      if (mode === 'edit') {
+        return patchDocumentsById({
+          path: {
+            id: document.id,
+          },
+          body: {
+            title,
+            content: {
+              type: 'qna',
+              data: qaList,
+            },
+          },
+        });
+      }
+
+      return postDocuments({
+        body: JSON.stringify({
+          chatbotId,
+          title,
+          content: {
+            type: 'qna',
+            data: qaList,
+          },
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      onClose?.();
+    },
+  });
+
   const createQnAMutation = useMutation({
     mutationFn: async ({ title, qaList }: { title: string; qaList: QA[] }) => {
       await postDocuments({
@@ -60,7 +110,7 @@ export const QAContentWidget = () => {
     setQaList([...qaList, { question: '', answer: '' }]);
   };
 
-  const updateQA = (
+  const updateQA1 = (
     index: number,
     field: 'question' | 'answer',
     value: string,
@@ -70,6 +120,16 @@ export const QAContentWidget = () => {
     setQaList(updated);
   };
 
+  const updateQA = (
+    index: number,
+    field: 'question' | 'answer',
+    value: string,
+  ) => {
+    setQaList((prev) =>
+      prev.map((qa, i) => (i === index ? { ...qa, [field]: value } : qa)),
+    );
+  };
+
   const deleteQuestion = (index: number) => {
     setQaList(qaList.filter((_, i) => i !== index));
   };
@@ -77,9 +137,13 @@ export const QAContentWidget = () => {
   return (
     <SheetContent className="sm:max-w-175 overflow-auto">
       <SheetHeader>
-        <SheetTitle>Q&A Source</SheetTitle>
+        <SheetTitle>
+          {mode === 'edit' ? 'Edit Q&A Source' : 'Add Q&A Source'}
+        </SheetTitle>
         <SheetDescription>
-          This is used to add Q&A source to the chatbot
+          {mode === 'edit'
+            ? 'Update existing questions and answers'
+            : 'Add Q&A source to the chatbot'}
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
@@ -149,10 +213,10 @@ export const QAContentWidget = () => {
       <SheetFooter>
         <Button
           onClick={handleSave}
-          disabled={createQnAMutation.isPending}
+          disabled={saveQnAMutation.isPending}
           type="submit"
         >
-          Save changes
+          {mode === 'edit' ? 'Update changes' : 'Save changes'}
         </Button>
         <SheetClose asChild>
           <Button variant="outline">Close</Button>

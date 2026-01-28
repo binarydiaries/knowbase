@@ -29,28 +29,9 @@ function RouteComponent() {
   });
   const queryClient = useQueryClient();
 
-  // Mutations
-  const createChatbotMutation = useMutation({
-    mutationFn: async ({
-      name,
-      description,
-    }: {
-      name: string;
-      description: string;
-    }) => {
-      await postChatbots({
-        body: { name, description },
-      });
-    },
-    onSuccess: () => {
-      console.log('postChatbots done');
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
-    },
-  });
-
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('archiveChatbotMutation', id);
       await deleteChatbotsById({
         path: {
           id,
@@ -72,11 +53,7 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-base font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog
-            onCreate={(name, description) => {
-              createChatbotMutation.mutate({ name, description });
-            }}
-          />
+          <CreateChatbotDialog />
         </div>
       </header>
       <Separator />

@@ -23,15 +23,13 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import { Sheet } from '@knowbase/ui/components/sheet';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-
 import { Edit, MoreHorizontal, ShieldAlertIcon, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { getDocuments } from '@/services';
+import { deleteDocumentsById, getDocuments } from '@/services';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
-
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
@@ -45,6 +43,20 @@ export const DocumentsWidget = () => {
       return getDocuments({
         query: { chatbotId: chatbotId },
       });
+    },
+  });
+  const queryClient = useQueryClient();
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return deleteDocumentsById({
+        path: {
+          id,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
   return (
@@ -134,7 +146,7 @@ export const DocumentsWidget = () => {
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        // archiveChatbotMutation.mutate(bot.id);
+                        deleteDocumentMutation.mutate(doc.id);
                       }}
                       className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                     >

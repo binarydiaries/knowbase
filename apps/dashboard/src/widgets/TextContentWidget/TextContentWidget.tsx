@@ -31,6 +31,8 @@ export const TextContentWidget = ({
   const { chatbotId } = useParams({ strict: false });
 
   useEffect(() => {
+    console.log('inside text widget');
+    console.log('document', document);
     if (mode === 'edit' && document) {
       setTitle(document.title);
       setContent(document.content.data);
@@ -47,9 +49,9 @@ export const TextContentWidget = ({
   const queryClient = useQueryClient();
 
   const handleSave = () => {
-    saveQnAMutation.mutate();
+    saveTextMutation.mutate();
   };
-  const saveQnAMutation = useMutation({
+  const saveTextMutation = useMutation({
     mutationFn: async () => {
       if (mode === 'edit') {
         return patchDocumentsById({
@@ -113,7 +115,7 @@ export const TextContentWidget = ({
       <SheetFooter>
         <Button
           onClick={handleSave}
-          disabled={saveQnAMutation.isPending}
+          disabled={saveTextMutation.isPending}
           type="submit"
         >
           {mode === 'edit' ? 'Update changes' : 'Save changes'}

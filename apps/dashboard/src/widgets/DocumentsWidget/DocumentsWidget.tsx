@@ -74,14 +74,25 @@ export const DocumentsWidget = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  onClick={() => setIsTextContentSheetOpen(true)}
+                  onClick={() => {
+                    setIsEdit(false);
+
+                    setSelectedDocument(null);
+                    setIsTextContentSheetOpen(true);
+
+                    setIsQASheetOpen(false);
+                  }}
                 >
                   Text
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
                     setIsEdit(false);
+                    setSelectedDocument(null);
+
                     setIsQASheetOpen(true);
+
+                    setIsTextContentSheetOpen(false);
                   }}
                 >
                   Q&A
@@ -131,9 +142,12 @@ export const DocumentsWidget = () => {
                         setSelectedDocument(doc);
                         setIsEdit(true);
 
+                        setIsTextContentSheetOpen(false);
+                        setIsQASheetOpen(false);
+
                         if (doc.content.type === 'text') {
                           setIsTextContentSheetOpen(true);
-                        } else if (doc.content.type === 'qna') {
+                        } else {
                           setIsQASheetOpen(true);
                         }
                       }}
@@ -164,24 +178,30 @@ export const DocumentsWidget = () => {
         open={isTextContentSheetOpen}
         onOpenChange={setIsTextContentSheetOpen}
       >
-        <TextContentWidget
-          mode={isEdit ? 'edit' : 'add'}
-          document={selectedDocument}
-          onClose={() => {
-            setIsTextContentSheetOpen(false);
-            setSelectedDocument(null);
-          }}
-        />
+        {isTextContentSheetOpen && (
+          <TextContentWidget
+            mode={isEdit ? 'edit' : 'add'}
+            document={selectedDocument}
+            onClose={() => {
+              setIsTextContentSheetOpen(false);
+              setSelectedDocument(null);
+              setIsEdit(false);
+            }}
+          />
+        )}
       </Sheet>
       <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
-        <QAContentWidget
-          mode={isEdit ? 'edit' : 'add'}
-          document={selectedDocument}
-          onClose={() => {
-            setIsQASheetOpen(false);
-            setSelectedDocument(null);
-          }}
-        />
+        {isQASheetOpen && (
+          <QAContentWidget
+            mode={isEdit ? 'edit' : 'add'}
+            document={selectedDocument}
+            onClose={() => {
+              setIsQASheetOpen(false);
+              setSelectedDocument(null);
+              setIsEdit(false);
+            }}
+          />
+        )}
       </Sheet>
     </>
   );

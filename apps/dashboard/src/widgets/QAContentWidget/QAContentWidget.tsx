@@ -33,6 +33,7 @@ export const QAContentWidget = ({ mode = 'add', document, onClose }: Props) => {
   const { chatbotId } = useParams({ strict: false });
 
   useEffect(() => {
+    console.log('inside qa widget');
     if (mode === 'edit' && document) {
       setTitle(document.title);
       setQaList(document.content.data);

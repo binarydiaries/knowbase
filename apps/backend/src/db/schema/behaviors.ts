@@ -21,8 +21,8 @@ export const behaviors = pgTable('behavior', {
     .notNull()
     .references(() => chatbots.id),
   systemPrompt: text().notNull(),
-  tone: behaviorTone().notNull(),
-  verbosity: behaviorVerbosity().notNull(),
+  tone: behaviorTone().notNull().default('neutral'),
+  verbosity: behaviorVerbosity().notNull().default('balanced'),
   fallbackMessage: text().notNull(),
   guardrails: text(),
   ...timestamps,

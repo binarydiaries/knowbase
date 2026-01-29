@@ -37,8 +37,4 @@ export abstract class ChatbotService {
       .returning();
     return rows[0];
   }
-
-  static async delete(id: string) {
-    return db.delete(chatbots).where(eq(chatbots.id, id));
-  }
 }

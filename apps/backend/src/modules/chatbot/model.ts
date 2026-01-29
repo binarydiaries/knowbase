@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Behaviour } from '../behaviour/model';
 import { Document } from '../document/model';
 
-const ChatbotStatus = z.enum(['draft', 'live', 'archived']);
+const ChatbotStatus = z.enum(['active', 'archived']);
 
 const Chatbot = z.object({
   id: z.string(),

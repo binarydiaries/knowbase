@@ -16,12 +16,6 @@ export const Chatbot = new Elysia({
     async ({ body }) => {
       const chatbot = await ChatbotService.create({
         ...body,
-        settings: {
-          displayName: body.name,
-          welcomeMessage: 'Hi! How can I help you today?',
-          primaryColor: '#000000',
-        },
-        status: 'draft',
         createdBy: '123',
         orgId: '123',
       });
@@ -81,14 +75,10 @@ export const Chatbot = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body, chatbot }) => {
+    async ({ params, body }) => {
       return {
         chatbot: await ChatbotService.update(params.id, {
           ...body,
-          settings: {
-            ...chatbot.settings,
-            ...body.settings,
-          },
         }),
       };
     },
@@ -96,18 +86,6 @@ export const Chatbot = new Elysia({
       body: 'UpdateChatbotBody',
       response: {
         200: 'OneSmallChatbotResponse',
-      },
-    },
-  )
-  .delete(
-    '/:id',
-    async ({ params, status }) => {
-      await ChatbotService.delete(params.id);
-      return status(204, undefined);
-    },
-    {
-      response: {
-        204: 'DeleteChatbotResponse',
       },
     },
   );

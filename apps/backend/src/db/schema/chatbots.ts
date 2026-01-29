@@ -1,7 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
-import type { z } from 'zod';
-import type { ChatbotSettings } from '../../modules/chatbot/model';
+import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkOrgIdColumn,
   clerkUserId,
@@ -17,7 +15,6 @@ export const chatbots = pgTable('chatbots', {
   name: text().notNull(),
   description: text(),
   status: statusEnum().notNull(),
-  settings: jsonb().$type<z.infer<typeof ChatbotSettings>>().notNull(),
   createdBy: clerkUserId,
   ...clerkOrgIdColumn,
   ...timestamps,

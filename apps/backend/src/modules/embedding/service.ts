@@ -103,7 +103,7 @@ ${chunk}
     content: string;
   }) {
     const documentChunks = splitter.splitText(content);
-    const documentChunkPromise = documentChunks.map(async (doc, index) => {
+    const documentChunkPromise = documentChunks.map(async (doc) => {
       const headerString = Object.values(doc.metadata).join(' → ');
       const header = title + (headerString ? ` - ${headerString}` : '');
 

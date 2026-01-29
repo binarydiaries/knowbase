@@ -9,8 +9,12 @@ export const DocumentContentQna = z.array(
 );
 
 export const DocumentContent = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('text'), data: z.string() }),
-  z.object({ type: z.literal('qna'), data: DocumentContentQna }),
+  z.object({ type: z.literal('text'), data: z.string() }).meta({
+    title: 'text',
+  }),
+  z.object({ type: z.literal('qna'), data: DocumentContentQna }).meta({
+    title: 'qna',
+  }),
 ]);
 
 export const Document = z.object({

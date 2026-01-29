@@ -1,13 +1,13 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { behaviors, chatbots } from '../../db/schema';
+import { behaviors, channels, chatbots } from '../../db/schema';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
+import { CHANNEL_CONFIG_DEFAULTS } from '../channel/defaults';
 
 export abstract class ChatbotService {
   static async create(data: typeof chatbots.$inferInsert) {
     return await db.transaction(async (tx) => {
       const [chatbot] = await tx.insert(chatbots).values(data).returning();
-
       const chatbotId = chatbot.id;
       await tx
         .insert(behaviors)
@@ -16,6 +16,18 @@ export abstract class ChatbotService {
           ...DEFAULT_BEHAVIOR,
         })
         .returning();
+
+      await tx.insert(channels).values({
+        chatbotId,
+        type: 'web',
+        enabled: true,
+        config: {
+          ...CHANNEL_CONFIG_DEFAULTS,
+          displayName: chatbot.name,
+        },
+        status: 'active',
+        usage: {},
+      });
 
       return chatbot;
     });

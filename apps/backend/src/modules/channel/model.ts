@@ -12,6 +12,8 @@ export const ChannelWebConfigSchema = z.object({
   allowedDomains: z.array(z.string()),
 });
 
+export type IChannelWebConfig = z.infer<typeof ChannelWebConfigSchema>;
+
 const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({

@@ -1,6 +1,6 @@
 import { boolean, jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import type { z } from 'zod';
-import type { ChannelConfigSchema } from '../../modules/channel/model';
+import type { ChannelWebConfigSchema } from '../../modules/channel/model';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
 
@@ -18,7 +18,7 @@ export const channels = pgTable('channels', {
     .references(() => chatbots.id),
   type: channelType().notNull(),
   enabled: boolean().notNull().default(false),
-  config: jsonb().$type<z.infer<typeof ChannelConfigSchema>>().notNull(),
+  config: jsonb().$type<z.infer<typeof ChannelWebConfigSchema>>().notNull(),
   status: channelStatus().notNull().default('inactive'),
   usage: jsonb().notNull(),
   ...timestamps,

@@ -106,6 +106,7 @@
       "name": "@knowbase/ui",
       "version": "0.0.0",
       "dependencies": {
+        "@lexical/markdown": "^0.39.0",
         "@lexical/react": "^0.39.0",
         "@lexical/rich-text": "^0.39.0",
         "@lexical/selection": "^0.39.0",

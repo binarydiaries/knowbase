@@ -14,6 +14,7 @@ import { Input } from '@knowbase/ui/components/input';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { postChatbots } from '@/services';
@@ -27,6 +28,7 @@ export function CreateChatbotDialog() {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const queryClient = useQueryClient();
+
   const createChatbotMutation = useMutation({
     mutationFn: async ({
       name,
@@ -35,14 +37,17 @@ export function CreateChatbotDialog() {
       name: string;
       description: string;
     }) => {
-      await postChatbots({
-        body: { name, description },
-      });
+      await postChatbots({ body: { name, description } });
     },
     onSuccess: () => {
-      console.log('postChatbots done');
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+
+      reset(); // ✅ reset happens AFTER success
+      setOpen(false); // ✅ dialog closes AFTER reset
+      setLoading(false);
+    },
+    onError: () => {
+      setLoading(false);
     },
   });
 
@@ -56,19 +61,17 @@ export function CreateChatbotDialog() {
     mode: 'all',
   });
   function handleCreate(formValues: z.infer<typeof schema>) {
-    setLoading(true);
-
-    try {
-      createChatbotMutation.mutate({
-        name: formValues.name,
-        description: formValues.description ?? '',
-      });
-      reset();
-    } finally {
-      setLoading(false);
-      setOpen(false);
-    }
+    createChatbotMutation.mutate({
+      name: formValues.name,
+      description: formValues.description ?? '',
+    });
   }
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

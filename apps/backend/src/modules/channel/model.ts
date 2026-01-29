@@ -11,7 +11,7 @@ export const ChannelConfigSchema = z.object({
   inputPlaceholder: z.string().optional(),
   primaryColor: z.string(),
 });
-export const ChannelUsageSchema = z.object({});
+export const ChannelUsageSchema = z.unknown();
 
 export const ChannelSchema = z.object({
   id: z.string(),
@@ -25,6 +25,16 @@ export const ChannelSchema = z.object({
   updatedAt: z.date(),
 });
 
+const ChannelListQuerySchema = z.object({
+  chatbotId: z.string(),
+});
+
+const ManyChannelResponse = z.object({
+  channels: z.array(ChannelSchema),
+});
+
 export const ChannelModel = new Elysia().model({
   ChannelSchema,
+  ChannelListQuerySchema,
+  ManyChannelResponse,
 });

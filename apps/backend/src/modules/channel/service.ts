@@ -3,8 +3,8 @@ import { db } from '../../db';
 import { channels } from '../../db/schema';
 
 export abstract class ChannelService {
-  static list() {
-    return db.select().from(channels);
+  static list({ chatbotId }: { chatbotId: string }) {
+    return db.select().from(channels).where(eq(channels.chatbotId, chatbotId));
   }
 
   static single(id: string) {

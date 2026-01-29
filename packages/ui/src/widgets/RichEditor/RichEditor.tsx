@@ -1,3 +1,8 @@
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS,
+} from '@lexical/markdown';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import {
   type InitialConfigType,
@@ -9,8 +14,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { HeadingNode } from '@lexical/rich-text';
-import type { EditorState } from 'lexical';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { editorTheme } from './ExampleTheme';
 import ToolbarPlugin from './ToolbarPlugin';
 
@@ -19,19 +23,42 @@ const placeholder = 'Enter some rich text...';
 function MyOnChangePlugin({
   onChange,
 }: {
-  onChange: (editorState: EditorState) => void;
+  onChange: (markdown: string) => void;
 }) {
   const [editor] = useLexicalComposerContext();
+
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
-      onChange(editorState);
+      editorState.read(() => {
+        const markdown = $convertToMarkdownString(TRANSFORMERS);
+        onChange(markdown);
+      });
     });
   }, [editor, onChange]);
+
+  return null;
+}
+
+function InitialMarkdownPlugin({ value }: { value: string }) {
+  const [editor] = useLexicalComposerContext();
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    if (!value) return;
+
+    editor.update(() => {
+      $convertFromMarkdownString(value, TRANSFORMERS);
+    });
+  }, [editor, value]);
+
   return null;
 }
 
 const editorConfig: InitialConfigType = {
-  namespace: 'React.js Demo',
+  namespace: 'editor',
   nodes: [HeadingNode],
   onError(error: Error) {
     throw error;
@@ -39,15 +66,17 @@ const editorConfig: InitialConfigType = {
   theme: editorTheme,
 };
 
-export function RichEditor() {
-  const [editorState, setEditorState] = useState<EditorState>();
+interface IRichEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-  console.log(JSON.stringify(editorState?.toJSON()));
-
+export function RichEditor({ value, onChange }: IRichEditorProps) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="border border-input rounded-md overflow-hidden">
         <ToolbarPlugin />
+
         <div className="editor-inner relative left-3 top-2">
           <RichTextPlugin
             contentEditable={
@@ -63,9 +92,15 @@ export function RichEditor() {
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
+
           <HistoryPlugin />
           <AutoFocusPlugin />
-          <MyOnChangePlugin onChange={setEditorState} />
+
+          {/* 👇 Inject initial markdown */}
+          <InitialMarkdownPlugin value={value} />
+
+          {/* 👇 Emit markdown changes */}
+          <MyOnChangePlugin onChange={onChange} />
         </div>
       </div>
     </LexicalComposer>

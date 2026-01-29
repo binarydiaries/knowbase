@@ -10,8 +10,11 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
+import { useState } from 'react';
 
 export const TextContentWidget = () => {
+  const [content, setContent] = useState('## Keshav');
+  console.log(content);
   return (
     <SheetContent className="sm:max-w-175 overflow-auto">
       <SheetHeader>
@@ -30,7 +33,7 @@ export const TextContentWidget = () => {
         </div>
         <div className="grid gap-3">
           <Label htmlFor="sheet-demo-username">Content</Label>
-          <RichEditor />
+          <RichEditor value={content} onChange={setContent} />
         </div>
       </div>
       <SheetFooter>

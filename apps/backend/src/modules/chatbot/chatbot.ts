@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourService } from '../behaviour/service';
+import { ChannelService } from '../channel/service';
 import { DocumentService } from '../document/service';
 import { ChatbotModel } from './model';
 import { ChatbotService } from './service';
@@ -59,12 +60,17 @@ export const Chatbot = new Elysia({
   .get(
     '/:id',
     async ({ chatbot, params }) => {
-      const documents = await DocumentService.list({ chatbotId: params.id });
-      const behaviour = await BehaviourService.singleByChatbot(params.id);
+      const [documents, behaviour, channels] = await Promise.all([
+        DocumentService.list({ chatbotId: params.id }),
+        BehaviourService.singleByChatbot(params.id),
+        ChannelService.list({ chatbotId: params.id }),
+      ]);
+
       return {
         chatbot,
         behaviour: behaviour,
         documents: documents.map(DocumentService.transformDocument),
+        channels: channels.map(ChannelService.transformChannel),
       };
     },
     {

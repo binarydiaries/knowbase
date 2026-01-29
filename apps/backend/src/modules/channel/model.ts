@@ -9,37 +9,39 @@ export const ChannelWebConfigSchema = z.object({
   welcomeMessage: z.string(),
   inputPlaceholder: z.string().optional(),
   primaryColor: z.string(),
-});
-export const ChannelWebUsageSchema = z.object({
   allowedDomains: z.array(z.string()),
 });
 
-export const ChannelSchemaBase = z.object({
+const ChannelSchemaType = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('web'),
+      config: ChannelWebConfigSchema,
+    })
+    .meta({ title: 'web' }),
+  z
+    .object({
+      type: z.literal('whatsapp'),
+      config: z.object({}),
+    })
+    .meta({ title: 'whatsapp' }),
+  z
+    .object({
+      type: z.literal('instagram'),
+      config: z.object({}),
+    })
+    .meta({ title: 'instagram' }),
+]);
+
+export const ChannelSchema = z.object({
   id: z.string(),
   chatbotId: z.string(),
   enabled: z.boolean(),
   status: ChannelStatusSchema,
+  additional: ChannelSchemaType,
   createdAt: z.date(),
   updatedAt: z.date(),
 });
-
-const ChannelSchema = z.discriminatedUnion('type', [
-  ChannelSchemaBase.extend({
-    type: z.literal('web'),
-    config: ChannelWebConfigSchema,
-    usage: ChannelWebUsageSchema,
-  }).meta({ title: 'web' }),
-  ChannelSchemaBase.extend({
-    type: z.literal('whatsapp'),
-    config: z.object({}),
-    usage: z.object({}),
-  }).meta({ title: 'whatsapp' }),
-  ChannelSchemaBase.extend({
-    type: z.literal('instagram'),
-    config: z.object({}),
-    usage: z.object({}),
-  }).meta({ title: 'instagram' }),
-]);
 
 export type IChannelSchema = z.infer<typeof ChannelSchema>;
 
@@ -47,12 +49,32 @@ const ChannelListQuerySchema = z.object({
   chatbotId: z.string(),
 });
 
+const OneChannelParamsSchema = z.object({
+  id: z.string(),
+});
+
 const ManyChannelResponse = z.object({
   channels: z.array(ChannelSchema),
 });
+
+const OneChannelResponse = z.object({
+  channel: ChannelSchema,
+});
+
+const CreateChannelBodySchema = ChannelSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+const UpdateChannelBodySchema = CreateChannelBodySchema.partial();
 
 export const ChannelModel = new Elysia().model({
   ChannelSchema,
   ChannelListQuerySchema,
   ManyChannelResponse,
+  CreateChannelBodySchema,
+  UpdateChannelBodySchema,
+  OneChannelResponse,
+  OneChannelParamsSchema,
 });

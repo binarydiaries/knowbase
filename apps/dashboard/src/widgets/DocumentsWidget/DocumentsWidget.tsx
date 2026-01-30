@@ -58,7 +58,7 @@ export const DocumentsWidget = () => {
     },
   });
 
-  const isDocumentsAvailable = query.data?.data.documents.length > 0;
+  const isDocumentsAvailable = !!query?.data?.data?.documents?.length;
 
   return (
     <>
@@ -68,26 +68,24 @@ export const DocumentsWidget = () => {
           <CardDescription>
             Your chatbot will only answer based on the sources you add here.
           </CardDescription>
-          {isDocumentsAvailable && (
-            <CardAction>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">Add</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => setIsTextContentSheetOpen(true)}
-                  >
-                    Text
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
-                    Q&A
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>PDF</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardAction>
-          )}
+          <CardAction>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Add</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => setIsTextContentSheetOpen(true)}
+                >
+                  Text
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
+                  Q&A
+                </DropdownMenuItem>
+                <DropdownMenuItem>PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardAction>
         </CardHeader>
         {query.data?.data.documents.map((doc) => (
           <CardContent key={doc.id}>

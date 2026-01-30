@@ -15,7 +15,7 @@ import { useParams } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { patchDocumentsById, postDocuments } from '@/services';
 
-type Props = {
+type ITextContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: any;
   onClose?: () => void;
@@ -25,26 +25,10 @@ export const TextContentWidget = ({
   mode = 'add',
   document,
   onClose,
-}: Props) => {
-  const [content, setContent] = useState('');
-  const [title, setTitle] = useState('');
+}: ITextContentWidgetProps) => {
+  const [content, setContent] = useState(document?.content?.data || '');
+  const [title, setTitle] = useState(document.title);
   const { chatbotId } = useParams({ strict: false });
-
-  useEffect(() => {
-    console.log('inside text widget');
-    console.log('document', document);
-    if (mode === 'edit' && document) {
-      setTitle(document.title);
-      setContent(document.content.data);
-    }
-  }, [mode, document]);
-
-  useEffect(() => {
-    if (mode === 'add') {
-      setTitle('');
-      setContent('');
-    }
-  }, [mode]);
 
   const queryClient = useQueryClient();
 

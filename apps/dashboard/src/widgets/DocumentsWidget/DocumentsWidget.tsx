@@ -15,6 +15,14 @@ import {
   DropdownMenuTrigger,
 } from '@knowbase/ui/components/dropdown-menu';
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@knowbase/ui/components/empty';
+import {
   Item,
   ItemActions,
   ItemContent,
@@ -25,7 +33,14 @@ import {
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { Edit, MoreHorizontal, ShieldAlertIcon, Trash2 } from 'lucide-react';
+import {
+  ArrowUpRightIcon,
+  Edit,
+  FolderIcon,
+  MoreHorizontal,
+  ShieldAlertIcon,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { deleteDocumentsById, getDocuments } from '@/services';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
@@ -59,13 +74,14 @@ export const DocumentsWidget = () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
+  const isDocumentsAvailable = !!query?.data?.data?.documents?.length;
   return (
     <>
       <Card className="w-full">
         <CardHeader>
           <CardTitle className={'text-xl'}>Knowledge Sources</CardTitle>
           <CardDescription>
-            You stored knowledge used for chatbot
+            Your chatbot will only answer based on the sources you add here.
           </CardDescription>
           <CardAction>
             <DropdownMenu>
@@ -173,6 +189,34 @@ export const DocumentsWidget = () => {
             </Item>
           </CardContent>
         ))}
+
+        {!isDocumentsAvailable && (
+          <Empty className="md:py-5">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FolderIcon />
+              </EmptyMedia>
+              <EmptyTitle>No Knowledge Sources Yet</EmptyTitle>
+              <EmptyDescription>
+                Add documents, links, or text to help your chatbot answer
+                questions accurately.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent className="flex-row justify-center gap-2">
+              <Button>Add Source</Button>
+            </EmptyContent>
+            <Button
+              variant="link"
+              asChild
+              className="text-muted-foreground"
+              size="sm"
+            >
+              <a href="#">
+                Learn More <ArrowUpRightIcon />
+              </a>
+            </Button>
+          </Empty>
+        )}
       </Card>
       <Sheet
         open={isTextContentSheetOpen}

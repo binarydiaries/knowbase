@@ -7,12 +7,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@knowbase/ui/components/dropdown-menu';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@knowbase/ui/components/empty';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Bot, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
+import {
+  ArrowUpRightIcon,
+  Bot,
+  Loader2,
+  MessageCircle,
+  MoreHorizontal,
+  Trash2,
+} from 'lucide-react';
+import { deleteChatbotsById, getChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -28,6 +43,8 @@ function RouteComponent() {
     },
   });
   const queryClient = useQueryClient();
+  const isChatbotAvailable =
+    !query.isLoading && query?.data?.data?.chatbots?.length;
 
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -152,6 +169,34 @@ function RouteComponent() {
               </Link>
             ))}
           </div>
+        )}
+
+        {!isChatbotAvailable && (
+          <Empty className="md:py-5">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <MessageCircle />
+              </EmptyMedia>
+              <EmptyTitle>No chatbots yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first chatbot to answer questions using your
+                content.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent className="flex-row justify-center gap-2">
+              <CreateChatbotDialog />
+            </EmptyContent>
+            <Button
+              variant="link"
+              asChild
+              className="text-muted-foreground"
+              size="sm"
+            >
+              <a href="#">
+                Learn More <ArrowUpRightIcon />
+              </a>
+            </Button>
+          </Empty>
         )}
       </div>
     </>

@@ -16,8 +16,8 @@ export const channels = pgTable('channels', {
     .references(() => chatbots.id),
   type: channelType().notNull(),
   enabled: boolean().notNull().default(false),
-  config: jsonb().notNull(),
+  config: jsonb().$type<object>().notNull(),
   status: channelStatus().notNull().default('inactive'),
-  usage: jsonb().notNull(),
+  usage: jsonb().$type<object>().notNull(),
   ...timestamps,
 });

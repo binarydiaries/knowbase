@@ -27,7 +27,7 @@ import {
   MoreHorizontal,
   Trash2,
 } from 'lucide-react';
-import { deleteChatbotsById, getChatbots, postChatbots } from '@/services';
+import { deleteChatbotsById, getChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -43,32 +43,12 @@ function RouteComponent() {
     },
   });
   const queryClient = useQueryClient();
-
   const isChatbotAvailable =
     !query.isLoading && query?.data?.data?.chatbots?.length;
 
-  // Mutations
-  const createChatbotMutation = useMutation({
-    mutationFn: async ({
-      name,
-      description,
-    }: {
-      name: string;
-      description: string;
-    }) => {
-      await postChatbots({
-        body: { name, description },
-      });
-    },
-    onSuccess: () => {
-      console.log('postChatbots done');
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
-    },
-  });
-
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('archiveChatbotMutation', id);
       await deleteChatbotsById({
         path: {
           id,
@@ -90,11 +70,7 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-base font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog
-            onCreate={(name, description) => {
-              createChatbotMutation.mutate({ name, description });
-            }}
-          />
+          <CreateChatbotDialog />
         </div>
       </header>
       <Separator />
@@ -208,11 +184,7 @@ function RouteComponent() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">
-              <CreateChatbotDialog
-                onCreate={(name, description) => {
-                  createChatbotMutation.mutate({ name, description });
-                }}
-              />
+              <CreateChatbotDialog />
             </EmptyContent>
             <Button
               variant="link"

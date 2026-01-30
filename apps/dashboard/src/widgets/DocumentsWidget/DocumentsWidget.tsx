@@ -31,23 +31,26 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import { Sheet } from '@knowbase/ui/components/sheet';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import {
   ArrowUpRightIcon,
+  Edit,
   FolderIcon,
   MoreHorizontal,
   ShieldAlertIcon,
+  Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { getDocuments } from '@/services';
+import { deleteDocumentsById, getDocuments } from '@/services';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
-
 export const DocumentsWidget = () => {
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   const { chatbotId } = useParams({ strict: false });
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [isEdit, setIsEdit] = useState(false);
 
   const query = useQuery({
     queryKey: ['documents'],
@@ -57,9 +60,21 @@ export const DocumentsWidget = () => {
       });
     },
   });
+  const queryClient = useQueryClient();
 
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return deleteDocumentsById({
+        path: {
+          id,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
   const isDocumentsAvailable = !!query?.data?.data?.documents?.length;
-
   return (
     <>
       <Card className="w-full">
@@ -75,11 +90,27 @@ export const DocumentsWidget = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  onClick={() => setIsTextContentSheetOpen(true)}
+                  onClick={() => {
+                    setIsEdit(false);
+
+                    setSelectedDocument(null);
+                    setIsTextContentSheetOpen(true);
+
+                    setIsQASheetOpen(false);
+                  }}
                 >
                   Text
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsQASheetOpen(true)}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setIsEdit(false);
+                    setSelectedDocument(null);
+
+                    setIsQASheetOpen(true);
+
+                    setIsTextContentSheetOpen(false);
+                  }}
+                >
                   Q&A
                 </DropdownMenuItem>
                 <DropdownMenuItem>PDF</DropdownMenuItem>
@@ -106,9 +137,54 @@ export const DocumentsWidget = () => {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Button size="icon" variant="ghost">
-                  <MoreHorizontal />
-                </Button>
+                {/*<Button size="icon" variant="ghost">*/}
+                {/*  <MoreHorizontal />*/}
+                {/*</Button>*/}
+                {/* Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-muted-foreground  cursor-pointer "
+                    >
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-40 ">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedDocument(doc);
+                        setIsEdit(true);
+
+                        setIsTextContentSheetOpen(false);
+                        setIsQASheetOpen(false);
+
+                        if (doc.content.type === 'text') {
+                          setIsTextContentSheetOpen(true);
+                        } else {
+                          setIsQASheetOpen(true);
+                        }
+                      }}
+                      className="flex items-center cursor-pointer gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteDocumentMutation.mutate(doc.id);
+                      }}
+                      className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 text-red" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </ItemActions>
             </Item>
           </CardContent>
@@ -146,10 +222,30 @@ export const DocumentsWidget = () => {
         open={isTextContentSheetOpen}
         onOpenChange={setIsTextContentSheetOpen}
       >
-        <TextContentWidget />
+        {isTextContentSheetOpen && (
+          <TextContentWidget
+            mode={isEdit ? 'edit' : 'add'}
+            document={selectedDocument}
+            onClose={() => {
+              setIsTextContentSheetOpen(false);
+              setSelectedDocument(null);
+              setIsEdit(false);
+            }}
+          />
+        )}
       </Sheet>
       <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
-        <QAContentWidget />
+        {isQASheetOpen && (
+          <QAContentWidget
+            mode={isEdit ? 'edit' : 'add'}
+            document={selectedDocument}
+            onClose={() => {
+              setIsQASheetOpen(false);
+              setSelectedDocument(null);
+              setIsEdit(false);
+            }}
+          />
+        )}
       </Sheet>
     </>
   );

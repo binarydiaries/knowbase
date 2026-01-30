@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Dialog,
@@ -8,36 +9,63 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@knowbase/ui/components/dialog';
-import { Input } from '@knowbase/ui/components/input';
-import { Label } from '@knowbase/ui/components/label';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
+import { postChatbots } from '@/services';
 
-type CreateChatbotDialogProps = {
-  onCreate?: (name: string, description: string) => void;
-};
+const schema = z.object({
+  name: z.string().min(3).max(20),
+  description: z.string().min(3).max(200).optional(),
+});
 
-export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
+export function CreateChatbotDialog() {
   const [open, setOpen] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [desc, setDesc] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const queryClient = useQueryClient();
 
-  function handleCreate() {
-    if (!name.trim()) return;
+  const createChatbotMutation = useMutation({
+    mutationFn: async ({
+      name,
+      description,
+    }: {
+      name: string;
+      description: string;
+    }) => {
+      await postChatbots({ body: { name, description } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
 
-    setLoading(true);
-
-    try {
-      onCreate?.(name.trim(), desc.trim());
-    } finally {
+      reset(); // ✅ reset happens AFTER success
+      setOpen(false); // ✅ dialog closes AFTER reset
       setLoading(false);
-      // reset + close
-      setName('');
-      setDesc('');
-      setOpen(false);
-    }
+    },
+    onError: () => {
+      setLoading(false);
+    },
+  });
+
+  const { handleSubmit, reset, control } = useForm({
+    resolver: zodResolver(schema),
+    mode: 'all',
+  });
+  function handleCreate(formValues: z.infer<typeof schema>) {
+    createChatbotMutation.mutate({
+      name: formValues.name,
+      description: formValues.description ?? '',
+    });
   }
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -53,31 +81,25 @@ export function CreateChatbotDialog({ onCreate }: CreateChatbotDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-2 py-4">
-          <Label htmlFor="chatbot-name">Chatbot name</Label>
-          <Input
-            id="chatbot-name"
-            placeholder="eg., Customer Support Bot"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoFocus
-          />
-        </div>
-        <div className="grid gap-2 ">
-          <Label htmlFor="chatbot-desc">Chatbot description</Label>
-          <Input
-            id="chatbot-desc"
-            placeholder="What will this chatbot do?"
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-          />
-        </div>
+        <FormInput
+          name="name"
+          control={control}
+          label="Name"
+          placeholder="Enter name"
+        />
+
+        <FormInput
+          name="description"
+          control={control}
+          label="Description"
+          placeholder="Enter description"
+        />
 
         <DialogFooter>
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim() || loading}>
+          <Button onClick={handleSubmit(handleCreate)} disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 text-white w-4 animate-spin" />

@@ -9,14 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@knowbase/ui/components/dialog';
-import { Field, FieldError, FieldLabel } from '@knowbase/ui/components/field';
-import { Input } from '@knowbase/ui/components/input';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { postChatbots } from '@/services';
 
 const schema = z.object({
@@ -51,12 +50,7 @@ export function CreateChatbotDialog() {
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
+  const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
     mode: 'all',
   });
@@ -87,38 +81,19 @@ export function CreateChatbotDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <Field data-invalid={errors.name?.message}>
-          <FieldLabel>Name</FieldLabel>
-          <Input {...register('name')} aria-invalid={!!errors.name?.message} />
-          <FieldError>{errors.name?.message}</FieldError>
-        </Field>
-        <Field data-invalid={errors.description?.message}>
-          <FieldLabel>Description</FieldLabel>
-          <Input
-            {...register('description')}
-            aria-invalid={!!errors.description?.message}
-          />
-          <FieldError>{errors.description?.message}</FieldError>
-        </Field>
-        {/*<div className="grid gap-2 py-4">*/}
-        {/*  <Label htmlFor="chatbot-name">Chatbot name</Label>*/}
-        {/*  <Input*/}
-        {/*    id="chatbot-name"*/}
-        {/*    placeholder="eg., Customer Support Bot"*/}
-        {/*    value={name}*/}
-        {/*    onChange={(e) => setName(e.target.value)}*/}
-        {/*    autoFocus*/}
-        {/*  />*/}
-        {/*</div>*/}
-        {/*<div className="grid gap-2 ">*/}
-        {/*  <Label htmlFor="chatbot-desc">Chatbot description</Label>*/}
-        {/*  <Input*/}
-        {/*    id="chatbot-desc"*/}
-        {/*    placeholder="What will this chatbot do?"*/}
-        {/*    value={desc}*/}
-        {/*    onChange={(e) => setDesc(e.target.value)}*/}
-        {/*  />*/}
-        {/*</div>*/}
+        <FormInput
+          name="name"
+          control={control}
+          label="Name"
+          placeholder="Enter name"
+        />
+
+        <FormInput
+          name="description"
+          control={control}
+          label="Description"
+          placeholder="Enter description"
+        />
 
         <DialogFooter>
           <Button variant="secondary" onClick={() => setOpen(false)}>

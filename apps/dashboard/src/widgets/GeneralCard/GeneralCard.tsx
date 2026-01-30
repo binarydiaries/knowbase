@@ -26,7 +26,6 @@ const GeneralCard = () => {
             placeholder="Customer Support Bot"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
           />
         </div>
         <div className="grid gap-2 ">
@@ -45,7 +44,6 @@ const GeneralCard = () => {
             placeholder="Type your message..."
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
           />
         </div>
       </CardContent>

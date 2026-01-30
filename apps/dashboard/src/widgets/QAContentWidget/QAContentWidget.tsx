@@ -21,31 +21,22 @@ type QA = {
   question: string;
   answer: string;
 };
-type Props = {
+type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: any;
   onClose?: () => void;
 };
 
-export const QAContentWidget = ({ mode = 'add', document, onClose }: Props) => {
-  const [qaList, setQaList] = useState<QA[]>([{ question: '', answer: '' }]);
-  const [title, setTitle] = useState('');
+export const QAContentWidget = ({
+  mode = 'add',
+  document,
+  onClose,
+}: IQAContentWidgetProps) => {
+  const [qaList, setQaList] = useState<QA[]>(
+    document?.content?.data || [{ question: '', answer: '' }],
+  );
+  const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
-
-  useEffect(() => {
-    console.log('inside qa widget');
-    if (mode === 'edit' && document) {
-      setTitle(document.title);
-      setQaList(document.content.data);
-    }
-  }, [mode, document]);
-
-  useEffect(() => {
-    if (mode === 'add') {
-      setTitle('');
-      setQaList([{ question: '', answer: '' }]);
-    }
-  }, [mode]);
 
   const queryClient = useQueryClient();
 

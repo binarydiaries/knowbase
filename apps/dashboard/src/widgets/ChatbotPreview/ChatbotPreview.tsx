@@ -1,18 +1,39 @@
 import { useChat } from '@ai-sdk/react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { useParams } from '@tanstack/react-router';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, type UIMessage } from 'ai';
+import { useEffect, useId } from 'react';
+import { useChannels } from '@/store/useChannels.ts';
 
 export const ChatbotPreview = () => {
   const { chatbotId } = useParams({ strict: false });
-  const { messages, sendMessage, status } = useChat({
-    messages: [
-      {
-        id: '1',
+  const initialMessageId = useId();
+  if (!chatbotId) {
+    throw new Error('ChatbotId not available');
+  }
+
+  const channelWeb = useChannels((state) =>
+    state.channelsByChatbotId[chatbotId]?.find(
+      (channel) => channel.additional.type === 'web',
+    ),
+  );
+  const channelConfig = channelWeb?.additional.config;
+
+  const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
+    ? {
+        id: initialMessageId,
         role: 'system',
-        parts: [{ type: 'text', text: 'Hello, How can i help you?' }],
-      },
-    ],
+        parts: [
+          {
+            type: 'text',
+            text: channelConfig.welcomeMessage,
+          },
+        ],
+      }
+    : undefined;
+
+  const { messages, setMessages, sendMessage, status } = useChat({
+    messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: 'http://localhost:3000/chat',
       prepareSendMessagesRequest({ messages, id }) {
@@ -24,15 +45,34 @@ export const ChatbotPreview = () => {
           body: {
             message: messageText?.text,
             conversationId: id,
-            channelId: 'zmj2s7wc76ugq5lm210lyd42',
+            channelId: channelWeb?.id,
           },
         };
       },
     }),
   });
 
+  useEffect(() => {
+    if (initialMessage) {
+      setMessages((exisingMessages) => {
+        exisingMessages[0] = initialMessage;
+        return exisingMessages;
+      });
+    }
+  }, [setMessages, initialMessage]);
+
+  if (!channelWeb) {
+    return null;
+  }
+
+  console.log('channelWeb', channelWeb);
+
   return (
     <Chatbot
+      displayName={channelConfig?.displayName || ''}
+      subTitle={channelConfig?.subtitle}
+      inputPlaceholder={channelConfig?.inputPlaceholder}
+      primaryColor={channelConfig?.primaryColor || ''}
       className="max-h-175 h-full"
       isLoading={status === 'submitted'}
       messages={messages.map((value) => ({
@@ -42,9 +82,6 @@ export const ChatbotPreview = () => {
         type: value.role === 'user' ? 'user' : 'system',
       }))}
       onSendMessage={(message) => sendMessage({ text: message })}
-      onClose={() => {
-        window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
-      }}
     />
   );
 };

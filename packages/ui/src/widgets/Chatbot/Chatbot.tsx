@@ -11,6 +11,10 @@ interface IChatbotProps extends ComponentProps<'div'> {
   onSendMessage?: (message: string) => void;
   isLoading?: boolean;
   onClose?: () => void;
+  displayName: string;
+  subTitle?: string;
+  inputPlaceholder?: string;
+  primaryColor: string;
 }
 
 export const Chatbot = ({
@@ -19,6 +23,10 @@ export const Chatbot = ({
   onSendMessage,
   isLoading,
   onClose,
+  displayName,
+  subTitle,
+  inputPlaceholder,
+  primaryColor,
   ...otherProps
 }: IChatbotProps) => {
   const [input, setInput] = useState('');
@@ -38,7 +46,10 @@ export const Chatbot = ({
       )}
       {...otherProps}
     >
-      <div className="flex bg-gray-950 h-18 px-5 items-center gap-5 shrink-0">
+      <div
+        className="flex h-18 px-5 items-center gap-5 shrink-0"
+        style={{ backgroundColor: primaryColor }}
+      >
         {/** biome-ignore lint/a11y/noSvgWithoutTitle: This is svg icon */}
         <svg
           width="27"
@@ -56,20 +67,23 @@ export const Chatbot = ({
         </svg>
 
         <div className="text-white flex-1">
-          <h2 className="text-base font-semibold">Gini</h2>
-          <p className="text-sm">Customer support assistance</p>
+          <h2 className="text-base font-semibold">{displayName}</h2>
+          {subTitle && <p className="text-sm">{subTitle}</p>}
         </div>
-        <Button size="icon-sm" onClick={onClose}>
-          <X className="text-white size-5" />
-        </Button>
+        {onClose && (
+          <Button size="icon-sm" onClick={onClose}>
+            <X className="text-white size-5" />
+          </Button>
+        )}
       </div>
       <div className="flex flex-col gap-5 p-5 overflow-auto h-full">
         {messages?.map((message) => (
           <ChatMessage
-            systemTitle="Siri"
+            systemTitle={displayName}
             type={message.type}
             message={message.message}
             key={message.id}
+            primaryColor={primaryColor}
           />
         ))}
 
@@ -85,7 +99,7 @@ export const Chatbot = ({
         <div className="relative">
           <Textarea
             className="min-h-12 rounded-2xl pr-14 py-3 resize-none"
-            placeholder="Type your message..."
+            placeholder={inputPlaceholder || 'Type your message...'}
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(e) => {

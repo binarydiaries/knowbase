@@ -5,7 +5,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "db:push": "npx drizzle-kit push",
-    "studio": "bunx drizzle-kit studio"
+    "studio": "npx drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.1",

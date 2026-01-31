@@ -22,6 +22,7 @@ import { createFileRoute, Link, useParams } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { getChatbotsById } from '@/services';
+import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
@@ -33,7 +34,8 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 
 function RouteComponent() {
   const { chatbotId } = useParams({ strict: false });
-  const { setDocuments } = useDocuments();
+  const setDocuments = useDocuments((state) => state.setDocuments);
+  const setChannels = useChannels((state) => state.setChannels);
 
   const query = useQuery({
     queryFn: async () => {
@@ -49,8 +51,15 @@ function RouteComponent() {
   useEffect(() => {
     if (query.data?.data.documents && chatbotId) {
       setDocuments(chatbotId, query.data?.data.documents);
+      setChannels(chatbotId, query.data.data.channels);
     }
-  }, [query.data?.data.documents, chatbotId, setDocuments]);
+  }, [
+    query.data?.data.documents,
+    chatbotId,
+    setDocuments,
+    query.data?.data.channels,
+    setChannels,
+  ]);
 
   const chatbot = query.data?.data.chatbot;
 

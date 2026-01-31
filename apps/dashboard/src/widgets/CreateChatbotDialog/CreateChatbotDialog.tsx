@@ -25,7 +25,6 @@ const schema = z.object({
 
 export function CreateChatbotDialog() {
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
   const queryClient = useQueryClient();
 
   const createChatbotMutation = useMutation({
@@ -43,12 +42,10 @@ export function CreateChatbotDialog() {
 
       reset(); // ✅ reset happens AFTER success
       setOpen(false); // ✅ dialog closes AFTER reset
-      setLoading(false);
     },
-    onError: () => {
-      setLoading(false);
-    },
+    onError: () => {},
   });
+  const { isPending } = createChatbotMutation;
 
   const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
@@ -99,10 +96,10 @@ export function CreateChatbotDialog() {
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit(handleCreate)} disabled={loading}>
-            {loading ? (
+          <Button onClick={handleSubmit(handleCreate)} disabled={isPending}>
+            {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 text-white w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating…
               </>
             ) : (

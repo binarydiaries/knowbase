@@ -16,7 +16,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { getChatbots } from '@/services';
-import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
+import { timeAgo } from '@/utils/datetimeHelper.ts';
 
 type Chatbot = {
   id: string;

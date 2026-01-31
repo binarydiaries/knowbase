@@ -17,7 +17,7 @@ export const DocumentContent = z.discriminatedUnion('type', [
   }),
 ]);
 
-export const Document = z.object({
+export const DocumentSchema = z.object({
   id: z.string(),
   title: z.string(),
   content: DocumentContent,
@@ -40,11 +40,11 @@ const UpdateDocumentBody = z.object({
 });
 
 const OneDocumentResponse = z.object({
-  document: Document,
+  document: DocumentSchema,
 });
 
 const ManyDocumentsResponse = z.object({
-  documents: z.array(Document),
+  documents: z.array(DocumentSchema),
 });
 
 export const ChatbotDocumentsParams = z.object({
@@ -56,7 +56,7 @@ export const OneDocumentParams = z.object({
 });
 
 export const DocumentModel = new Elysia().model({
-  Document,
+  DocumentSchema,
   CreateDocumentBody,
   UpdateDocumentBody,
   OneDocumentResponse,

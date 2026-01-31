@@ -5,6 +5,6 @@ export const Model = new Elysia().model({
   ChatBody: z.object({
     conversationId: z.string(),
     message: z.string(),
-    chatbotId: z.string(),
+    channelId: z.string(),
   }),
 });

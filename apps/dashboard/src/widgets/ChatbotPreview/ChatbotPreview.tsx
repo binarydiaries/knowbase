@@ -17,7 +17,7 @@ export const ChatbotPreview = () => {
           body: {
             message: messageText?.text,
             conversationId: id,
-            chatbotId,
+            channelId: 'zmj2s7wc76ugq5lm210lyd42',
           },
         };
       },

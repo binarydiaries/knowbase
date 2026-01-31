@@ -8,13 +8,13 @@ import {
 } from '../../utils/columns.utils';
 import { behaviors } from './behaviors';
 
-const chatbotStatus = pgEnum('status', ['active', 'archived']);
+export const chatbotStatus = pgEnum('chatbotStatus', ['active', 'archived']);
 
 export const chatbots = pgTable('chatbots', {
   id: cuid2PrimaryKey,
   name: text().notNull(),
   description: text(),
-  status: chatbotStatus().notNull().default('active'),
+  chatbotStatus: chatbotStatus().notNull().default('active'),
   createdBy: clerkUserId,
   ...clerkOrgIdColumn,
   ...timestamps,

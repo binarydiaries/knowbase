@@ -31,7 +31,7 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import { Sheet } from '@knowbase/ui/components/sheet';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import {
   ArrowUpRightIcon,
@@ -42,28 +42,27 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { deleteDocumentsById, getDocuments } from '@/services';
+import { type DocumentSchema, deleteDocumentsById } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 export const DocumentsWidget = () => {
+  const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId } = useDocuments();
-  console.log(documentsByChatbotId);
+
+  if (!chatbotId) {
+    throw 'Not chatbot id';
+  }
+
+  const documents = documentsByChatbotId[chatbotId] || [];
+
+  console.log('Documents', documents);
+
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
-  const { chatbotId } = useParams({ strict: false });
-  const [selectedDocument, setSelectedDocument] = useState<any>(null);
-  const [isEdit, setIsEdit] = useState(false);
 
-  const query = useQuery({
-    queryKey: ['documents'],
-    queryFn: () => {
-      return getDocuments({
-        query: { chatbotId: chatbotId },
-      });
-    },
-  });
-  const queryClient = useQueryClient();
+  const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
+  const [isEdit, setIsEdit] = useState(false);
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -74,10 +73,11 @@ export const DocumentsWidget = () => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      // queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
-  const isDocumentsAvailable = !!query?.data?.data?.documents?.length;
+
+  const isDocumentsAvailable = !!documents?.length;
   return (
     <>
       <Card className="w-full">
@@ -96,7 +96,7 @@ export const DocumentsWidget = () => {
                   onClick={() => {
                     setIsEdit(false);
 
-                    setSelectedDocument(null);
+                    setSelectedDocument(undefined);
                     setIsTextContentSheetOpen(true);
 
                     setIsQASheetOpen(false);
@@ -107,10 +107,8 @@ export const DocumentsWidget = () => {
                 <DropdownMenuItem
                   onClick={() => {
                     setIsEdit(false);
-                    setSelectedDocument(null);
-
+                    setSelectedDocument(undefined);
                     setIsQASheetOpen(true);
-
                     setIsTextContentSheetOpen(false);
                   }}
                 >
@@ -121,7 +119,7 @@ export const DocumentsWidget = () => {
             </DropdownMenu>
           </CardAction>
         </CardHeader>
-        {query.data?.data.documents.map((doc) => (
+        {documents.map((doc) => (
           <CardContent key={doc.id}>
             <Item variant="outline">
               <ItemMedia variant="icon">
@@ -214,7 +212,7 @@ export const DocumentsWidget = () => {
               className="text-muted-foreground"
               size="sm"
             >
-              <a href="#">
+              <a href="http://help.com">
                 Learn More <ArrowUpRightIcon />
               </a>
             </Button>
@@ -231,7 +229,7 @@ export const DocumentsWidget = () => {
             document={selectedDocument}
             onClose={() => {
               setIsTextContentSheetOpen(false);
-              setSelectedDocument(null);
+              setSelectedDocument(undefined);
               setIsEdit(false);
             }}
           />
@@ -244,7 +242,7 @@ export const DocumentsWidget = () => {
             document={selectedDocument}
             onClose={() => {
               setIsQASheetOpen(false);
-              setSelectedDocument(null);
+              setSelectedDocument(undefined);
               setIsEdit(false);
             }}
           />

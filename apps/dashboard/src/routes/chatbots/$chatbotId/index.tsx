@@ -66,9 +66,9 @@ function RouteComponent() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <Link to={'/chatbots'}>
-                  <BreadcrumbLink>Chatbots</BreadcrumbLink>
-                </Link>
+                <BreadcrumbLink asChild>
+                  <Link to={'/chatbots'}>Chatbots</Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>

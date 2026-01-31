@@ -5,7 +5,6 @@ import { Ellipsis, SendHorizonal, X } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
 import type { IChatMessage } from './Chatbot.types';
 import { ChatMessage } from './ChatMessage';
-import iconSvg from './icon2.png';
 
 interface IChatbotProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
@@ -40,6 +39,7 @@ export const Chatbot = ({
       {...otherProps}
     >
       <div className="flex bg-gray-950 h-18 px-5 items-center gap-5 shrink-0">
+        {/** biome-ignore lint/a11y/noSvgWithoutTitle: This is svg icon */}
         <svg
           width="27"
           height="27"

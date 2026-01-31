@@ -6,6 +6,13 @@ import { DefaultChatTransport } from 'ai';
 export const ChatbotPreview = () => {
   const { chatbotId } = useParams({ strict: false });
   const { messages, sendMessage, status } = useChat({
+    messages: [
+      {
+        id: '1',
+        role: 'system',
+        parts: [{ type: 'text', text: 'Hello, How can i help you?' }],
+      },
+    ],
     transport: new DefaultChatTransport({
       api: 'http://localhost:3000/chat',
       prepareSendMessagesRequest({ messages, id }) {

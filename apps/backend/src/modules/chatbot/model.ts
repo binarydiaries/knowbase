@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { Behaviour } from '../behaviour/model';
 import { ChannelSchema } from '../channel/model';
-import { Document } from '../document/model';
+import { DocumentSchema } from '../document/model';
 
 const ChatbotStatus = z.enum(['active', 'archived']);
 
@@ -34,7 +34,7 @@ const CreateChatbotBody = z.object({
 
 const OneChatbotResponse = z.object({
   chatbot: Chatbot,
-  documents: z.array(Document),
+  documents: z.array(DocumentSchema),
   channels: z.array(ChannelSchema),
   behaviour: Behaviour.optional(),
 });

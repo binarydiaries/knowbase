@@ -7,19 +7,19 @@ export type ClientOptions = {
 export type ChatBody = {
     conversationId: string;
     message: string;
-    chatbotId: string;
+    channelId: string;
 };
 
 export type GetMessageQuery = {
     conversationId: string;
 };
 
-export type Document = {
+export type DocumentSchema = {
     id: string;
     title: string;
     content: {
         type: string;
-        data: unknown;
+        data: string;
     } | {
         type: string;
         data: Array<{
@@ -39,7 +39,7 @@ export type CreateDocumentBody = {
     title: string;
     content: {
         type: string;
-        data: unknown;
+        data: string;
     } | {
         type: string;
         data: Array<{
@@ -53,7 +53,7 @@ export type UpdateDocumentBody = {
     title?: string;
     content: {
         type: string;
-        data: unknown;
+        data: string;
     } | {
         type: string;
         data: Array<{
@@ -69,7 +69,7 @@ export type OneDocumentResponse = {
         title: string;
         content: {
             type: string;
-            data: unknown;
+            data: string;
         } | {
             type: string;
             data: Array<{
@@ -91,7 +91,7 @@ export type ManyDocumentsResponse = {
         title: string;
         content: {
             type: string;
-            data: unknown;
+            data: string;
         } | {
             type: string;
             data: Array<{
@@ -124,14 +124,7 @@ export type Chatbot = {
     id: string;
     name: string;
     description?: string | unknown;
-    status: 'draft' | 'live' | 'archived';
-    settings: {
-        displayName: string;
-        subtitle?: string;
-        welcomeMessage: string;
-        inputPlaceholder?: string;
-        primaryColor: string;
-    };
+    chatbotStatus: 'active' | 'archived';
     createdBy: string;
     orgId: string;
     createdAt: string;
@@ -148,14 +141,7 @@ export type OneChatbotResponse = {
         id: string;
         name: string;
         description?: string | unknown;
-        status: 'draft' | 'live' | 'archived';
-        settings: {
-            displayName: string;
-            subtitle?: string;
-            welcomeMessage: string;
-            inputPlaceholder?: string;
-            primaryColor: string;
-        };
+        chatbotStatus: 'active' | 'archived';
         createdBy: string;
         orgId: string;
         createdAt: string;
@@ -166,7 +152,7 @@ export type OneChatbotResponse = {
         title: string;
         content: {
             type: string;
-            data: unknown;
+            data: string;
         } | {
             type: string;
             data: Array<{
@@ -177,6 +163,35 @@ export type OneChatbotResponse = {
         chatbotId: string;
         createdBy: string;
         orgId: string;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+    channels: Array<{
+        id: string;
+        chatbotId: string;
+        enabled: boolean;
+        status: 'inactive' | 'active' | 'error';
+        additional: {
+            type: string;
+            config: {
+                displayName: string;
+                subtitle?: string;
+                welcomeMessage: string;
+                inputPlaceholder?: string;
+                primaryColor: string;
+                allowedDomains: Array<string>;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        };
         createdAt: string;
         updatedAt: string;
     }>;
@@ -198,7 +213,7 @@ export type ManyChatbotResponse = {
         id: string;
         name: string;
         description?: string | unknown;
-        status: 'draft' | 'live' | 'archived';
+        chatbotStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -212,14 +227,7 @@ export type OneChatbotParams = {
 export type UpdateChatbotBody = {
     name: string;
     description?: string | unknown;
-    status: 'draft' | 'live' | 'archived';
-    settings: {
-        displayName: string;
-        subtitle?: string;
-        welcomeMessage: string;
-        inputPlaceholder?: string;
-        primaryColor: string;
-    };
+    chatbotStatus: 'active' | 'archived';
 };
 
 export type DeleteChatbotResponse = unknown;
@@ -229,7 +237,7 @@ export type OneSmallChatbotResponse = {
         id: string;
         name: string;
         description?: string | unknown;
-        status: 'draft' | 'live' | 'archived';
+        chatbotStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -299,6 +307,162 @@ export type ManyBehaviourResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
+};
+
+export type ChannelSchema = {
+    id: string;
+    chatbotId: string;
+    enabled: boolean;
+    status: 'inactive' | 'active' | 'error';
+    additional: {
+        type: string;
+        config: {
+            displayName: string;
+            subtitle?: string;
+            welcomeMessage: string;
+            inputPlaceholder?: string;
+            primaryColor: string;
+            allowedDomains: Array<string>;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ChannelListQuerySchema = {
+    chatbotId: string;
+};
+
+export type ManyChannelResponse = {
+    channels: Array<{
+        id: string;
+        chatbotId: string;
+        enabled: boolean;
+        status: 'inactive' | 'active' | 'error';
+        additional: {
+            type: string;
+            config: {
+                displayName: string;
+                subtitle?: string;
+                welcomeMessage: string;
+                inputPlaceholder?: string;
+                primaryColor: string;
+                allowedDomains: Array<string>;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        };
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type CreateChannelBodySchema = {
+    chatbotId: string;
+    enabled: boolean;
+    status: 'inactive' | 'active' | 'error';
+    additional: {
+        type: string;
+        config: {
+            displayName: string;
+            subtitle?: string;
+            welcomeMessage: string;
+            inputPlaceholder?: string;
+            primaryColor: string;
+            allowedDomains: Array<string>;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    };
+};
+
+export type UpdateChannelBodySchema = {
+    chatbotId?: string;
+    enabled?: boolean;
+    status?: 'inactive' | 'active' | 'error';
+    additional?: {
+        type: string;
+        config: {
+            displayName: string;
+            subtitle?: string;
+            welcomeMessage: string;
+            inputPlaceholder?: string;
+            primaryColor: string;
+            allowedDomains: Array<string>;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    } | {
+        type: string;
+        config: {
+            [key: string]: never;
+        };
+    };
+};
+
+export type OneChannelResponse = {
+    channel: {
+        id: string;
+        chatbotId: string;
+        enabled: boolean;
+        status: 'inactive' | 'active' | 'error';
+        additional: {
+            type: string;
+            config: {
+                displayName: string;
+                subtitle?: string;
+                welcomeMessage: string;
+                inputPlaceholder?: string;
+                primaryColor: string;
+                allowedDomains: Array<string>;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        };
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type OneChannelParamsSchema = {
+    id: string;
 };
 
 export type PostChatData = {
@@ -452,29 +616,6 @@ export type PostChatbotsResponses = {
 
 export type PostChatbotsResponse = PostChatbotsResponses[keyof PostChatbotsResponses];
 
-export type DeleteChatbotsByIdData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/chatbots/{id}';
-};
-
-export type DeleteChatbotsByIdErrors = {
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type DeleteChatbotsByIdError = DeleteChatbotsByIdErrors[keyof DeleteChatbotsByIdErrors];
-
-export type DeleteChatbotsByIdResponses = {
-    /**
-     * Response for status 204
-     */
-    204: unknown;
-};
-
 export type GetChatbotsByIdData = {
     body?: never;
     path?: never;
@@ -588,3 +729,85 @@ export type PatchBehaviourByIdResponses = {
 };
 
 export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof PatchBehaviourByIdResponses];
+
+export type GetChannelsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/channels';
+};
+
+export type GetChannelsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyChannelResponse;
+};
+
+export type GetChannelsResponse = GetChannelsResponses[keyof GetChannelsResponses];
+
+export type PostChannelsData = {
+    body: CreateChannelBodySchema;
+    path?: never;
+    query?: never;
+    url: '/channels';
+};
+
+export type PostChannelsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneChannelResponse;
+};
+
+export type PostChannelsResponse = PostChannelsResponses[keyof PostChannelsResponses];
+
+export type GetChannelsByIdData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/channels/{id}';
+};
+
+export type GetChannelsByIdErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetChannelsByIdError = GetChannelsByIdErrors[keyof GetChannelsByIdErrors];
+
+export type GetChannelsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneChannelResponse;
+};
+
+export type GetChannelsByIdResponse = GetChannelsByIdResponses[keyof GetChannelsByIdResponses];
+
+export type PatchChannelsByIdData = {
+    body: UpdateChannelBodySchema;
+    path?: never;
+    query?: never;
+    url: '/channels/{id}';
+};
+
+export type PatchChannelsByIdErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PatchChannelsByIdError = PatchChannelsByIdErrors[keyof PatchChannelsByIdErrors];
+
+export type PatchChannelsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneChannelResponse;
+};
+
+export type PatchChannelsByIdResponse = PatchChannelsByIdResponses[keyof PatchChannelsByIdResponses];

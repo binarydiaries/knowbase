@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
 import { documents, embeddings as embeddingsTable } from '../../db/schema';
-import type { Document } from './model';
+import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {
   static async create(data: typeof documents.$inferInsert) {
@@ -111,7 +111,7 @@ export abstract class DocumentService {
 
   static transformDocument(
     doc: typeof documents.$inferSelect,
-  ): z.infer<typeof Document> {
+  ): z.infer<typeof DocumentSchema> {
     return {
       ...doc,
       content: {

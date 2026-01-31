@@ -20,13 +20,15 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
+  Archive,
   ArrowUpRightIcon,
   Bot,
+  Edit,
   Loader2,
   MessageCircle,
   MoreHorizontal,
-  Trash2,
 } from 'lucide-react';
+import { useState } from 'react';
 import { deleteChatbotsById, getChatbots } from '@/services';
 import { timeAgo } from '@/services/utilities/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
@@ -45,6 +47,8 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const isChatbotAvailable =
     !query.isLoading && query?.data?.data?.chatbots?.length;
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingBot, setEditingBot] = useState<any>(null);
 
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -69,7 +73,12 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-base font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog />
+          <CreateChatbotDialog
+            open={dialogOpen}
+            setOpen={setDialogOpen}
+            chatbot={editingBot}
+            onClose={() => setEditingBot(null)}
+          />
         </div>
       </header>
       <Separator />
@@ -105,15 +114,15 @@ function RouteComponent() {
                             {bot.name}
                           </h3>
 
-                          <Badge
-                            className={
-                              bot.status === 'live'
-                                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
-                                : 'bg-muted text-muted-foreground'
-                            }
-                          >
-                            {bot.status === 'live' ? 'Live' : 'Draft'}
-                          </Badge>
+                          {/*<Badge*/}
+                          {/*  className={*/}
+                          {/*    bot.status === 'live'*/}
+                          {/*      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'*/}
+                          {/*      : 'bg-muted text-muted-foreground'*/}
+                          {/*  }*/}
+                          {/*>*/}
+                          {/*  {bot.status === 'live' ? 'Live' : 'Draft'}*/}
+                          {/*</Badge>*/}
                         </div>
                       </div>
 
@@ -130,15 +139,17 @@ function RouteComponent() {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40 ">
-                          {/*<DropdownMenuItem*/}
-                          {/*  onClick={() => {*/}
-                          {/*    console.log('Duplicate clicked', bot.id);*/}
-                          {/*  }}*/}
-                          {/*  className="flex items-center  cursor-pointer gap-2"*/}
-                          {/*>*/}
-                          {/*  <Copy className="h-4 w-4" />*/}
-                          {/*  Duplicate*/}
-                          {/*</DropdownMenuItem>*/}
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation(); // IMPORTANT: prevent Link navigation
+                              setEditingBot(bot);
+                              setDialogOpen(true);
+                            }}
+                            className="flex items-center  cursor-pointer gap-2"
+                          >
+                            <Edit className="h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
 
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -147,8 +158,8 @@ function RouteComponent() {
                             }}
                             className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
                           >
-                            <Trash2 className="h-4 w-4 text-red" />
-                            Delete
+                            <Archive className="h-4 w-4 text-red" />
+                            Archive
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

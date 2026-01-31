@@ -23,7 +23,6 @@ export const useDocuments = create<IDocumentsState>((set) => ({
       const index = docs.findIndex((d) => d.id === document.id);
 
       if (index === -1) {
-        // ADD
         return {
           documentsByChatbotId: {
             ...state.documentsByChatbotId,
@@ -32,7 +31,6 @@ export const useDocuments = create<IDocumentsState>((set) => ({
         };
       }
 
-      // UPDATE
       return {
         documentsByChatbotId: {
           ...state.documentsByChatbotId,

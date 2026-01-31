@@ -43,9 +43,12 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { deleteDocumentsById, getDocuments } from '@/services';
+import { useDocuments } from '@/store/useDocuments.ts';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 export const DocumentsWidget = () => {
+  const { documentsByChatbotId } = useDocuments();
+  console.log(documentsByChatbotId);
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   const { chatbotId } = useParams({ strict: false });

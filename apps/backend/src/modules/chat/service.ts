@@ -1,11 +1,9 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs, streamText } from 'ai';
-import type { z } from 'zod';
 import type { conversations } from '../../db/schema';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
-import type { conversationChannel } from '../conversation/model';
 import { ConversationService } from '../conversation/service';
 import { EmbeddingService } from '../embedding/service';
 import { MessageService } from '../message/service';
@@ -13,7 +11,6 @@ import {
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
   buildPlatformRules,
-  getKnowledgeBasePrompt,
   referenceResolverPrompt,
 } from './prompts';
 
@@ -39,97 +36,6 @@ export abstract class ChatService {
     });
 
     return text.trim() || currentUserMessage;
-  }
-
-  static async send2({
-    conversationId,
-    message,
-    channelId,
-    channel,
-  }: {
-    conversationId: string;
-    message: string;
-    channelId: string;
-    channel: z.infer<typeof conversationChannel>;
-  }) {
-    const chatbot = await ChannelService.single(channelId);
-
-    if (!chatbot) {
-      throw new Error('Chatbot not found');
-    }
-
-    const { chatbotId } = chatbot;
-
-    let finalQuery = message;
-    const conversation = await ConversationService.single({
-      id: conversationId,
-    });
-    if (conversation?.lastAssistantUtterance) {
-      finalQuery = await ChatService.resolveReferences({
-        lastAssistantUtterance: conversation.lastAssistantUtterance,
-        currentUserMessage: message,
-      });
-    }
-    const chunks = await EmbeddingService.findRelevantContent(finalQuery);
-    const knowledgeBasePrompt = getKnowledgeBasePrompt({
-      knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
-    });
-
-    const result = streamText({
-      system: knowledgeBasePrompt,
-      model,
-      messages: [{ role: 'user', content: finalQuery }],
-      stopWhen: stepCountIs(5),
-    });
-
-    return result.toUIMessageStreamResponse({
-      onFinish: async ({ responseMessage }) => {
-        const assistantMessage =
-          responseMessage?.parts?.find((value) => value?.type === 'text')
-            ?.text || '';
-        const conversationData = {
-          lastUserQuestion: finalQuery,
-          lastAssistantUtterance: assistantMessage,
-          lastMessageAt: new Date(),
-        };
-
-        if (!conversation) {
-          await ConversationService.create({
-            id: conversationId,
-            chatbotId,
-            channelId,
-            ...conversationData,
-          });
-        } else {
-          await ConversationService.update(conversationId, conversationData);
-        }
-
-        await MessageService.addMessages([
-          {
-            conversationId,
-            role: 'user',
-            content: message,
-            systemMetadata: { finalQuery },
-          },
-          {
-            conversationId,
-            role: 'assistant',
-            content: assistantMessage,
-            metadata: {
-              confidenceScore:
-                chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) /
-                chunks.length,
-              sources: chunks.map((chunk) => ({
-                documentId: chunk.documentId,
-                documentVersion: chunk.documentVersion,
-                chunkIndex: chunk.chunkIndex,
-                similarity: chunk.similarity,
-              })),
-            },
-          },
-        ]);
-      },
-    });
   }
 
   static async getFinalQuery({
@@ -178,7 +84,7 @@ export abstract class ChatService {
     return behaviour;
   }
 
-  static async *send({
+  static async send({
     chatbotId,
     channelId,
     message,

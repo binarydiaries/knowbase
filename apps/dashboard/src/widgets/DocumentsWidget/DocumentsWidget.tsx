@@ -48,16 +48,13 @@ import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 export const DocumentsWidget = () => {
   const { chatbotId } = useParams({ strict: false });
-  const { documentsByChatbotId } = useDocuments();
+  const { documentsByChatbotId, deleteDocument } = useDocuments();
 
   if (!chatbotId) {
     throw 'Not chatbot id';
   }
 
   const documents = documentsByChatbotId[chatbotId] || [];
-
-  console.log('Documents', documents);
-
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
 
@@ -66,15 +63,17 @@ export const DocumentsWidget = () => {
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      return deleteDocumentsById({
+      await deleteDocumentsById({
         path: {
           id,
         },
       });
+
+      return {
+        documentId: id,
+      };
     },
-    onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ['documents'] });
-    },
+    onSuccess: ({ documentId }) => deleteDocument(chatbotId, documentId),
   });
 
   const isDocumentsAvailable = !!documents?.length;

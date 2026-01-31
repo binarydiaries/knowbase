@@ -10,14 +10,19 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { patchDocumentsById, postDocuments } from '@/services';
+import { useState } from 'react';
+import {
+  type DocumentSchema,
+  patchDocumentsById,
+  postDocuments,
+} from '@/services';
+import { useDocuments } from '@/store/useDocuments.ts';
 
 type ITextContentWidgetProps = {
   mode?: 'add' | 'edit';
-  document?: any;
+  document?: DocumentSchema;
   onClose?: () => void;
 };
 
@@ -27,44 +32,53 @@ export const TextContentWidget = ({
   onClose,
 }: ITextContentWidgetProps) => {
   const [content, setContent] = useState(document?.content?.data || '');
-  const [title, setTitle] = useState(document.title);
+  const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
 
-  const queryClient = useQueryClient();
+  if (!chatbotId) {
+    throw new Error('Chatbot not found');
+  }
+
+  const { addUpdateDocument } = useDocuments();
 
   const handleSave = () => {
     saveTextMutation.mutate();
   };
   const saveTextMutation = useMutation({
     mutationFn: async () => {
+      const payloadBody = {
+        title,
+        content: {
+          type: 'text',
+          data: content,
+        },
+      };
+
       if (mode === 'edit') {
-        return patchDocumentsById({
+        const { data } = await patchDocumentsById({
           path: {
-            id: document.id,
+            id: document?.id,
           },
-          body: {
-            title,
-            content: {
-              type: 'text',
-              data: content,
-            },
-          },
+          body: payloadBody,
         });
+        return {
+          document: data.document,
+        };
       }
 
-      return postDocuments({
+      const { data } = await postDocuments({
         body: JSON.stringify({
+          ...payloadBody,
           chatbotId,
-          title,
-          content: {
-            type: 'text',
-            data: content,
-          },
         }),
       });
+
+      return {
+        document: data.document,
+      };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    onSuccess: ({ document }) => {
+      addUpdateDocument(chatbotId, document);
       onClose?.();
     },
   });

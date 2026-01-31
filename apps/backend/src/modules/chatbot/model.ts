@@ -10,7 +10,7 @@ const Chatbot = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional().nullable(),
-  status: ChatbotStatus,
+  chatbotStatus: ChatbotStatus,
   createdBy: z.string(),
   orgId: z.string(),
   createdAt: z.date(),
@@ -21,7 +21,7 @@ const SmallChatbot = Chatbot.pick({
   id: true,
   name: true,
   description: true,
-  status: true,
+  chatbotStatus: true,
   createdBy: true,
   createdAt: true,
   updatedAt: true,
@@ -54,7 +54,7 @@ export const OneChatbotParams = z.object({
 export const UpdateChatbotBody = Chatbot.pick({
   name: true,
   description: true,
-  status: true,
+  chatbotStatus: true,
 });
 export const DeleteChatbotResponse = z.undefined();
 

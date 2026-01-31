@@ -48,7 +48,6 @@ function RouteComponent() {
 
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('archiveChatbotMutation', id);
       await deleteChatbotsById({
         path: {
           id,

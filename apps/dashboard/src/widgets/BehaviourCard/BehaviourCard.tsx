@@ -50,13 +50,14 @@ const BehaviourCard = () => {
       </CardHeader>
       <CardContent className={'flex-col gap-5 flex'}>
         <div className="grid gap-2 ">
-          <FormInput
+          <FormTextarea
             name="systemPrompt"
             control={control}
             label="Sysyem Prompt"
             placeholder="Enter a system prompt"
           />
         </div>
+
         <div className="grid gap-2 ">
           <FormSelect
             name="tone"

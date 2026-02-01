@@ -1,3 +1,4 @@
+import { Spinner } from '@knowbase/ui/components/spinner';
 import { useQuery } from '@tanstack/react-query';
 import { useQueryParams } from '@/hooks/useQueryParams.ts';
 import { getChannel } from '@/services/chat.ts';
@@ -8,7 +9,9 @@ function App() {
   const channelId = params.get('channelId');
 
   const query = useQuery({
-    queryFn: () => getChannel(channelId || ''),
+    queryFn: async () => {
+      return getChannel(channelId || '');
+    },
     queryKey: ['channel', channelId],
   });
 
@@ -16,6 +19,12 @@ function App() {
     <>
       {query.data?.channel && (
         <ChatbotWidget channelSchema={query.data?.channel} />
+      )}
+
+      {query.isLoading && (
+        <div className="h-full flex justify-center items-center">
+          <Spinner className="size-6" />
+        </div>
       )}
     </>
   );

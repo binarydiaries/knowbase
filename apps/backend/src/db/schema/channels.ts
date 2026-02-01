@@ -17,7 +17,7 @@ export const channels = pgTable('channels', {
   type: channelType().notNull(),
   enabled: boolean().notNull().default(false),
   config: jsonb().$type<object>().notNull(),
-  status: channelStatus().notNull().default('inactive'),
+  channelStatus: channelStatus().notNull().default('inactive'),
   usage: jsonb().$type<object>().notNull(),
   ...timestamps,
 });

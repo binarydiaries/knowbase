@@ -28,9 +28,9 @@ import {
   MessageCircle,
   MoreHorizontal,
 } from 'lucide-react';
+import { useState } from 'react';
 import { getChatbots } from '@/services';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
-import { useState } from 'react';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
 export const Route = createFileRoute('/chatbots/')({

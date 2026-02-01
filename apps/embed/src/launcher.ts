@@ -1,13 +1,12 @@
-import { bubbleIcon } from './icons';
+import { bubbleIcon, chevronDown } from './icons';
 import { hideIframe, isIframeVisible, openIframe } from './iframe';
-import { showIcon, showSpinner } from './spinner';
 import { launcherStyle } from './styles';
 
-export function createLauncher(chatUrl: string) {
-  const btn = document.createElement('button');
-  btn.innerHTML = bubbleIcon;
-  btn.style.cssText = launcherStyle;
+const btn = document.createElement('button');
 
+export function createLauncher(chatUrl: string) {
+  btn.style.cssText = launcherStyle;
+  showButtonBrand();
   // Hover enlarge
   btn.addEventListener('mouseenter', () => {
     btn.style.transform = 'scale(1.08)';
@@ -30,13 +29,46 @@ export function createLauncher(chatUrl: string) {
     if (isIframeVisible()) {
       hideIframe();
     } else {
-      openIframe(
-        chatUrl,
-        () => showSpinner(btn), // loading
-        () => showIcon(btn), // ready
-      );
+      openIframe(chatUrl);
     }
   };
 
   document.body.appendChild(btn);
+}
+
+export function showButtonLoading() {
+  btn.innerHTML = `
+    <span style="
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      animation: kb-spin 0.8s linear infinite;
+    "></span>
+  `;
+
+  injectSpinnerKeyframes();
+}
+
+function injectSpinnerKeyframes() {
+  if (document.getElementById('__kb_spinner__')) return;
+
+  const style = document.createElement('style');
+  style.id = '__kb_spinner__';
+  style.textContent = `
+    @keyframes kb-spin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+export function showButtonArrow() {
+  btn.innerHTML = chevronDown;
+}
+
+export function showButtonBrand() {
+  btn.innerHTML = bubbleIcon;
 }

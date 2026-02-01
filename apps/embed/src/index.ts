@@ -8,12 +8,12 @@ import { setupMessageListener } from './listener';
 
   const config = getConfig();
 
-  if (!config.chatbotId) {
-    console.warn('KnowBase: chatbotId missing');
+  if (!config.channelId) {
+    console.warn('KnowBase: channelId missing');
     return;
   }
 
-  const chatUrl = `http://localhost:4000/?chatbotId=${config.chatbotId}`;
+  const chatUrl = `http://localhost:4000/?channelId=${config.channelId}`;
 
   setupMessageListener();
 

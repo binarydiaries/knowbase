@@ -1,3 +1,8 @@
+import {
+  showButtonArrow,
+  showButtonBrand,
+  showButtonLoading,
+} from './launcher';
 import { BASE_STYLE } from './styles';
 
 let iframe: HTMLIFrameElement | null = null;
@@ -5,11 +10,7 @@ let isLoading = false;
 let isReady = false;
 let isVisible = false;
 
-export function openIframe(
-  chatUrl: string,
-  onLoading: () => void,
-  onReady: () => void,
-) {
+export function openIframe(chatUrl: string) {
   if (isReady && iframe) {
     showIframe();
     return;
@@ -18,7 +19,7 @@ export function openIframe(
   if (isLoading) return;
 
   isLoading = true;
-  onLoading();
+  showButtonLoading();
 
   iframe = document.createElement('iframe');
   iframe.src = chatUrl;
@@ -27,7 +28,6 @@ export function openIframe(
   iframe.onload = () => {
     isLoading = false;
     isReady = true;
-    onReady();
     showIframe();
   };
 
@@ -36,6 +36,7 @@ export function openIframe(
 
 export function hideIframe() {
   if (!iframe) return;
+  showButtonBrand();
 
   iframe.style.opacity = '0';
   iframe.style.transform = 'translateY(16px)';
@@ -49,7 +50,7 @@ export function isIframeVisible(): boolean {
 
 function showIframe() {
   if (!iframe) return;
-
+  showButtonArrow();
   requestAnimationFrame(() => {
     iframe!.style.opacity = '1';
     iframe!.style.transform = 'translateY(0)';

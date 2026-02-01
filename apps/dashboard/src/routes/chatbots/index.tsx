@@ -170,7 +170,7 @@ function RouteComponent() {
           </div>
         )}
 
-        {!isChatbotAvailable && (
+        {query.isSuccess && !isChatbotAvailable && (
           <Empty className="md:py-5">
             <EmptyHeader>
               <EmptyMedia variant="icon">

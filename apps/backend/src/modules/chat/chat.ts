@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { ChannelService } from '../channel/service';
 import { Model } from './model';
 import { ChatService } from './service';
 
@@ -15,6 +16,24 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       });
     },
     {
-      body: 'ChatBody',
+      body: 'ChatBodySchema',
+    },
+  )
+  .get(
+    '/channel',
+    async ({ query }) => {
+      const channel = await ChannelService.single(query.channelId);
+
+      if (!channel) {
+        throw new Error('Channel not found or Invalid');
+      }
+
+      return {
+        channel: ChannelService.transformChannel(channel),
+      };
+    },
+    {
+      query: 'ChatChannelQueryParamSchema',
+      response: 'ChatChannelResponseSchema',
     },
   );

@@ -1,11 +1,35 @@
 import { useChat } from '@ai-sdk/react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, type UIMessage } from 'ai';
+import { useId } from 'react';
+import { baseUrl } from '@/services/chat.ts';
+import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 
-export const ChatbotWidget = () => {
+interface IChatbotWidgetProps {
+  channelSchema: ChannelSchema;
+}
+
+export const ChatbotWidget = ({ channelSchema }: IChatbotWidgetProps) => {
+  const channelConfig = channelSchema.additional.config;
+  const initialMessageId = useId();
+
+  const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
+    ? {
+        id: initialMessageId,
+        role: 'system',
+        parts: [
+          {
+            type: 'text',
+            text: channelConfig.welcomeMessage,
+          },
+        ],
+      }
+    : undefined;
+
   const { messages, sendMessage, status } = useChat({
+    messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: 'http://localhost:3000/chat',
+      api: baseUrl,
       prepareSendMessagesRequest({ messages, id }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find(
@@ -25,6 +49,10 @@ export const ChatbotWidget = () => {
   });
   return (
     <Chatbot
+      displayName={channelConfig.displayName}
+      primaryColor={channelConfig.primaryColor}
+      inputPlaceholder={channelConfig.inputPlaceholder}
+      subTitle={channelConfig.subtitle}
       className="h-full"
       isLoading={status === 'submitted'}
       messages={messages.map((value) => ({

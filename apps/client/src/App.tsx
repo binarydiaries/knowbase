@@ -1,26 +1,23 @@
+import { useQuery } from '@tanstack/react-query';
+import { useQueryParams } from '@/hooks/useQueryParams.ts';
+import { getChannel } from '@/services/chat.ts';
 import { ChatbotWidget } from '@/widgets/ChatbotWidget/ChatbotWidget.tsx';
 
 function App() {
-  // const { params } = useQueryParams();
-  // const conversationId = params.get('id');
-  // const getMessages = async () => {
-  //   if (conversationId) {
-  //     return (
-  //       await axios.get('http://localhost:3000/message', {
-  //         params: {
-  //           conversationId,
-  //         },
-  //       })
-  //     ).data;
-  //   }
-  //   return [];
-  // };
-  // const messagePromise = getMessages();
+  const { params } = useQueryParams();
+  const channelId = params.get('channelId');
+
+  const query = useQuery({
+    queryFn: () => getChannel(channelId || ''),
+    queryKey: ['channel', channelId],
+  });
+
   return (
-    <ChatbotWidget />
-    // <Suspense fallback={<p>waiting for message...</p>}>
-    //   <ChatBoxWidget2 messagePromise={messagePromise} />
-    // </Suspense>
+    <>
+      {query.data?.channel && (
+        <ChatbotWidget channelSchema={query.data?.channel} />
+      )}
+    </>
   );
 }
 

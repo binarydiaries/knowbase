@@ -29,7 +29,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { useState } from 'react';
-import { getChatbots } from '@/services';
+import { getChatbots, patchChatbotsById } from '@/services';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -52,11 +52,12 @@ function RouteComponent() {
 
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
-      // await deleteChatbotsById({
-      //   path: {
-      //     id,
-      //   },
-      // });
+      return patchChatbotsById({
+        path: { id },
+        body: {
+          chatbotStatus: 'archived',
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
@@ -194,7 +195,12 @@ function RouteComponent() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">
-              <CreateChatbotDialog />
+              <CreateChatbotDialog
+                open={dialogOpen}
+                setOpen={setDialogOpen}
+                chatbot={editingBot}
+                onClose={() => setEditingBot(null)}
+              />
             </EmptyContent>
             <Button
               variant="link"

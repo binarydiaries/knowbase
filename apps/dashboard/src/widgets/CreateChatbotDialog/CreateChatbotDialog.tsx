@@ -11,7 +11,6 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import * as React from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -50,24 +49,6 @@ export function CreateChatbotDialog({
 
   const queryClient = useQueryClient();
 
-  const createChatbotMutation1 = useMutation({
-    mutationFn: async ({
-      name,
-      description,
-    }: {
-      name: string;
-      description: string;
-    }) => {
-      await postChatbots({ body: { name, description } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
-
-      reset(); // ✅ reset happens AFTER success
-      setOpen(false); // ✅ dialog closes AFTER reset
-    },
-    onError: () => {},
-  });
   const createOrUpdateMutation = useMutation({
     mutationFn: async ({
       name,
@@ -80,7 +61,7 @@ export function CreateChatbotDialog({
         // ✨ EDIT
         return patchChatbotsById({
           path: { id: chatbot.id },
-          body: { name, description },
+          body: { name, description, chatbotStatus: chatbot?.chatbotStatus },
         });
       }
 
@@ -105,7 +86,7 @@ export function CreateChatbotDialog({
   }
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       reset();
     }
   }, [open, reset]);

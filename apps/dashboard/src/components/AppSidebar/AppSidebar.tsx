@@ -17,11 +17,10 @@ import {
   LineChart,
   Settings,
 } from 'lucide-react';
-import { NavProjects } from '../NavProjects/NavProjects.tsx';
+import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { NavUser } from '../NavUser/NavUser.tsx';
 import { TeamSwitcher } from '../TeamSwitcher/TeamSwitcher.tsx';
 
-// This is sample data.
 const data = {
   user: {
     name: 'shadcn',
@@ -100,12 +99,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.main} />
-        <NavProjects projects={data.chatbots} title={'Favourites'} />
+        <NavMain items={data.main} title="Platform" />
+        {/*<NavProjects projects={data.chatbots} title={'Favourites'} />*/}
       </SidebarContent>
       <SidebarFooter>
-        <NavProjects projects={data.footer} />
-        <NavUser user={data.user} />
+        <NavMain items={data.footer} />
+        <div className="p-2">
+          <NavUser user={data.user} />
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

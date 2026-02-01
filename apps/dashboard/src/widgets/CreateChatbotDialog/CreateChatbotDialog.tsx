@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
+import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchChatbotsById, postChatbots } from '@/services';
 
 const schema = z.object({
@@ -114,8 +115,7 @@ export function CreateChatbotDialog({
           label="Name"
           placeholder="Enter name"
         />
-
-        <FormInput
+        <FormTextarea
           name="description"
           control={control}
           label="Description"

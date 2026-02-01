@@ -14,36 +14,19 @@ import {
   BreadcrumbSeparator,
 } from '@knowbase/ui/components/breadcrumb';
 import { Button } from '@knowbase/ui/components/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@knowbase/ui/components/popover';
 import { Separator } from '@knowbase/ui/components/separator';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-} from '@knowbase/ui/components/sidebar';
+import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Spinner } from '@knowbase/ui/components/spinner';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useParams } from '@tanstack/react-router';
-import {
-  AlertCircleIcon,
-  FileText,
-  MoreHorizontal,
-  Settings2,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertCircleIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { getChatbotsById } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
+import { ChatbotMenuActions } from '@/widgets/ChatbotMenuActions/ChatbotMenuActions.tsx';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
+import { ChatbotUseWidget } from '@/widgets/ChatbotUseWidget/ChatbotUseWidget.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
 
@@ -52,7 +35,6 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 });
 
 function RouteComponent() {
-  const [isOpen, setIsOpen] = useState(false);
   const { chatbotId } = useParams({ strict: false });
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
@@ -83,19 +65,6 @@ function RouteComponent() {
 
   const chatbot = query.data?.data.chatbot;
 
-  const data = [
-    [
-      {
-        label: 'Customize Page',
-        icon: Settings2,
-      },
-      {
-        label: 'Turn into wiki',
-        icon: FileText,
-      },
-    ],
-  ];
-
   return (
     <div className="h-screen flex flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -121,47 +90,8 @@ function RouteComponent() {
         </div>
         <div className="ml-auto px-3">
           <div className="flex items-center gap-2 text-sm">
-            <Button size="sm" variant="outline">
-              Use Chabot
-            </Button>
-            <Popover open={isOpen} onOpenChange={setIsOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="data-[state=open]:bg-accent h-7 w-7"
-                >
-                  <MoreHorizontal />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-56 overflow-hidden rounded-lg p-0"
-                align="end"
-              >
-                <Sidebar collapsible="none" className="bg-transparent">
-                  <SidebarContent>
-                    {data.map((group, index) => (
-                      <SidebarGroup
-                        key={index}
-                        className="border-b last:border-none"
-                      >
-                        <SidebarGroupContent className="gap-0">
-                          <SidebarMenu>
-                            {group.map((item, index) => (
-                              <SidebarMenuItem key={index}>
-                                <SidebarMenuButton>
-                                  <item.icon /> <span>{item.label}</span>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </SidebarGroupContent>
-                      </SidebarGroup>
-                    ))}
-                  </SidebarContent>
-                </Sidebar>
-              </PopoverContent>
-            </Popover>
+            <ChatbotUseWidget />
+            <ChatbotMenuActions />
           </div>
         </div>
       </header>

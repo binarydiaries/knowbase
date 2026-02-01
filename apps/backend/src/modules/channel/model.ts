@@ -39,7 +39,7 @@ export const ChannelSchema = z.object({
   id: z.string(),
   chatbotId: z.string(),
   enabled: z.boolean(),
-  status: ChannelStatusSchema,
+  channelStatus: ChannelStatusSchema,
   additional: ChannelSchemaType,
   createdAt: z.date(),
   updatedAt: z.date(),

@@ -11,24 +11,45 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import * as React from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
-import { postChatbots } from '@/services';
+import { patchChatbotsById, postChatbots } from '@/services';
 
 const schema = z.object({
   name: z.string().min(3).max(20),
   description: z.string().min(3).max(200).optional(),
 });
 
-export function CreateChatbotDialog() {
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+export function CreateChatbotDialog({
+  open,
+  setOpen,
+  chatbot,
+  onClose,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  chatbot?: any;
+  onClose?: () => void;
+}) {
+  const { handleSubmit, reset, control } = useForm({
+    resolver: zodResolver(schema),
+    mode: 'all',
+  });
+
+  useEffect(() => {
+    if (chatbot) {
+      reset({
+        name: chatbot.name,
+        description: chatbot.description ?? '',
+      });
+    }
+  }, [chatbot, reset]);
+
   const queryClient = useQueryClient();
 
-  const createChatbotMutation = useMutation({
+  const createOrUpdateMutation = useMutation({
     mutationFn: async ({
       name,
       description,
@@ -36,33 +57,36 @@ export function CreateChatbotDialog() {
       name: string;
       description: string;
     }) => {
-      await postChatbots({ body: { name, description } });
+      if (chatbot) {
+        // ✨ EDIT
+        return patchChatbotsById({
+          path: { id: chatbot.id },
+          body: { name, description, chatbotStatus: chatbot?.chatbotStatus },
+        });
+      }
+
+      // ✨ CREATE
+      return postChatbots({ body: { name, description } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
-
-      reset(); // ✅ reset happens AFTER success
-      setOpen(false); // ✅ dialog closes AFTER reset
-      setLoading(false);
-    },
-    onError: () => {
-      setLoading(false);
+      reset();
+      setOpen(false);
+      onClose?.();
     },
   });
 
-  const { handleSubmit, reset, control } = useForm({
-    resolver: zodResolver(schema),
-    mode: 'all',
-  });
+  const { isPending } = createOrUpdateMutation;
+
   function handleCreate(formValues: z.infer<typeof schema>) {
-    createChatbotMutation.mutate({
+    createOrUpdateMutation.mutate({
       name: formValues.name,
       description: formValues.description ?? '',
     });
   }
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       reset();
     }
   }, [open, reset]);
@@ -75,7 +99,10 @@ export function CreateChatbotDialog() {
 
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>Create Chatbot</DialogTitle>
+          <DialogTitle>
+            {chatbot ? 'Edit Chatbot' : 'Create Chatbot'}
+          </DialogTitle>
+
           <DialogDescription>
             Give your chatbot a name. You can configure everything else later.
           </DialogDescription>
@@ -99,12 +126,14 @@ export function CreateChatbotDialog() {
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit(handleCreate)} disabled={loading}>
-            {loading ? (
+          <Button onClick={handleSubmit(handleCreate)} disabled={isPending}>
+            {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 text-white w-4 animate-spin" />
-                Creating…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {chatbot ? 'Updating…' : 'Creating…'}
               </>
+            ) : chatbot ? (
+              'Update'
             ) : (
               'Create'
             )}

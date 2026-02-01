@@ -24,6 +24,8 @@ import { useEffect } from 'react';
 import { getChatbotsById } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
+import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
+import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import { ChatbotMenuActions } from '@/widgets/ChatbotMenuActions/ChatbotMenuActions.tsx';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { ChatbotUseWidget } from '@/widgets/ChatbotUseWidget/ChatbotUseWidget.tsx';
@@ -101,7 +103,9 @@ function RouteComponent() {
         <div className="flex flex-1 h-full overflow-hidden">
           <div className="grow p-5 shadow-none flex-col flex gap-5 h-full overflow-auto border-r">
             <DocumentsWidget />
-            <SettingsCard />
+            <BehaviourCard />
+            <ChannelCard />
+            {/*<SettingsCard />*/}
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
             <Badge variant="secondary" className="rounded-l-none">

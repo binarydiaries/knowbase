@@ -23,6 +23,8 @@ import { AlertCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { getChatbotsById } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
+import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
+import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
@@ -84,7 +86,9 @@ function RouteComponent() {
         <div className="flex flex-1 h-full overflow-hidden">
           <div className="grow p-5 shadow-none flex-col flex gap-5 h-full overflow-auto border-r">
             <DocumentsWidget />
-            <SettingsCard />
+            <BehaviourCard />
+            <ChannelCard />
+            {/*<SettingsCard />*/}
           </div>
           <div className="w-130 shrink-0 flex flex-col gap-5">
             <Badge variant="secondary" className="rounded-l-none">

@@ -71,7 +71,12 @@ export const Chatbot = ({
           {subTitle && <p className="text-sm">{subTitle}</p>}
         </div>
         {onClose && (
-          <Button size="icon-sm" onClick={onClose}>
+          <Button
+            size="icon-sm"
+            variant="link"
+            onClick={onClose}
+            className="cursor-pointer"
+          >
             <X className="text-white size-5" />
           </Button>
         )}

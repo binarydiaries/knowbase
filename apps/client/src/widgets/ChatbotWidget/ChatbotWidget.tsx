@@ -37,11 +37,9 @@ export const ChatbotWidget = ({ channelSchema }: IChatbotWidgetProps) => {
         );
         return {
           body: {
-            message: {
-              id: lastMessage.id,
-              text: messageText?.text,
-            },
-            id,
+            message: messageText?.text,
+            conversationId: id,
+            channelId: channelSchema?.id,
           },
         };
       },

@@ -1,4 +1,5 @@
 import { cn } from '@knowbase/ui/lib/utils';
+import Markdown from 'react-markdown';
 
 interface IChatMessageProps {
   systemTitle: string;
@@ -26,7 +27,20 @@ export const ChatMessage = ({
         {type === 'system' && (
           <h4 className="text-sm font-medium">{systemTitle}</h4>
         )}
-        <p className="text-sm">{message}</p>
+
+        <Markdown
+          components={{
+            p: (props) => <p {...props} className="text-sm" />,
+            ol: (props) => (
+              <ol {...props} className="list-decimal pl-6 space-y-2" />
+            ),
+            ul: (props) => (
+              <ul {...props} className="list-disc pl-6 space-y-2" />
+            ),
+          }}
+        >
+          {message}
+        </Markdown>
       </div>
     </div>
   );

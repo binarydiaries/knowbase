@@ -98,7 +98,7 @@ export const Chatbot = ({
       <div className="p-5 flex flex-col gap-2">
         <div className="relative">
           <Textarea
-            className="min-h-12 rounded-2xl pr-14 py-3 resize-none"
+            className="min-h-12 rounded-2xl pr-14 py-3 resize-none placeholder:truncate"
             placeholder={inputPlaceholder || 'Type your message...'}
             value={input}
             onChange={(event) => setInput(event.target.value)}

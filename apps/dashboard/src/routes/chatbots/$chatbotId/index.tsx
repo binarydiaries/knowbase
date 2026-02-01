@@ -95,7 +95,7 @@ function RouteComponent() {
             <DocumentsWidget />
             <SettingsCard />
           </div>
-          <div className="w-130 shrink-0 flex flex-col gap-5">
+          <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
             <Badge variant="secondary" className="rounded-l-none">
               Web Preview
             </Badge>

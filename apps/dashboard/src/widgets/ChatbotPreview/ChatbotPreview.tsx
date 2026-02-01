@@ -36,16 +36,16 @@ export const ChatbotPreview = () => {
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: 'http://localhost:3000/chat',
-      prepareSendMessagesRequest({ messages, id }) {
+      prepareSendMessagesRequest({ messages, id, body }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find(
           (value) => value.type === 'text',
         );
         return {
           body: {
+            ...body,
             message: messageText?.text,
             conversationId: id,
-            channelId: channelWeb?.id,
           },
         };
       },
@@ -65,8 +65,6 @@ export const ChatbotPreview = () => {
     return null;
   }
 
-  console.log('channelWeb', channelWeb);
-
   return (
     <Chatbot
       displayName={channelConfig?.displayName || ''}
@@ -81,7 +79,9 @@ export const ChatbotPreview = () => {
           value.parts.find((value1) => value1?.type === 'text')?.text || '',
         type: value.role === 'user' ? 'user' : 'system',
       }))}
-      onSendMessage={(message) => sendMessage({ text: message })}
+      onSendMessage={(message) =>
+        sendMessage({ text: message }, { body: { channelId: channelWeb?.id } })
+      }
     />
   );
 };

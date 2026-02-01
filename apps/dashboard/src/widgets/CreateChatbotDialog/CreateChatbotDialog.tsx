@@ -86,6 +86,7 @@ export function CreateChatbotDialog() {
           control={control}
           label="Name"
           placeholder="Enter name"
+          className="placeholder:line-clamp-1"
         />
 
         <FormInput

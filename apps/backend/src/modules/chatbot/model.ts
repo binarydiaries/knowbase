@@ -55,7 +55,7 @@ export const UpdateChatbotBody = Chatbot.pick({
   name: true,
   description: true,
   chatbotStatus: true,
-});
+}).partial();
 export const DeleteChatbotResponse = z.undefined();
 
 export const ChatbotModel = new Elysia().model({

@@ -3,12 +3,16 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from '@knowbase/ui/components/sidebar';
 import {
   Activity,
   AudioWaveform,
   Bot,
+  Bubbles,
   Command,
   Dot,
   GalleryVerticalEnd,
@@ -19,7 +23,6 @@ import {
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { NavUser } from '../NavUser/NavUser.tsx';
-import { TeamSwitcher } from '../TeamSwitcher/TeamSwitcher.tsx';
 
 const data = {
   user: {
@@ -96,7 +99,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <a href="/">
+                <Bubbles />
+                <span className="text-base font-semibold">Knowbase.ai</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.main} title="Platform" />

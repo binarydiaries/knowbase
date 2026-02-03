@@ -73,7 +73,7 @@ function RouteComponent() {
             orientation="vertical"
             className="mr-2 data-[orientation=vertical]:h-4"
           />
-          <h1 className="text-base font-medium flex-1">Chatbots</h1>
+          <h1 className="text-sm font-medium flex-1">Chatbots</h1>
           <CreateChatbotDialog
             open={dialogOpen}
             setOpen={setDialogOpen}

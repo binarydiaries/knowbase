@@ -32,10 +32,15 @@ export const Chatbot = new Elysia({
   .get(
     '',
     async () => {
-      const chatbots = await ChatbotService.list();
-      return {
-        chatbots,
-      };
+      try {
+        const chatbots = await ChatbotService.list();
+        return {
+          chatbots,
+        };
+      } catch (e) {
+        console.log(e);
+        return e;
+      }
     },
     {
       response: 'ManyChatbotResponse',

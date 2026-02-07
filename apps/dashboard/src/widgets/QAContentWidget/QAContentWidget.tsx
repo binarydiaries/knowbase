@@ -14,8 +14,12 @@ import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { patchDocumentsById, postDocuments } from '@/services';
+import { useState } from 'react';
+import {
+  type DocumentSchema,
+  patchDocumentsById,
+  postDocuments,
+} from '@/services';
 
 type QA = {
   question: string;
@@ -23,7 +27,7 @@ type QA = {
 };
 type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
-  document?: any;
+  document?: DocumentSchema;
   onClose?: () => void;
 };
 

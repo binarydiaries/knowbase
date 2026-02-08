@@ -33,7 +33,7 @@ export const ChatbotUseWidget = () => {
   const embedUrl = `${import.meta.env.VITE_EMBED_BASE}/embed.js`;
   const embedCode = `<script>
 window.KnowBaseChat = {
-  channelId: ${channelWeb?.id || ''},
+  channelId: "${channelWeb?.id || ''}",
 };
 </script>
 <script src="${embedUrl}" async></script>`;

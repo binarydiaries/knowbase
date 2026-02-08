@@ -13,7 +13,7 @@ import { setupMessageListener } from './listener';
     return;
   }
 
-  const chatUrl = `http://localhost:4000/?channelId=${config.channelId}`;
+  const chatUrl = `${import.meta.env.VITE_CLIENT_BASE}?channelId=${config.channelId}`;
 
   setupMessageListener();
 

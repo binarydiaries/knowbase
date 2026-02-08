@@ -16,7 +16,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
-import { patchChatbotsById, postChatbots } from '@/services';
+import {
+  type ChatbotSchema,
+  patchChatbotsById,
+  postChatbots,
+} from '@/services';
 
 const schema = z.object({
   name: z.string().min(3).max(20),
@@ -31,7 +35,7 @@ export function CreateChatbotDialog({
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  chatbot?: any;
+  chatbot?: ChatbotSchema;
   onClose?: () => void;
 }) {
   const { handleSubmit, reset, control } = useForm({

@@ -42,13 +42,13 @@ export const Channel = new Elysia({
     },
   )
   .guard({
-    params: 'OneChannelParamsSchema',
     response: {
       404: 'NotFoundResponse',
     },
   })
   .resolve(async ({ params, status }) => {
-    const channel = await ChannelService.single(params.id);
+    const newParam = params as { id: string };
+    const channel = await ChannelService.single(newParam.id);
 
     if (!channel) {
       return status(404, {

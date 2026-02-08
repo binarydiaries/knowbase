@@ -42,13 +42,14 @@ export const Chatbot = new Elysia({
     },
   )
   .guard({
-    params: 'OneChatbotParams',
     response: {
       404: 'NotFoundResponse',
     },
   })
   .resolve(async ({ params, status }) => {
-    const chatbot = await ChatbotService.single({ id: params.id });
+    const newParams = params as { id: string };
+
+    const chatbot = await ChatbotService.single({ id: newParams.id });
     if (!chatbot) {
       return status(404, {
         code: 'NOT_FOUND',
@@ -74,6 +75,7 @@ export const Chatbot = new Elysia({
       };
     },
     {
+      // params: 'OneChatbotParams',
       response: {
         200: 'OneChatbotResponse',
       },

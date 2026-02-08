@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@knowbase/ui/components/card';
+import type { LucideIcon } from 'lucide-react';
 
 export function StatCard({
   title,
@@ -8,7 +9,7 @@ export function StatCard({
 }: {
   title: string;
   value: string | number;
-  icon: any;
+  icon: LucideIcon;
   color?: string;
 }) {
   return (

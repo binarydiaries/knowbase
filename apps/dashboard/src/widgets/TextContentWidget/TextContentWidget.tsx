@@ -31,7 +31,9 @@ export const TextContentWidget = ({
   document,
   onClose,
 }: ITextContentWidgetProps) => {
-  const [content, setContent] = useState(document?.content?.data || '');
+  const [content, setContent] = useState(
+    (document?.content.type === 'text' && document?.content?.data) || '',
+  );
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
 
@@ -46,20 +48,18 @@ export const TextContentWidget = ({
   };
   const saveTextMutation = useMutation({
     mutationFn: async () => {
-      const payloadBody = {
-        title,
-        content: {
-          type: 'text',
-          data: content,
-        },
-      };
-
       if (mode === 'edit') {
         const { data } = await patchDocumentsById({
           path: {
-            id: document?.id,
+            id: document?.id || '',
           },
-          body: payloadBody,
+          body: {
+            title,
+            content: {
+              type: 'text',
+              data: content,
+            },
+          },
         });
         return {
           document: data.document,
@@ -67,10 +67,14 @@ export const TextContentWidget = ({
       }
 
       const { data } = await postDocuments({
-        body: JSON.stringify({
-          ...payloadBody,
+        body: {
+          title: title || '',
+          content: {
+            type: 'text',
+            data: content,
+          },
           chatbotId,
-        }),
+        },
       });
 
       return {

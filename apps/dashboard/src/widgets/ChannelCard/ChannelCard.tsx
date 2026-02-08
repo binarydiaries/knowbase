@@ -108,6 +108,7 @@ const ChannelCard = () => {
         body: {
           additional: {
             ...channelWeb.additional,
+            type: 'web',
             config: updatedConfig,
           },
         },
@@ -117,6 +118,7 @@ const ChannelCard = () => {
         id: channelWeb.id,
         additional: {
           ...channelWeb.additional,
+          type: 'web',
           config: updatedConfig,
         },
       });

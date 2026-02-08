@@ -51,10 +51,6 @@ const ChannelListQuerySchema = z.object({
   chatbotId: z.string(),
 });
 
-const OneChannelParamsSchema = z.object({
-  id: z.string(),
-});
-
 const ManyChannelResponse = z.object({
   channels: z.array(ChannelSchema),
 });
@@ -78,5 +74,4 @@ export const ChannelModel = new Elysia().model({
   CreateChannelBodySchema,
   UpdateChannelBodySchema,
   OneChannelResponse,
-  OneChannelParamsSchema,
 });

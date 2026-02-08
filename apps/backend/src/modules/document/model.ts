@@ -8,8 +8,10 @@ export const DocumentContentQna = z.array(
   }),
 );
 
+const DocumentContentText = z.string();
+
 export const DocumentContent = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('text'), data: z.string() }).meta({
+  z.object({ type: z.literal('text'), data: DocumentContentText }).meta({
     title: 'text',
   }),
   z.object({ type: z.literal('qna'), data: DocumentContentQna }).meta({
@@ -63,4 +65,6 @@ export const DocumentModel = new Elysia().model({
   ManyDocumentsResponse,
   OneDocumentParams,
   ChatbotDocumentsParams,
+  DocumentContentQna,
+  DocumentContentText,
 });

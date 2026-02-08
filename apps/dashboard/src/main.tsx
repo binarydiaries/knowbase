@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
+import { client } from '@/services/client.gen.ts';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
@@ -30,7 +31,12 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key');
 }
 
+client.setConfig({
+  baseURL: import.meta.env.VITE_API_BASE,
+});
+
 // Render the app
+// biome-ignore lint/style/noNonNullAssertion: Its from vite
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);

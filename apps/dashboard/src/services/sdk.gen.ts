@@ -51,13 +51,13 @@ export const postDocuments = <ThrowOnError extends boolean = true>(options: Opti
     }
 });
 
-export const deleteDocumentsById = <ThrowOnError extends boolean = true>(options?: Options<DeleteDocumentsByIdData, ThrowOnError>) => (options?.client ?? client).delete<DeleteDocumentsByIdResponses, DeleteDocumentsByIdErrors, ThrowOnError>({
+export const deleteDocumentsById = <ThrowOnError extends boolean = true>(options: Options<DeleteDocumentsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteDocumentsByIdResponses, DeleteDocumentsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/documents/{id}',
     ...options
 });
 
-export const getDocumentsById = <ThrowOnError extends boolean = true>(options?: Options<GetDocumentsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetDocumentsByIdResponses, GetDocumentsByIdErrors, ThrowOnError>({
+export const getDocumentsById = <ThrowOnError extends boolean = true>(options: Options<GetDocumentsByIdData, ThrowOnError>) => (options.client ?? client).get<GetDocumentsByIdResponses, GetDocumentsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/documents/{id}',
     ...options
@@ -89,7 +89,7 @@ export const postChatbots = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const getChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<GetChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetChatbotsByIdResponses, GetChatbotsByIdErrors, ThrowOnError>({
+export const getChatbotsById = <ThrowOnError extends boolean = true>(options: Options<GetChatbotsByIdData, ThrowOnError>) => (options.client ?? client).get<GetChatbotsByIdResponses, GetChatbotsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/chatbots/{id}',
     ...options
@@ -152,7 +152,7 @@ export const postChannels = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const getChannelsById = <ThrowOnError extends boolean = true>(options?: Options<GetChannelsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetChannelsByIdResponses, GetChannelsByIdErrors, ThrowOnError>({
+export const getChannelsById = <ThrowOnError extends boolean = true>(options: Options<GetChannelsByIdData, ThrowOnError>) => (options.client ?? client).get<GetChannelsByIdResponses, GetChannelsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/channels/{id}',
     ...options

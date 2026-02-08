@@ -18,7 +18,7 @@ import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Spinner } from '@knowbase/ui/components/spinner';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, useParams } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { getChatbotsById } from '@/services';
@@ -37,7 +37,7 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 });
 
 function RouteComponent() {
-  const { chatbotId } = useParams({ strict: false });
+  const { chatbotId } = Route.useParams();
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);

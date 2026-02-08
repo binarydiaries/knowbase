@@ -1,4 +1,3 @@
-import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
 import {
@@ -29,7 +28,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { useState } from 'react';
-import { getChatbots, patchChatbotsById } from '@/services';
+import { type ChatbotSchema, getChatbots, patchChatbotsById } from '@/services';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -48,7 +47,7 @@ function RouteComponent() {
   const isChatbotAvailable =
     !query.isLoading && query?.data?.data?.chatbots?.length;
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingBot, setEditingBot] = useState<any>(null);
+  const [editingBot, setEditingBot] = useState<ChatbotSchema>();
 
   const archiveChatbotMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -78,7 +77,7 @@ function RouteComponent() {
             open={dialogOpen}
             setOpen={setDialogOpen}
             chatbot={editingBot}
-            onClose={() => setEditingBot(null)}
+            onClose={() => setEditingBot(undefined)}
           />
         </div>
       </header>
@@ -199,7 +198,7 @@ function RouteComponent() {
                 open={dialogOpen}
                 setOpen={setDialogOpen}
                 chatbot={editingBot}
-                onClose={() => setEditingBot(null)}
+                onClose={() => setEditingBot(undefined)}
               />
             </EmptyContent>
             <Button
@@ -208,7 +207,7 @@ function RouteComponent() {
               className="text-muted-foreground"
               size="sm"
             >
-              <a href="#">
+              <a href="/">
                 Learn More <ArrowUpRightIcon />
               </a>
             </Button>

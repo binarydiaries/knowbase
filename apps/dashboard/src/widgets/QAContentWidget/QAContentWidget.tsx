@@ -14,8 +14,12 @@ import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { patchDocumentsById, postDocuments } from '@/services';
+import { useState } from 'react';
+import {
+  type DocumentSchema,
+  patchDocumentsById,
+  postDocuments,
+} from '@/services';
 
 type QA = {
   question: string;
@@ -23,7 +27,7 @@ type QA = {
 };
 type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
-  document?: any;
+  document?: DocumentSchema;
   onClose?: () => void;
 };
 
@@ -33,7 +37,9 @@ export const QAContentWidget = ({
   onClose,
 }: IQAContentWidgetProps) => {
   const [qaList, setQaList] = useState<QA[]>(
-    document?.content?.data || [{ question: '', answer: '' }],
+    (document?.content.type === 'qna' && document?.content?.data) || [
+      { question: '', answer: '' },
+    ],
   );
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
@@ -49,7 +55,7 @@ export const QAContentWidget = ({
       if (mode === 'edit') {
         return patchDocumentsById({
           path: {
-            id: document.id,
+            id: document?.id || '',
           },
           body: {
             title,
@@ -62,14 +68,14 @@ export const QAContentWidget = ({
       }
 
       return postDocuments({
-        body: JSON.stringify({
-          chatbotId,
-          title,
+        body: {
+          chatbotId: chatbotId || '',
+          title: title || '',
           content: {
             type: 'qna',
             data: qaList,
           },
-        }),
+        },
       });
     },
     onSuccess: () => {
@@ -126,7 +132,7 @@ export const QAContentWidget = ({
         </div>
         {/* Cards */}
         {qaList.map((qa, index) => (
-          <Card key={index}>
+          <Card key={+index}>
             <CardContent className="space-y-4">
               <div>
                 <div>

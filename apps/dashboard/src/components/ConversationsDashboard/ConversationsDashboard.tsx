@@ -80,7 +80,7 @@ export default function ConversationsDashboard() {
                 sess_abc123 · 2024-01-15 10:30 AM
               </p>
             </div>
-            <Badge variant="success">Completed</Badge>
+            <Badge variant="default">Completed</Badge>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -107,7 +107,7 @@ export default function ConversationsDashboard() {
 
                 <div className="flex items-center gap-3 text-sm">
                   <span className="text-muted-foreground">Confidence:</span>
-                  <Badge variant="success">95%</Badge>
+                  <Badge variant="default">95%</Badge>
                 </div>
 
                 <div className="flex gap-2">

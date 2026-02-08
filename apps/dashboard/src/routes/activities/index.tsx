@@ -12,33 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 import { getChatbots } from '@/services';
-import { timeAgo } from '@/utils/datetimeHelper.ts';
-
-type Chatbot = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-};
-//
-// const chatbots: Chatbot[] = [
-//   {
-//     id: 'sales-bot',
-//     name: 'Sales Bot',
-//     description: 'Handles sales queries',
-//     createdAt: '2024-12-01',
-//   },
-//   {
-//     id: 'support-bot',
-//     name: 'Support Bot',
-//     description: 'Customer support chatbot',
-//     createdAt: '2024-12-10',
-//   },
-// ];
 
 export const Route = createFileRoute('/activities/')({
   component: RouteComponent,

@@ -35,7 +35,7 @@ export const ChatbotPreview = () => {
   const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: 'http://localhost:3000/chat',
+      api: `${import.meta.env.VITE_API_BASE}/chat`,
       prepareSendMessagesRequest({ messages, id, body }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find(

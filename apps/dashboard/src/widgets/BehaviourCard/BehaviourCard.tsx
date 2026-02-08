@@ -39,6 +39,7 @@ export const chatbotBehaviourSchema = z.object({
     .optional(), // textarea, optional unless you want it required
 });
 type BehaviourFormValues = z.infer<typeof chatbotBehaviourSchema>;
+
 const BehaviourCard = () => {
   const { chatbotId } = useParams({ strict: false });
   if (!chatbotId) throw new Error('ChatbotId not available');
@@ -46,7 +47,7 @@ const BehaviourCard = () => {
   const behaviour = useBehaviour(
     (state) => state.behaviourByChatbotId[chatbotId],
   );
-  console.log('behaviour', behaviour, 'chatbotId', chatbotId);
+
   const patchBehaviour = useBehaviour((s) => s.updateBehaviour);
   const {
     control,
@@ -72,7 +73,7 @@ const BehaviourCard = () => {
         tone: behaviour.tone,
         verbosity: behaviour.verbosity,
         fallbackMessage: behaviour.fallbackMessage,
-        guardrails: behaviour.guardrails,
+        guardrails: behaviour.guardrails || '',
       });
     }
   }, [behaviour, reset]);

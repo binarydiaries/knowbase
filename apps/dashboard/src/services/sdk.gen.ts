@@ -51,13 +51,13 @@ export const postDocuments = <ThrowOnError extends boolean = true>(options: Opti
     }
 });
 
-export const deleteDocumentsById = <ThrowOnError extends boolean = true>(options?: Options<DeleteDocumentsByIdData, ThrowOnError>) => (options?.client ?? client).delete<DeleteDocumentsByIdResponses, DeleteDocumentsByIdErrors, ThrowOnError>({
+export const deleteDocumentsById = <ThrowOnError extends boolean = true>(options: Options<DeleteDocumentsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteDocumentsByIdResponses, DeleteDocumentsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/documents/{id}',
     ...options
 });
 
-export const getDocumentsById = <ThrowOnError extends boolean = true>(options?: Options<GetDocumentsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetDocumentsByIdResponses, GetDocumentsByIdErrors, ThrowOnError>({
+export const getDocumentsById = <ThrowOnError extends boolean = true>(options: Options<GetDocumentsByIdData, ThrowOnError>) => (options.client ?? client).get<GetDocumentsByIdResponses, GetDocumentsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/documents/{id}',
     ...options

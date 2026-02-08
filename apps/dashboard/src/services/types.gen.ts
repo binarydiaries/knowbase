@@ -169,7 +169,6 @@ export type ChatbotSchema = {
     description: string | null;
     chatbotStatus: 'active' | 'archived';
     createdBy: string;
-    orgId: string;
     createdAt: string;
     updatedAt: string;
 };
@@ -186,7 +185,6 @@ export type OneChatbotResponse = {
         description: string | null;
         chatbotStatus: 'active' | 'archived';
         createdBy: string;
-        orgId: string;
         createdAt: string;
         updatedAt: string;
     };
@@ -261,10 +259,6 @@ export type ManyChatbotResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
-};
-
-export type OneChatbotParams = {
-    id: string;
 };
 
 export type UpdateChatbotBody = {
@@ -572,7 +566,9 @@ export type PostDocumentsResponse = PostDocumentsResponses[keyof PostDocumentsRe
 
 export type DeleteDocumentsByIdData = {
     body?: never;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/documents/{id}';
 };
@@ -595,7 +591,9 @@ export type DeleteDocumentsByIdResponses = {
 
 export type GetDocumentsByIdData = {
     body?: never;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/documents/{id}';
 };
@@ -620,7 +618,9 @@ export type GetDocumentsByIdResponse = GetDocumentsByIdResponses[keyof GetDocume
 
 export type PatchDocumentsByIdData = {
     body: UpdateDocumentBody;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/documents/{id}';
 };

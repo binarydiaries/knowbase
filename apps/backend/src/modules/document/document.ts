@@ -45,13 +45,13 @@ export const Document = new Elysia({
     },
   )
   .guard({
-    params: 'OneDocumentParams',
     response: {
       404: 'NotFoundResponse',
     },
   })
   .resolve(async ({ params, status }) => {
-    const document = await DocumentService.single(params.id);
+    const newParams = params as { id: string };
+    const document = await DocumentService.single(newParams.id);
 
     if (!document) {
       return status(404, {

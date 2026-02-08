@@ -18,13 +18,9 @@ export const chatbotBehaviourSchema = z.object({
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
 
-  tone: z.enum(['friendly', 'professional', 'neutral'], {
-    required_error: 'Tone is required',
-  }),
+  tone: z.enum(['friendly', 'professional', 'neutral']),
 
-  verbosity: z.enum(['short', 'balanced', 'detailed'], {
-    required_error: 'Verbosity is required',
-  }),
+  verbosity: z.enum(['short', 'balanced', 'detailed']),
 
   fallbackMessage: z
     .string()
@@ -38,7 +34,7 @@ export const chatbotBehaviourSchema = z.object({
 });
 
 const BehaviourCard = () => {
-  const { handleSubmit, reset, control } = useForm({
+  const { control } = useForm({
     resolver: zodResolver(chatbotBehaviourSchema),
     mode: 'all',
   });

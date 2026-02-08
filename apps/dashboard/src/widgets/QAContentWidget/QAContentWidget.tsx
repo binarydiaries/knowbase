@@ -37,7 +37,9 @@ export const QAContentWidget = ({
   onClose,
 }: IQAContentWidgetProps) => {
   const [qaList, setQaList] = useState<QA[]>(
-    document?.content?.data || [{ question: '', answer: '' }],
+    (document?.content.type === 'qna' && document?.content?.data) || [
+      { question: '', answer: '' },
+    ],
   );
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
@@ -53,7 +55,7 @@ export const QAContentWidget = ({
       if (mode === 'edit') {
         return patchDocumentsById({
           path: {
-            id: document.id,
+            id: document?.id || '',
           },
           body: {
             title,
@@ -66,14 +68,14 @@ export const QAContentWidget = ({
       }
 
       return postDocuments({
-        body: JSON.stringify({
-          chatbotId,
-          title,
+        body: {
+          chatbotId: chatbotId || '',
+          title: title || '',
           content: {
             type: 'qna',
             data: qaList,
           },
-        }),
+        },
       });
     },
     onSuccess: () => {
@@ -130,7 +132,7 @@ export const QAContentWidget = ({
         </div>
         {/* Cards */}
         {qaList.map((qa, index) => (
-          <Card key={index}>
+          <Card key={+index}>
             <CardContent className="space-y-4">
               <div>
                 <div>

@@ -12,7 +12,6 @@ const ChatbotSchema = z.object({
   description: z.string().nullable(),
   chatbotStatus: ChatbotStatus,
   createdBy: z.string(),
-  orgId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

@@ -43,7 +43,7 @@ export const ChannelSchema = z.object({
 const ChannelCard = () => {
   const [primaryColor, setPrimaryColor] = React.useState('#915964');
 
-  const { handleSubmit, reset, control } = useForm({
+  const { control } = useForm({
     resolver: zodResolver(ChannelSchema),
     mode: 'all',
   });

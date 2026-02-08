@@ -4,7 +4,7 @@ import { z } from 'zod';
 const BehaviourTone = z.enum(['friendly', 'professional', 'neutral']);
 const BehaviourVerbosity = z.enum(['short', 'balanced', 'detailed']);
 
-export const Behaviour = z.object({
+export const BehaviourSchema = z.object({
   id: z.string(),
   chatbotId: z.string(),
   systemPrompt: z.string(),
@@ -17,17 +17,17 @@ export const Behaviour = z.object({
 });
 
 const OneBehaviourResponse = z.object({
-  behaviour: Behaviour,
+  behaviour: BehaviourSchema,
 });
 
 const ManyBehaviourResponse = z.object({
-  behaviours: z.array(Behaviour),
+  behaviours: z.array(BehaviourSchema),
 });
 
 const OneBehaviourParams = z.object({
   id: z.string(),
 });
-export const UpdateBehaviourBody = Behaviour.pick({
+export const UpdateBehaviourBody = BehaviourSchema.pick({
   tone: true,
   systemPrompt: true,
   guardrails: true,
@@ -40,4 +40,5 @@ export const BehaviourModel = new Elysia().model({
   OneBehaviourResponse,
   OneBehaviourParams,
   ManyBehaviourResponse,
+  BehaviourSchema,
 });

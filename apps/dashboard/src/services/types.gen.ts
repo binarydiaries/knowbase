@@ -346,6 +346,18 @@ export type ManyBehaviourResponse = {
     }>;
 };
 
+export type BehaviourSchema = {
+    id: string;
+    chatbotId: string;
+    systemPrompt: string;
+    tone: 'friendly' | 'professional' | 'neutral';
+    verbosity: 'short' | 'balanced' | 'detailed';
+    fallbackMessage: string;
+    guardrails?: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type ChannelSchema = {
     id: string;
     chatbotId: string;

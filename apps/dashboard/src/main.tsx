@@ -36,6 +36,7 @@ client.setConfig({
 });
 
 // Render the app
+// biome-ignore lint/style/noNonNullAssertion: Its from vite
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);

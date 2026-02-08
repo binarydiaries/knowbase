@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsResponses, GetMessagesData, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsResponses, PostChatbotsData, PostChatbotsResponses, PostChatData, PostDocumentsData, PostDocumentsResponses, PostEmbeddingData } from './types.gen';
+import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsData, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsResponses, GetMessagesData, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsResponses, PostChatbotsData, PostChatbotsResponses, PostChatData, PostDocumentsData, PostDocumentsResponses, PostEmbeddingData } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -89,11 +89,7 @@ export const postChatbots = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const getChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<GetChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetChatbotsByIdResponses, GetChatbotsByIdErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/chatbots/{id}',
-    ...options
-});
+export const getChatbotsById = <ThrowOnError extends boolean = true>(options?: Options<GetChatbotsByIdData, ThrowOnError>) => (options?.client ?? client).get<unknown, GetChatbotsByIdErrors, ThrowOnError>({ url: '/chatbots/{id}', ...options });
 
 export const patchChatbotsById = <ThrowOnError extends boolean = true>(options: Options<PatchChatbotsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchChatbotsByIdResponses, PatchChatbotsByIdErrors, ThrowOnError>({
     responseType: 'json',

@@ -21,7 +21,7 @@ export type ChatChannelResponseSchema = {
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
-            type: string;
+            type: 'web';
             config: {
                 displayName: string;
                 subtitle?: string;
@@ -31,12 +31,12 @@ export type ChatChannelResponseSchema = {
                 allowedDomains: Array<string>;
             };
         } | {
-            type: string;
+            type: 'whatsapp';
             config: {
                 [key: string]: never;
             };
         } | {
-            type: string;
+            type: 'instagram';
             config: {
                 [key: string]: never;
             };
@@ -54,10 +54,10 @@ export type DocumentSchema = {
     id: string;
     title: string;
     content: {
-        type: string;
+        type: 'text';
         data: string;
     } | {
-        type: string;
+        type: 'qna';
         data: Array<{
             question: string;
             answer: string;
@@ -74,10 +74,10 @@ export type CreateDocumentBody = {
     chatbotId: string;
     title: string;
     content: {
-        type: string;
+        type: 'text';
         data: string;
     } | {
-        type: string;
+        type: 'qna';
         data: Array<{
             question: string;
             answer: string;
@@ -88,10 +88,10 @@ export type CreateDocumentBody = {
 export type UpdateDocumentBody = {
     title?: string;
     content: {
-        type: string;
+        type: 'text';
         data: string;
     } | {
-        type: string;
+        type: 'qna';
         data: Array<{
             question: string;
             answer: string;
@@ -104,10 +104,10 @@ export type OneDocumentResponse = {
         id: string;
         title: string;
         content: {
-            type: string;
+            type: 'text';
             data: string;
         } | {
-            type: string;
+            type: 'qna';
             data: Array<{
                 question: string;
                 answer: string;
@@ -126,10 +126,10 @@ export type ManyDocumentsResponse = {
         id: string;
         title: string;
         content: {
-            type: string;
+            type: 'text';
             data: string;
         } | {
-            type: string;
+            type: 'qna';
             data: Array<{
                 question: string;
                 answer: string;
@@ -151,15 +151,22 @@ export type ChatbotDocumentsParams = {
     chatbotId: string;
 };
 
+export type DocumentContentQna = Array<{
+    question: string;
+    answer: string;
+}>;
+
+export type DocumentContentText = string;
+
 export type NotFoundResponse = {
     code: 'NOT_FOUND';
     message: string;
 };
 
-export type Chatbot = {
+export type ChatbotSchema = {
     id: string;
     name: string;
-    description?: string | unknown;
+    description: string | null;
     chatbotStatus: 'active' | 'archived';
     createdBy: string;
     orgId: string;
@@ -176,7 +183,7 @@ export type OneChatbotResponse = {
     chatbot: {
         id: string;
         name: string;
-        description?: string | unknown;
+        description: string | null;
         chatbotStatus: 'active' | 'archived';
         createdBy: string;
         orgId: string;
@@ -187,10 +194,10 @@ export type OneChatbotResponse = {
         id: string;
         title: string;
         content: {
-            type: string;
+            type: 'text';
             data: string;
         } | {
-            type: string;
+            type: 'qna';
             data: Array<{
                 question: string;
                 answer: string;
@@ -208,7 +215,7 @@ export type OneChatbotResponse = {
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
-            type: string;
+            type: 'web';
             config: {
                 displayName: string;
                 subtitle?: string;
@@ -218,12 +225,12 @@ export type OneChatbotResponse = {
                 allowedDomains: Array<string>;
             };
         } | {
-            type: string;
+            type: 'whatsapp';
             config: {
                 [key: string]: never;
             };
         } | {
-            type: string;
+            type: 'instagram';
             config: {
                 [key: string]: never;
             };
@@ -238,7 +245,7 @@ export type OneChatbotResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | unknown;
+        guardrails?: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -248,7 +255,7 @@ export type ManyChatbotResponse = {
     chatbots: Array<{
         id: string;
         name: string;
-        description?: string | unknown;
+        description: string | null;
         chatbotStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
@@ -262,7 +269,7 @@ export type OneChatbotParams = {
 
 export type UpdateChatbotBody = {
     name?: string;
-    description?: string | unknown;
+    description?: string | null;
     chatbotStatus?: 'active' | 'archived';
 };
 
@@ -272,7 +279,7 @@ export type OneSmallChatbotResponse = {
     chatbot: {
         id: string;
         name: string;
-        description?: string | unknown;
+        description: string | null;
         chatbotStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
@@ -308,7 +315,7 @@ export type ManyConversationResponse = {
 export type UpdateBehaviourBody = {
     tone?: 'friendly' | 'professional' | 'neutral';
     systemPrompt?: string;
-    guardrails?: string | unknown;
+    guardrails?: string | null;
     verbosity?: 'short' | 'balanced' | 'detailed';
     fallbackMessage?: string;
 };
@@ -321,7 +328,7 @@ export type OneBehaviourResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | unknown;
+        guardrails?: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -339,7 +346,7 @@ export type ManyBehaviourResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | unknown;
+        guardrails?: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -351,7 +358,7 @@ export type ChannelSchema = {
     enabled: boolean;
     channelStatus: 'inactive' | 'active' | 'error';
     additional: {
-        type: string;
+        type: 'web';
         config: {
             displayName: string;
             subtitle?: string;
@@ -361,12 +368,12 @@ export type ChannelSchema = {
             allowedDomains: Array<string>;
         };
     } | {
-        type: string;
+        type: 'whatsapp';
         config: {
             [key: string]: never;
         };
     } | {
-        type: string;
+        type: 'instagram';
         config: {
             [key: string]: never;
         };
@@ -386,7 +393,7 @@ export type ManyChannelResponse = {
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
-            type: string;
+            type: 'web';
             config: {
                 displayName: string;
                 subtitle?: string;
@@ -396,12 +403,12 @@ export type ManyChannelResponse = {
                 allowedDomains: Array<string>;
             };
         } | {
-            type: string;
+            type: 'whatsapp';
             config: {
                 [key: string]: never;
             };
         } | {
-            type: string;
+            type: 'instagram';
             config: {
                 [key: string]: never;
             };
@@ -416,7 +423,7 @@ export type CreateChannelBodySchema = {
     enabled: boolean;
     channelStatus: 'inactive' | 'active' | 'error';
     additional: {
-        type: string;
+        type: 'web';
         config: {
             displayName: string;
             subtitle?: string;
@@ -426,12 +433,12 @@ export type CreateChannelBodySchema = {
             allowedDomains: Array<string>;
         };
     } | {
-        type: string;
+        type: 'whatsapp';
         config: {
             [key: string]: never;
         };
     } | {
-        type: string;
+        type: 'instagram';
         config: {
             [key: string]: never;
         };
@@ -443,7 +450,7 @@ export type UpdateChannelBodySchema = {
     enabled?: boolean;
     channelStatus?: 'inactive' | 'active' | 'error';
     additional?: {
-        type: string;
+        type: 'web';
         config: {
             displayName: string;
             subtitle?: string;
@@ -453,12 +460,12 @@ export type UpdateChannelBodySchema = {
             allowedDomains: Array<string>;
         };
     } | {
-        type: string;
+        type: 'whatsapp';
         config: {
             [key: string]: never;
         };
     } | {
-        type: string;
+        type: 'instagram';
         config: {
             [key: string]: never;
         };
@@ -472,7 +479,7 @@ export type OneChannelResponse = {
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
-            type: string;
+            type: 'web';
             config: {
                 displayName: string;
                 subtitle?: string;
@@ -482,12 +489,12 @@ export type OneChannelResponse = {
                 allowedDomains: Array<string>;
             };
         } | {
-            type: string;
+            type: 'whatsapp';
             config: {
                 [key: string]: never;
             };
         } | {
-            type: string;
+            type: 'instagram';
             config: {
                 [key: string]: never;
             };
@@ -683,15 +690,6 @@ export type GetChatbotsByIdErrors = {
 };
 
 export type GetChatbotsByIdError = GetChatbotsByIdErrors[keyof GetChatbotsByIdErrors];
-
-export type GetChatbotsByIdResponses = {
-    /**
-     * Response for status 200
-     */
-    200: OneChatbotResponse;
-};
-
-export type GetChatbotsByIdResponse = GetChatbotsByIdResponses[keyof GetChatbotsByIdResponses];
 
 export type PatchChatbotsByIdData = {
     body: UpdateChatbotBody;

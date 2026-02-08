@@ -20,6 +20,7 @@ const app = new Elysia()
         zod: (schema: schemas.$ZodType) =>
           z.toJSONSchema(schema, {
             unrepresentable: 'any',
+            target: 'openapi-3.0',
             override: (ctx) => {
               const def = ctx.zodSchema._zod.def;
               if (def.type === 'date') {

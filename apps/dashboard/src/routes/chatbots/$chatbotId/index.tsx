@@ -30,7 +30,6 @@ import { ChatbotMenuActions } from '@/widgets/ChatbotMenuActions/ChatbotMenuActi
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { ChatbotUseWidget } from '@/widgets/ChatbotUseWidget/ChatbotUseWidget.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
-import SettingsCard from '@/widgets/SettingsCard/SettingsCard.tsx';
 
 export const Route = createFileRoute('/chatbots/$chatbotId/')({
   component: RouteComponent,

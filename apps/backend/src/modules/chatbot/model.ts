@@ -6,10 +6,10 @@ import { DocumentSchema } from '../document/model';
 
 const ChatbotStatus = z.enum(['active', 'archived']);
 
-const Chatbot = z.object({
+const ChatbotSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().nullable(),
   chatbotStatus: ChatbotStatus,
   createdBy: z.string(),
   orgId: z.string(),
@@ -17,7 +17,7 @@ const Chatbot = z.object({
   updatedAt: z.date(),
 });
 
-const SmallChatbot = Chatbot.pick({
+const SmallChatbot = ChatbotSchema.pick({
   id: true,
   name: true,
   description: true,
@@ -33,7 +33,7 @@ const CreateChatbotBody = z.object({
 });
 
 const OneChatbotResponse = z.object({
-  chatbot: Chatbot,
+  chatbot: ChatbotSchema,
   documents: z.array(DocumentSchema),
   channels: z.array(ChannelSchema),
   behaviour: Behaviour.optional(),
@@ -51,7 +51,7 @@ export const OneChatbotParams = z.object({
   id: z.string(),
 });
 
-export const UpdateChatbotBody = Chatbot.pick({
+export const UpdateChatbotBody = ChatbotSchema.pick({
   name: true,
   description: true,
   chatbotStatus: true,
@@ -59,7 +59,7 @@ export const UpdateChatbotBody = Chatbot.pick({
 export const DeleteChatbotResponse = z.undefined();
 
 export const ChatbotModel = new Elysia().model({
-  Chatbot,
+  ChatbotSchema,
   CreateChatbotBody,
   OneChatbotResponse,
   ManyChatbotResponse,

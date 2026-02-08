@@ -677,7 +677,9 @@ export type PostChatbotsResponse = PostChatbotsResponses[keyof PostChatbotsRespo
 
 export type GetChatbotsByIdData = {
     body?: never;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/chatbots/{id}';
 };
@@ -691,9 +693,20 @@ export type GetChatbotsByIdErrors = {
 
 export type GetChatbotsByIdError = GetChatbotsByIdErrors[keyof GetChatbotsByIdErrors];
 
+export type GetChatbotsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneChatbotResponse;
+};
+
+export type GetChatbotsByIdResponse = GetChatbotsByIdResponses[keyof GetChatbotsByIdResponses];
+
 export type PatchChatbotsByIdData = {
     body: UpdateChatbotBody;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/chatbots/{id}';
 };

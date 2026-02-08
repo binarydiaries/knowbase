@@ -47,10 +47,6 @@ const ManyChatbotResponse = z.object({
   chatbots: z.array(SmallChatbot),
 });
 
-export const OneChatbotParams = z.object({
-  id: z.string(),
-});
-
 export const UpdateChatbotBody = ChatbotSchema.pick({
   name: true,
   description: true,
@@ -63,7 +59,6 @@ export const ChatbotModel = new Elysia().model({
   CreateChatbotBody,
   OneChatbotResponse,
   ManyChatbotResponse,
-  OneChatbotParams,
   UpdateChatbotBody,
   DeleteChatbotResponse,
   OneSmallChatbotResponse,

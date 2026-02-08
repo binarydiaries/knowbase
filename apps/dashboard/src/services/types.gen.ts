@@ -4,10 +4,46 @@ export type ClientOptions = {
     baseURL: 'http://localhost:3000' | (string & {});
 };
 
-export type ChatBody = {
+export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
+};
+
+export type ChatChannelQueryParamSchema = {
+    channelId: string;
+};
+
+export type ChatChannelResponseSchema = {
+    channel: {
+        id: string;
+        chatbotId: string;
+        enabled: boolean;
+        channelStatus: 'inactive' | 'active' | 'error';
+        additional: {
+            type: string;
+            config: {
+                displayName: string;
+                subtitle?: string;
+                welcomeMessage: string;
+                inputPlaceholder?: string;
+                primaryColor: string;
+                allowedDomains: Array<string>;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        } | {
+            type: string;
+            config: {
+                [key: string]: never;
+            };
+        };
+        createdAt: string;
+        updatedAt: string;
+    };
 };
 
 export type GetMessageQuery = {
@@ -170,7 +206,7 @@ export type OneChatbotResponse = {
         id: string;
         chatbotId: string;
         enabled: boolean;
-        status: 'inactive' | 'active' | 'error';
+        channelStatus: 'inactive' | 'active' | 'error';
         additional: {
             type: string;
             config: {
@@ -225,9 +261,9 @@ export type OneChatbotParams = {
 };
 
 export type UpdateChatbotBody = {
-    name: string;
+    name?: string;
     description?: string | unknown;
-    chatbotStatus: 'active' | 'archived';
+    chatbotStatus?: 'active' | 'archived';
 };
 
 export type DeleteChatbotResponse = unknown;
@@ -309,11 +345,23 @@ export type ManyBehaviourResponse = {
     }>;
 };
 
+export type BehaviourSchema = {
+    id: string;
+    chatbotId: string;
+    systemPrompt: string;
+    tone: 'friendly' | 'professional' | 'neutral';
+    verbosity: 'short' | 'balanced' | 'detailed';
+    fallbackMessage: string;
+    guardrails?: string | unknown;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type ChannelSchema = {
     id: string;
     chatbotId: string;
     enabled: boolean;
-    status: 'inactive' | 'active' | 'error';
+    channelStatus: 'inactive' | 'active' | 'error';
     additional: {
         type: string;
         config: {
@@ -348,7 +396,7 @@ export type ManyChannelResponse = {
         id: string;
         chatbotId: string;
         enabled: boolean;
-        status: 'inactive' | 'active' | 'error';
+        channelStatus: 'inactive' | 'active' | 'error';
         additional: {
             type: string;
             config: {
@@ -378,7 +426,7 @@ export type ManyChannelResponse = {
 export type CreateChannelBodySchema = {
     chatbotId: string;
     enabled: boolean;
-    status: 'inactive' | 'active' | 'error';
+    channelStatus: 'inactive' | 'active' | 'error';
     additional: {
         type: string;
         config: {
@@ -405,7 +453,7 @@ export type CreateChannelBodySchema = {
 export type UpdateChannelBodySchema = {
     chatbotId?: string;
     enabled?: boolean;
-    status?: 'inactive' | 'active' | 'error';
+    channelStatus?: 'inactive' | 'active' | 'error';
     additional?: {
         type: string;
         config: {
@@ -434,7 +482,7 @@ export type OneChannelResponse = {
         id: string;
         chatbotId: string;
         enabled: boolean;
-        status: 'inactive' | 'active' | 'error';
+        channelStatus: 'inactive' | 'active' | 'error';
         additional: {
             type: string;
             config: {
@@ -466,11 +514,27 @@ export type OneChannelParamsSchema = {
 };
 
 export type PostChatData = {
-    body: ChatBody;
+    body: ChatBodySchema;
     path?: never;
     query?: never;
     url: '/chat';
 };
+
+export type GetChatChannelData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/chat/channel';
+};
+
+export type GetChatChannelResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ChatChannelResponseSchema;
+};
+
+export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
 
 export type GetMessagesData = {
     body?: never;

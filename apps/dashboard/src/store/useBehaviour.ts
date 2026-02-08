@@ -1,19 +1,12 @@
 import { create } from 'zustand/react';
-
-export interface IBehaviourConfig {
-  systemPrompt: string;
-  tone: 'friendly' | 'professional' | 'neutral';
-  verbosity: 'short' | 'balanced' | 'detailed';
-  fallbackMessage: string;
-  guardrails?: string;
-}
+import type { BehaviourSchema } from '@/services';
 
 interface IBehaviourState {
-  behaviourByChatbotId: Record<string, IBehaviourConfig>;
-  setBehaviour: (chatbotId: string, behaviour: IBehaviourConfig) => void;
-  patchBehaviour: (
+  behaviourByChatbotId: Record<string, BehaviourSchema>;
+  setBehaviour: (chatbotId: string, behaviour: BehaviourSchema) => void;
+  updateBehaviour: (
     chatbotId: string,
-    behaviour: Partial<IBehaviourConfig>,
+    behaviour: Partial<BehaviourSchema>,
   ) => void;
 }
 
@@ -28,8 +21,7 @@ export const useBehaviour = create<IBehaviourState>((set) => ({
       },
     })),
 
-  /* ✏️ Patch behaviour safely */
-  patchBehaviour: (chatbotId, behaviour) =>
+  updateBehaviour: (chatbotId, behaviour) =>
     set((state) => {
       const existing = state.behaviourByChatbotId[chatbotId];
 

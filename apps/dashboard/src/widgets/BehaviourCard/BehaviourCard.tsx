@@ -16,7 +16,7 @@ import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormSelect } from '@/components/FormSelect/FormSelect.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchBehaviourById } from '@/services';
-import { type IBehaviourConfig, useBehaviour } from '@/store/useBehaviour.ts';
+import { useBehaviour } from '@/store/useBehaviour.ts';
 
 export const chatbotBehaviourSchema = z.object({
   systemPrompt: z
@@ -24,13 +24,9 @@ export const chatbotBehaviourSchema = z.object({
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
 
-  tone: z.enum(['friendly', 'professional', 'neutral'], {
-    required_error: 'Tone is required',
-  }),
+  tone: z.enum(['friendly', 'professional', 'neutral']),
 
-  verbosity: z.enum(['short', 'balanced', 'detailed'], {
-    required_error: 'Verbosity is required',
-  }),
+  verbosity: z.enum(['short', 'balanced', 'detailed']),
 
   fallbackMessage: z
     .string()
@@ -51,8 +47,7 @@ const BehaviourCard = () => {
     (state) => state.behaviourByChatbotId[chatbotId],
   );
   console.log('behaviour', behaviour, 'chatbotId', chatbotId);
-  const patchBehaviour = useBehaviour((s) => s.patchBehaviour);
-
+  const patchBehaviour = useBehaviour((s) => s.updateBehaviour);
   const {
     control,
     reset,
@@ -70,18 +65,22 @@ const BehaviourCard = () => {
     },
   });
 
-  /* 🔁 Populate form when behaviour loads */
   useEffect(() => {
-    console.log('behaviour', behaviour);
     if (behaviour) {
-      reset(behaviour);
+      reset({
+        systemPrompt: behaviour.systemPrompt,
+        tone: behaviour.tone,
+        verbosity: behaviour.verbosity,
+        fallbackMessage: behaviour.fallbackMessage,
+        guardrails: behaviour.guardrails,
+      });
     }
   }, [behaviour, reset]);
 
   const saveBehaviourMutation = useMutation({
-    mutationFn: async (values: IBehaviourConfig) => {
+    mutationFn: async (values: BehaviourFormValues) => {
       await patchBehaviourById({
-        path: { chatbotId },
+        path: { id: behaviour.id },
         body: values,
       });
 

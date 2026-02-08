@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
-import { Behaviour } from '../behaviour/model';
+import { BehaviourSchema } from '../behaviour/model';
 import { ChannelSchema } from '../channel/model';
 import { DocumentSchema } from '../document/model';
 
@@ -36,7 +36,7 @@ const OneChatbotResponse = z.object({
   chatbot: Chatbot,
   documents: z.array(DocumentSchema),
   channels: z.array(ChannelSchema),
-  behaviour: Behaviour.optional(),
+  behaviour: BehaviourSchema.optional(),
 });
 
 const OneSmallChatbotResponse = z.object({

@@ -22,13 +22,13 @@ export const Behaviour = new Elysia({
     },
   )
   .guard({
-    params: 'OneBehaviourParams',
     response: {
       404: 'NotFoundResponse',
     },
   })
   .resolve(async ({ params, status }) => {
-    const behaviour = await BehaviourService.single(params.id);
+    const newParams = params as { id: string };
+    const behaviour = await BehaviourService.single(newParams.id);
     if (!behaviour) {
       return status(404, {
         code: 'NOT_FOUND',

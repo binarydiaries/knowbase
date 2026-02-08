@@ -11,7 +11,7 @@ export const BehaviourSchema = z.object({
   tone: BehaviourTone,
   verbosity: BehaviourVerbosity,
   fallbackMessage: z.string(),
-  guardrails: z.string().optional().nullable(),
+  guardrails: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -24,9 +24,6 @@ const ManyBehaviourResponse = z.object({
   behaviours: z.array(BehaviourSchema),
 });
 
-const OneBehaviourParams = z.object({
-  id: z.string(),
-});
 export const UpdateBehaviourBody = BehaviourSchema.pick({
   tone: true,
   systemPrompt: true,
@@ -38,7 +35,6 @@ export const UpdateBehaviourBody = BehaviourSchema.pick({
 export const BehaviourModel = new Elysia().model({
   UpdateBehaviourBody,
   OneBehaviourResponse,
-  OneBehaviourParams,
   ManyBehaviourResponse,
   BehaviourSchema,
 });

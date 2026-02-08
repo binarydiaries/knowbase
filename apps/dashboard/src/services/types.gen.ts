@@ -243,7 +243,7 @@ export type OneChatbotResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | null;
+        guardrails: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -322,14 +322,10 @@ export type OneBehaviourResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | null;
+        guardrails: string | null;
         createdAt: string;
         updatedAt: string;
     };
-};
-
-export type OneBehaviourParams = {
-    id: string;
 };
 
 export type ManyBehaviourResponse = {
@@ -340,7 +336,7 @@ export type ManyBehaviourResponse = {
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
         fallbackMessage: string;
-        guardrails?: string | null;
+        guardrails: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -353,7 +349,7 @@ export type BehaviourSchema = {
     tone: 'friendly' | 'professional' | 'neutral';
     verbosity: 'short' | 'balanced' | 'detailed';
     fallbackMessage: string;
-    guardrails?: string | null;
+    guardrails: string | null;
     createdAt: string;
     updatedAt: string;
 };
@@ -508,10 +504,6 @@ export type OneChannelResponse = {
         createdAt: string;
         updatedAt: string;
     };
-};
-
-export type OneChannelParamsSchema = {
-    id: string;
 };
 
 export type PostChatData = {
@@ -782,7 +774,9 @@ export type GetBehaviourResponse = GetBehaviourResponses[keyof GetBehaviourRespo
 
 export type PatchBehaviourByIdData = {
     body: UpdateBehaviourBody;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/behaviour/{id}';
 };
@@ -839,7 +833,9 @@ export type PostChannelsResponse = PostChannelsResponses[keyof PostChannelsRespo
 
 export type GetChannelsByIdData = {
     body?: never;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/channels/{id}';
 };
@@ -864,7 +860,9 @@ export type GetChannelsByIdResponse = GetChannelsByIdResponses[keyof GetChannels
 
 export type PatchChannelsByIdData = {
     body: UpdateChannelBodySchema;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
     url: '/channels/{id}';
 };

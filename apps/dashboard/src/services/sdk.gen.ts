@@ -152,7 +152,7 @@ export const postChannels = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const getChannelsById = <ThrowOnError extends boolean = true>(options?: Options<GetChannelsByIdData, ThrowOnError>) => (options?.client ?? client).get<GetChannelsByIdResponses, GetChannelsByIdErrors, ThrowOnError>({
+export const getChannelsById = <ThrowOnError extends boolean = true>(options: Options<GetChannelsByIdData, ThrowOnError>) => (options.client ?? client).get<GetChannelsByIdResponses, GetChannelsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/channels/{id}',
     ...options

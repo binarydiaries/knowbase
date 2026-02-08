@@ -30,12 +30,13 @@ export const ChatbotUseWidget = () => {
       (channel) => channel.additional.type === 'web',
     ),
   );
+  const embedUrl = `${import.meta.env.VITE_EMBED_BASE}/embed.js`;
   const embedCode = `<script>
 window.KnowBaseChat = {
   channelId: ${channelWeb?.id || ''},
 };
 </script>
-<script src="/Users/shridhar/Documents/Keshav/knowbase/apps/embed/dist/embed.js" async></script>`;
+<script src="${embedUrl}" async></script>`;
 
   return (
     <Dialog>

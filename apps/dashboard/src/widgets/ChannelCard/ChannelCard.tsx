@@ -59,7 +59,7 @@ const ChannelCard = () => {
     ),
   );
   const channelConfig = channelWeb?.additional.config;
-  const patchChannel = useChannels((s) => s.patchChannel);
+  const updateChannel = useChannels((s) => s.updateChannel);
 
   const {
     control,
@@ -80,7 +80,6 @@ const ChannelCard = () => {
     },
   });
 
-  /* 🔥 THIS IS THE MISSING PIECE */
   useEffect(() => {
     if (channelConfig) {
       reset({
@@ -104,7 +103,6 @@ const ChannelCard = () => {
         allowedDomains: channelConfig?.allowedDomains ?? [],
       };
 
-      /* 1️⃣ Update DB */
       await patchChannelsById({
         path: { id: channelWeb.id },
         body: {
@@ -115,16 +113,13 @@ const ChannelCard = () => {
         },
       });
 
-      /* 2️⃣ Update Zustand */
-      patchChannel(chatbotId, channelWeb.id, {
+      updateChannel(chatbotId, {
+        id: channelWeb.id,
         additional: {
           ...channelWeb.additional,
           config: updatedConfig,
         },
       });
-    },
-    onSuccess: () => {
-      reset(undefined, { keepValues: true });
     },
   });
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand/react';
 
-export interface BehaviourConfig {
+export interface IBehaviourConfig {
   systemPrompt: string;
   tone: 'friendly' | 'professional' | 'neutral';
   verbosity: 'short' | 'balanced' | 'detailed';
@@ -9,20 +9,17 @@ export interface BehaviourConfig {
 }
 
 interface IBehaviourState {
-  behaviourByChatbotId: Record<string, BehaviourConfig | undefined>;
-
-  setBehaviour: (chatbotId: string, behaviour: BehaviourConfig) => void;
-
+  behaviourByChatbotId: Record<string, IBehaviourConfig>;
+  setBehaviour: (chatbotId: string, behaviour: IBehaviourConfig) => void;
   patchBehaviour: (
     chatbotId: string,
-    behaviour: Partial<BehaviourConfig>,
+    behaviour: Partial<IBehaviourConfig>,
   ) => void;
 }
 
 export const useBehaviour = create<IBehaviourState>((set) => ({
   behaviourByChatbotId: {},
 
-  /* 📥 Set full behaviour from backend */
   setBehaviour: (chatbotId, behaviour) =>
     set((state) => ({
       behaviourByChatbotId: {

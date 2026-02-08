@@ -16,7 +16,7 @@ import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormSelect } from '@/components/FormSelect/FormSelect.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchBehaviourById } from '@/services';
-import { type BehaviourConfig, useBehaviour } from '@/store/useBehaviour.ts';
+import { type IBehaviourConfig, useBehaviour } from '@/store/useBehaviour.ts';
 
 export const chatbotBehaviourSchema = z.object({
   systemPrompt: z
@@ -79,7 +79,7 @@ const BehaviourCard = () => {
   }, [behaviour, reset]);
 
   const saveBehaviourMutation = useMutation({
-    mutationFn: async (values: BehaviourConfig) => {
+    mutationFn: async (values: IBehaviourConfig) => {
       await patchBehaviourById({
         path: { chatbotId },
         body: values,

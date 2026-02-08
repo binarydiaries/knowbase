@@ -3,14 +3,8 @@ import type { ChannelSchema } from '@/services';
 
 interface IChannelsState {
   channelsByChatbotId: Record<string, ChannelSchema[]>;
-
   setChannels: (chatbotId: string, channels: ChannelSchema[]) => void;
-
-  patchChannel: (
-    chatbotId: string,
-    channelId: string,
-    patch: Partial<ChannelSchema>,
-  ) => void;
+  updateChannel: (chatbotId: string, data: Partial<ChannelSchema>) => void;
 }
 
 export const useChannels = create<IChannelsState>((set) => ({
@@ -24,8 +18,7 @@ export const useChannels = create<IChannelsState>((set) => ({
       },
     })),
 
-  /** ✅ PATCH a single channel */
-  patchChannel: (chatbotId, channelId, patch) =>
+  updateChannel: (chatbotId, data) =>
     set((state) => {
       const channels = state.channelsByChatbotId[chatbotId];
       if (!channels) return state;
@@ -34,13 +27,13 @@ export const useChannels = create<IChannelsState>((set) => ({
         channelsByChatbotId: {
           ...state.channelsByChatbotId,
           [chatbotId]: channels.map((channel) =>
-            channel.id === channelId
+            channel.id === data.id
               ? {
                   ...channel,
-                  ...patch,
+                  ...data,
                   additional: {
                     ...channel.additional,
-                    ...(patch.additional ?? {}),
+                    ...(data.additional ?? {}),
                   },
                 }
               : channel,

@@ -61,6 +61,7 @@ export default function ToolbarPlugin() {
     }
 
     if (element instanceof HeadingNode) {
+      // @ts-ignore
       setBlockType(element.getTag()); // 'h1' | 'h2' | 'h3'
     } else {
       setBlockType('paragraph');
@@ -109,9 +110,10 @@ export default function ToolbarPlugin() {
     <div className="flex gap-1 px-2 py-1 h-10 items-center" ref={toolbarRef}>
       <Select
         value={blockType}
-        onValueChange={(value) =>
-          editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, value)
-        }
+        onValueChange={(value) => {
+          // @ts-ignore
+          editor.dispatchCommand(SET_BLOCK_TYPE_COMMAND, value);
+        }}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select block type" />

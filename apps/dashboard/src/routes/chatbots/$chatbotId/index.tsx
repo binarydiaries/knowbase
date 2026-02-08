@@ -36,7 +36,7 @@ export const Route = createFileRoute('/chatbots/$chatbotId/')({
 });
 
 function RouteComponent() {
-  const chatbotId = Route.id;
+  const { chatbotId } = Route.useParams();
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
 

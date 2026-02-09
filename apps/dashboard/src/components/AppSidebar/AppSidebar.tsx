@@ -9,7 +9,6 @@ import {
   SidebarRail,
 } from '@knowbase/ui/components/sidebar';
 import {
-  Activity,
   AudioWaveform,
   Bot,
   Bubbles,
@@ -19,6 +18,7 @@ import {
   Gauge,
   LifeBuoy,
   LineChart,
+  MessageCircle,
   Settings,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
@@ -53,10 +53,15 @@ const data = {
       url: '/chatbots',
       icon: Bot,
     },
+    // {
+    //   name: 'Activities',
+    //   url: '/activities',
+    //   icon: Activity,
+    // },
     {
-      name: 'Activities',
-      url: '/activities',
-      icon: Activity,
+      name: 'Conversations',
+      url: '/conversations',
+      icon: MessageCircle,
     },
     {
       name: 'Analytics',

@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const MessageRole = z.enum(['user', 'assistant']);
 
-const messageSource = z.object({
+const MessageSource = z.object({
   documentId: z.string(),
   documentVersion: z.number(),
   chunkIndex: z.number(),
@@ -11,27 +11,30 @@ const messageSource = z.object({
 });
 
 export const MessageMetaData = z.object({
-  confidenceScore: z.number().optional(),
-  sources: z.array(messageSource).optional(),
+  confidenceScore: z.number().nullable(),
+  sources: z.array(MessageSource).nullable().optional(),
 });
 
 export const MessageSystemMetaData = z.object({
   finalQuery: z.string().optional(),
 });
 
-export const Message = z.object({
+export const MessageSchema = z.object({
   id: z.string(),
   conversationId: z.string(),
   role: MessageRole,
   content: z.string(),
-  metadata: MessageMetaData,
-  systemMetadata: MessageSystemMetaData,
+  metadata: MessageMetaData.nullable(),
+  systemMetadata: MessageSystemMetaData.nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
+const ManyMessageResponse = z.object({
+  messages: z.array(MessageSchema),
+});
+
 export const MessageModel = new Elysia().model({
-  GetMessageQuery: z.object({
-    conversationId: z.string(),
-  }),
+  MessageSchema,
+  ManyMessageResponse,
 });

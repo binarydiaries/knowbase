@@ -46,8 +46,48 @@ export type ChatChannelResponseSchema = {
     };
 };
 
-export type GetMessageQuery = {
+export type MessageSchema = {
+    id: string;
     conversationId: string;
+    role: 'user' | 'assistant';
+    content: string;
+    metadata: {
+        confidenceScore: number | null;
+        sources?: Array<{
+            documentId: string;
+            documentVersion: number;
+            chunkIndex: number;
+            similarity: number;
+        }> | null;
+    } | null;
+    systemMetadata: {
+        finalQuery?: string;
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ManyMessageResponse = {
+    messages: Array<{
+        id: string;
+        conversationId: string;
+        role: 'user' | 'assistant';
+        content: string;
+        metadata: {
+            confidenceScore: number | null;
+            sources?: Array<{
+                documentId: string;
+                documentVersion: number;
+                chunkIndex: number;
+                similarity: number;
+            }> | null;
+        } | null;
+        systemMetadata: {
+            finalQuery?: string;
+        } | null;
+        createdAt: string;
+        updatedAt: string;
+    }>;
 };
 
 export type DocumentSchema = {
@@ -290,14 +330,13 @@ export type EmbedStartResponse = {
 };
 
 export type ListConversation = {
-    chatbotId: string;
+    chatbotId?: string;
 };
 
 export type ManyConversationResponse = {
     conversations: Array<{
         id: string;
         chatbotId: string;
-        channel: 'web' | 'instagram' | 'whatsapp';
         lastUserQuestion: string;
         lastAssistantUtterance: string;
         lastMessageAt: string;
@@ -532,9 +571,20 @@ export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChanne
 export type GetMessagesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        conversationId: string;
+    };
     url: '/messages';
 };
+
+export type GetMessagesResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyMessageResponse;
+};
+
+export type GetMessagesResponse = GetMessagesResponses[keyof GetMessagesResponses];
 
 export type GetDocumentsData = {
     body?: never;

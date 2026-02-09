@@ -9,9 +9,9 @@ export abstract class ConversationService {
     });
   }
 
-  static list({ chatbotId }: { chatbotId: string }) {
+  static list({ chatbotId }: { chatbotId?: string }) {
     return db.query.conversations.findMany({
-      where: eq(conversations.chatbotId, chatbotId),
+      // where: eq(conversations.chatbotId, chatbotId),
     });
   }
 

@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import z from 'zod';
 import { MessageModel } from './model';
 import { MessageService } from './service';
 
@@ -7,9 +8,14 @@ export const message = new Elysia({ prefix: '/messages', tags: ['Message'] })
   .get(
     '',
     async ({ query }) => {
-      return MessageService.getMessages(query.conversationId);
+      return {
+        messages: await MessageService.getMessages(query.conversationId),
+      };
     },
     {
-      query: 'GetMessageQuery',
+      query: z.object({
+        conversationId: z.string(),
+      }),
+      response: 'ManyMessageResponse',
     },
   );

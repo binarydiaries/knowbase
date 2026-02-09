@@ -1,12 +1,9 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 
-export const conversationChannel = z.enum(['web', 'instagram', 'whatsapp']);
-
 const Conversation = z.object({
   id: z.string(),
   chatbotId: z.string(),
-  channel: conversationChannel,
   lastUserQuestion: z.string(),
   lastAssistantUtterance: z.string(),
   lastMessageAt: z.date(),
@@ -15,7 +12,7 @@ const Conversation = z.object({
 });
 
 const ListConversation = z.object({
-  chatbotId: z.string(),
+  chatbotId: z.string().optional(),
 });
 
 const ManyConversationResponse = z.object({

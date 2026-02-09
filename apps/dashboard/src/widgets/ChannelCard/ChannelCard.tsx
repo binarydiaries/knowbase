@@ -7,14 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
-import { Input } from '@knowbase/ui/components/input';
-import { Label } from '@knowbase/ui/components/label';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
+import { FormInputColor } from '@/components/FormInputColor/FormInputColor.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchChannelsById } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
@@ -64,8 +63,6 @@ const ChannelCard = () => {
   const {
     control,
     reset,
-    watch,
-    setValue,
     handleSubmit,
     formState: { isDirty },
   } = useForm<ChannelFormValues>({
@@ -91,8 +88,6 @@ const ChannelCard = () => {
       });
     }
   }, [channelConfig, reset]);
-
-  const primaryColor = watch('primaryColor');
 
   const saveChannelMutation = useMutation({
     mutationFn: async (values: ChannelFormValues) => {
@@ -141,65 +136,35 @@ const ChannelCard = () => {
       </CardHeader>
       <form onSubmit={handleSubmit(onSave)}>
         <CardContent className={'flex-col gap-5 flex'}>
-          <div className="grid gap-2 ">
-            <FormInput
-              name="displayName"
-              control={control}
-              label="Display Name"
-              placeholder="Enter a display Name"
-            />
-          </div>
-          <div className="grid gap-2 ">
-            <FormInput
-              name="subtitle"
-              control={control}
-              label="Subtitle"
-              placeholder="Enter a subtitle"
-            />
-          </div>
-          <div className="grid gap-2 ">
-            <FormTextarea
-              name="welcomeMessage"
-              control={control}
-              label="Welcome Message"
-              placeholder="Enter a welcome message"
-            />
-          </div>
-          <div className="grid gap-2 ">
-            <FormInput
-              name="inputPlaceholder"
-              control={control}
-              label="Input Placeholder"
-              placeholder="Enter a input placeholder"
-            />
-          </div>
-          {/* Primary Color */}
-          <div className="space-y-2">
-            <Label>Primary Color</Label>
-
-            <div className="flex items-center gap-3">
-              <Input
-                type="color"
-                value={primaryColor}
-                onChange={(e) =>
-                  setValue('primaryColor', e.target.value, {
-                    shouldValidate: true,
-                  })
-                }
-                className="h-10 w-14 cursor-pointer p-1"
-              />
-
-              <Input
-                value={primaryColor}
-                onChange={(e) =>
-                  setValue('primaryColor', e.target.value, {
-                    shouldValidate: true,
-                  })
-                }
-                className="max-w-[140px]"
-              />
-            </div>
-          </div>
+          <FormInput
+            name="displayName"
+            control={control}
+            label="Display Name"
+            placeholder="Enter a display Name"
+          />
+          <FormInput
+            name="subtitle"
+            control={control}
+            label="Subtitle"
+            placeholder="Enter a subtitle"
+          />
+          <FormTextarea
+            name="welcomeMessage"
+            control={control}
+            label="Welcome Message"
+            placeholder="Enter a welcome message"
+          />
+          <FormInput
+            name="inputPlaceholder"
+            control={control}
+            label="Input Placeholder"
+            placeholder="Enter a input placeholder"
+          />
+          <FormInputColor
+            control={control}
+            name="primaryColor"
+            label="Primary Color"
+          />
           <div className="flex justify-end">
             <Button
               type="submit"

@@ -11,8 +11,9 @@ import { ScrollArea } from '@knowbase/ui/components/scroll-area';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { BotIcon, ChevronRightIcon, UserIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { getConversations, getMessages } from '@/services';
 
 export const Route = createFileRoute('/conversations/{-$conversationId}/')({
@@ -21,6 +22,8 @@ export const Route = createFileRoute('/conversations/{-$conversationId}/')({
 
 function RouteComponent() {
   const { conversationId } = Route.useParams();
+  const navigate = useNavigate();
+
   const conversationQuery = useQuery({
     queryKey: ['conversations'],
     queryFn: () => getConversations(),
@@ -32,6 +35,18 @@ function RouteComponent() {
       getMessages({ query: { conversationId: conversationId || '' } }),
     enabled: !!conversationId,
   });
+
+  useEffect(() => {
+    if (conversationQuery.data?.data.conversations[0].id) {
+      navigate({
+        from: '/conversations/{-$conversationId}/',
+        params: {
+          conversationId: conversationQuery.data?.data.conversations[0].id,
+        },
+        replace: true,
+      });
+    }
+  }, [conversationQuery.data?.data.conversations[0].id, navigate]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -71,7 +86,7 @@ function RouteComponent() {
             </Item>
           ))}
         </ScrollArea>
-        <ScrollArea className="w-full px-4">
+        <ScrollArea className="w-full p-4">
           {messageQuery.data?.data.messages.map((message) => (
             <Item
               key={message.id}

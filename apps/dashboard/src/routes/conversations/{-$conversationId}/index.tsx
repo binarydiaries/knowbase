@@ -7,27 +7,30 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@knowbase/ui/components/item';
+import { ScrollArea } from '@knowbase/ui/components/scroll-area';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { BotIcon, ChevronRightIcon, UserIcon } from 'lucide-react';
 import { getConversations, getMessages } from '@/services';
 
-export const Route = createFileRoute('/conversations/')({
+export const Route = createFileRoute('/conversations/{-$conversationId}/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { conversationId } = Route.useParams();
   const conversationQuery = useQuery({
     queryKey: ['conversations'],
     queryFn: () => getConversations(),
   });
 
   const messageQuery = useQuery({
-    queryKey: ['messages'],
+    queryKey: ['messages', conversationId],
     queryFn: () =>
-      getMessages({ query: { conversationId: 'yf6UHq445ByRyp6i' } }),
+      getMessages({ query: { conversationId: conversationId || '' } }),
+    enabled: !!conversationId,
   });
 
   return (
@@ -43,11 +46,18 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
-      <div className="flex flex-1">
-        <div className="flex w-full h-full max-w-md flex-col gap-4 border-r overflow-auto">
+      <div className="flex flex-1 overflow-hidden">
+        <ScrollArea className="flex w-full max-w-md flex-col gap-4 border-r">
           {conversationQuery.data?.data.conversations.map((conversation) => (
-            <Item asChild key={conversation.id}>
-              <a href="#">
+            <Item
+              asChild
+              key={conversation.id}
+              variant={conversation.id === conversationId ? 'muted' : 'default'}
+            >
+              <Link
+                to={'/conversations/{-$conversationId}'}
+                params={{ conversationId: conversation.id }}
+              >
                 <ItemContent>
                   <ItemTitle>{conversation.lastUserQuestion}</ItemTitle>
                   <ItemDescription>
@@ -57,11 +67,11 @@ function RouteComponent() {
                 <ItemActions>
                   <ChevronRightIcon className="size-4" />
                 </ItemActions>
-              </a>
+              </Link>
             </Item>
           ))}
-        </div>
-        <div className="w-full px-4">
+        </ScrollArea>
+        <ScrollArea className="w-full px-4">
           {messageQuery.data?.data.messages.map((message) => (
             <Item
               key={message.id}
@@ -100,7 +110,7 @@ function RouteComponent() {
               </ItemContent>
             </Item>
           ))}
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );

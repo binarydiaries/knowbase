@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia';
-import { clerkPlugin } from 'elysia-clerk';
+import { AuthGuard } from '../../common/clerkModule/clerkModule';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
@@ -11,22 +11,7 @@ export const Chatbot = new Elysia({
   prefix: '/chatbots',
   tags: ['Chatbot'],
 })
-  .use(clerkPlugin())
-  .resolve(({ auth, status }) => {
-    const { userId, orgId } = auth();
-
-    if (!userId || !orgId) {
-      throw status(401, {
-        code: 'Unauthorized',
-      });
-    }
-
-    return {
-      userId,
-      orgId,
-      auth,
-    };
-  })
+  .use(AuthGuard)
   .use(ChatbotModel)
   .use(ErrorModel)
   .post(

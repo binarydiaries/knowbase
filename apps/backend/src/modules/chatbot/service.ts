@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { behaviors, channels, chatbots } from '../../db/schema';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
@@ -33,12 +33,16 @@ export abstract class ChatbotService {
     });
   }
 
-  static list() {
-    return db.select().from(chatbots);
+  static list({ orgId }: { orgId: string }) {
+    return db.query.chatbots.findMany({
+      where: eq(chatbots.orgId, orgId),
+    });
   }
 
-  static single({ id }: { id: string }) {
-    return db.query.chatbots.findFirst({ where: eq(chatbots.id, id) });
+  static single({ id, orgId }: { id: string; orgId: string }) {
+    return db.query.chatbots.findFirst({
+      where: and(eq(chatbots.id, id), eq(chatbots.orgId, orgId)),
+    });
   }
 
   static async update(id: string, data: Partial<typeof chatbots.$inferInsert>) {

@@ -25,7 +25,6 @@ export const DocumentSchema = z.object({
   content: DocumentContent,
   chatbotId: z.string(),
   createdBy: z.string(),
-  orgId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

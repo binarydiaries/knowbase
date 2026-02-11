@@ -1,4 +1,6 @@
 import { Elysia } from 'elysia';
+import { clerkPlugin } from 'elysia-clerk';
+import { ClerkModule } from '../../common/clerkModule';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
@@ -10,15 +12,30 @@ export const Chatbot = new Elysia({
   prefix: '/chatbots',
   tags: ['Chatbot'],
 })
+  .use(clerkPlugin())
+  .resolve(({ auth }) => {
+    const { userId, orgId } = auth();
+
+    if (!userId || !orgId) {
+      throw new Error('Not authenticated');
+    }
+
+    return {
+      userId,
+      orgId,
+      auth,
+    };
+  })
   .use(ChatbotModel)
   .use(ErrorModel)
+  .use(ClerkModule)
   .post(
     '',
-    async ({ body }) => {
+    async ({ body, userId, orgId }) => {
       const chatbot = await ChatbotService.create({
         ...body,
-        createdBy: '123',
-        orgId: '123',
+        createdBy: userId,
+        orgId,
       });
       return {
         chatbot,
@@ -31,8 +48,8 @@ export const Chatbot = new Elysia({
   )
   .get(
     '',
-    async () => {
-      const chatbots = await ChatbotService.list();
+    async ({ orgId }) => {
+      const chatbots = await ChatbotService.list({ orgId });
       return {
         chatbots,
       };
@@ -46,10 +63,10 @@ export const Chatbot = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
+  .resolve(async ({ params, status, orgId }) => {
     const newParams = params as { id: string };
+    const chatbot = await ChatbotService.single({ id: newParams.id, orgId });
 
-    const chatbot = await ChatbotService.single({ id: newParams.id });
     if (!chatbot) {
       return status(404, {
         code: 'NOT_FOUND',

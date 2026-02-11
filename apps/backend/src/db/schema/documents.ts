@@ -1,6 +1,5 @@
 import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
 import {
-  clerkOrgIdColumn,
   clerkUserId,
   cuid2PrimaryKey,
   timestamps,
@@ -24,6 +23,5 @@ export const documents = pgTable('documents', {
     .notNull()
     .references(() => chatbots.id),
   createdBy: clerkUserId,
-  ...clerkOrgIdColumn,
   ...timestamps,
 });

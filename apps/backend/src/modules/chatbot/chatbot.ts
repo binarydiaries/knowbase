@@ -1,6 +1,5 @@
 import { Elysia } from 'elysia';
 import { clerkPlugin } from 'elysia-clerk';
-import { ClerkModule } from '../../common/clerkModule';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
@@ -13,11 +12,13 @@ export const Chatbot = new Elysia({
   tags: ['Chatbot'],
 })
   .use(clerkPlugin())
-  .resolve(({ auth }) => {
+  .resolve(({ auth, status }) => {
     const { userId, orgId } = auth();
 
     if (!userId || !orgId) {
-      throw new Error('Not authenticated');
+      throw status(401, {
+        code: 'Unauthorized',
+      });
     }
 
     return {
@@ -28,7 +29,6 @@ export const Chatbot = new Elysia({
   })
   .use(ChatbotModel)
   .use(ErrorModel)
-  .use(ClerkModule)
   .post(
     '',
     async ({ body, userId, orgId }) => {
@@ -92,7 +92,6 @@ export const Chatbot = new Elysia({
       };
     },
     {
-      // params: 'OneChatbotParams',
       response: {
         200: 'OneChatbotResponse',
       },

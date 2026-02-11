@@ -1,3 +1,4 @@
+import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
 import {
@@ -20,6 +21,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   Archive,
+  ArchiveRestore,
   ArrowUpRightIcon,
   Bot,
   Edit,
@@ -50,11 +52,17 @@ function RouteComponent() {
   const [editingBot, setEditingBot] = useState<ChatbotSchema>();
 
   const archiveChatbotMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: 'active' | 'archived';
+    }) => {
       return patchChatbotsById({
         path: { id },
         body: {
-          chatbotStatus: 'archived',
+          chatbotStatus: status,
         },
       });
     },
@@ -113,16 +121,11 @@ function RouteComponent() {
                           <h3 className="text-base font-semibold leading-none">
                             {bot.name}
                           </h3>
-
-                          {/*<Badge*/}
-                          {/*  className={*/}
-                          {/*    bot.status === 'live'*/}
-                          {/*      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'*/}
-                          {/*      : 'bg-muted text-muted-foreground'*/}
-                          {/*  }*/}
-                          {/*>*/}
-                          {/*  {bot.status === 'live' ? 'Live' : 'Draft'}*/}
-                          {/*</Badge>*/}
+                          {bot.chatbotStatus === 'archived' && (
+                            <Badge className={'bg-muted text-muted-foreground'}>
+                              Archived
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
@@ -154,12 +157,30 @@ function RouteComponent() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              archiveChatbotMutation.mutate(bot.id);
+                              console.log(
+                                'bot.chatbotStatus',
+                                bot.chatbotStatus,
+                              );
+                              const newStatus =
+                                bot.chatbotStatus === 'archived'
+                                  ? 'active'
+                                  : 'archived';
+
+                              archiveChatbotMutation.mutate({
+                                id: bot.id,
+                                status: newStatus,
+                              });
                             }}
-                            className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
+                            className="flex items-center gap-2 cursor-pointer "
                           >
-                            <Archive className="h-4 w-4 text-red" />
-                            Archive
+                            {bot.chatbotStatus === 'archived' ? (
+                              <ArchiveRestore className="h-4 w-4" />
+                            ) : (
+                              <Archive className="h-4 w-4" />
+                            )}
+                            {bot.chatbotStatus === 'archived'
+                              ? 'Unarchive'
+                              : 'Archive'}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

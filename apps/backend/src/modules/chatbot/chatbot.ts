@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia';
-import { AuthGuard } from '../../common/clerkModule/clerkModule';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';

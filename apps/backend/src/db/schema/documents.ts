@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
@@ -25,3 +26,10 @@ export const documents = pgTable('documents', {
   createdBy: clerkUserId,
   ...timestamps,
 });
+
+export const documentsRelations = relations(documents, ({ one }) => ({
+  chatbot: one(chatbots, {
+    fields: [documents.chatbotId],
+    references: [chatbots.id],
+  }),
+}));

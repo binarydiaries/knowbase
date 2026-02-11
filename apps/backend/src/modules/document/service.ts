@@ -1,7 +1,11 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
-import { documents, embeddings as embeddingsTable } from '../../db/schema';
+import {
+  chatbots,
+  documents,
+  embeddings as embeddingsTable,
+} from '../../db/schema';
 import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {
@@ -33,12 +37,17 @@ export abstract class DocumentService {
   //   return document;
   // }
 
-  static async list({ chatbotId }: { chatbotId: string }) {
-    const docs = await db
+  static async list({
+    chatbotId,
+    orgId,
+  }: {
+    chatbotId: string;
+    orgId: string;
+  }) {
+    return db
       .select()
       .from(documents)
       .where(eq(documents.chatbotId, chatbotId));
-    return docs;
   }
 
   static async single(id: string) {

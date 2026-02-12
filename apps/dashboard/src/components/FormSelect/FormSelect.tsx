@@ -40,7 +40,7 @@ export const FormSelect = <T extends FieldValues>({
     <Field data-invalid={fieldState.error?.message}>
       <FieldLabel>{label}</FieldLabel>
 
-      <Select value={field.value} onValueChange={field.onChange}>
+      <Select defaultValue={field.value} onValueChange={field.onChange}>
         <SelectTrigger aria-invalid={!!fieldState.error?.message}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

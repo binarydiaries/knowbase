@@ -44,10 +44,14 @@ export abstract class DocumentService {
     chatbotId: string;
     orgId: string;
   }) {
-    return db
-      .select()
-      .from(documents)
-      .where(eq(documents.chatbotId, chatbotId));
+    return db.query.documents.findMany({
+      where: {
+        chatbotId,
+        chatbot: {
+          orgId,
+        },
+      },
+    });
   }
 
   static async single(id: string) {

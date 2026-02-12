@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+// import { relations } from 'drizzle-orm';
 import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
@@ -28,9 +28,9 @@ export const behaviors = pgTable('behavior', {
   ...timestamps,
 });
 
-export const behaviorRelations = relations(behaviors, ({ one }) => ({
-  chatbot: one(chatbots, {
-    fields: [behaviors.chatbotId],
-    references: [chatbots.id],
-  }),
-}));
+// export const behaviorRelations = relations(behaviors, ({ one }) => ({
+//   chatbot: one(chatbots, {
+//     fields: [behaviors.chatbotId],
+//     references: [chatbots.id],
+//   }),
+// }));

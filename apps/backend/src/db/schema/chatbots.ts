@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+// import { relations } from 'drizzle-orm';
 import { index, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkOrgIdColumn,
@@ -24,6 +24,6 @@ export const chatbots = pgTable(
   (t) => [index('chatbots_org_idx').on(t.orgId)],
 );
 
-export const usersRelations = relations(chatbots, ({ one }) => ({
-  behaviour: one(behaviors),
-}));
+// export const usersRelations = relations(chatbots, ({ one }) => ({
+//   behaviour: one(behaviors),
+// }));

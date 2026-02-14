@@ -4,9 +4,19 @@ import { channels } from './channels';
 import { chatbots } from './chatbots';
 import { conversations } from './conversations';
 import { documents } from './documents';
+import { embeddings } from './embeddings';
+import { messages } from './messages';
 
 export const relations = defineRelations(
-  { chatbots, channels, behaviors, documents, conversations },
+  {
+    chatbots,
+    channels,
+    behaviors,
+    documents,
+    conversations,
+    messages,
+    embeddings,
+  },
   (r) => ({
     chatbots: {
       channels: r.many.channels({
@@ -40,6 +50,23 @@ export const relations = defineRelations(
         to: r.chatbots.id,
       }),
     },
-    conversations: {},
+    conversations: {
+      chatbot: r.one.chatbots({
+        from: r.conversations.chatbotId,
+        to: r.chatbots.id,
+      }),
+    },
+    messages: {
+      conversation: r.one.conversations({
+        from: r.messages.conversationId,
+        to: r.conversations.id,
+      }),
+    },
+    embeddings: {
+      document: r.one.documents({
+        from: r.embeddings.documentId,
+        to: r.documents.id,
+      }),
+    },
   }),
 );

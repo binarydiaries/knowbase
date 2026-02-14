@@ -123,8 +123,14 @@ ${recursiveChunk}
     return (await Promise.all(documentChunkPromise)).flat();
   }
 
-  static startEmbedding = async (chatbotId: string) => {
-    const documents = await DocumentService.list({ chatbotId });
+  static startEmbedding = async ({
+    chatbotId,
+    orgId,
+  }: {
+    chatbotId: string;
+    orgId: string;
+  }) => {
+    const documents = await DocumentService.list({ chatbotId, orgId });
     return Promise.all(
       documents
         .filter(

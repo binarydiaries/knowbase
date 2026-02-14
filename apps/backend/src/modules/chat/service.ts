@@ -106,6 +106,7 @@ export abstract class ChatService {
     await ChatService.getChatbot({ chatbotId, orgId });
     const conversation = await ConversationService.single({
       id: conversationId,
+      orgId,
     });
     const behavior = await ChatService.getBehaviour(chatbotId);
     const finalQuery = await ChatService.getFinalQuery({

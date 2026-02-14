@@ -1,4 +1,4 @@
-import type { behaviors } from '../../db/schema';
+import type { behaviors } from '../../db/schema/behaviors';
 
 type IBehaviourInsert = typeof behaviors.$inferInsert;
 export const DEFAULT_BEHAVIOR: Omit<

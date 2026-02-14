@@ -3,15 +3,15 @@ import { db } from '../../db';
 import { conversations } from '../../db/schema/conversations';
 
 export abstract class ConversationService {
-  static single({ id }: { id: string }) {
+  static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.conversations.findFirst({
-      where: { id },
+      where: { id, chatbot: { orgId } },
     });
   }
 
-  static list({ chatbotId }: { chatbotId?: string }) {
+  static list({ chatbotId, orgId }: { chatbotId?: string; orgId: string }) {
     return db.query.conversations.findMany({
-      where: { chatbotId },
+      where: { chatbotId, chatbot: { orgId } },
     });
   }
 

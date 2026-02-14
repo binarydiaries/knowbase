@@ -2,10 +2,11 @@ import { defineRelations } from 'drizzle-orm';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
 import { chatbots } from './chatbots';
+import { conversations } from './conversations';
 import { documents } from './documents';
 
 export const relations = defineRelations(
-  { chatbots, channels, behaviors, documents },
+  { chatbots, channels, behaviors, documents, conversations },
   (r) => ({
     chatbots: {
       channels: r.many.channels({
@@ -39,5 +40,6 @@ export const relations = defineRelations(
         to: r.chatbots.id,
       }),
     },
+    conversations: {},
   }),
 );

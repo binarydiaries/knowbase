@@ -1,17 +1,17 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { conversations } from '../../db/schema';
+import { conversations } from '../../db/schema/conversations';
 
 export abstract class ConversationService {
   static single({ id }: { id: string }) {
     return db.query.conversations.findFirst({
-      where: eq(conversations.id, id),
+      where: { id },
     });
   }
 
   static list({ chatbotId }: { chatbotId?: string }) {
     return db.query.conversations.findMany({
-      // where: eq(conversations.chatbotId, chatbotId),
+      where: { chatbotId },
     });
   }
 

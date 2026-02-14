@@ -64,6 +64,7 @@ export const Chatbot = new Elysia({
       const { behaviour, channels, documents, ...otherChatbot } = chatbot;
       return {
         chatbot: otherChatbot,
+        // biome-ignore lint/style/noNonNullAssertion: Will fix later
         behaviour: behaviour!,
         documents: documents.map(DocumentService.transformDocument),
         channels: channels.map(ChannelService.transformChannel),

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
-import { documents } from '../../db/schema';
+import { documents } from '../../db/schema/documents';
 import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {

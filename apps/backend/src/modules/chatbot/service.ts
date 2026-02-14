@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { behaviors, channels, chatbots } from '../../db/schema';
+import { behaviors } from '../../db/schema/behaviors';
+import { channels } from '../../db/schema/channels';
+import { chatbots } from '../../db/schema/chatbots';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
 import { CHANNEL_CONFIG_DEFAULTS } from '../channel/defaults';
 

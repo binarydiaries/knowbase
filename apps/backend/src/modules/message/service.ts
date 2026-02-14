@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { messages } from '../../db/schema';
+import { messages } from '../../db/schema/messages';
 
 export abstract class MessageService {
   static async addMessages(data: (typeof messages.$inferInsert)[]) {

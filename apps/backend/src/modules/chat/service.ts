@@ -1,6 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs, streamText } from 'ai';
-import type { conversations } from '../../db/schema';
+import type { conversations } from '../../db/schema/conversations';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';

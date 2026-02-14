@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { behaviors } from '../../db/schema';
+import { behaviors } from '../../db/schema/behaviors';
 
 export abstract class BehaviourService {
   static single({ id, orgId }: { id: string; orgId: string }) {

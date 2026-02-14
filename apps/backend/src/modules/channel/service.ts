@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { channels } from '../../db/schema';
+import { channels } from '../../db/schema/channels';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {

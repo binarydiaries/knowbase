@@ -21,7 +21,3 @@ export const chatbots = pgTable(
   },
   (t) => [index('chatbots_org_idx').on(t.orgId)],
 );
-
-// export const usersRelations = relations(chatbots, ({ one }) => ({
-//   behaviour: one(behaviors),
-// }));

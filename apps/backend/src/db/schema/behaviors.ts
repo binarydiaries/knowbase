@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
   cuid2PrimaryKey,
@@ -18,16 +18,23 @@ export const behaviorVerbosity = pgEnum('verbosity', [
   'detailed',
 ]);
 
-export const behaviors = pgTable('behavior', {
-  id: cuid2PrimaryKey,
-  chatbotId: text()
-    .notNull()
-    .references(() => chatbots.id),
-  systemPrompt: text().notNull(),
-  tone: behaviorTone().notNull().default('neutral'),
-  verbosity: behaviorVerbosity().notNull().default('balanced'),
-  fallbackMessage: text().notNull(),
-  guardrails: text(),
-  createdBy: clerkUserId,
-  ...timestamps,
-});
+export const behaviors = pgTable(
+  'behavior',
+  {
+    id: cuid2PrimaryKey,
+    chatbotId: text()
+      .notNull()
+      .references(() => chatbots.id),
+    systemPrompt: text().notNull(),
+    tone: behaviorTone().notNull().default('neutral'),
+    verbosity: behaviorVerbosity().notNull().default('balanced'),
+    fallbackMessage: text().notNull(),
+    guardrails: text(),
+    createdBy: clerkUserId,
+    ...timestamps,
+  },
+  (table) => [
+    // 🔥 Enforce 1–1 relationship
+    uniqueIndex('behavior_chatbot_unique').on(table.chatbotId),
+  ],
+);

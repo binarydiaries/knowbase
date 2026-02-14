@@ -1,4 +1,3 @@
-import { defineRelations } from 'drizzle-orm';
 import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
@@ -24,22 +23,3 @@ export const documents = pgTable('documents', {
   createdBy: clerkUserId,
   ...timestamps,
 });
-
-export const documentsRelations = defineRelations(
-  { documents, chatbots },
-  (r) => ({
-    documents: {
-      chatbot: r.one.chatbots({
-        from: r.documents.chatbotId,
-        to: r.chatbots.id,
-      }),
-    },
-  }),
-);
-
-// export const documentsRelations = relations(documents, ({ one }) => ({
-//   chatbot: one(chatbots, {
-//     fields: [documents.chatbotId],
-//     references: [chatbots.id],
-//   }),
-// }));

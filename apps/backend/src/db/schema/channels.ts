@@ -1,5 +1,9 @@
 import { boolean, jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
-import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
+import {
+  clerkUserId,
+  cuid2PrimaryKey,
+  timestamps,
+} from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
 
 export const channelType = pgEnum('type', ['web', 'whatsapp', 'instagram']);
@@ -19,5 +23,6 @@ export const channels = pgTable('channels', {
   config: jsonb().$type<object>().notNull(),
   channelStatus: channelStatus().notNull().default('inactive'),
   usage: jsonb().$type<object>().notNull(),
+  createdBy: clerkUserId,
   ...timestamps,
 });

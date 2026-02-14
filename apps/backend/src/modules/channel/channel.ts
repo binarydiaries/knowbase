@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { ChannelModel } from './model';
 import { ChannelService } from './service';
@@ -7,16 +8,18 @@ export const Channel = new Elysia({
   prefix: '/channels',
   tags: ['Channel'],
 })
+  .use(AuthGuard)
   .use(ChannelModel)
   .use(ErrorModel)
   .post(
     '',
-    async ({ body }) => {
+    async ({ body, userId }) => {
       const channel = await ChannelService.create({
         ...body,
         type: body.additional.type,
         config: body.additional.config,
         usage: {},
+        createdBy: userId,
       });
       return {
         channel: ChannelService.transformChannel(channel),
@@ -29,11 +32,11 @@ export const Channel = new Elysia({
   )
   .get(
     '',
-    async ({ query }) => {
+    async ({ query, orgId }) => {
       return {
-        channels: (await ChannelService.list(query)).map(
-          ChannelService.transformChannel,
-        ),
+        channels: (
+          await ChannelService.list({ chatbotId: query.chatbotId, orgId })
+        ).map(ChannelService.transformChannel),
       };
     },
     {
@@ -46,9 +49,9 @@ export const Channel = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
+  .resolve(async ({ params, status, orgId }) => {
     const newParam = params as { id: string };
-    const channel = await ChannelService.single(newParam.id);
+    const channel = await ChannelService.single({ id: newParam.id, orgId });
 
     if (!channel) {
       return status(404, {

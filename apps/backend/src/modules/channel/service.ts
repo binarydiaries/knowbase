@@ -4,13 +4,21 @@ import { channels } from '../../db/schema';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {
-  static async list({ chatbotId }: { chatbotId: string }) {
-    return db.select().from(channels).where(eq(channels.chatbotId, chatbotId));
+  static async list({
+    chatbotId,
+    orgId,
+  }: {
+    chatbotId: string;
+    orgId: string;
+  }) {
+    return db.query.channels.findMany({
+      where: { chatbotId, chatbot: { orgId } },
+    });
   }
 
-  static single(id: string) {
+  static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.channels.findFirst({
-      where: eq(channels.id, id),
+      where: { id, chatbot: { orgId } },
     });
   }
 

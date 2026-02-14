@@ -13,6 +13,7 @@ export abstract class ChatbotService {
         .insert(behaviors)
         .values({
           chatbotId,
+          createdBy: data.createdBy,
           ...DEFAULT_BEHAVIOR,
         })
         .returning();
@@ -27,6 +28,7 @@ export abstract class ChatbotService {
         },
         channelStatus: 'active',
         usage: {},
+        createdBy: data.createdBy,
       });
 
       return chatbot;

@@ -21,5 +21,23 @@ export const relations = defineRelations(
         to: r.documents.chatbotId,
       }),
     },
+    documents: {
+      chatbot: r.one.chatbots({
+        from: r.documents.chatbotId,
+        to: r.chatbots.id,
+      }),
+    },
+    behaviors: {
+      chatbot: r.one.chatbots({
+        from: r.behaviors.chatbotId,
+        to: r.chatbots.id,
+      }),
+    },
+    channels: {
+      chatbot: r.one.chatbots({
+        from: r.channels.chatbotId,
+        to: r.chatbots.id,
+      }),
+    },
   }),
 );

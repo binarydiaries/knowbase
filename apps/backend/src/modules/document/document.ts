@@ -52,9 +52,9 @@ export const Document = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
+  .resolve(async ({ params, status, orgId }) => {
     const newParams = params as { id: string };
-    const document = await DocumentService.single(newParams.id);
+    const document = await DocumentService.single({ id: newParams.id, orgId });
 
     if (!document) {
       return status(404, {

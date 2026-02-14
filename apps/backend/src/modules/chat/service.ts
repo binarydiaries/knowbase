@@ -64,8 +64,14 @@ export abstract class ChatService {
     };
   }
 
-  static async getChatbot(chatbotId: string) {
-    const chatbot = await ChatbotService.single({ id: chatbotId });
+  static async getChatbot({
+    chatbotId,
+    orgId,
+  }: {
+    chatbotId: string;
+    orgId: string;
+  }) {
+    const chatbot = await ChatbotService.single({ id: chatbotId, orgId });
 
     if (chatbot && chatbot.chatbotStatus === 'active') {
       return chatbot;
@@ -89,13 +95,15 @@ export abstract class ChatService {
     channelId,
     message,
     conversationId,
+    orgId,
   }: {
     chatbotId: string;
     conversationId: string;
     message: string;
     channelId: string;
+    orgId: string;
   }) {
-    await ChatService.getChatbot(chatbotId);
+    await ChatService.getChatbot({ chatbotId, orgId });
     const conversation = await ConversationService.single({
       id: conversationId,
     });
@@ -174,12 +182,14 @@ export abstract class ChatService {
     channelId,
     conversationId,
     message,
+    orgId,
   }: {
     channelId: string;
     message: string;
     conversationId: string;
+    orgId: string;
   }) {
-    const channel = await ChannelService.single(channelId);
+    const channel = await ChannelService.single({ id: channelId, orgId });
 
     if (!channel) {
       throw new Error('Channel not found');
@@ -190,6 +200,7 @@ export abstract class ChatService {
       conversationId,
       channelId,
       message,
+      orgId,
     });
   }
 }

@@ -8,11 +8,12 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .post(
     '',
     async ({ body }) => {
-      const { message, channelId, conversationId } = body;
+      const { message, channelId, conversationId, orgId } = body;
       return ChatService.sendWeb({
         conversationId,
         message: message,
         channelId,
+        orgId,
       });
     },
     {
@@ -22,7 +23,10 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .get(
     '/channel',
     async ({ query }) => {
-      const channel = await ChannelService.single(query.channelId);
+      const channel = await ChannelService.single({
+        id: query.channelId,
+        orgId: query.orgId,
+      });
 
       if (!channel) {
         throw new Error('Channel not found or Invalid');

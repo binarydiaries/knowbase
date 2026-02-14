@@ -1,4 +1,3 @@
-// import { relations } from 'drizzle-orm';
 import { index, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkOrgIdColumn,
@@ -6,7 +5,6 @@ import {
   cuid2PrimaryKey,
   timestamps,
 } from '../../utils/columns.utils';
-import { behaviors } from './behaviors';
 
 export const chatbotStatus = pgEnum('chatbotStatus', ['active', 'archived']);
 

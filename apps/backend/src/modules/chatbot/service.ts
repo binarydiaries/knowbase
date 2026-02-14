@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { behaviors, channels, chatbots } from '../../db/schema';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
@@ -25,7 +25,7 @@ export abstract class ChatbotService {
           ...CHANNEL_CONFIG_DEFAULTS,
           displayName: chatbot.name,
         },
-        status: 'active',
+        channelStatus: 'active',
         usage: {},
       });
 
@@ -35,13 +35,32 @@ export abstract class ChatbotService {
 
   static list({ orgId }: { orgId: string }) {
     return db.query.chatbots.findMany({
-      where: eq(chatbots.orgId, orgId),
+      where: {
+        orgId,
+      },
     });
   }
 
   static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.chatbots.findFirst({
-      where: and(eq(chatbots.id, id), eq(chatbots.orgId, orgId)),
+      where: {
+        id,
+        orgId,
+      },
+    });
+  }
+
+  static singleWithRelations({ id, orgId }: { id: string; orgId: string }) {
+    return db.query.chatbots.findFirst({
+      where: {
+        id,
+        orgId,
+      },
+      with: {
+        channels: true,
+        behaviour: true,
+        documents: true,
+      },
     });
   }
 

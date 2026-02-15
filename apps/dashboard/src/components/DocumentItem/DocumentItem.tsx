@@ -63,8 +63,8 @@ export const DocumentItem = ({
             Waiting to train…
           </Badge>
         </div>
-
         <ItemDescription>{description}</ItemDescription>
+        <p className="text-xs text-muted-foreground">Last Trained: 11pm</p>
       </ItemContent>
       <ItemActions>
         {/*<Button size="icon" variant="ghost">*/}

@@ -1,14 +1,14 @@
 import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
-import { EmbeddingModel } from './model';
+import { IndexingModel } from './model';
 import { EmbeddingService } from './service';
 
-export const Embedding = new Elysia({
-  prefix: '/embedding',
-  tags: ['Embedding'],
+export const Indexing = new Elysia({
+  prefix: '/indexing',
+  tags: ['Indexing'],
 })
   .use(AuthGuard)
-  .use(EmbeddingModel)
+  .use(IndexingModel)
   .post(
     '',
     async ({ body, status, orgId }) => {
@@ -22,7 +22,7 @@ export const Embedding = new Elysia({
       });
     },
     {
-      body: 'EmbedStartBody',
-      202: 'EmbedStartResponse',
+      body: 'IndexingStartBody',
+      202: 'IndexingStartResponse',
     },
   );

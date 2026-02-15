@@ -5,7 +5,7 @@ import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
-import { EmbeddingService } from '../embedding/service';
+import { EmbeddingService } from '../indexing/service';
 import { MessageService } from '../message/service';
 import {
   buildBehaviorPrompt,

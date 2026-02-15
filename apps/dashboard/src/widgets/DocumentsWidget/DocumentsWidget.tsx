@@ -1,4 +1,3 @@
-import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Card,
@@ -22,30 +21,17 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@knowbase/ui/components/item';
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import {
-  ArrowUpRightIcon,
-  Edit,
-  FolderIcon,
-  MoreHorizontal,
-  ShieldAlertIcon,
-  Trash2,
-} from 'lucide-react';
+import { ArrowUpRightIcon, FolderIcon } from 'lucide-react';
 import { useState } from 'react';
+import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import { type DocumentSchema, deleteDocumentsById } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
+
 export const DocumentsWidget = () => {
   const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId, deleteDocument } = useDocuments();
@@ -118,105 +104,65 @@ export const DocumentsWidget = () => {
             </DropdownMenu>
           </CardAction>
         </CardHeader>
-        {documents.map((doc) => (
-          <CardContent key={doc.id}>
-            <Item variant="outline">
-              <ItemMedia variant="icon">
-                <ShieldAlertIcon />
-              </ItemMedia>
-              <ItemContent>
-                <div className={'flex flex-row gap-4'}>
-                  <ItemTitle>{doc.title}</ItemTitle>
-                  <Badge>{doc.content.type === 'qna' ? 'Q&A' : 'Text'}</Badge>
-                </div>
+        <CardContent className="flex flex-col gap-3">
+          {documents.map((doc) => (
+            <DocumentItem
+              key={doc.id}
+              type={doc.content.type}
+              title={doc.title}
+              description={
+                doc.content?.type === 'qna'
+                  ? `${doc.content.data.length} questions`
+                  : String(doc.content?.data)
+              }
+              onEdit={() => {
+                setSelectedDocument(doc);
+                setIsEdit(true);
 
-                <ItemDescription>
-                  {doc.content?.type === 'qna'
-                    ? `${doc.content.data.length} questions`
-                    : String(doc.content?.data)}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                {/*<Button size="icon" variant="ghost">*/}
-                {/*  <MoreHorizontal />*/}
-                {/*</Button>*/}
-                {/* Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="text-muted-foreground  cursor-pointer "
-                    >
-                      <MoreHorizontal />
-                    </Button>
-                  </DropdownMenuTrigger>
+                setIsTextContentSheetOpen(false);
+                setIsQASheetOpen(false);
 
-                  <DropdownMenuContent align="end" className="w-40 ">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedDocument(doc);
-                        setIsEdit(true);
+                if (doc.content.type === 'text') {
+                  setIsTextContentSheetOpen(true);
+                } else {
+                  setIsQASheetOpen(true);
+                }
+              }}
+              onDelete={(e) => {
+                e.stopPropagation();
+                deleteDocumentMutation.mutate(doc.id);
+              }}
+            />
+          ))}
 
-                        setIsTextContentSheetOpen(false);
-                        setIsQASheetOpen(false);
-
-                        if (doc.content.type === 'text') {
-                          setIsTextContentSheetOpen(true);
-                        } else {
-                          setIsQASheetOpen(true);
-                        }
-                      }}
-                      className="flex items-center cursor-pointer gap-2"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteDocumentMutation.mutate(doc.id);
-                      }}
-                      className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 text-red" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </ItemActions>
-            </Item>
-          </CardContent>
-        ))}
-
-        {!isDocumentsAvailable && (
-          <Empty className="md:py-5">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <FolderIcon />
-              </EmptyMedia>
-              <EmptyTitle>No Knowledge Sources Yet</EmptyTitle>
-              <EmptyDescription>
-                Add documents, links, or text to help your chatbot answer
-                questions accurately.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent className="flex-row justify-center gap-2">
-              <Button>Add Source</Button>
-            </EmptyContent>
-            <Button
-              variant="link"
-              asChild
-              className="text-muted-foreground"
-              size="sm"
-            >
-              <a href="http://help.com">
-                Learn More <ArrowUpRightIcon />
-              </a>
-            </Button>
-          </Empty>
-        )}
+          {!isDocumentsAvailable && (
+            <Empty className="md:py-5">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FolderIcon />
+                </EmptyMedia>
+                <EmptyTitle>No Knowledge Sources Yet</EmptyTitle>
+                <EmptyDescription>
+                  Add documents, links, or text to help your chatbot answer
+                  questions accurately.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent className="flex-row justify-center gap-2">
+                <Button>Add Source</Button>
+              </EmptyContent>
+              <Button
+                variant="link"
+                asChild
+                className="text-muted-foreground"
+                size="sm"
+              >
+                <a href="http://help.com">
+                  Learn More <ArrowUpRightIcon />
+                </a>
+              </Button>
+            </Empty>
+          )}
+        </CardContent>
       </Card>
       <Sheet
         open={isTextContentSheetOpen}

@@ -15,7 +15,7 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import {
-  Clock,
+  CheckCircle,
   Edit,
   Files,
   FileText,
@@ -58,13 +58,16 @@ export const DocumentItem = ({
           {/*<Badge variant="outline">*/}
           {/*  {doc.content.type === 'qna' ? 'Q&A' : 'Text'}*/}
           {/*</Badge>*/}
-          <Badge variant={'outline'} className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Waiting to train…
+          {/*<Badge variant={'outline'} className="flex items-center gap-1">*/}
+          {/*  <Clock className="h-3 w-3" />*/}
+          {/*  Waiting to train…*/}
+          {/*</Badge>*/}
+          <Badge variant="outline" className="text-muted-foreground px-1.5">
+            <CheckCircle />
+            Trained
           </Badge>
         </div>
         <ItemDescription>{description}</ItemDescription>
-        <p className="text-xs text-muted-foreground">Last Trained: 11pm</p>
       </ItemContent>
       <ItemActions>
         {/*<Button size="icon" variant="ghost">*/}

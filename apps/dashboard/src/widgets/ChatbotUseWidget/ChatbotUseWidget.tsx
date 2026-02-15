@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/clerk-react';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
@@ -20,6 +21,7 @@ import { useChannels } from '@/store/useChannels.ts';
 
 export const ChatbotUseWidget = () => {
   const [copiedText, copyToClipboard] = useCopyToClipboard();
+  const { orgId } = useAuth();
 
   const { chatbotId } = useParams({ strict: false });
   if (!chatbotId) {
@@ -33,6 +35,7 @@ export const ChatbotUseWidget = () => {
   const embedUrl = `${import.meta.env.VITE_EMBED_BASE}/embed.js`;
   const embedCode = `<script>
 window.KnowBaseChat = {
+  orgId: "${orgId}",
   channelId: "${channelWeb?.id || ''}",
 };
 </script>

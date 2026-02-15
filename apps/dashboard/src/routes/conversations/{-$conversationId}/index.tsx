@@ -37,7 +37,7 @@ function RouteComponent() {
   });
 
   useEffect(() => {
-    if (conversationQuery.data?.data.conversations[0].id) {
+    if (conversationQuery.data?.data.conversations?.[0]?.id) {
       navigate({
         from: '/conversations/{-$conversationId}/',
         params: {
@@ -46,7 +46,7 @@ function RouteComponent() {
         replace: true,
       });
     }
-  }, [conversationQuery.data?.data.conversations[0].id, navigate]);
+  }, [conversationQuery.data?.data.conversations?.[0]?.id, navigate]);
 
   return (
     <div className="flex flex-col h-screen">

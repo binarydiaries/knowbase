@@ -1,4 +1,5 @@
 import { useChat } from '@ai-sdk/react';
+import { useAuth } from '@clerk/clerk-react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
@@ -7,6 +8,7 @@ import { useChannels } from '@/store/useChannels.ts';
 
 export const ChatbotPreview = () => {
   const { chatbotId } = useParams({ strict: false });
+  const { orgId } = useAuth();
   const initialMessageId = useId();
   if (!chatbotId) {
     throw new Error('ChatbotId not available');
@@ -46,6 +48,7 @@ export const ChatbotPreview = () => {
             ...body,
             message: messageText?.text,
             conversationId: id,
+            orgId,
           },
         };
       },

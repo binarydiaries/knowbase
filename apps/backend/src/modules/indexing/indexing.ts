@@ -1,7 +1,9 @@
 import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
+import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
+import { DocumentService } from '../document/service';
 import { IndexingModel } from './model';
-import { EmbeddingService } from './service';
+import { IndexingService } from './service';
 
 export const Indexing = new Elysia({
   prefix: '/indexing',
@@ -12,10 +14,26 @@ export const Indexing = new Elysia({
   .post(
     '',
     async ({ body, status, orgId }) => {
-      await EmbeddingService.startEmbedding({
+      const documents = await DocumentService.list({
         chatbotId: body.chatbotId,
         orgId,
+        filter: { status: ['ready', 'draft'] },
       });
+
+      await Promise.all(
+        documents.map(async (doc) => {
+          return await addIndexDocumentJob({
+            orgId,
+            documentId: doc.id,
+            version: doc.version,
+          });
+        }),
+      );
+
+      // await EmbeddingService.startEmbedding({
+      //   chatbotId: body.chatbotId,
+      //   orgId,
+      // });
 
       return status(202, {
         message: 'Indexing Started',

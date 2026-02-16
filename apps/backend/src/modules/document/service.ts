@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
-import { documents } from '../../db/schema/documents';
+import { documents, type IDocument } from '../../db/schema/documents';
 import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {
@@ -13,9 +13,13 @@ export abstract class DocumentService {
   static async list({
     chatbotId,
     orgId,
+    filter,
   }: {
     chatbotId: string;
     orgId: string;
+    filter?: {
+      status?: IDocument['status'][];
+    };
   }) {
     return db.query.documents.findMany({
       where: {
@@ -23,6 +27,7 @@ export abstract class DocumentService {
         chatbot: {
           orgId,
         },
+        ...(filter?.status ? { status: { in: filter.status } } : {}),
       },
     });
   }

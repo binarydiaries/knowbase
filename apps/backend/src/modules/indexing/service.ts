@@ -18,7 +18,7 @@ const splitter = new MarkdownHeaderTextSplitter([
   ['###', 'h3'],
 ]);
 
-export abstract class EmbeddingService {
+export abstract class IndexingService {
   static embedDocument = async (document: typeof documents.$inferSelect) => {
     return await db.transaction(async (transaction) => {
       await transaction
@@ -27,7 +27,6 @@ export abstract class EmbeddingService {
           status: 'indexing',
         })
         .where(eq(documents.id, document.id));
-
       const documentContent = {
         type: document.type,
         data: document.contentSerialized,
@@ -36,17 +35,17 @@ export abstract class EmbeddingService {
       let generatedEmbeddings: { embedding: number[]; content: string }[] = [];
 
       if (documentContent.type === 'qna') {
-        const chunks = await EmbeddingService.chunkLargeQnA({
+        const chunks = await IndexingService.chunkLargeQnA({
           title: document.title,
           questions: documentContent.data,
         });
-        generatedEmbeddings = await EmbeddingService.generateEmbeddings(chunks);
+        generatedEmbeddings = await IndexingService.generateEmbeddings(chunks);
       } else if (documentContent.type === 'text') {
-        const chunks = await EmbeddingService.chunkText({
+        const chunks = await IndexingService.chunkText({
           title: document.title,
           content: documentContent.data,
         });
-        generatedEmbeddings = await EmbeddingService.generateEmbeddings(chunks);
+        generatedEmbeddings = await IndexingService.generateEmbeddings(chunks);
       }
 
       if (generatedEmbeddings.length > 0) {
@@ -78,7 +77,7 @@ export abstract class EmbeddingService {
     questions: z.infer<typeof DocumentContentQna>;
   }) {
     const chunkPromises = questions.map(async (question) => {
-      const recursiveChunks = await EmbeddingService.generateRecursiveChunks(
+      const recursiveChunks = await IndexingService.generateRecursiveChunks(
         question.answer,
       );
 
@@ -108,7 +107,7 @@ ${chunk}
       const headerString = Object.values(doc.metadata).join(' → ');
       const header = title + (headerString ? ` - ${headerString}` : '');
 
-      const recursiveChunks = await EmbeddingService.generateRecursiveChunks(
+      const recursiveChunks = await IndexingService.generateRecursiveChunks(
         doc.pageContent,
       );
 

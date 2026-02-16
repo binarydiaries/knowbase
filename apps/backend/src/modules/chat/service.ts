@@ -5,7 +5,7 @@ import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
-import { EmbeddingService } from '../indexing/service';
+import { IndexingService } from '../indexing/service';
 import { MessageService } from '../message/service';
 import {
   buildBehaviorPrompt,
@@ -57,7 +57,7 @@ export abstract class ChatService {
   }
 
   static async getSearchChunks(finalQuery: string) {
-    const chunks = await EmbeddingService.findRelevantContent(finalQuery);
+    const chunks = await IndexingService.findRelevantContent(finalQuery);
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),

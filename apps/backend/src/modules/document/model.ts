@@ -1,6 +1,14 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 
+const DocumentStatus = z.enum([
+  'draft',
+  'ready',
+  'indexing',
+  'indexed',
+  'failed',
+]);
+
 export const DocumentContentQna = z.array(
   z.object({
     question: z.string(),
@@ -23,6 +31,7 @@ export const DocumentSchema = z.object({
   id: z.string(),
   title: z.string(),
   content: DocumentContent,
+  status: DocumentStatus,
   chatbotId: z.string(),
   createdBy: z.string(),
   createdAt: z.date(),

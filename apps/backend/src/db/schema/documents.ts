@@ -1,10 +1,27 @@
-import { index, integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
+import type { InferSelectModel } from 'drizzle-orm';
+import {
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+} from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
   cuid2PrimaryKey,
   timestamps,
 } from '../../utils/columns.utils';
 import { chatbots } from './chatbots';
+
+export const documentStatus = pgEnum('status', [
+  'draft',
+  'ready',
+  'queue',
+  'indexing',
+  'indexed',
+  'failed',
+]);
 
 export const documents = pgTable(
   'documents',
@@ -14,10 +31,7 @@ export const documents = pgTable(
     contentSerialized: jsonb().notNull(),
     version: integer().notNull().default(1),
     type: text().$type<'text' | 'qna'>().notNull(),
-    status: text()
-      .$type<'draft' | 'ready' | 'indexing' | 'indexed' | 'failed'>()
-      .notNull()
-      .default('draft'),
+    status: documentStatus().notNull().default('draft'),
     lastIndexedVersion: integer(),
     chatbotId: text()
       .notNull()
@@ -33,3 +47,5 @@ export const documents = pgTable(
     index('documents_chatbot_status_idx').on(table.chatbotId, table.status),
   ],
 );
+
+export type IDocument = InferSelectModel<typeof documents>;

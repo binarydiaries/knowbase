@@ -4,6 +4,7 @@ import { z } from 'zod';
 const DocumentStatus = z.enum([
   'draft',
   'ready',
+  'queue',
   'indexing',
   'indexed',
   'failed',

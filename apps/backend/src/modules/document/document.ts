@@ -43,7 +43,7 @@ export const Document = new Elysia({
       };
     },
     {
-      // response: 'ManyDocumentsResponse',
+      response: 'ManyDocumentsResponse',
       query: 'ChatbotDocumentsParams',
     },
   )

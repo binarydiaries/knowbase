@@ -6,6 +6,7 @@ import {
   pgEnum,
   pgTable,
   text,
+  timestamp,
 } from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
@@ -32,6 +33,7 @@ export const documents = pgTable(
     type: text().$type<'text' | 'qna'>().notNull(),
     status: documentStatus().notNull().default('ready'),
     lastIndexedVersion: integer(),
+    lastTrainedAt: timestamp({ withTimezone: true }),
     chatbotId: text()
       .notNull()
       .references(() => chatbots.id),

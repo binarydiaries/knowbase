@@ -110,11 +110,12 @@ export type DocumentSchema = {
             answer: string;
         }>;
     };
-    status: 'draft' | 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+    status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     chatbotId: string;
     createdBy: string;
     createdAt: string;
     updatedAt: string;
+    lastTrainedAt: string | null;
 };
 
 export type CreateDocumentBody = {
@@ -160,11 +161,12 @@ export type OneDocumentResponse = {
                 answer: string;
             }>;
         };
-        status: 'draft' | 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     };
 };
 
@@ -182,11 +184,12 @@ export type ManyDocumentsResponse = {
                 answer: string;
             }>;
         };
-        status: 'draft' | 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     }>;
 };
 
@@ -248,11 +251,12 @@ export type OneChatbotResponse = {
                 answer: string;
             }>;
         };
-        status: 'draft' | 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     }>;
     channels: Array<{
         id: string;

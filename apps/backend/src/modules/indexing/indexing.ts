@@ -3,7 +3,6 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
 import { DocumentService } from '../document/service';
 import { IndexingModel } from './model';
-import { IndexingService } from './service';
 
 export const Indexing = new Elysia({
   prefix: '/indexing',
@@ -29,11 +28,6 @@ export const Indexing = new Elysia({
           });
         }),
       );
-
-      // await EmbeddingService.startEmbedding({
-      //   chatbotId: body.chatbotId,
-      //   orgId,
-      // });
 
       return status(202, {
         message: 'Indexing Started',

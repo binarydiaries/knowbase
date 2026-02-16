@@ -1,4 +1,6 @@
 import { type Job, Worker } from 'bullmq';
+import { DocumentService } from '../../modules/document/service';
+import { IndexingService } from '../../modules/indexing/service';
 import { connection } from '../connection';
 import { indexingQueue } from './indexing.queue';
 import type { IIndexDocumentJob } from './indexing.types';
@@ -6,9 +8,18 @@ import type { IIndexDocumentJob } from './indexing.types';
 export const indexingWorker = new Worker(
   indexingQueue.name,
   async (job: Job<IIndexDocumentJob>) => {
-    const { documentId } = job.data;
+    const { documentId, orgId } = job.data;
+    await DocumentService.update(job.data.documentId, {
+      status: 'indexing',
+    });
 
-    // await DocumentIndexService.index(documentId);
+    const document = await DocumentService.single({ id: documentId, orgId });
+
+    if (!document) {
+      throw new Error('Document not found');
+    }
+
+    await IndexingService.embedDocument(document);
   },
   {
     connection,
@@ -16,19 +27,20 @@ export const indexingWorker = new Worker(
   },
 );
 
-indexingWorker.on('ready', async () => {
-  console.log('Ready ');
+indexingWorker.on('completed', async (job) => {
+  const { documentId, version } = job.data;
+  await DocumentService.update(documentId, {
+    status: 'indexed',
+    lastIndexedVersion: version,
+  });
 });
 
-indexingWorker.on('completed', (job) => {
-  console.log('completed', job.name, job.queueName);
-});
+indexingWorker.on('failed', async (job) => {
+  if (job?.data) {
+    const { documentId } = job.data;
 
-indexingWorker.on('failed', async (job, err) => {
-  // const { documentId } = job.data;
-  //
-  // await db
-  //   .update(documents)
-  //   .set({ status: 'failed' })
-  //   .where(eq(documents.id, documentId));
+    await DocumentService.update(documentId, {
+      status: 'failed',
+    });
+  }
 });

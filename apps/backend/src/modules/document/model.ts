@@ -36,6 +36,7 @@ export const DocumentSchema = z.object({
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  lastTrainedAt: z.date().nullable(),
 });
 
 const CreateDocumentBody = z.object({

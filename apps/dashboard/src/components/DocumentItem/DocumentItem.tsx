@@ -39,6 +39,7 @@ interface IDocumentItemProps {
   type: 'text' | 'qna';
   title: string;
   description: string;
+  lastTrainedAt?: string | null;
   onEdit: MouseEventHandler;
   onDelete: MouseEventHandler;
   status: DocumentSchema['status'];
@@ -51,6 +52,7 @@ export const DocumentItem = ({
   onEdit,
   onDelete,
   status,
+  lastTrainedAt,
 }: IDocumentItemProps) => {
   let docIcon = <Files className="h-4 w-4" />;
   switch (type) {
@@ -98,7 +100,7 @@ export const DocumentItem = ({
           label: 'Trained',
           icon: <CheckCircle className="h-3 w-3" />,
           description: 'Training complete',
-          // description: doc.lastTrainedAt
+          // description: lastTrainedAt
           //   ? `Last trained ${formatDistanceToNow(new Date(doc.lastTrainedAt), {
           //       addSuffix: true,
           //     })}`

@@ -17,7 +17,7 @@ export const Indexing = new Elysia({
       const documents = await DocumentService.list({
         chatbotId: body.chatbotId,
         orgId,
-        filter: { status: ['ready', 'draft'] },
+        filter: { status: ['ready'] },
       });
 
       await Promise.all(

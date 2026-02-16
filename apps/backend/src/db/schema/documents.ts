@@ -15,7 +15,6 @@ import {
 import { chatbots } from './chatbots';
 
 export const documentStatus = pgEnum('status', [
-  'draft',
   'ready',
   'queue',
   'indexing',
@@ -31,7 +30,7 @@ export const documents = pgTable(
     contentSerialized: jsonb().notNull(),
     version: integer().notNull().default(1),
     type: text().$type<'text' | 'qna'>().notNull(),
-    status: documentStatus().notNull().default('draft'),
+    status: documentStatus().notNull().default('ready'),
     lastIndexedVersion: integer(),
     chatbotId: text()
       .notNull()

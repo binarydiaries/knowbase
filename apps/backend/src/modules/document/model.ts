@@ -2,7 +2,6 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 
 const DocumentStatus = z.enum([
-  'draft',
   'ready',
   'queue',
   'indexing',

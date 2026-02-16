@@ -15,15 +15,25 @@ import {
   ItemTitle,
 } from '@knowbase/ui/components/item';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@knowbase/ui/components/tooltip';
+import {
+  AlertTriangle,
   CheckCircle,
+  Clock,
   Edit,
   Files,
   FileText,
+  Loader2,
   MessageSquare,
   MoreHorizontal,
+  Send,
   Trash2,
 } from 'lucide-react';
-import type { MouseEventHandler } from 'react';
+import { type MouseEventHandler, useMemo } from 'react';
+import type { DocumentSchema } from '@/services';
 
 interface IDocumentItemProps {
   type: 'text' | 'qna';
@@ -31,6 +41,7 @@ interface IDocumentItemProps {
   description: string;
   onEdit: MouseEventHandler;
   onDelete: MouseEventHandler;
+  status: DocumentSchema['status'];
 }
 
 export const DocumentItem = ({
@@ -39,6 +50,7 @@ export const DocumentItem = ({
   description,
   onEdit,
   onDelete,
+  status,
 }: IDocumentItemProps) => {
   let docIcon = <Files className="h-4 w-4" />;
   switch (type) {
@@ -49,23 +61,69 @@ export const DocumentItem = ({
       docIcon = <FileText className="h-4 w-4" />;
       break;
   }
+
+  const documentIndexingStatus = useMemo(() => {
+    switch (status) {
+      case 'ready':
+        return {
+          label: 'Ready',
+          icon: <Send className="h-3 w-3" />,
+          description: 'Ready to be trained',
+        };
+
+      case 'queue':
+        return {
+          label: 'Queued',
+          icon: <Clock className="h-3 w-3" />,
+          description: 'Waiting in training queue…',
+        };
+
+      case 'indexing':
+        return {
+          label: 'Training',
+          icon: <Loader2 className="h-3 w-3 animate-spin" />,
+          description: 'Training in progress…',
+        };
+
+      case 'failed':
+        return {
+          label: 'Failed',
+          icon: <AlertTriangle className="h-3 w-3" />,
+          description: 'Training failed. You can retry.',
+        };
+
+      case 'indexed':
+      default:
+        return {
+          label: 'Trained',
+          icon: <CheckCircle className="h-3 w-3" />,
+          description: 'Training complete',
+          // description: doc.lastTrainedAt
+          //   ? `Last trained ${formatDistanceToNow(new Date(doc.lastTrainedAt), {
+          //       addSuffix: true,
+          //     })}`
+          //   : 'Training complete',
+        };
+    }
+  }, [status]);
+
   return (
     <Item variant="outline">
       <ItemMedia variant="icon">{docIcon}</ItemMedia>
       <ItemContent>
         <div className={'flex flex-row gap-2'}>
           <ItemTitle>{title}</ItemTitle>
-          {/*<Badge variant="outline">*/}
-          {/*  {doc.content.type === 'qna' ? 'Q&A' : 'Text'}*/}
-          {/*</Badge>*/}
-          {/*<Badge variant={'outline'} className="flex items-center gap-1">*/}
-          {/*  <Clock className="h-3 w-3" />*/}
-          {/*  Waiting to train…*/}
-          {/*</Badge>*/}
-          <Badge variant="outline" className="text-muted-foreground px-1.5">
-            <CheckCircle />
-            Trained
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="outline" className="text-muted-foreground px-1.5">
+                {documentIndexingStatus.icon}
+                {documentIndexingStatus.label}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{documentIndexingStatus.description}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <ItemDescription>{description}</ItemDescription>
       </ItemContent>

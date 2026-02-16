@@ -110,6 +110,7 @@ export const DocumentsWidget = () => {
               key={doc.id}
               type={doc.content.type}
               title={doc.title}
+              status={doc.status}
               description={
                 doc.content?.type === 'qna'
                   ? `${doc.content.data.length} questions`

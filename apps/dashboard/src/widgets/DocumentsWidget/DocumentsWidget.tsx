@@ -119,7 +119,12 @@ export const DocumentsWidget = () => {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent className="flex-row justify-center gap-2">
-                <Button>Add Source</Button>
+                <AddDocumentDropdown
+                  onTextClick={() => setIsTextContentSheetOpen(true)}
+                  onQaClick={() => setIsQASheetOpen(true)}
+                >
+                  <Button>Add Source</Button>
+                </AddDocumentDropdown>
               </EmptyContent>
               <Button
                 variant="link"

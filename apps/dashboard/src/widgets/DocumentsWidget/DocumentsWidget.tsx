@@ -16,12 +16,17 @@ import {
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
 import { Sheet } from '@knowbase/ui/components/sheet';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { ArrowUpRightIcon, FolderIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
-import { type DocumentSchema, deleteDocumentsById } from '@/services';
+import {
+  type DocumentSchema,
+  deleteDocumentsById,
+  getIndexingStatus,
+  postIndexing,
+} from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
@@ -29,7 +34,12 @@ import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget
 
 export const DocumentsWidget = () => {
   const { chatbotId } = useParams({ strict: false });
-  const { documentsByChatbotId, deleteDocument } = useDocuments();
+  const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
+    useDocuments();
+  const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
+  const [isQASheetOpen, setIsQASheetOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
+  const [isPollingActive, setIsPollingActive] = useState(true);
 
   if (!chatbotId) {
     throw 'Not chatbot id';
@@ -38,11 +48,6 @@ export const DocumentsWidget = () => {
   const documents = (documentsByChatbotId[chatbotId] || []).sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   );
-
-  const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
-  const [isQASheetOpen, setIsQASheetOpen] = useState(false);
-
-  const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
 
   const isEdit = !!selectedDocument;
 
@@ -53,13 +58,33 @@ export const DocumentsWidget = () => {
           id,
         },
       });
-
       return {
         documentId: id,
       };
     },
     onSuccess: ({ documentId }) => deleteDocument(chatbotId, documentId),
   });
+
+  const trainMutation = useMutation({
+    mutationFn: () => postIndexing({ body: { chatbotId } }),
+    onSuccess: () => setIsPollingActive(true),
+  });
+
+  const indexStatusQuery = useQuery({
+    queryFn: () => getIndexingStatus({ query: { chatbotId } }),
+    queryKey: ['indexStatus', chatbotId],
+    enabled: isPollingActive,
+    refetchInterval: 3000,
+  });
+
+  useEffect(() => {
+    if (indexStatusQuery.data?.data) {
+      setIsPollingActive(indexStatusQuery.data?.data.isPollingActive);
+      indexStatusQuery.data.data.documentIds?.forEach((value) => {
+        addUpdateDocument(chatbotId, value);
+      });
+    }
+  }, [addUpdateDocument, chatbotId, indexStatusQuery?.data?.data]);
 
   const isDocumentsAvailable = !!documents?.length;
   return (
@@ -70,14 +95,17 @@ export const DocumentsWidget = () => {
           <CardDescription>
             Your chatbot will only answer based on the sources you add here.
           </CardDescription>
-          <CardAction>
-            <AddDocumentDropdown
-              onTextClick={() => setIsTextContentSheetOpen(true)}
-              onQaClick={() => setIsQASheetOpen(true)}
-            >
-              <Button variant="outline">Add</Button>
-            </AddDocumentDropdown>
-          </CardAction>
+          {isDocumentsAvailable && (
+            <CardAction className="flex gap-2">
+              <Button onClick={() => trainMutation.mutate()}>Train</Button>
+              <AddDocumentDropdown
+                onTextClick={() => setIsTextContentSheetOpen(true)}
+                onQaClick={() => setIsQASheetOpen(true)}
+              >
+                <Button variant="outline">Add</Button>
+              </AddDocumentDropdown>
+            </CardAction>
+          )}
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {documents.map((doc) => (
@@ -86,6 +114,7 @@ export const DocumentsWidget = () => {
               type={doc.content.type}
               title={doc.title}
               status={doc.status}
+              lastTrainedAt={doc.lastTrainedAt}
               description={
                 doc.content?.type === 'qna'
                   ? `${doc.content.data.length} questions`

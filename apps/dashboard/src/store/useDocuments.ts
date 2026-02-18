@@ -4,7 +4,10 @@ import type { DocumentSchema } from '@/services';
 interface IDocumentsState {
   documentsByChatbotId: Record<string, DocumentSchema[]>;
   setDocuments: (chatbotId: string, documents: DocumentSchema[]) => void;
-  addUpdateDocument: (chatbotId: string, document: DocumentSchema) => void;
+  addUpdateDocument: (
+    chatbotId: string,
+    document: Partial<DocumentSchema>,
+  ) => void;
   deleteDocument: (chatbotId: string, documentId: string) => void;
 }
 
@@ -26,7 +29,7 @@ export const useDocuments = create<IDocumentsState>((set) => ({
         return {
           documentsByChatbotId: {
             ...state.documentsByChatbotId,
-            [chatbotId]: [document, ...docs],
+            [chatbotId]: [{ ...docs[index], ...document }, ...docs],
           },
         };
       }
@@ -34,7 +37,9 @@ export const useDocuments = create<IDocumentsState>((set) => ({
       return {
         documentsByChatbotId: {
           ...state.documentsByChatbotId,
-          [chatbotId]: docs.map((d) => (d.id === document.id ? document : d)),
+          [chatbotId]: docs.map((d) =>
+            d.id === document.id ? { ...d, ...document } : d,
+          ),
         },
       };
     }),

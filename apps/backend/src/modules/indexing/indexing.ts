@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
 import { DocumentService } from '../document/service';
@@ -61,7 +62,9 @@ export const Indexing = new Elysia({
       };
     },
     {
-      query: 'IndexingStartBody',
+      query: z.object({
+        chatbotId: z.string(),
+      }),
       response: 'IndexingStatusResponse',
     },
   );

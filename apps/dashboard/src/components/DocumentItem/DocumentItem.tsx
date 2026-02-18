@@ -99,15 +99,12 @@ export const DocumentItem = ({
         return {
           label: 'Trained',
           icon: <CheckCircle className="h-3 w-3" />,
-          description: 'Training complete',
-          // description: lastTrainedAt
-          //   ? `Last trained ${formatDistanceToNow(new Date(doc.lastTrainedAt), {
-          //       addSuffix: true,
-          //     })}`
-          //   : 'Training complete',
+          description: lastTrainedAt
+            ? `Last trained ${lastTrainedAt}`
+            : 'Training complete',
         };
     }
-  }, [status]);
+  }, [status, lastTrainedAt]);
 
   return (
     <Item variant="outline">

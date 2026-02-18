@@ -340,6 +340,15 @@ export type IndexingStartResponse = {
     message: string;
 };
 
+export type IndexingStatusResponse = {
+    documentIds: Array<{
+        id: string;
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+        updatedAt: string;
+    }>;
+    isPollingActive: boolean;
+};
+
 export type ListConversation = {
     chatbotId?: string;
 };
@@ -854,6 +863,33 @@ export type PostIndexingErrors = {
 };
 
 export type PostIndexingError = PostIndexingErrors[keyof PostIndexingErrors];
+
+export type GetIndexingStatusData = {
+    body?: never;
+    path?: never;
+    query: {
+        chatbotId: string;
+    };
+    url: '/indexing/status';
+};
+
+export type GetIndexingStatusErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetIndexingStatusError = GetIndexingStatusErrors[keyof GetIndexingStatusErrors];
+
+export type GetIndexingStatusResponses = {
+    /**
+     * Response for status 200
+     */
+    200: IndexingStatusResponse;
+};
+
+export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetIndexingStatusResponses];
 
 export type GetConversationsData = {
     body?: never;

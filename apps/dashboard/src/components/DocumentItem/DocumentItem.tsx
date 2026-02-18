@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@knowbase/ui/components/tooltip';
+import { formatDistance } from 'date-fns';
 import {
   AlertTriangle,
   CheckCircle,
@@ -100,7 +101,7 @@ export const DocumentItem = ({
           label: 'Trained',
           icon: <CheckCircle className="h-3 w-3" />,
           description: lastTrainedAt
-            ? `Last trained ${lastTrainedAt}`
+            ? `Last trained ${formatDistance(lastTrainedAt, new Date(), { addSuffix: true })}`
             : 'Training complete',
         };
     }

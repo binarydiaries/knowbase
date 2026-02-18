@@ -8,12 +8,6 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@knowbase/ui/components/dropdown-menu';
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -29,6 +23,7 @@ import { useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import { type DocumentSchema, deleteDocumentsById } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
+import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 
@@ -45,7 +40,8 @@ export const DocumentsWidget = () => {
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
 
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
-  const [isEdit, setIsEdit] = useState(false);
+
+  const isEdit = !!selectedDocument;
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -72,36 +68,12 @@ export const DocumentsWidget = () => {
             Your chatbot will only answer based on the sources you add here.
           </CardDescription>
           <CardAction>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">Add</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setIsEdit(false);
-
-                    setSelectedDocument(undefined);
-                    setIsTextContentSheetOpen(true);
-
-                    setIsQASheetOpen(false);
-                  }}
-                >
-                  Text
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setIsEdit(false);
-                    setSelectedDocument(undefined);
-                    setIsQASheetOpen(true);
-                    setIsTextContentSheetOpen(false);
-                  }}
-                >
-                  Q&A
-                </DropdownMenuItem>
-                <DropdownMenuItem>PDF</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AddDocumentDropdown
+              onTextClick={() => setIsTextContentSheetOpen(true)}
+              onQaClick={() => setIsQASheetOpen(true)}
+            >
+              <Button variant="outline">Add</Button>
+            </AddDocumentDropdown>
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
@@ -118,11 +90,6 @@ export const DocumentsWidget = () => {
               }
               onEdit={() => {
                 setSelectedDocument(doc);
-                setIsEdit(true);
-
-                setIsTextContentSheetOpen(false);
-                setIsQASheetOpen(false);
-
                 if (doc.content.type === 'text') {
                   setIsTextContentSheetOpen(true);
                 } else {
@@ -167,30 +134,33 @@ export const DocumentsWidget = () => {
       </Card>
       <Sheet
         open={isTextContentSheetOpen}
-        onOpenChange={setIsTextContentSheetOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedDocument(undefined);
+          }
+          setIsTextContentSheetOpen(open);
+        }}
       >
         {isTextContentSheetOpen && (
           <TextContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
-            onClose={() => {
-              setIsTextContentSheetOpen(false);
-              setSelectedDocument(undefined);
-              setIsEdit(false);
-            }}
           />
         )}
       </Sheet>
-      <Sheet open={isQASheetOpen} onOpenChange={setIsQASheetOpen}>
+      <Sheet
+        open={isQASheetOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedDocument(undefined);
+          }
+          setIsQASheetOpen(open);
+        }}
+      >
         {isQASheetOpen && (
           <QAContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
-            onClose={() => {
-              setIsQASheetOpen(false);
-              setSelectedDocument(undefined);
-              setIsEdit(false);
-            }}
           />
         )}
       </Sheet>

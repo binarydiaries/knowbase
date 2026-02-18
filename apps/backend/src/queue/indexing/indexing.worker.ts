@@ -32,6 +32,7 @@ indexingWorker.on('completed', async (job) => {
   await DocumentService.update(documentId, {
     status: 'indexed',
     lastIndexedVersion: version,
+    lastTrainedAt: new Date(),
   });
 });
 

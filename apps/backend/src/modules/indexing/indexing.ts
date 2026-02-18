@@ -37,4 +37,31 @@ export const Indexing = new Elysia({
       body: 'IndexingStartBody',
       202: 'IndexingStartResponse',
     },
+  )
+  .get(
+    '/status',
+    async ({ query, orgId }) => {
+      const documents = await DocumentService.list({
+        chatbotId: query.chatbotId,
+        orgId,
+      });
+
+      return {
+        documentIds: documents.map((doc) => {
+          return {
+            id: doc.id,
+            updatedAt: doc.updatedAt,
+            status: doc.status,
+          };
+        }),
+        isPollingActive: !!documents.find(
+          (document) =>
+            document.status === 'queue' || document.status === 'indexing',
+        ),
+      };
+    },
+    {
+      query: 'IndexingStartBody',
+      response: 'IndexingStatusResponse',
+    },
   );

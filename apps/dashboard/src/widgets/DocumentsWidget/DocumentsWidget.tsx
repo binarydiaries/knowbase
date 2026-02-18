@@ -35,7 +35,10 @@ export const DocumentsWidget = () => {
     throw 'Not chatbot id';
   }
 
-  const documents = documentsByChatbotId[chatbotId] || [];
+  const documents = (documentsByChatbotId[chatbotId] || []).sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
+
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
 
@@ -145,7 +148,10 @@ export const DocumentsWidget = () => {
           <TextContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
-            onClose={() => setIsTextContentSheetOpen(false)}
+            onClose={() => {
+              setIsTextContentSheetOpen(false);
+              setSelectedDocument(undefined);
+            }}
           />
         )}
       </Sheet>
@@ -162,7 +168,10 @@ export const DocumentsWidget = () => {
           <QAContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
-            onClose={() => setIsQASheetOpen(false)}
+            onClose={() => {
+              setIsQASheetOpen(false);
+              setSelectedDocument(undefined);
+            }}
           />
         )}
       </Sheet>

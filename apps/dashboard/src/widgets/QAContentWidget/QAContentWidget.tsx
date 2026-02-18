@@ -11,7 +11,7 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { Textarea } from '@knowbase/ui/components/textarea';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -20,6 +20,7 @@ import {
   patchDocumentsById,
   postDocuments,
 } from '@/services';
+import { useDocuments } from '@/store/useDocuments.ts';
 
 type QA = {
   question: string;
@@ -36,6 +37,7 @@ export const QAContentWidget = ({
   document,
   onClose,
 }: IQAContentWidgetProps) => {
+  const { addUpdateDocument } = useDocuments();
   const [qaList, setQaList] = useState<QA[]>(
     (document?.content.type === 'qna' && document?.content?.data) || [
       { question: '', answer: '' },
@@ -44,7 +46,9 @@ export const QAContentWidget = ({
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
 
-  const queryClient = useQueryClient();
+  if (!chatbotId) {
+    throw new Error('Chatbot not found');
+  }
 
   const handleSave = () => {
     saveQnAMutation.mutate();
@@ -53,7 +57,7 @@ export const QAContentWidget = ({
   const saveQnAMutation = useMutation({
     mutationFn: async () => {
       if (mode === 'edit') {
-        return patchDocumentsById({
+        const { data } = await patchDocumentsById({
           path: {
             id: document?.id || '',
           },
@@ -65,9 +69,13 @@ export const QAContentWidget = ({
             },
           },
         });
+
+        return {
+          document: data.document,
+        };
       }
 
-      return postDocuments({
+      const { data } = await postDocuments({
         body: {
           chatbotId: chatbotId || '',
           title: title || '',
@@ -77,9 +85,13 @@ export const QAContentWidget = ({
           },
         },
       });
+
+      return {
+        document: data.document,
+      };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    onSuccess: ({ document }) => {
+      addUpdateDocument(chatbotId, document);
       onClose?.();
     },
   });

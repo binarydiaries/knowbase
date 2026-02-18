@@ -145,6 +145,7 @@ export const DocumentsWidget = () => {
           <TextContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
+            onClose={() => setIsTextContentSheetOpen(false)}
           />
         )}
       </Sheet>
@@ -161,6 +162,7 @@ export const DocumentsWidget = () => {
           <QAContentWidget
             mode={isEdit ? 'edit' : 'add'}
             document={selectedDocument}
+            onClose={() => setIsQASheetOpen(false)}
           />
         )}
       </Sheet>

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
+import { Route as BillingIndexRouteImport } from './routes/billing/index'
 import { Route as ActivitiesIndexRouteImport } from './routes/activities/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as ChatbotsChatbotIdIndexRouteImport } from './routes/chatbots/$chatbotId/index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ChatbotsIndexRoute = ChatbotsIndexRouteImport.update({
   id: '/chatbots/',
   path: '/chatbots/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillingIndexRoute = BillingIndexRouteImport.update({
+  id: '/billing/',
+  path: '/billing/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivitiesIndexRoute = ActivitiesIndexRouteImport.update({
@@ -52,6 +58,7 @@ const ActivitiesChatbotIdIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities/': typeof ActivitiesIndexRoute
+  '/billing/': typeof BillingIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesIndexRoute
+  '/billing': typeof BillingIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
   '/activities/$chatbotId': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activities/': typeof ActivitiesIndexRoute
+  '/billing/': typeof BillingIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activities/'
+    | '/billing/'
     | '/chatbots/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activities'
+    | '/billing'
     | '/chatbots'
     | '/activities/$chatbotId'
     | '/chatbots/$chatbotId'
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activities/'
+    | '/billing/'
     | '/chatbots/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
@@ -104,6 +116,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesIndexRoute: typeof ActivitiesIndexRoute
+  BillingIndexRoute: typeof BillingIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
   ActivitiesChatbotIdIndexRoute: typeof ActivitiesChatbotIdIndexRoute
   ChatbotsChatbotIdIndexRoute: typeof ChatbotsChatbotIdIndexRoute
@@ -124,6 +137,13 @@ declare module '@tanstack/react-router' {
       path: '/chatbots'
       fullPath: '/chatbots/'
       preLoaderRoute: typeof ChatbotsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/billing/': {
+      id: '/billing/'
+      path: '/billing'
+      fullPath: '/billing/'
+      preLoaderRoute: typeof BillingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activities/': {
@@ -160,6 +180,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesIndexRoute: ActivitiesIndexRoute,
+  BillingIndexRoute: BillingIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
   ActivitiesChatbotIdIndexRoute: ActivitiesChatbotIdIndexRoute,
   ChatbotsChatbotIdIndexRoute: ChatbotsChatbotIdIndexRoute,

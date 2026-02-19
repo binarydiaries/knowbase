@@ -14,8 +14,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@knowbase/ui/components/sidebar';
+import { Link } from '@tanstack/react-router';
 import {
   BadgeCheck,
+  Bubbles,
   ChevronsUpDown,
   CreditCard,
   LogOut,
@@ -75,9 +77,11 @@ export function NavUser() {
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link to={'/billing'}>
+                  <CreditCard />
+                  Billing
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

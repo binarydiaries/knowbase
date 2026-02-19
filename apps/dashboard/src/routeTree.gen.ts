@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
 import { Route as BillingIndexRouteImport } from './routes/billing/index'
 import { Route as ActivitiesIndexRouteImport } from './routes/activities/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as ChatbotsChatbotIdIndexRouteImport } from './routes/chatbots/$chatbotId/index'
 import { Route as ActivitiesChatbotIdIndexRouteImport } from './routes/activities/$chatbotId/index'
@@ -20,6 +22,11 @@ import { Route as ActivitiesChatbotIdIndexRouteImport } from './routes/activitie
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizationIndexRoute = OrganizationIndexRouteImport.update({
+  id: '/organization/',
+  path: '/organization/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatbotsIndexRoute = ChatbotsIndexRouteImport.update({
@@ -35,6 +42,11 @@ const BillingIndexRoute = BillingIndexRouteImport.update({
 const ActivitiesIndexRoute = ActivitiesIndexRouteImport.update({
   id: '/activities/',
   path: '/activities/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConversationsChar123ConversationIdChar125IndexRoute =
@@ -57,18 +69,22 @@ const ActivitiesChatbotIdIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account/': typeof AccountIndexRoute
   '/activities/': typeof ActivitiesIndexRoute
   '/billing/': typeof BillingIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
+  '/organization/': typeof OrganizationIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountIndexRoute
   '/activities': typeof ActivitiesIndexRoute
   '/billing': typeof BillingIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
+  '/organization': typeof OrganizationIndexRoute
   '/activities/$chatbotId': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -76,9 +92,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account/': typeof AccountIndexRoute
   '/activities/': typeof ActivitiesIndexRoute
   '/billing/': typeof BillingIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
+  '/organization/': typeof OrganizationIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -87,27 +105,33 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account/'
     | '/activities/'
     | '/billing/'
     | '/chatbots/'
+    | '/organization/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/activities'
     | '/billing'
     | '/chatbots'
+    | '/organization'
     | '/activities/$chatbotId'
     | '/chatbots/$chatbotId'
     | '/conversations/{-$conversationId}'
   id:
     | '__root__'
     | '/'
+    | '/account/'
     | '/activities/'
     | '/billing/'
     | '/chatbots/'
+    | '/organization/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
@@ -115,9 +139,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   ActivitiesIndexRoute: typeof ActivitiesIndexRoute
   BillingIndexRoute: typeof BillingIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
+  OrganizationIndexRoute: typeof OrganizationIndexRoute
   ActivitiesChatbotIdIndexRoute: typeof ActivitiesChatbotIdIndexRoute
   ChatbotsChatbotIdIndexRoute: typeof ChatbotsChatbotIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -130,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organization/': {
+      id: '/organization/'
+      path: '/organization'
+      fullPath: '/organization/'
+      preLoaderRoute: typeof OrganizationIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chatbots/': {
@@ -151,6 +184,13 @@ declare module '@tanstack/react-router' {
       path: '/activities'
       fullPath: '/activities/'
       preLoaderRoute: typeof ActivitiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conversations/{-$conversationId}/': {
@@ -179,9 +219,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountIndexRoute: AccountIndexRoute,
   ActivitiesIndexRoute: ActivitiesIndexRoute,
   BillingIndexRoute: BillingIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
+  OrganizationIndexRoute: OrganizationIndexRoute,
   ActivitiesChatbotIdIndexRoute: ActivitiesChatbotIdIndexRoute,
   ChatbotsChatbotIdIndexRoute: ChatbotsChatbotIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:

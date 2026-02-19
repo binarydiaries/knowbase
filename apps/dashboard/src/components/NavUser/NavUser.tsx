@@ -73,14 +73,22 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link to={'/account'}>
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to={'/billing'}>
                   <CreditCard />
                   Billing
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={'/organization'}>
+                  <BadgeCheck />
+                  Organization
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

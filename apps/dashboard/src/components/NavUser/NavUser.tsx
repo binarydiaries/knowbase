@@ -17,9 +17,8 @@ import {
 import { Link } from '@tanstack/react-router';
 import {
   BadgeCheck,
-  Bubbles,
+  Building,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Sparkles,
 } from 'lucide-react';
@@ -66,9 +65,11 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem asChild>
+                <Link to={'/subscriptions'}>
+                  <Sparkles />
+                  Upgrade Plan
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -76,18 +77,12 @@ export function NavUser() {
               <DropdownMenuItem asChild>
                 <Link to={'/account'}>
                   <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={'/billing'}>
-                  <CreditCard />
-                  Billing
+                  User Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to={'/organization'}>
-                  <BadgeCheck />
+                  <Building />
                   Organization
                 </Link>
               </DropdownMenuItem>

@@ -157,10 +157,6 @@ function RouteComponent() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log(
-                                'bot.chatbotStatus',
-                                bot.chatbotStatus,
-                              );
                               const newStatus =
                                 bot.chatbotStatus === 'archived'
                                   ? 'active'

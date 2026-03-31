@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
-import { documents, embeddings as embeddingsTable } from '../../db/schema';
+import { documents, type IDocument } from '../../db/schema/documents';
 import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {
@@ -9,43 +9,38 @@ export abstract class DocumentService {
     const [doc] = await db.insert(documents).values(data).returning();
     return doc;
   }
-  // static async createV1(data: typeof documents.$inferInsert) {
-  //   const [document] = await db.transaction(async (transaction) => {
-  //     const [doc] = await transaction
-  //       .insert(documents)
-  //       .values(data)
-  //       .returning();
-  //
-  //     const embeddings = await EmbeddingService.generateEmbeddings(
-  //       data.content,
-  //     );
-  //     await transaction.insert(embeddingsTable).values(
-  //       embeddings.map((embedding) => ({
-  //         documentId: doc.id,
-  //         content: embedding.content,
-  //         embedding: embedding.embedding,
-  //       })),
-  //     );
-  //
-  //     return [doc];
-  //   });
-  //
-  //   return document;
-  // }
 
-  static async list({ chatbotId }: { chatbotId: string }) {
-    const docs = await db
-      .select()
-      .from(documents)
-      .where(eq(documents.chatbotId, chatbotId));
-    return docs;
+  static async list({
+    chatbotId,
+    orgId,
+    filter,
+  }: {
+    chatbotId: string;
+    orgId: string;
+    filter?: {
+      status?: IDocument['status'][];
+    };
+  }) {
+    return db.query.documents.findMany({
+      where: {
+        chatbotId,
+        chatbot: {
+          orgId,
+        },
+        ...(filter?.status ? { status: { in: filter.status } } : {}),
+      },
+    });
   }
 
-  static async single(id: string) {
-    const doc = await db.query.documents.findFirst({
-      where: eq(documents.id, id),
+  static async single({ id, orgId }: { id: string; orgId: string }) {
+    return db.query.documents.findFirst({
+      where: {
+        id,
+        chatbot: {
+          orgId,
+        },
+      },
     });
-    return doc;
   }
 
   static async update(
@@ -61,52 +56,13 @@ export abstract class DocumentService {
     return updatedDoc;
   }
 
-  // static async updateV1(
-  //   id: string,
-  //   data: Partial<typeof documents.$inferInsert>,
-  // ) {
-  //   return db.transaction(async (transaction) => {
-  //     // Update document content
-  //     const [updatedDoc] = await transaction
-  //       .update(documents)
-  //       .set({ content, updatedAt: new Date() })
-  //       .where(eq(documents.id, id))
-  //       .returning();
-  //
-  //     // Delete existing embeddings
-  //     await transaction
-  //       .delete(embeddingsTable)
-  //       .where(eq(embeddingsTable.documentId, id));
-  //
-  //     // Generate and insert new embeddings
-  //     const embeddings = await EmbeddingService.generateEmbeddings(content);
-  //     await transaction.insert(embeddingsTable).values(
-  //       embeddings.map((embedding) => ({
-  //         documentId: id,
-  //         content: embedding.content,
-  //         embedding: embedding.embedding,
-  //       })),
-  //     );
-  //
-  //     return updatedDoc;
-  //   });
-  // }
-
   static async delete(id: string) {
-    return db.transaction(async (transaction) => {
-      // Delete embeddings first due to foreign key constraint
-      await transaction
-        .delete(embeddingsTable)
-        .where(eq(embeddingsTable.documentId, id));
+    const [deletedDoc] = await db
+      .delete(documents)
+      .where(eq(documents.id, id))
+      .returning();
 
-      // Then delete the document
-      const [deletedDoc] = await transaction
-        .delete(documents)
-        .where(eq(documents.id, id))
-        .returning();
-
-      return deletedDoc;
-    });
+    return deletedDoc;
   }
 
   static transformDocument(

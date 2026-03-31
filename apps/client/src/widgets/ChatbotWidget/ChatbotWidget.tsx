@@ -7,9 +7,13 @@ import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 
 interface IChatbotWidgetProps {
   channelSchema: ChannelSchema;
+  orgId: string;
 }
 
-export const ChatbotWidget = ({ channelSchema }: IChatbotWidgetProps) => {
+export const ChatbotWidget = ({
+  channelSchema,
+  orgId,
+}: IChatbotWidgetProps) => {
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
 
@@ -40,6 +44,7 @@ export const ChatbotWidget = ({ channelSchema }: IChatbotWidgetProps) => {
             message: messageText?.text,
             conversationId: id,
             channelId: channelSchema?.id,
+            orgId,
           },
         };
       },

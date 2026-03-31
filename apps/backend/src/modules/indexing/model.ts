@@ -1,0 +1,28 @@
+import { Elysia } from 'elysia';
+import { z } from 'zod';
+import { DocumentSchema } from '../document/model';
+
+const IndexingStartBody = z.object({
+  chatbotId: z.string(),
+});
+
+const IndexingStartResponse = z.object({
+  message: z.string(),
+});
+
+const IndexingStatusResponse = z.object({
+  documentIds: z.array(
+    DocumentSchema.pick({
+      id: true,
+      status: true,
+      updatedAt: true,
+    }),
+  ),
+  isPollingActive: z.boolean(),
+});
+
+export const IndexingModel = new Elysia().model({
+  IndexingStartBody,
+  IndexingStartResponse,
+  IndexingStatusResponse,
+});

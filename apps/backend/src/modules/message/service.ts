@@ -1,16 +1,25 @@
-import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { messages } from '../../db/schema';
+import { messages } from '../../db/schema/messages';
 
 export abstract class MessageService {
   static async addMessages(data: (typeof messages.$inferInsert)[]) {
     return db.insert(messages).values(data).returning();
   }
 
-  static async getMessages(conversationId: string) {
-    return db
-      .select()
-      .from(messages)
-      .where(eq(messages.conversationId, conversationId));
+  static async getMessages({
+    conversationId,
+    orgId,
+  }: {
+    conversationId: string;
+    orgId: string;
+  }) {
+    return db.query.messages.findMany({
+      where: {
+        conversationId,
+        conversation: {
+          chatbot: { orgId },
+        },
+      },
+    });
   }
 }

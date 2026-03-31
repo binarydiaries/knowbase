@@ -1,11 +1,11 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs, streamText } from 'ai';
-import type { conversations } from '../../db/schema';
+import type { conversations } from '../../db/schema/conversations';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
-import { EmbeddingService } from '../embedding/service';
+import { IndexingService } from '../indexing/service';
 import { MessageService } from '../message/service';
 import {
   buildBehaviorPrompt,
@@ -57,15 +57,21 @@ export abstract class ChatService {
   }
 
   static async getSearchChunks(finalQuery: string) {
-    const chunks = await EmbeddingService.findRelevantContent(finalQuery);
+    const chunks = await IndexingService.findRelevantContent(finalQuery);
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
     };
   }
 
-  static async getChatbot(chatbotId: string) {
-    const chatbot = await ChatbotService.single({ id: chatbotId });
+  static async getChatbot({
+    chatbotId,
+    orgId,
+  }: {
+    chatbotId: string;
+    orgId: string;
+  }) {
+    const chatbot = await ChatbotService.single({ id: chatbotId, orgId });
 
     if (chatbot && chatbot.chatbotStatus === 'active') {
       return chatbot;
@@ -89,15 +95,18 @@ export abstract class ChatService {
     channelId,
     message,
     conversationId,
+    orgId,
   }: {
     chatbotId: string;
     conversationId: string;
     message: string;
     channelId: string;
+    orgId: string;
   }) {
-    await ChatService.getChatbot(chatbotId);
+    await ChatService.getChatbot({ chatbotId, orgId });
     const conversation = await ConversationService.single({
       id: conversationId,
+      orgId,
     });
     const behavior = await ChatService.getBehaviour(chatbotId);
     const finalQuery = await ChatService.getFinalQuery({
@@ -174,12 +183,14 @@ export abstract class ChatService {
     channelId,
     conversationId,
     message,
+    orgId,
   }: {
     channelId: string;
     message: string;
     conversationId: string;
+    orgId: string;
   }) {
-    const channel = await ChannelService.single(channelId);
+    const channel = await ChannelService.single({ id: channelId, orgId });
 
     if (!channel) {
       throw new Error('Channel not found');
@@ -190,6 +201,7 @@ export abstract class ChatService {
       conversationId,
       channelId,
       message,
+      orgId,
     });
   }
 }

@@ -9,7 +9,6 @@ import {
 } from '@knowbase/ui/components/card';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
@@ -18,21 +17,29 @@ import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchBehaviourById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
 
+const behaviourTone = [
+  { label: 'Friendly', value: 'friendly' },
+  { label: 'Professional', value: 'professional' },
+  { label: 'Neutral', value: 'neutral' },
+];
+
+const behaviorVerbosity = [
+  { label: 'Short', value: 'short' },
+  { label: 'Balanced', value: 'balanced' },
+  { label: 'Detailed', value: 'detailed' },
+];
+
 export const chatbotBehaviourSchema = z.object({
   systemPrompt: z
     .string()
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
-
-  tone: z.enum(['friendly', 'professional', 'neutral']),
-
-  verbosity: z.enum(['short', 'balanced', 'detailed']),
-
+  tone: z.enum(behaviourTone.map((value) => value.value)),
+  verbosity: z.enum(behaviorVerbosity.map((value) => value.value)),
   fallbackMessage: z
     .string()
     .min(5, 'Fallback message is too short')
     .max(120, 'Fallback message is too long (max 120 characters)'),
-
   guardrails: z
     .string()
     .max(300, 'Guardrails are too long (max 300 characters)')
@@ -51,32 +58,19 @@ const BehaviourCard = () => {
   const patchBehaviour = useBehaviour((s) => s.updateBehaviour);
   const {
     control,
-    reset,
     handleSubmit,
     formState: { isDirty },
   } = useForm<BehaviourFormValues>({
     resolver: zodResolver(chatbotBehaviourSchema),
     mode: 'all',
     defaultValues: {
-      systemPrompt: '',
-      tone: 'friendly',
-      verbosity: 'short',
-      fallbackMessage: '',
-      guardrails: '',
+      systemPrompt: behaviour.systemPrompt,
+      tone: behaviour.tone,
+      verbosity: behaviour.verbosity,
+      fallbackMessage: behaviour.fallbackMessage,
+      guardrails: behaviour.guardrails || '',
     },
   });
-
-  useEffect(() => {
-    if (behaviour) {
-      reset({
-        systemPrompt: behaviour.systemPrompt,
-        tone: behaviour.tone,
-        verbosity: behaviour.verbosity,
-        fallbackMessage: behaviour.fallbackMessage,
-        guardrails: behaviour.guardrails || '',
-      });
-    }
-  }, [behaviour, reset]);
 
   const saveBehaviourMutation = useMutation({
     mutationFn: async (values: BehaviourFormValues) => {
@@ -117,11 +111,7 @@ const BehaviourCard = () => {
               control={control}
               label="Tone"
               placeholder="Select tone"
-              options={[
-                { label: 'Friendly', value: 'friendly' },
-                { label: 'Professional', value: 'professional' },
-                { label: 'Neutral', value: 'neutral' },
-              ]}
+              options={behaviourTone}
             />
           </div>
           <div className="grid gap-2 ">
@@ -130,11 +120,7 @@ const BehaviourCard = () => {
               control={control}
               label="Verbosity"
               placeholder="Select verbosity"
-              options={[
-                { label: 'Short', value: 'short' },
-                { label: 'Balanced', value: 'balanced' },
-                { label: 'Detailed', value: 'detailed' },
-              ]}
+              options={behaviorVerbosity}
             />
           </div>
           <div className="grid gap-2 ">

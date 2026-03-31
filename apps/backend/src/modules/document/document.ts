@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { DocumentModel } from './model';
 import { DocumentService } from './service';
@@ -8,17 +9,18 @@ export const Document = new Elysia({
   prefix: '/documents',
   tags: ['Document'],
 })
+  .onError(({ error }) => console.log(error))
+  .use(AuthGuard)
   .use(DocumentModel)
   .use(ErrorModel)
   .post(
     '',
-    async ({ body }) => {
+    async ({ body, userId }) => {
       const document = await DocumentService.create({
         ...body,
         contentSerialized: body.content.data,
         type: body.content.type,
-        createdBy: '111',
-        orgId: '112',
+        createdBy: userId,
       });
       return {
         document: DocumentService.transformDocument(document),
@@ -31,9 +33,10 @@ export const Document = new Elysia({
   )
   .get(
     '',
-    async ({ query }) => {
+    async ({ query, orgId }) => {
       const documents = await DocumentService.list({
         chatbotId: query.chatbotId,
+        orgId,
       });
       return {
         documents: documents.map(DocumentService.transformDocument),
@@ -49,9 +52,9 @@ export const Document = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
+  .resolve(async ({ params, status, orgId }) => {
     const newParams = params as { id: string };
-    const document = await DocumentService.single(newParams.id);
+    const document = await DocumentService.single({ id: newParams.id, orgId });
 
     if (!document) {
       return status(404, {

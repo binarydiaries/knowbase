@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { behaviors, channels, chatbots } from '../../db/schema';
+import { behaviors } from '../../db/schema/behaviors';
+import { channels } from '../../db/schema/channels';
+import { chatbots } from '../../db/schema/chatbots';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
 import { CHANNEL_CONFIG_DEFAULTS } from '../channel/defaults';
 
@@ -13,6 +15,7 @@ export abstract class ChatbotService {
         .insert(behaviors)
         .values({
           chatbotId,
+          createdBy: data.createdBy,
           ...DEFAULT_BEHAVIOR,
         })
         .returning();
@@ -25,20 +28,44 @@ export abstract class ChatbotService {
           ...CHANNEL_CONFIG_DEFAULTS,
           displayName: chatbot.name,
         },
-        status: 'active',
+        channelStatus: 'active',
         usage: {},
+        createdBy: data.createdBy,
       });
 
       return chatbot;
     });
   }
 
-  static list() {
-    return db.select().from(chatbots);
+  static list({ orgId }: { orgId: string }) {
+    return db.query.chatbots.findMany({
+      where: {
+        orgId,
+      },
+    });
   }
 
-  static single({ id }: { id: string }) {
-    return db.query.chatbots.findFirst({ where: eq(chatbots.id, id) });
+  static single({ id, orgId }: { id: string; orgId: string }) {
+    return db.query.chatbots.findFirst({
+      where: {
+        id,
+        orgId,
+      },
+    });
+  }
+
+  static singleWithRelations({ id, orgId }: { id: string; orgId: string }) {
+    return db.query.chatbots.findFirst({
+      where: {
+        id,
+        orgId,
+      },
+      with: {
+        channels: true,
+        behaviour: true,
+        documents: true,
+      },
+    });
   }
 
   static async update(id: string, data: Partial<typeof chatbots.$inferInsert>) {

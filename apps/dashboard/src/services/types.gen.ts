@@ -8,10 +8,12 @@ export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
+    orgId: string;
 };
 
 export type ChatChannelQueryParamSchema = {
     channelId: string;
+    orgId: string;
 };
 
 export type ChatChannelResponseSchema = {
@@ -46,8 +48,53 @@ export type ChatChannelResponseSchema = {
     };
 };
 
-export type GetMessageQuery = {
+export type UnauthorizedSchema = {
+    code: 'UNAUTHORIZED';
+    message: string;
+};
+
+export type MessageSchema = {
+    id: string;
     conversationId: string;
+    role: 'user' | 'assistant';
+    content: string;
+    metadata: {
+        confidenceScore: number | null;
+        sources?: Array<{
+            documentId: string;
+            documentVersion: number;
+            chunkIndex: number;
+            similarity: number;
+        }> | null;
+    } | null;
+    systemMetadata: {
+        finalQuery?: string;
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ManyMessageResponse = {
+    messages: Array<{
+        id: string;
+        conversationId: string;
+        role: 'user' | 'assistant';
+        content: string;
+        metadata: {
+            confidenceScore: number | null;
+            sources?: Array<{
+                documentId: string;
+                documentVersion: number;
+                chunkIndex: number;
+                similarity: number;
+            }> | null;
+        } | null;
+        systemMetadata: {
+            finalQuery?: string;
+        } | null;
+        createdAt: string;
+        updatedAt: string;
+    }>;
 };
 
 export type DocumentSchema = {
@@ -63,11 +110,12 @@ export type DocumentSchema = {
             answer: string;
         }>;
     };
+    status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     chatbotId: string;
     createdBy: string;
-    orgId: string;
     createdAt: string;
     updatedAt: string;
+    lastTrainedAt: string | null;
 };
 
 export type CreateDocumentBody = {
@@ -113,11 +161,12 @@ export type OneDocumentResponse = {
                 answer: string;
             }>;
         };
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
-        orgId: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     };
 };
 
@@ -135,11 +184,12 @@ export type ManyDocumentsResponse = {
                 answer: string;
             }>;
         };
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
-        orgId: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     }>;
 };
 
@@ -201,11 +251,12 @@ export type OneChatbotResponse = {
                 answer: string;
             }>;
         };
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         chatbotId: string;
         createdBy: string;
-        orgId: string;
         createdAt: string;
         updatedAt: string;
+        lastTrainedAt: string | null;
     }>;
     channels: Array<{
         id: string;
@@ -281,23 +332,31 @@ export type OneSmallChatbotResponse = {
     };
 };
 
-export type EmbedStartBody = {
+export type IndexingStartBody = {
     chatbotId: string;
 };
 
-export type EmbedStartResponse = {
+export type IndexingStartResponse = {
     message: string;
 };
 
+export type IndexingStatusResponse = {
+    documentIds: Array<{
+        id: string;
+        status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
+        updatedAt: string;
+    }>;
+    isPollingActive: boolean;
+};
+
 export type ListConversation = {
-    chatbotId: string;
+    chatbotId?: string;
 };
 
 export type ManyConversationResponse = {
     conversations: Array<{
         id: string;
         chatbotId: string;
-        channel: 'web' | 'instagram' | 'whatsapp';
         lastUserQuestion: string;
         lastAssistantUtterance: string;
         lastMessageAt: string;
@@ -532,9 +591,29 @@ export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChanne
 export type GetMessagesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        conversationId: string;
+    };
     url: '/messages';
 };
+
+export type GetMessagesErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetMessagesError = GetMessagesErrors[keyof GetMessagesErrors];
+
+export type GetMessagesResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyMessageResponse;
+};
+
+export type GetMessagesResponse = GetMessagesResponses[keyof GetMessagesResponses];
 
 export type GetDocumentsData = {
     body?: never;
@@ -542,6 +621,15 @@ export type GetDocumentsData = {
     query?: never;
     url: '/documents';
 };
+
+export type GetDocumentsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetDocumentsError = GetDocumentsErrors[keyof GetDocumentsErrors];
 
 export type GetDocumentsResponses = {
     /**
@@ -558,6 +646,15 @@ export type PostDocumentsData = {
     query?: never;
     url: '/documents';
 };
+
+export type PostDocumentsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type PostDocumentsError = PostDocumentsErrors[keyof PostDocumentsErrors];
 
 export type PostDocumentsResponses = {
     /**
@@ -654,6 +751,15 @@ export type GetChatbotsData = {
     url: '/chatbots';
 };
 
+export type GetChatbotsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetChatbotsError = GetChatbotsErrors[keyof GetChatbotsErrors];
+
 export type GetChatbotsResponses = {
     /**
      * Response for status 200
@@ -669,6 +775,15 @@ export type PostChatbotsData = {
     query?: never;
     url: '/chatbots';
 };
+
+export type PostChatbotsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type PostChatbotsError = PostChatbotsErrors[keyof PostChatbotsErrors];
 
 export type PostChatbotsResponses = {
     /**
@@ -733,12 +848,48 @@ export type PatchChatbotsByIdResponses = {
 
 export type PatchChatbotsByIdResponse = PatchChatbotsByIdResponses[keyof PatchChatbotsByIdResponses];
 
-export type PostEmbeddingData = {
-    body: EmbedStartBody;
+export type PostIndexingData = {
+    body: IndexingStartBody;
     path?: never;
     query?: never;
-    url: '/embedding';
+    url: '/indexing';
 };
+
+export type PostIndexingErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type PostIndexingError = PostIndexingErrors[keyof PostIndexingErrors];
+
+export type GetIndexingStatusData = {
+    body?: never;
+    path?: never;
+    query: {
+        chatbotId: string;
+    };
+    url: '/indexing/status';
+};
+
+export type GetIndexingStatusErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetIndexingStatusError = GetIndexingStatusErrors[keyof GetIndexingStatusErrors];
+
+export type GetIndexingStatusResponses = {
+    /**
+     * Response for status 200
+     */
+    200: IndexingStatusResponse;
+};
+
+export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetIndexingStatusResponses];
 
 export type GetConversationsData = {
     body?: never;
@@ -746,6 +897,15 @@ export type GetConversationsData = {
     query?: never;
     url: '/conversations';
 };
+
+export type GetConversationsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetConversationsError = GetConversationsErrors[keyof GetConversationsErrors];
 
 export type GetConversationsResponses = {
     /**
@@ -762,6 +922,15 @@ export type GetBehaviourData = {
     query?: never;
     url: '/behaviour';
 };
+
+export type GetBehaviourErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetBehaviourError = GetBehaviourErrors[keyof GetBehaviourErrors];
 
 export type GetBehaviourResponses = {
     /**
@@ -806,6 +975,15 @@ export type GetChannelsData = {
     url: '/channels';
 };
 
+export type GetChannelsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetChannelsError = GetChannelsErrors[keyof GetChannelsErrors];
+
 export type GetChannelsResponses = {
     /**
      * Response for status 200
@@ -821,6 +999,15 @@ export type PostChannelsData = {
     query?: never;
     url: '/channels';
 };
+
+export type PostChannelsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type PostChannelsError = PostChannelsErrors[keyof PostChannelsErrors];
 
 export type PostChannelsResponses = {
     /**

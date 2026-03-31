@@ -1,22 +1,24 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { behaviors } from '../../db/schema';
+import { behaviors } from '../../db/schema/behaviors';
 
 export abstract class BehaviourService {
-  static single(id: string) {
+  static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.behaviors.findFirst({
-      where: eq(behaviors.id, id),
+      where: { id, chatbot: { orgId } },
     });
   }
 
   static singleByChatbot(chatbotId: string) {
     return db.query.behaviors.findFirst({
-      where: eq(behaviors.chatbotId, chatbotId),
+      where: { chatbotId },
     });
   }
 
-  static list() {
-    return db.select().from(behaviors);
+  static list({ orgId }: { orgId: string }) {
+    return db.query.behaviors.findMany({
+      where: { chatbot: { orgId } },
+    });
   }
 
   static async update(

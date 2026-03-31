@@ -14,10 +14,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@knowbase/ui/components/sidebar';
+import { Link } from '@tanstack/react-router';
 import {
   BadgeCheck,
+  Building,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Sparkles,
 } from 'lucide-react';
@@ -64,20 +65,26 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem asChild>
+                <Link to={'/subscriptions'}>
+                  <Sparkles />
+                  Upgrade Plan
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link to={'/account'}>
+                  <BadgeCheck />
+                  User Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link to={'/organization'}>
+                  <Building />
+                  Organization
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

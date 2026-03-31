@@ -5,6 +5,8 @@ import {
   SignedIn,
   SignedOut,
 } from '@clerk/clerk-react';
+import { Toaster } from '@knowbase/ui/components/sonner';
+import { TooltipProvider } from '@knowbase/ui/components/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -45,8 +47,11 @@ if (!rootElement.innerHTML) {
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <SignedIn>
           <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
+            <TooltipProvider>
+              <RouterProvider router={router} />
+            </TooltipProvider>
           </QueryClientProvider>
+          <Toaster />
         </SignedIn>
         <SignedOut>
           <RedirectToSignIn />

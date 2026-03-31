@@ -41,6 +41,9 @@ function RouteComponent() {
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);
+  const behaviour = useBehaviour(
+    (state) => state.behaviourByChatbotId[chatbotId],
+  );
 
   const query = useQuery({
     queryFn: async () => {
@@ -107,7 +110,7 @@ function RouteComponent() {
         <div className="flex flex-1 h-full overflow-hidden">
           <div className="grow p-5 shadow-none flex-col flex gap-5 h-full overflow-auto border-r">
             <DocumentsWidget />
-            <BehaviourCard />
+            {behaviour && <BehaviourCard />}
             <ChannelCard />
             {/*<SettingsCard />*/}
           </div>

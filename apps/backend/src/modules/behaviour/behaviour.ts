@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { BehaviourModel } from './model';
 import { BehaviourService } from './service';
@@ -7,12 +8,13 @@ export const Behaviour = new Elysia({
   prefix: '/behaviour',
   tags: ['Behaviour'],
 })
+  .use(AuthGuard)
   .use(BehaviourModel)
   .use(ErrorModel)
   .get(
     '',
-    async () => {
-      const behaviours = await BehaviourService.list();
+    async ({ orgId }) => {
+      const behaviours = await BehaviourService.list({ orgId });
       return {
         behaviours,
       };
@@ -26,9 +28,12 @@ export const Behaviour = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
+  .resolve(async ({ params, status, orgId }) => {
     const newParams = params as { id: string };
-    const behaviour = await BehaviourService.single(newParams.id);
+    const behaviour = await BehaviourService.single({
+      id: newParams.id,
+      orgId,
+    });
     if (!behaviour) {
       return status(404, {
         code: 'NOT_FOUND',

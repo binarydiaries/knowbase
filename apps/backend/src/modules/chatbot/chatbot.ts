@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
-import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
 import { DocumentService } from '../document/service';
 import { ChatbotModel } from './model';
@@ -10,15 +10,16 @@ export const Chatbot = new Elysia({
   prefix: '/chatbots',
   tags: ['Chatbot'],
 })
+  .use(AuthGuard)
   .use(ChatbotModel)
   .use(ErrorModel)
   .post(
     '',
-    async ({ body }) => {
+    async ({ body, userId, orgId }) => {
       const chatbot = await ChatbotService.create({
         ...body,
-        createdBy: '123',
-        orgId: '123',
+        createdBy: userId,
+        orgId,
       });
       return {
         chatbot,
@@ -31,8 +32,8 @@ export const Chatbot = new Elysia({
   )
   .get(
     '',
-    async () => {
-      const chatbots = await ChatbotService.list();
+    async ({ orgId }) => {
+      const chatbots = await ChatbotService.list({ orgId });
       return {
         chatbots,
       };
@@ -46,10 +47,39 @@ export const Chatbot = new Elysia({
       404: 'NotFoundResponse',
     },
   })
-  .resolve(async ({ params, status }) => {
-    const newParams = params as { id: string };
+  .get(
+    '/:id',
+    async ({ params, orgId, status }) => {
+      const chatbot = await ChatbotService.singleWithRelations({
+        id: params.id,
+        orgId,
+      });
 
-    const chatbot = await ChatbotService.single({ id: newParams.id });
+      if (!chatbot) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Chatbot not found',
+        });
+      }
+      const { behaviour, channels, documents, ...otherChatbot } = chatbot;
+      return {
+        chatbot: otherChatbot,
+        // biome-ignore lint/style/noNonNullAssertion: Will fix later
+        behaviour: behaviour!,
+        documents: documents.map(DocumentService.transformDocument),
+        channels: channels.map(ChannelService.transformChannel),
+      };
+    },
+    {
+      response: {
+        200: 'OneChatbotResponse',
+      },
+    },
+  )
+  .resolve(async ({ params, status, orgId }) => {
+    const newParams = params as { id: string };
+    const chatbot = await ChatbotService.single({ id: newParams.id, orgId });
+
     if (!chatbot) {
       return status(404, {
         code: 'NOT_FOUND',
@@ -58,29 +88,6 @@ export const Chatbot = new Elysia({
     }
     return { chatbot };
   })
-  .get(
-    '/:id',
-    async ({ chatbot, params }) => {
-      const [documents, behaviour, channels] = await Promise.all([
-        DocumentService.list({ chatbotId: params.id }),
-        BehaviourService.singleByChatbot(params.id),
-        ChannelService.list({ chatbotId: params.id }),
-      ]);
-
-      return {
-        chatbot,
-        behaviour: behaviour,
-        documents: documents.map(DocumentService.transformDocument),
-        channels: channels.map(ChannelService.transformChannel),
-      };
-    },
-    {
-      // params: 'OneChatbotParams',
-      response: {
-        200: 'OneChatbotResponse',
-      },
-    },
-  )
   .patch(
     '/:id',
     async ({ params, body }) => {

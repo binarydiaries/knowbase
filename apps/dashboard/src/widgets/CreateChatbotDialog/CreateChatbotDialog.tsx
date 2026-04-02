@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@knowbase/ui/components/dialog';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -21,6 +22,7 @@ import {
   patchChatbotsById,
   postChatbots,
 } from '@/services';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const schema = z.object({
   name: z.string().min(3).max(20),
@@ -78,6 +80,9 @@ export function CreateChatbotDialog({
       reset();
       setOpen(false);
       onClose?.();
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 

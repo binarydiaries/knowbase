@@ -3,6 +3,7 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { ChannelService } from '../channel/service';
 import { DocumentService } from '../document/service';
+import { SubscriptionService } from '../subscription/service';
 import { ChatbotModel } from './model';
 import { ChatbotService } from './service';
 
@@ -15,7 +16,21 @@ export const Chatbot = new Elysia({
   .use(ErrorModel)
   .post(
     '',
-    async ({ body, userId, orgId }) => {
+    async ({ body, userId, orgId, status }) => {
+      const chatbotLimit = await SubscriptionService.assertChatbotLimitNotReached(
+        orgId,
+      );
+
+      if (!chatbotLimit.allowed) {
+        return status(403, {
+          code: 'CHATBOT_LIMIT_REACHED',
+          message: `Your ${chatbotLimit.plan} plan allows up to ${chatbotLimit.limit} chatbot${chatbotLimit.limit === 1 ? '' : 's'}. Upgrade your subscription to create more.`,
+          plan: chatbotLimit.plan,
+          limit: chatbotLimit.limit,
+          current: chatbotLimit.current,
+        });
+      }
+
       const chatbot = await ChatbotService.create({
         ...body,
         createdBy: userId,
@@ -27,7 +42,10 @@ export const Chatbot = new Elysia({
     },
     {
       body: 'CreateChatbotBody',
-      response: 'OneSmallChatbotResponse',
+      response: {
+        200: 'OneSmallChatbotResponse',
+        403: 'ChatbotLimitReachedResponse',
+      },
     },
   )
   .get(

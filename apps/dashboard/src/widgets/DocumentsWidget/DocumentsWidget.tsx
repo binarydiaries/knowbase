@@ -77,6 +77,11 @@ export const DocumentsWidget = ({
     subscription?.hasReachedKnowledgeSourceLimit ?? false;
   const hasReachedTrainingLimit =
     subscription?.hasReachedTrainingRunsPerDayLimit ?? false;
+  const trainingResetLabel = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(new Date(Date.UTC(2024, 0, 2, 0, 0, 0)));
   const isAddDisabled = readOnly || hasReachedKnowledgeSourceLimit;
   const isTrainDisabled = readOnly || hasReachedTrainingLimit;
   const addDisabledReason = readOnly
@@ -171,7 +176,7 @@ export const DocumentsWidget = ({
                       label="Daily Training"
                       current={subscription.trainingRunsToday}
                       limit={subscription.trainingRunsPerDayLimit}
-                      helperText="Resets daily at 00:00 UTC."
+                      helperText={`Resets daily at ${trainingResetLabel}.`}
                     />
                   </HoverCardContent>
                 </HoverCard>

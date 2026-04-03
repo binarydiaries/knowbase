@@ -8,7 +8,7 @@ import { OrgUsageDailyService } from './usage';
 export const PLAN_LIMITS = {
   free: {
     chatbots: 1,
-    knowledgeSources: 25,
+    knowledgeSources: 10,
     messagesPerMonth: 500,
     trainingRunsPerDay: 3,
   },

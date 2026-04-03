@@ -11,7 +11,7 @@ import {
 } from '@knowbase/ui/components/sheet';
 import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { toast } from '@knowbase/ui/components/sonner';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
@@ -44,6 +44,7 @@ export const TextContentWidget = ({
   );
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
+  const queryClient = useQueryClient();
 
   if (!chatbotId) {
     throw new Error('Chatbot not found');
@@ -91,6 +92,7 @@ export const TextContentWidget = ({
     },
     onSuccess: ({ document }) => {
       addUpdateDocument(chatbotId, document);
+      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
       onClose?.();
     },
     onError: (error) => {

@@ -17,8 +17,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@knowbase/ui/components/popover';
 import { Sheet } from '@knowbase/ui/components/sheet';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { ArrowUpRightIcon, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -53,6 +61,7 @@ export const DocumentsWidget = ({
   const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
     useDocuments();
+  const queryClient = useQueryClient();
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
@@ -91,7 +100,10 @@ export const DocumentsWidget = ({
         documentId: id,
       };
     },
-    onSuccess: ({ documentId }) => deleteDocument(chatbotId, documentId),
+    onSuccess: ({ documentId }) => {
+      deleteDocument(chatbotId, documentId);
+      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+    },
     onError: (error) => {
       toast.error(getErrorMessage(error));
     },
@@ -99,7 +111,10 @@ export const DocumentsWidget = ({
 
   const trainMutation = useMutation({
     mutationFn: () => postIndexing({ body: { chatbotId } }),
-    onSuccess: () => setIsPollingActive(true),
+    onSuccess: () => {
+      setIsPollingActive(true);
+      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+    },
     onError: (error) => {
       toast.error(getErrorMessage(error));
     },
@@ -130,23 +145,36 @@ export const DocumentsWidget = ({
           <CardDescription>
             Your chatbot will only answer based on the sources you add here.
           </CardDescription>
-          {subscription ? (
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <UsageMeter
-                label="Knowledge Sources"
-                current={subscription.knowledgeSourceCount}
-                limit={subscription.knowledgeSourceLimit}
-              />
-              <UsageMeter
-                label="Daily Training"
-                current={subscription.trainingRunsToday}
-                limit={subscription.trainingRunsPerDayLimit}
-                helperText="Resets daily at 00:00 UTC."
-              />
-            </div>
-          ) : null}
-          {isDocumentsAvailable && (
+          {(isDocumentsAvailable || subscription) && (
             <CardAction className="flex gap-2">
+              {subscription ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline">Usage</Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80 space-y-4">
+                    <PopoverHeader>
+                      <PopoverTitle>Usage</PopoverTitle>
+                      <PopoverDescription>
+                        Track your knowledge source and daily training limits.
+                      </PopoverDescription>
+                    </PopoverHeader>
+                    <UsageMeter
+                      label="Knowledge Sources"
+                      current={subscription.knowledgeSourceCount}
+                      limit={subscription.knowledgeSourceLimit}
+                    />
+                    <UsageMeter
+                      label="Daily Training"
+                      current={subscription.trainingRunsToday}
+                      limit={subscription.trainingRunsPerDayLimit}
+                      helperText="Resets daily at 00:00 UTC."
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : null}
+              {isDocumentsAvailable && (
+                <>
               <DisabledTooltip
                 disabled={isTrainDisabled}
                 content={trainDisabledReason}
@@ -174,6 +202,8 @@ export const DocumentsWidget = ({
                     Add
                   </Button>
                 </DisabledTooltip>
+              )}
+                </>
               )}
             </CardAction>
           )}

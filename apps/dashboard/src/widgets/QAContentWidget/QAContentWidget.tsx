@@ -12,7 +12,7 @@ import {
 } from '@knowbase/ui/components/sheet';
 import { toast } from '@knowbase/ui/components/sonner';
 import { Textarea } from '@knowbase/ui/components/textarea';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -53,6 +53,7 @@ export const QAContentWidget = ({
   );
   const [title, setTitle] = useState(document?.title);
   const { chatbotId } = useParams({ strict: false });
+  const queryClient = useQueryClient();
 
   if (!chatbotId) {
     throw new Error('Chatbot not found');
@@ -100,6 +101,7 @@ export const QAContentWidget = ({
     },
     onSuccess: ({ document }) => {
       addUpdateDocument(chatbotId, document);
+      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
       onClose?.();
     },
     onError: (error) => {

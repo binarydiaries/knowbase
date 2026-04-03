@@ -18,13 +18,10 @@ import {
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
 import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from '@knowbase/ui/components/popover';
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@knowbase/ui/components/hover-card';
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
@@ -148,17 +145,23 @@ export const DocumentsWidget = ({
           {(isDocumentsAvailable || subscription) && (
             <CardAction className="flex gap-2">
               {subscription ? (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline">Usage</Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-80 space-y-4">
-                    <PopoverHeader>
-                      <PopoverTitle>Usage</PopoverTitle>
-                      <PopoverDescription>
+                <HoverCard openDelay={100} closeDelay={100}>
+                  <HoverCardTrigger asChild>
+                    <a
+                      href="#usage"
+                      onClick={(e) => e.preventDefault()}
+                      className="inline-flex items-center text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      Usage
+                    </a>
+                  </HoverCardTrigger>
+                  <HoverCardContent align="end" className="w-80 space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Usage</p>
+                      <p className="text-sm text-muted-foreground">
                         Track your knowledge source and daily training limits.
-                      </PopoverDescription>
-                    </PopoverHeader>
+                      </p>
+                    </div>
                     <UsageMeter
                       label="Knowledge Sources"
                       current={subscription.knowledgeSourceCount}
@@ -170,39 +173,39 @@ export const DocumentsWidget = ({
                       limit={subscription.trainingRunsPerDayLimit}
                       helperText="Resets daily at 00:00 UTC."
                     />
-                  </PopoverContent>
-                </Popover>
+                  </HoverCardContent>
+                </HoverCard>
               ) : null}
               {isDocumentsAvailable && (
                 <>
-              <DisabledTooltip
-                disabled={isTrainDisabled}
-                content={trainDisabledReason}
-              >
-                <Button
-                  onClick={() => trainMutation.mutate()}
-                  disabled={isTrainDisabled || trainMutation.isPending}
-                >
-                  Train
-                </Button>
-              </DisabledTooltip>
-              {!isAddDisabled ? (
-                <AddDocumentDropdown
-                  onTextClick={() => setIsTextContentSheetOpen(true)}
-                  onQaClick={() => setIsQASheetOpen(true)}
-                >
-                  <Button variant="outline">Add</Button>
-                </AddDocumentDropdown>
-              ) : (
-                <DisabledTooltip
-                  content={addDisabledReason}
-                  disabled
-                >
-                  <Button variant="outline" disabled>
-                    Add
-                  </Button>
-                </DisabledTooltip>
-              )}
+                  <DisabledTooltip
+                    disabled={isTrainDisabled}
+                    content={trainDisabledReason}
+                  >
+                    <Button
+                      onClick={() => trainMutation.mutate()}
+                      disabled={isTrainDisabled || trainMutation.isPending}
+                    >
+                      Train
+                    </Button>
+                  </DisabledTooltip>
+                  {!isAddDisabled ? (
+                    <AddDocumentDropdown
+                      onTextClick={() => setIsTextContentSheetOpen(true)}
+                      onQaClick={() => setIsQASheetOpen(true)}
+                    >
+                      <Button variant="outline">Add</Button>
+                    </AddDocumentDropdown>
+                  ) : (
+                    <DisabledTooltip
+                      content={addDisabledReason}
+                      disabled
+                    >
+                      <Button variant="outline" disabled>
+                        Add
+                      </Button>
+                    </DisabledTooltip>
+                  )}
                 </>
               )}
             </CardAction>

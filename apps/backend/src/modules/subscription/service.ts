@@ -4,10 +4,26 @@ import { db } from '../../db';
 import { chatbots } from '../../db/schema/chatbots';
 
 export const PLAN_LIMITS = {
-  free: { messages: 500, knowledge: 25, chatbots: 1 },
-  starter: { messages: 5000, knowledge: 250, chatbots: 3 },
-  growth: { messages: 20000, knowledge: 1000, chatbots: 10 },
-  pro: { messages: 75000, knowledge: 5000, chatbots: 30 },
+  free: {
+    chatbots: 1,
+    knowledgeSources: 25,
+    messagesPerMonth: 500,
+  },
+  starter: {
+    chatbots: 3,
+    knowledgeSources: 250,
+    messagesPerMonth: 5000,
+  },
+  growth: {
+    chatbots: 10,
+    knowledgeSources: 1000,
+    messagesPerMonth: 20000,
+  },
+  pro: {
+    chatbots: 30,
+    knowledgeSources: 5000,
+    messagesPerMonth: 75000,
+  },
 } as const;
 
 export type PlanName = keyof typeof PLAN_LIMITS;
@@ -84,10 +100,7 @@ export abstract class SubscriptionService {
       .select({ value: count() })
       .from(chatbots)
       .where(
-        and(
-          eq(chatbots.orgId, orgId),
-          eq(chatbots.chatbotStatus, 'active'),
-        ),
+        and(eq(chatbots.orgId, orgId), eq(chatbots.chatbotStatus, 'active')),
       );
 
     return {
@@ -98,14 +111,18 @@ export abstract class SubscriptionService {
     };
   }
 
-  static hasReachedChatbotLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+  static hasReachedChatbotLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return status.activeChatbotCount >= status.activeChatbotLimit;
   }
 
   static isChatbotLocked({
     subscriptionStatus,
   }: {
-    subscriptionStatus: Awaited<ReturnType<typeof SubscriptionService.getStatus>>;
+    subscriptionStatus: Awaited<
+      ReturnType<typeof SubscriptionService.getStatus>
+    >;
   }) {
     return subscriptionStatus.isOverLimit;
   }

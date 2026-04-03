@@ -141,7 +141,7 @@ function RouteComponent() {
                           <h3 className="text-base font-semibold leading-none">
                             {bot.name}
                           </h3>
-                          {bot.locked && (
+                          {bot.locked && bot.chatbotStatus === 'active' && (
                             <Badge className={'bg-amber-100 text-amber-700'}>
                               Locked
                             </Badge>

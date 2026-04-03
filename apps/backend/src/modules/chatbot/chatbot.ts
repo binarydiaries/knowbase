@@ -57,7 +57,6 @@ export const Chatbot = new Elysia({
         chatbots: chatbots.map((chatbot) => ({
           ...chatbot,
           locked: SubscriptionService.isChatbotLocked({
-            chatbotStatus: chatbot.chatbotStatus,
             subscriptionStatus: subscription,
           }),
         })),
@@ -94,7 +93,6 @@ export const Chatbot = new Elysia({
         chatbot: {
           ...otherChatbot,
           locked: SubscriptionService.isChatbotLocked({
-            chatbotStatus: chatbot.chatbotStatus,
             subscriptionStatus: subscription,
           }),
         },

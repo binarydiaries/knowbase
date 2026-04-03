@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
+import { CHATBOT_LIMIT_TOOLTIP } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
 import { getChatbotsById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
@@ -111,6 +112,7 @@ function RouteComponent() {
               <ChatbotMenuActions
                 chatbotStatus={chatbot.chatbotStatus}
                 disableUnarchive={disableUnarchive}
+                disableUnarchiveReason={CHATBOT_LIMIT_TOOLTIP}
               />
             )}
           </div>

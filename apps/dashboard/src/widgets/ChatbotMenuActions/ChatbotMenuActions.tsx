@@ -14,14 +14,20 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { patchChatbotsById } from '@/services';
+import {
+  CHATBOT_LIMIT_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 export const ChatbotMenuActions = ({
   chatbotStatus,
   disableUnarchive = false,
+  disableUnarchiveReason = CHATBOT_LIMIT_TOOLTIP,
 }: {
   chatbotStatus: 'active' | 'archived';
   disableUnarchive?: boolean;
+  disableUnarchiveReason?: string;
 }) => {
   const { chatbotId } = useParams({ strict: false });
   const queryClient = useQueryClient();
@@ -61,18 +67,25 @@ export const ChatbotMenuActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem
-          onClick={() => archiveMutation.mutate()}
-          disabled={archiveMutation.isPending || disableUnarchive}
-          className="flex items-center gap-2 cursor-pointer"
+        <DisabledTooltip
+          disabled={disableUnarchive}
+          content={disableUnarchiveReason}
         >
-          {chatbotStatus === 'archived' ? (
-            <ArchiveRestore className="h-4 w-4" />
-          ) : (
-            <Archive className="h-4 w-4" />
-          )}
-          {chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
-        </DropdownMenuItem>
+          <div>
+            <DropdownMenuItem
+              onClick={() => archiveMutation.mutate()}
+              disabled={archiveMutation.isPending || disableUnarchive}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              {chatbotStatus === 'archived' ? (
+                <ArchiveRestore className="h-4 w-4" />
+              ) : (
+                <Archive className="h-4 w-4" />
+              )}
+              {chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
+            </DropdownMenuItem>
+          </div>
+        </DisabledTooltip>
       </DropdownMenuContent>
     </DropdownMenu>
   );

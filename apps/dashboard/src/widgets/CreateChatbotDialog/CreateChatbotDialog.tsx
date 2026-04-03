@@ -15,6 +15,10 @@ import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  CHATBOT_LIMIT_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import {
@@ -35,12 +39,14 @@ export function CreateChatbotDialog({
   chatbot,
   onClose,
   disabled = false,
+  disabledReason = CHATBOT_LIMIT_TOOLTIP,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   chatbot?: ChatbotSchema;
   onClose?: () => void;
   disabled?: boolean;
+  disabledReason?: string;
 }) {
   const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
@@ -105,11 +111,17 @@ export function CreateChatbotDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" disabled={disabled}>
-          Add Chatbot
-        </Button>
-      </DialogTrigger>
+      {disabled ? (
+        <DisabledTooltip content={disabledReason} disabled>
+          <Button size="sm" disabled={disabled}>
+            Add Chatbot
+          </Button>
+        </DisabledTooltip>
+      ) : (
+        <DialogTrigger asChild>
+          <Button size="sm">Add Chatbot</Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>

@@ -28,6 +28,10 @@ import {
   getIndexingStatus,
   postIndexing,
 } from '@/services';
+import {
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
@@ -105,21 +109,34 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
           </CardDescription>
           {isDocumentsAvailable && (
             <CardAction className="flex gap-2">
-              <Button
-                onClick={() => trainMutation.mutate()}
-                disabled={readOnly || trainMutation.isPending}
-              >
-                Train
-              </Button>
-              <AddDocumentDropdown
-                onTextClick={() => setIsTextContentSheetOpen(true)}
-                onQaClick={() => setIsQASheetOpen(true)}
+              <DisabledTooltip
                 disabled={readOnly}
+                content={CHATBOT_LOCK_TOOLTIP}
               >
-                <Button variant="outline" disabled={readOnly}>
-                  Add
+                <Button
+                  onClick={() => trainMutation.mutate()}
+                  disabled={readOnly || trainMutation.isPending}
+                >
+                  Train
                 </Button>
-              </AddDocumentDropdown>
+              </DisabledTooltip>
+              {!readOnly ? (
+                <AddDocumentDropdown
+                  onTextClick={() => setIsTextContentSheetOpen(true)}
+                  onQaClick={() => setIsQASheetOpen(true)}
+                >
+                  <Button variant="outline">Add</Button>
+                </AddDocumentDropdown>
+              ) : (
+                <DisabledTooltip
+                  content={CHATBOT_LOCK_TOOLTIP}
+                  disabled
+                >
+                  <Button variant="outline" disabled={readOnly}>
+                    Add
+                  </Button>
+                </DisabledTooltip>
+              )}
             </CardAction>
           )}
         </CardHeader>
@@ -149,6 +166,7 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
                 deleteDocumentMutation.mutate(doc.id);
               }}
               readOnly={readOnly}
+              disabledReason={CHATBOT_LOCK_TOOLTIP}
             />
           ))}
 
@@ -165,13 +183,21 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent className="flex-row justify-center gap-2">
-                <AddDocumentDropdown
-                  onTextClick={() => setIsTextContentSheetOpen(true)}
-                  onQaClick={() => setIsQASheetOpen(true)}
-                  disabled={readOnly}
-                >
-                  <Button disabled={readOnly}>Add Source</Button>
-                </AddDocumentDropdown>
+                {!readOnly ? (
+                  <AddDocumentDropdown
+                    onTextClick={() => setIsTextContentSheetOpen(true)}
+                    onQaClick={() => setIsQASheetOpen(true)}
+                  >
+                    <Button>Add Source</Button>
+                  </AddDocumentDropdown>
+                ) : (
+                  <DisabledTooltip
+                    content={CHATBOT_LOCK_TOOLTIP}
+                    disabled
+                  >
+                    <Button disabled={readOnly}>Add Source</Button>
+                  </DisabledTooltip>
+                )}
               </EmptyContent>
               <Button
                 variant="link"

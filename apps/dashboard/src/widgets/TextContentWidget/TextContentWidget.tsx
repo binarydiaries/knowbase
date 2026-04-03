@@ -19,6 +19,10 @@ import {
   patchDocumentsById,
   postDocuments,
 } from '@/services';
+import {
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -123,13 +127,15 @@ export const TextContentWidget = ({
         </div>
       </div>
       <SheetFooter>
-        <Button
-          onClick={handleSave}
-          disabled={readOnly || saveTextMutation.isPending}
-          type="submit"
-        >
-          {mode === 'edit' ? 'Update changes' : 'Save changes'}
-        </Button>
+        <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+          <Button
+            onClick={handleSave}
+            disabled={readOnly || saveTextMutation.isPending}
+            type="submit"
+          >
+            {mode === 'edit' ? 'Update changes' : 'Save changes'}
+          </Button>
+        </DisabledTooltip>
         <SheetClose asChild>
           <Button variant="outline">Close</Button>
         </SheetClose>

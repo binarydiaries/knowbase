@@ -21,6 +21,10 @@ import {
   patchDocumentsById,
   postDocuments,
 } from '@/services';
+import {
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -146,9 +150,11 @@ export const QAContentWidget = ({
         </div>
         <div className=" flex flex-row  justify-between">
           <Label htmlFor="sheet-demo-username">Questions & Answer</Label>
-          <Button variant="outline" onClick={addQuestion} disabled={readOnly}>
-            + Add Question
-          </Button>
+          <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+            <Button variant="outline" onClick={addQuestion} disabled={readOnly}>
+              + Add Question
+            </Button>
+          </DisabledTooltip>
         </div>
         {/* Cards */}
         {qaList.map((qa, index) => (
@@ -164,15 +170,20 @@ export const QAContentWidget = ({
                     </div>
 
                     {qaList.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={readOnly || qaList.length === 1}
-                        onClick={() => deleteQuestion(index)}
-                        className="text-destructive hover:text-destructive mb-2"
+                      <DisabledTooltip
+                        disabled={readOnly}
+                        content={CHATBOT_LOCK_TOOLTIP}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={readOnly || qaList.length === 1}
+                          onClick={() => deleteQuestion(index)}
+                          className="text-destructive hover:text-destructive mb-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </DisabledTooltip>
                     )}
                   </div>
 
@@ -201,13 +212,15 @@ export const QAContentWidget = ({
         ))}
       </div>
       <SheetFooter>
-        <Button
-          onClick={handleSave}
-          disabled={readOnly || saveQnAMutation.isPending}
-          type="submit"
-        >
-          {mode === 'edit' ? 'Update changes' : 'Save changes'}
-        </Button>
+        <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+          <Button
+            onClick={handleSave}
+            disabled={readOnly || saveQnAMutation.isPending}
+            type="submit"
+          >
+            {mode === 'edit' ? 'Update changes' : 'Save changes'}
+          </Button>
+        </DisabledTooltip>
         <SheetClose asChild>
           <Button variant="outline">Close</Button>
         </SheetClose>

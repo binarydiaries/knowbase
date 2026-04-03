@@ -103,15 +103,11 @@ export abstract class SubscriptionService {
   }
 
   static isChatbotLocked({
-    chatbotStatus,
     subscriptionStatus,
   }: {
-    chatbotStatus: (typeof chatbots.$inferSelect)['chatbotStatus'];
     subscriptionStatus: Awaited<ReturnType<typeof SubscriptionService.getStatus>>;
   }) {
-    return (
-      subscriptionStatus.isOverLimit && chatbotStatus === 'active'
-    );
+    return subscriptionStatus.isOverLimit;
   }
 
   static getLimitReachedMessage(

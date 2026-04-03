@@ -13,6 +13,10 @@ import { useParams } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormInputColor } from '@/components/FormInputColor/FormInputColor.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
@@ -176,12 +180,14 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             disabled={readOnly}
           />
           <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={readOnly || !isDirty || saveChannelMutation.isPending}
-            >
-              {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
-            </Button>
+            <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+              <Button
+                type="submit"
+                disabled={readOnly || !isDirty || saveChannelMutation.isPending}
+              >
+                {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
+              </Button>
+            </DisabledTooltip>
           </div>
         </CardContent>
       </form>

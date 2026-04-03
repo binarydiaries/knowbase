@@ -12,6 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormSelect } from '@/components/FormSelect/FormSelect.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
@@ -150,12 +154,14 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             />
           </div>
           <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={readOnly || !isDirty || saveBehaviourMutation.isPending}
-            >
-              {saveBehaviourMutation.isPending ? 'Saving…' : 'Save'}
-            </Button>
+            <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+              <Button
+                type="submit"
+                disabled={readOnly || !isDirty || saveBehaviourMutation.isPending}
+              >
+                {saveBehaviourMutation.isPending ? 'Saving…' : 'Save'}
+              </Button>
+            </DisabledTooltip>
           </div>
         </CardContent>
       </form>

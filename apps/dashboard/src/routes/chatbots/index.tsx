@@ -31,6 +31,11 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { useState } from 'react';
+import {
+  CHATBOT_LIMIT_TOOLTIP,
+  CHATBOT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
 import { type ChatbotSchema, getChatbots, patchChatbotsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
@@ -97,6 +102,7 @@ function RouteComponent() {
             chatbot={editingBot}
             onClose={() => setEditingBot(undefined)}
             disabled={hasReachedChatbotLimit}
+            disabledReason={CHATBOT_LIMIT_TOOLTIP}
           />
         </div>
       </header>
@@ -165,47 +171,64 @@ function RouteComponent() {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40 ">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation(); // IMPORTANT: prevent Link navigation
-                              setEditingBot(bot);
-                              setDialogOpen(true);
-                            }}
+                          <DisabledTooltip
                             disabled={subscription?.isOverLimit}
-                            className="flex items-center  cursor-pointer gap-2"
+                            content={CHATBOT_LOCK_TOOLTIP}
                           >
-                            <Edit className="h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
+                            <div>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation(); // IMPORTANT: prevent Link navigation
+                                  setEditingBot(bot);
+                                  setDialogOpen(true);
+                                }}
+                                disabled={subscription?.isOverLimit}
+                                className="flex items-center  cursor-pointer gap-2"
+                              >
+                                <Edit className="h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            </div>
+                          </DisabledTooltip>
 
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newStatus =
-                                bot.chatbotStatus === 'archived'
-                                  ? 'active'
-                                  : 'archived';
-
-                              archiveChatbotMutation.mutate({
-                                id: bot.id,
-                                status: newStatus,
-                              });
-                            }}
+                          <DisabledTooltip
                             disabled={
                               bot.chatbotStatus === 'archived' &&
                               hasReachedChatbotLimit
                             }
-                            className="flex items-center gap-2 cursor-pointer "
+                            content={CHATBOT_LIMIT_TOOLTIP}
                           >
-                            {bot.chatbotStatus === 'archived' ? (
-                              <ArchiveRestore className="h-4 w-4" />
-                            ) : (
-                              <Archive className="h-4 w-4" />
-                            )}
-                            {bot.chatbotStatus === 'archived'
-                              ? 'Unarchive'
-                              : 'Archive'}
-                          </DropdownMenuItem>
+                            <div>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newStatus =
+                                    bot.chatbotStatus === 'archived'
+                                      ? 'active'
+                                      : 'archived';
+
+                                  archiveChatbotMutation.mutate({
+                                    id: bot.id,
+                                    status: newStatus,
+                                  });
+                                }}
+                                disabled={
+                                  bot.chatbotStatus === 'archived' &&
+                                  hasReachedChatbotLimit
+                                }
+                                className="flex items-center gap-2 cursor-pointer "
+                              >
+                                {bot.chatbotStatus === 'archived' ? (
+                                  <ArchiveRestore className="h-4 w-4" />
+                                ) : (
+                                  <Archive className="h-4 w-4" />
+                                )}
+                                {bot.chatbotStatus === 'archived'
+                                  ? 'Unarchive'
+                                  : 'Archive'}
+                              </DropdownMenuItem>
+                            </div>
+                          </DisabledTooltip>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -245,6 +268,7 @@ function RouteComponent() {
                 chatbot={editingBot}
                 onClose={() => setEditingBot(undefined)}
                 disabled={hasReachedChatbotLimit}
+                disabledReason={CHATBOT_LIMIT_TOOLTIP}
               />
             </EmptyContent>
             <Button

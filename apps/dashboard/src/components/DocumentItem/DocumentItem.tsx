@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { type MouseEventHandler, useMemo } from 'react';
 import type { DocumentSchema } from '@/services';
+import { DisabledTooltip } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 
 interface IDocumentItemProps {
   type: 'text' | 'qna';
@@ -45,6 +46,7 @@ interface IDocumentItemProps {
   onDelete: MouseEventHandler;
   status: DocumentSchema['status'];
   readOnly?: boolean;
+  disabledReason?: string;
 }
 
 export const DocumentItem = ({
@@ -56,6 +58,7 @@ export const DocumentItem = ({
   status,
   lastTrainedAt,
   readOnly = false,
+  disabledReason,
 }: IDocumentItemProps) => {
   let docIcon = <Files className="h-4 w-4" />;
   switch (type) {
@@ -146,23 +149,31 @@ export const DocumentItem = ({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-40 ">
-            <DropdownMenuItem
-              onClick={onEdit}
-              disabled={readOnly}
-              className="flex items-center cursor-pointer gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
+            <DisabledTooltip disabled={readOnly} content={disabledReason}>
+              <div>
+                <DropdownMenuItem
+                  onClick={onEdit}
+                  disabled={readOnly}
+                  className="flex items-center cursor-pointer gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+              </div>
+            </DisabledTooltip>
 
-            <DropdownMenuItem
-              onClick={onDelete}
-              disabled={readOnly}
-              className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 text-red" />
-              Delete
-            </DropdownMenuItem>
+            <DisabledTooltip disabled={readOnly} content={disabledReason}>
+              <div>
+                <DropdownMenuItem
+                  onClick={onDelete}
+                  disabled={readOnly}
+                  className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 text-red" />
+                  Delete
+                </DropdownMenuItem>
+              </div>
+            </DisabledTooltip>
           </DropdownMenuContent>
         </DropdownMenu>
       </ItemActions>

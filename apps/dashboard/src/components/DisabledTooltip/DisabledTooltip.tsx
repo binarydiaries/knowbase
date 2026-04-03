@@ -13,6 +13,8 @@ export const KNOWLEDGE_SOURCE_LIMIT_TOOLTIP =
   'Workspace has reached its knowledge source limit.';
 export const TRAINING_LIMIT_TOOLTIP =
   'Workspace has reached its daily training limit.';
+export const NO_READY_TRAINING_TOOLTIP =
+  'No knowledge sources are ready to train.';
 
 export function DisabledTooltip({
   children,

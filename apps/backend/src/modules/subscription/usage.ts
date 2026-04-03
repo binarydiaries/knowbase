@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { orgUsageDaily } from '../../db/schema/orgUsageDaily';
 
@@ -7,8 +7,6 @@ function getUtcDateKey(date = new Date()) {
 }
 
 export abstract class OrgUsageDailyService {
-  static getUtcDateKey = getUtcDateKey;
-
   static async getTodayTrainingRuns(orgId: string) {
     const dateKey = getUtcDateKey();
     const usage = await db.query.orgUsageDaily.findFirst({
@@ -21,25 +19,51 @@ export abstract class OrgUsageDailyService {
     return usage?.trainingRuns ?? 0;
   }
 
-  static async incrementTodayTrainingRuns(orgId: string) {
+  static async tryConsumeTrainingRun(orgId: string, limit: number) {
     const dateKey = getUtcDateKey();
 
-    const [usage] = await db
-      .insert(orgUsageDaily)
-      .values({
-        orgId,
-        dateKey,
-        trainingRuns: 1,
-      })
-      .onConflictDoUpdate({
-        target: [orgUsageDaily.orgId, orgUsageDaily.dateKey],
-        set: {
+    return db.transaction(async (tx) => {
+      await tx
+        .insert(orgUsageDaily)
+        .values({
+          orgId,
+          dateKey,
+          trainingRuns: 0,
+        })
+        .onConflictDoNothing();
+
+      const lockedRow = await tx.execute<{ trainingRuns: number }>(
+        sql`select "trainingRuns" from "org_usage_daily" where "orgId" = ${orgId} and "dateKey" = ${dateKey} for update`,
+      );
+
+      const currentRuns = lockedRow.rows[0]?.trainingRuns ?? 0;
+      if (currentRuns >= limit) {
+        return {
+          allowed: false as const,
+          trainingRunsToday: currentRuns,
+        };
+      }
+
+      const [updatedUsage] = await tx
+        .update(orgUsageDaily)
+        .set({
           trainingRuns: sql`${orgUsageDaily.trainingRuns} + 1`,
           updatedAt: new Date(),
-        },
-      })
-      .returning();
+        })
+        .where(
+          and(
+            eq(orgUsageDaily.orgId, orgId),
+            eq(orgUsageDaily.dateKey, dateKey),
+          ),
+        )
+        .returning({
+          trainingRuns: orgUsageDaily.trainingRuns,
+        });
 
-    return usage.trainingRuns;
+      return {
+        allowed: true as const,
+        trainingRunsToday: updatedUsage.trainingRuns,
+      };
+    });
   }
 }

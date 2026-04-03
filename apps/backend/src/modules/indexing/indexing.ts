@@ -42,27 +42,37 @@ export const Indexing = new Elysia({
         });
       }
 
-      if (
-        SubscriptionService.hasReachedTrainingRunsPerDayLimit(subscription)
-      ) {
-        return status(403, {
-          code: 'TRAINING_LIMIT_REACHED',
-          message: SubscriptionService.getTrainingLimitReachedMessage(
-            subscription,
-          ),
-          plan: subscription.plan,
-          trainingRunsPerDayLimit: subscription.trainingRunsPerDayLimit,
-          trainingRunsToday: subscription.trainingRunsToday,
-        });
-      }
-
-      await OrgUsageDailyService.incrementTodayTrainingRuns(orgId);
-
       const documents = await DocumentService.list({
         chatbotId: body.chatbotId,
         orgId,
         filter: { status: ['ready'] },
       });
+
+      if (documents.length === 0) {
+        return status(200, {
+          status: 'no_documents_ready',
+          message: 'No knowledge sources are ready to train.',
+        });
+      }
+
+      const trainingRun = await OrgUsageDailyService.tryConsumeTrainingRun(
+        orgId,
+        subscription.trainingRunsPerDayLimit,
+      );
+
+      if (!trainingRun.allowed) {
+        return status(403, {
+          code: 'TRAINING_LIMIT_REACHED',
+          message: SubscriptionService.getTrainingLimitReachedMessage({
+            ...subscription,
+            trainingRunsToday: trainingRun.trainingRunsToday,
+            hasReachedTrainingRunsPerDayLimit: true,
+          }),
+          plan: subscription.plan,
+          trainingRunsPerDayLimit: subscription.trainingRunsPerDayLimit,
+          trainingRunsToday: trainingRun.trainingRunsToday,
+        });
+      }
 
       await Promise.all(
         documents.map(async (doc) => {
@@ -75,12 +85,14 @@ export const Indexing = new Elysia({
       );
 
       return status(202, {
+        status: 'queued',
         message: 'Indexing Started',
       });
     },
     {
       body: 'IndexingStartBody',
       response: {
+        200: 'IndexingStartResponse',
         202: 'IndexingStartResponse',
         403: 'IndexingForbiddenResponse',
         404: 'NotFoundResponse',

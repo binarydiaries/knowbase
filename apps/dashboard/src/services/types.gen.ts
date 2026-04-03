@@ -365,6 +365,7 @@ export type IndexingStartBody = {
 };
 
 export type IndexingStartResponse = {
+    status: 'queued' | 'no_documents_ready';
     message: string;
 };
 
@@ -888,9 +889,30 @@ export type PostIndexingErrors = {
      * Response for status 401
      */
     401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: IndexingForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
 };
 
 export type PostIndexingError = PostIndexingErrors[keyof PostIndexingErrors];
+
+export type PostIndexingResponses = {
+    /**
+     * Response for status 200
+     */
+    200: IndexingStartResponse;
+    /**
+     * Response for status 202
+     */
+    202: IndexingStartResponse;
+};
+
+export type PostIndexingResponse = PostIndexingResponses[keyof PostIndexingResponses];
 
 export type GetIndexingStatusData = {
     body?: never;

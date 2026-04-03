@@ -7,6 +7,7 @@ const IndexingStartBody = z.object({
 });
 
 const IndexingStartResponse = z.object({
+  status: z.enum(['queued', 'no_documents_ready']),
   message: z.string(),
 });
 

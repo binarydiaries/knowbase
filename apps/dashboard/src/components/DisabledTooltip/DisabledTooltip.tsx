@@ -9,6 +9,10 @@ export const CHATBOT_LIMIT_TOOLTIP =
   'Workspace has reached its chatbot limit.';
 export const CHATBOT_LOCK_TOOLTIP =
   'Workspace is over its chatbot limit.';
+export const KNOWLEDGE_SOURCE_LIMIT_TOOLTIP =
+  'Workspace has reached its knowledge source limit.';
+export const TRAINING_LIMIT_TOOLTIP =
+  'Workspace has reached its daily training limit.';
 
 export function DisabledTooltip({
   children,

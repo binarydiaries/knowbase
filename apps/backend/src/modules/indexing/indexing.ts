@@ -6,6 +6,7 @@ import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
 import { ChatbotService } from '../chatbot/service';
 import { DocumentService } from '../document/service';
 import { SubscriptionService } from '../subscription/service';
+import { OrgUsageDailyService } from '../subscription/usage';
 import { IndexingModel } from './model';
 
 export const Indexing = new Elysia({
@@ -41,6 +42,22 @@ export const Indexing = new Elysia({
         });
       }
 
+      if (
+        SubscriptionService.hasReachedTrainingRunsPerDayLimit(subscription)
+      ) {
+        return status(403, {
+          code: 'TRAINING_LIMIT_REACHED',
+          message: SubscriptionService.getTrainingLimitReachedMessage(
+            subscription,
+          ),
+          plan: subscription.plan,
+          trainingRunsPerDayLimit: subscription.trainingRunsPerDayLimit,
+          trainingRunsToday: subscription.trainingRunsToday,
+        });
+      }
+
+      await OrgUsageDailyService.incrementTodayTrainingRuns(orgId);
+
       const documents = await DocumentService.list({
         chatbotId: body.chatbotId,
         orgId,
@@ -65,7 +82,7 @@ export const Indexing = new Elysia({
       body: 'IndexingStartBody',
       response: {
         202: 'IndexingStartResponse',
-        403: 'ChatbotLockedResponse',
+        403: 'IndexingForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },

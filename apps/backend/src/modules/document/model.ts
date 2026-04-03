@@ -1,6 +1,10 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 
+const TEXT_SOURCE_MAX_CHARACTERS = 10_000;
+const QNA_SOURCE_MAX_CHARACTERS = 20_000;
+const QNA_SOURCE_MAX_PAIRS = 50;
+
 const DocumentStatus = z.enum([
   'ready',
   'queue',
@@ -9,14 +13,33 @@ const DocumentStatus = z.enum([
   'failed',
 ]);
 
-export const DocumentContentQna = z.array(
-  z.object({
-    question: z.string(),
-    answer: z.string(),
-  }),
-);
+export const DocumentContentQna = z
+  .array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    }),
+  )
+  .max(QNA_SOURCE_MAX_PAIRS, {
+    message: `Q&A sources can contain up to ${QNA_SOURCE_MAX_PAIRS} question-answer pairs.`,
+  })
+  .superRefine((qaList, ctx) => {
+    const totalCharacters = qaList.reduce(
+      (total, qa) => total + qa.question.length + qa.answer.length,
+      0,
+    );
 
-const DocumentContentText = z.string();
+    if (totalCharacters > QNA_SOURCE_MAX_CHARACTERS) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Q&A sources can contain up to ${QNA_SOURCE_MAX_CHARACTERS} characters across all questions and answers.`,
+      });
+    }
+  });
+
+const DocumentContentText = z.string().max(TEXT_SOURCE_MAX_CHARACTERS, {
+  message: `Text sources can contain up to ${TEXT_SOURCE_MAX_CHARACTERS} characters.`,
+});
 
 export const DocumentContent = z.discriminatedUnion('type', [
   z.object({ type: z.literal('text'), data: DocumentContentText }).meta({

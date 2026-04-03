@@ -317,7 +317,13 @@ export type ManyChatbotResponse = {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         activeChatbotLimit: number;
         activeChatbotCount: number;
+        knowledgeSourceLimit: number;
+        knowledgeSourceCount: number;
+        trainingRunsPerDayLimit: number;
+        trainingRunsToday: number;
         isOverLimit: boolean;
+        hasReachedKnowledgeSourceLimit: boolean;
+        hasReachedTrainingRunsPerDayLimit: boolean;
     };
 };
 
@@ -345,7 +351,13 @@ export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     activeChatbotLimit: number;
     activeChatbotCount: number;
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+    trainingRunsPerDayLimit: number;
+    trainingRunsToday: number;
     isOverLimit: boolean;
+    hasReachedKnowledgeSourceLimit: boolean;
+    hasReachedTrainingRunsPerDayLimit: boolean;
 };
 
 export type IndexingStartBody = {

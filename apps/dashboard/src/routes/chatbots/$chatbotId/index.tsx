@@ -124,7 +124,7 @@ function RouteComponent() {
         <div className="flex flex-1 h-full overflow-hidden">
           <div className="grow p-5 shadow-none flex-col flex gap-5 h-full overflow-auto border-r">
             <SubscriptionLimitBanner subscription={subscription} />
-            <DocumentsWidget readOnly={readOnly} />
+            <DocumentsWidget readOnly={readOnly} subscription={subscription} />
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             {/*<SettingsCard />*/}

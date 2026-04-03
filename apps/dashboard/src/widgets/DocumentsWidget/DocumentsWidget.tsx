@@ -1,5 +1,6 @@
 import { Button } from '@knowbase/ui/components/button';
 import { toast } from '@knowbase/ui/components/sonner';
+import { Alert, AlertDescription, AlertTitle } from '@knowbase/ui/components/alert';
 import {
   Card,
   CardAction,
@@ -31,14 +32,24 @@ import {
 import {
   CHATBOT_LOCK_TOOLTIP,
   DisabledTooltip,
+  KNOWLEDGE_SOURCE_LIMIT_TOOLTIP,
+  TRAINING_LIMIT_TOOLTIP,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import { UsageMeter } from '@/components/UsageMeter/UsageMeter.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
+import type { SubscriptionStatusSchema } from '@/services';
 
-export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) => {
+export const DocumentsWidget = ({
+  readOnly = false,
+  subscription,
+}: {
+  readOnly?: boolean;
+  subscription?: SubscriptionStatusSchema;
+}) => {
   const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
     useDocuments();
@@ -56,6 +67,18 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
   );
 
   const isEdit = !!selectedDocument;
+  const hasReachedKnowledgeSourceLimit =
+    subscription?.hasReachedKnowledgeSourceLimit ?? false;
+  const hasReachedTrainingLimit =
+    subscription?.hasReachedTrainingRunsPerDayLimit ?? false;
+  const isAddDisabled = readOnly || hasReachedKnowledgeSourceLimit;
+  const isTrainDisabled = readOnly || hasReachedTrainingLimit;
+  const addDisabledReason = readOnly
+    ? CHATBOT_LOCK_TOOLTIP
+    : KNOWLEDGE_SOURCE_LIMIT_TOOLTIP;
+  const trainDisabledReason = readOnly
+    ? CHATBOT_LOCK_TOOLTIP
+    : TRAINING_LIMIT_TOOLTIP;
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -107,20 +130,35 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
           <CardDescription>
             Your chatbot will only answer based on the sources you add here.
           </CardDescription>
+          {subscription ? (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <UsageMeter
+                label="Knowledge Sources"
+                current={subscription.knowledgeSourceCount}
+                limit={subscription.knowledgeSourceLimit}
+              />
+              <UsageMeter
+                label="Daily Training"
+                current={subscription.trainingRunsToday}
+                limit={subscription.trainingRunsPerDayLimit}
+                helperText="Resets daily at 00:00 UTC."
+              />
+            </div>
+          ) : null}
           {isDocumentsAvailable && (
             <CardAction className="flex gap-2">
               <DisabledTooltip
-                disabled={readOnly}
-                content={CHATBOT_LOCK_TOOLTIP}
+                disabled={isTrainDisabled}
+                content={trainDisabledReason}
               >
                 <Button
                   onClick={() => trainMutation.mutate()}
-                  disabled={readOnly || trainMutation.isPending}
+                  disabled={isTrainDisabled || trainMutation.isPending}
                 >
                   Train
                 </Button>
               </DisabledTooltip>
-              {!readOnly ? (
+              {!isAddDisabled ? (
                 <AddDocumentDropdown
                   onTextClick={() => setIsTextContentSheetOpen(true)}
                   onQaClick={() => setIsQASheetOpen(true)}
@@ -129,10 +167,10 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
                 </AddDocumentDropdown>
               ) : (
                 <DisabledTooltip
-                  content={CHATBOT_LOCK_TOOLTIP}
+                  content={addDisabledReason}
                   disabled
                 >
-                  <Button variant="outline" disabled={readOnly}>
+                  <Button variant="outline" disabled>
                     Add
                   </Button>
                 </DisabledTooltip>
@@ -141,6 +179,16 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
           )}
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {hasReachedKnowledgeSourceLimit && !readOnly ? (
+            <Alert>
+              <AlertTitle>Knowledge source limit reached</AlertTitle>
+              <AlertDescription>
+                Delete knowledge sources or upgrade your subscription to add
+                more.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
           {documents.map((doc) => (
             <DocumentItem
               key={doc.id}
@@ -184,18 +232,27 @@ export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) =>
               </EmptyHeader>
               <EmptyContent className="flex-row justify-center gap-2">
                 {!readOnly ? (
-                  <AddDocumentDropdown
-                    onTextClick={() => setIsTextContentSheetOpen(true)}
-                    onQaClick={() => setIsQASheetOpen(true)}
-                  >
-                    <Button>Add Source</Button>
-                  </AddDocumentDropdown>
+                  !hasReachedKnowledgeSourceLimit ? (
+                    <AddDocumentDropdown
+                      onTextClick={() => setIsTextContentSheetOpen(true)}
+                      onQaClick={() => setIsQASheetOpen(true)}
+                    >
+                      <Button>Add Source</Button>
+                    </AddDocumentDropdown>
+                  ) : (
+                    <DisabledTooltip
+                      content={KNOWLEDGE_SOURCE_LIMIT_TOOLTIP}
+                      disabled
+                    >
+                      <Button disabled>Add Source</Button>
+                    </DisabledTooltip>
+                  )
                 ) : (
                   <DisabledTooltip
                     content={CHATBOT_LOCK_TOOLTIP}
                     disabled
                   >
-                    <Button disabled={readOnly}>Add Source</Button>
+                    <Button disabled>Add Source</Button>
                   </DisabledTooltip>
                 )}
               </EmptyContent>

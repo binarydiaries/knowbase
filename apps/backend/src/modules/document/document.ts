@@ -41,6 +41,19 @@ export const Document = new Elysia({
         });
       }
 
+      if (SubscriptionService.hasReachedKnowledgeSourceLimit(subscription)) {
+        return status(403, {
+          code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED',
+          message:
+            SubscriptionService.getKnowledgeSourceLimitReachedMessage(
+              subscription,
+            ),
+          plan: subscription.plan,
+          knowledgeSourceLimit: subscription.knowledgeSourceLimit,
+          knowledgeSourceCount: subscription.knowledgeSourceCount,
+        });
+      }
+
       const document = await DocumentService.create({
         ...body,
         contentSerialized: body.content.data,
@@ -55,7 +68,7 @@ export const Document = new Elysia({
       body: 'CreateDocumentBody',
       response: {
         200: 'OneDocumentResponse',
-        403: 'ChatbotLockedResponse',
+        403: 'DocumentWriteForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },

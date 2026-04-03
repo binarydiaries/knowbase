@@ -6,6 +6,7 @@ import { conversations } from './conversations';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
 import { messages } from './messages';
+import { orgUsageDaily } from './orgUsageDaily';
 
 export const relations = defineRelations(
   {
@@ -16,6 +17,7 @@ export const relations = defineRelations(
     conversations,
     messages,
     embeddings,
+    orgUsageDaily,
   },
   (r) => ({
     chatbots: {
@@ -68,5 +70,6 @@ export const relations = defineRelations(
         to: r.documents.id,
       }),
     },
+    orgUsageDaily: {},
   }),
 );

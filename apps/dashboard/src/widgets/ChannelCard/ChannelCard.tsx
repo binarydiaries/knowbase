@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useEffect } from 'react';
@@ -17,6 +18,7 @@ import { FormInputColor } from '@/components/FormInputColor/FormInputColor.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchChannelsById } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 export const ChannelSchema = z.object({
   displayName: z
@@ -44,7 +46,7 @@ export const ChannelSchema = z.object({
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
 });
 type ChannelFormValues = z.infer<typeof ChannelSchema>;
-const ChannelCard = () => {
+const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   // const [primaryColor, setPrimaryColor] = React.useState('#915964');
   const { chatbotId } = useParams({ strict: false });
   // const initialMessageId = useId();
@@ -118,6 +120,9 @@ const ChannelCard = () => {
         },
       });
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   /* -------------------- Submit -------------------- */
@@ -141,34 +146,39 @@ const ChannelCard = () => {
             control={control}
             label="Display Name"
             placeholder="Enter a display Name"
+            disabled={readOnly}
           />
           <FormInput
             name="subtitle"
             control={control}
             label="Subtitle"
             placeholder="Enter a subtitle"
+            disabled={readOnly}
           />
           <FormTextarea
             name="welcomeMessage"
             control={control}
             label="Welcome Message"
             placeholder="Enter a welcome message"
+            disabled={readOnly}
           />
           <FormInput
             name="inputPlaceholder"
             control={control}
             label="Input Placeholder"
             placeholder="Enter a input placeholder"
+            disabled={readOnly}
           />
           <FormInputColor
             control={control}
             name="primaryColor"
             label="Primary Color"
+            disabled={readOnly}
           />
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={!isDirty || saveChannelMutation.isPending}
+              disabled={readOnly || !isDirty || saveChannelMutation.isPending}
             >
               {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
             </Button>

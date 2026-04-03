@@ -33,6 +33,7 @@ export const FormInputColor = <T extends FieldValues>({
           {...field}
           aria-invalid={!!fieldState.error?.message}
           className="h-10 w-14 cursor-pointer p-1"
+          {...otherProps}
         />
 
         <Input

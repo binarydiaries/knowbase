@@ -22,6 +22,7 @@ interface IFormSelectProps<T extends FieldValues>
   label: string;
   placeholder?: string;
   options: Option[];
+  disabled?: boolean;
 }
 
 export const FormSelect = <T extends FieldValues>({
@@ -30,6 +31,7 @@ export const FormSelect = <T extends FieldValues>({
   name,
   options,
   placeholder = 'Select an option',
+  disabled = false,
 }: IFormSelectProps<T>) => {
   const { field, fieldState } = useController({
     control,
@@ -40,8 +42,15 @@ export const FormSelect = <T extends FieldValues>({
     <Field data-invalid={fieldState.error?.message}>
       <FieldLabel>{label}</FieldLabel>
 
-      <Select value={field.value} onValueChange={field.onChange}>
-        <SelectTrigger aria-invalid={!!fieldState.error?.message}>
+      <Select
+        value={field.value}
+        onValueChange={field.onChange}
+        disabled={disabled}
+      >
+        <SelectTrigger
+          aria-invalid={!!fieldState.error?.message}
+          disabled={disabled}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 

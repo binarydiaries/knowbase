@@ -1,4 +1,4 @@
-import { count, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 import { clerkClient } from 'elysia-clerk';
 import { db } from '../../db';
 import { chatbots } from '../../db/schema/chatbots';
@@ -40,8 +40,6 @@ export abstract class SubscriptionService {
       const subscription =
         await clerkClient.billing.getOrganizationBillingSubscription(orgId);
 
-      console.log(subscription);
-
       for (const item of subscription.subscriptionItems) {
         const plan =
           normalizePlanName(item.plan?.slug) ??
@@ -78,29 +76,69 @@ export abstract class SubscriptionService {
     return PLAN_LIMITS[plan];
   }
 
-  static async assertChatbotLimitNotReached(orgId: string) {
+  static async getStatus(orgId: string) {
     const plan = await this.getPlan(orgId);
-    const limit = this.getLimits(plan).chatbots;
+    const activeChatbotLimit = this.getLimits(plan).chatbots;
 
-    const [{ value: current }] = await db
+    const [{ value: activeChatbotCount }] = await db
       .select({ value: count() })
       .from(chatbots)
-      .where(eq(chatbots.orgId, orgId));
+      .where(
+        and(
+          eq(chatbots.orgId, orgId),
+          eq(chatbots.chatbotStatus, 'active'),
+        ),
+      );
 
-    if (current >= limit) {
+    return {
+      plan,
+      activeChatbotLimit,
+      activeChatbotCount,
+      isOverLimit: activeChatbotCount > activeChatbotLimit,
+    };
+  }
+
+  static hasReachedChatbotLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+    return status.activeChatbotCount >= status.activeChatbotLimit;
+  }
+
+  static isChatbotLocked({
+    chatbotStatus,
+    subscriptionStatus,
+  }: {
+    chatbotStatus: (typeof chatbots.$inferSelect)['chatbotStatus'];
+    subscriptionStatus: Awaited<ReturnType<typeof SubscriptionService.getStatus>>;
+  }) {
+    return (
+      subscriptionStatus.isOverLimit && chatbotStatus === 'active'
+    );
+  }
+
+  static getLimitReachedMessage(
+    subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
+    return `Your ${subscriptionStatus.plan} plan allows up to ${subscriptionStatus.activeChatbotLimit} active chatbot${subscriptionStatus.activeChatbotLimit === 1 ? '' : 's'}. Archive active chatbots or upgrade your subscription to create more.`;
+  }
+
+  static getLockedMessage(
+    subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
+    return `Your organization is over the ${subscriptionStatus.plan} plan limit of ${subscriptionStatus.activeChatbotLimit} active chatbot${subscriptionStatus.activeChatbotLimit === 1 ? '' : 's'}. Archive active chatbots or upgrade your subscription to edit chatbot settings.`;
+  }
+
+  static async assertChatbotLimitNotReached(orgId: string) {
+    const subscriptionStatus = await this.getStatus(orgId);
+
+    if (this.hasReachedChatbotLimit(subscriptionStatus)) {
       return {
         allowed: false as const,
-        plan,
-        limit,
-        current,
+        ...subscriptionStatus,
       };
     }
 
     return {
       allowed: true as const,
-      plan,
-      limit,
-      current,
+      ...subscriptionStatus,
     };
   }
 }

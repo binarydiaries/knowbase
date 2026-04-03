@@ -234,6 +234,7 @@ export type OneChatbotResponse = {
         name: string;
         description: string | null;
         chatbotStatus: 'active' | 'archived';
+        locked: boolean;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -298,6 +299,7 @@ export type OneChatbotResponse = {
         createdAt: string;
         updatedAt: string;
     };
+    subscription: SubscriptionStatusSchema;
 };
 
 export type ManyChatbotResponse = {
@@ -306,10 +308,17 @@ export type ManyChatbotResponse = {
         name: string;
         description: string | null;
         chatbotStatus: 'active' | 'archived';
+        locked: boolean;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
     }>;
+    subscription: {
+        plan: 'free' | 'starter' | 'growth' | 'pro';
+        activeChatbotLimit: number;
+        activeChatbotCount: number;
+        isOverLimit: boolean;
+    };
 };
 
 export type UpdateChatbotBody = {
@@ -330,6 +339,13 @@ export type OneSmallChatbotResponse = {
         createdAt: string;
         updatedAt: string;
     };
+};
+
+export type SubscriptionStatusSchema = {
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+    isOverLimit: boolean;
 };
 
 export type IndexingStartBody = {

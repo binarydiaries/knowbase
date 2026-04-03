@@ -1,4 +1,5 @@
 import { Button } from '@knowbase/ui/components/button';
+import { toast } from '@knowbase/ui/components/sonner';
 import {
   Card,
   CardAction,
@@ -28,11 +29,12 @@ import {
   postIndexing,
 } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 
-export const DocumentsWidget = () => {
+export const DocumentsWidget = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
     useDocuments();
@@ -63,11 +65,17 @@ export const DocumentsWidget = () => {
       };
     },
     onSuccess: ({ documentId }) => deleteDocument(chatbotId, documentId),
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   const trainMutation = useMutation({
     mutationFn: () => postIndexing({ body: { chatbotId } }),
     onSuccess: () => setIsPollingActive(true),
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   const indexStatusQuery = useQuery({
@@ -97,12 +105,20 @@ export const DocumentsWidget = () => {
           </CardDescription>
           {isDocumentsAvailable && (
             <CardAction className="flex gap-2">
-              <Button onClick={() => trainMutation.mutate()}>Train</Button>
+              <Button
+                onClick={() => trainMutation.mutate()}
+                disabled={readOnly || trainMutation.isPending}
+              >
+                Train
+              </Button>
               <AddDocumentDropdown
                 onTextClick={() => setIsTextContentSheetOpen(true)}
                 onQaClick={() => setIsQASheetOpen(true)}
+                disabled={readOnly}
               >
-                <Button variant="outline">Add</Button>
+                <Button variant="outline" disabled={readOnly}>
+                  Add
+                </Button>
               </AddDocumentDropdown>
             </CardAction>
           )}
@@ -132,6 +148,7 @@ export const DocumentsWidget = () => {
                 e.stopPropagation();
                 deleteDocumentMutation.mutate(doc.id);
               }}
+              readOnly={readOnly}
             />
           ))}
 
@@ -151,8 +168,9 @@ export const DocumentsWidget = () => {
                 <AddDocumentDropdown
                   onTextClick={() => setIsTextContentSheetOpen(true)}
                   onQaClick={() => setIsQASheetOpen(true)}
+                  disabled={readOnly}
                 >
-                  <Button>Add Source</Button>
+                  <Button disabled={readOnly}>Add Source</Button>
                 </AddDocumentDropdown>
               </EmptyContent>
               <Button
@@ -186,6 +204,7 @@ export const DocumentsWidget = () => {
               setIsTextContentSheetOpen(false);
               setSelectedDocument(undefined);
             }}
+            readOnly={readOnly}
           />
         )}
       </Sheet>
@@ -206,6 +225,7 @@ export const DocumentsWidget = () => {
               setIsQASheetOpen(false);
               setSelectedDocument(undefined);
             }}
+            readOnly={readOnly}
           />
         )}
       </Sheet>

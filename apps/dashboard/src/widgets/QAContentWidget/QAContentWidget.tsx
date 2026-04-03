@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
+import { toast } from '@knowbase/ui/components/sonner';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
@@ -21,6 +22,7 @@ import {
   postDocuments,
 } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 type QA = {
   question: string;
@@ -30,12 +32,14 @@ type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: DocumentSchema;
   onClose?: () => void;
+  readOnly?: boolean;
 };
 
 export const QAContentWidget = ({
   mode = 'add',
   document,
   onClose,
+  readOnly = false,
 }: IQAContentWidgetProps) => {
   const { addUpdateDocument } = useDocuments();
   const [qaList, setQaList] = useState<QA[]>(
@@ -94,6 +98,9 @@ export const QAContentWidget = ({
       addUpdateDocument(chatbotId, document);
       onClose?.();
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   const addQuestion = () => {
@@ -134,11 +141,12 @@ export const QAContentWidget = ({
             placeholder="Enter a title for this Q&A group"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={readOnly}
           />
         </div>
         <div className=" flex flex-row  justify-between">
           <Label htmlFor="sheet-demo-username">Questions & Answer</Label>
-          <Button variant="outline" onClick={addQuestion}>
+          <Button variant="outline" onClick={addQuestion} disabled={readOnly}>
             + Add Question
           </Button>
         </div>
@@ -159,7 +167,7 @@ export const QAContentWidget = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        disabled={qaList.length === 1}
+                        disabled={readOnly || qaList.length === 1}
                         onClick={() => deleteQuestion(index)}
                         className="text-destructive hover:text-destructive mb-2"
                       >
@@ -174,6 +182,7 @@ export const QAContentWidget = ({
                     onChange={(e) =>
                       updateQA(index, 'question', e.target.value)
                     }
+                    disabled={readOnly}
                   />
                 </div>
               </div>
@@ -184,6 +193,7 @@ export const QAContentWidget = ({
                   placeholder="Enter the answer..."
                   value={qa.answer}
                   onChange={(e) => updateQA(index, 'answer', e.target.value)}
+                  disabled={readOnly}
                 />
               </div>
             </CardContent>
@@ -193,7 +203,7 @@ export const QAContentWidget = ({
       <SheetFooter>
         <Button
           onClick={handleSave}
-          disabled={saveQnAMutation.isPending}
+          disabled={readOnly || saveQnAMutation.isPending}
           type="submit"
         >
           {mode === 'edit' ? 'Update changes' : 'Save changes'}

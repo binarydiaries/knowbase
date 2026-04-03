@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -19,17 +20,20 @@ import {
   postDocuments,
 } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 type ITextContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: DocumentSchema;
   onClose?: () => void;
+  readOnly?: boolean;
 };
 
 export const TextContentWidget = ({
   mode = 'add',
   document,
   onClose,
+  readOnly = false,
 }: ITextContentWidgetProps) => {
   const [content, setContent] = useState(
     (document?.content.type === 'text' && document?.content?.data) || '',
@@ -85,6 +89,9 @@ export const TextContentWidget = ({
       addUpdateDocument(chatbotId, document);
       onClose?.();
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   return (
@@ -107,17 +114,18 @@ export const TextContentWidget = ({
             placeholder="Enter a title for this text source..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={readOnly}
           />
         </div>
         <div className="grid gap-3">
           <Label htmlFor="sheet-demo-username">Content</Label>
-          <RichEditor value={content} onChange={setContent} />
+          <RichEditor value={content} onChange={readOnly ? () => {} : setContent} />
         </div>
       </div>
       <SheetFooter>
         <Button
           onClick={handleSave}
-          disabled={saveTextMutation.isPending}
+          disabled={readOnly || saveTextMutation.isPending}
           type="submit"
         >
           {mode === 'edit' ? 'Update changes' : 'Save changes'}

@@ -24,10 +24,10 @@ export const Chatbot = new Elysia({
       if (!chatbotLimit.allowed) {
         return status(403, {
           code: 'CHATBOT_LIMIT_REACHED',
-          message: `Your ${chatbotLimit.plan} plan allows up to ${chatbotLimit.limit} chatbot${chatbotLimit.limit === 1 ? '' : 's'}. Upgrade your subscription to create more.`,
+          message: SubscriptionService.getLimitReachedMessage(chatbotLimit),
           plan: chatbotLimit.plan,
-          limit: chatbotLimit.limit,
-          current: chatbotLimit.current,
+          activeChatbotLimit: chatbotLimit.activeChatbotLimit,
+          activeChatbotCount: chatbotLimit.activeChatbotCount,
         });
       }
 
@@ -44,16 +44,24 @@ export const Chatbot = new Elysia({
       body: 'CreateChatbotBody',
       response: {
         200: 'OneSmallChatbotResponse',
-        403: 'ChatbotLimitReachedResponse',
+        403: 'ChatbotRestrictedResponse',
       },
     },
   )
   .get(
     '',
     async ({ orgId }) => {
+      const subscription = await SubscriptionService.getStatus(orgId);
       const chatbots = await ChatbotService.list({ orgId });
       return {
-        chatbots,
+        chatbots: chatbots.map((chatbot) => ({
+          ...chatbot,
+          locked: SubscriptionService.isChatbotLocked({
+            chatbotStatus: chatbot.chatbotStatus,
+            subscriptionStatus: subscription,
+          }),
+        })),
+        subscription,
       };
     },
     {
@@ -63,11 +71,13 @@ export const Chatbot = new Elysia({
   .guard({
     response: {
       404: 'NotFoundResponse',
+      403: 'ChatbotLockedResponse',
     },
   })
   .get(
     '/:id',
     async ({ params, orgId, status }) => {
+      const subscription = await SubscriptionService.getStatus(orgId);
       const chatbot = await ChatbotService.singleWithRelations({
         id: params.id,
         orgId,
@@ -81,11 +91,18 @@ export const Chatbot = new Elysia({
       }
       const { behaviour, channels, documents, ...otherChatbot } = chatbot;
       return {
-        chatbot: otherChatbot,
+        chatbot: {
+          ...otherChatbot,
+          locked: SubscriptionService.isChatbotLocked({
+            chatbotStatus: chatbot.chatbotStatus,
+            subscriptionStatus: subscription,
+          }),
+        },
         // biome-ignore lint/style/noNonNullAssertion: Will fix later
         behaviour: behaviour!,
         documents: documents.map(DocumentService.transformDocument),
         channels: channels.map(ChannelService.transformChannel),
+        subscription,
       };
     },
     {
@@ -108,7 +125,49 @@ export const Chatbot = new Elysia({
   })
   .patch(
     '/:id',
-    async ({ params, body }) => {
+    async ({ params, body, chatbot, orgId, status }) => {
+      const subscription = await SubscriptionService.getStatus(orgId);
+      const changedKeys = Object.entries(body).filter(
+        ([, value]) => value !== undefined,
+      );
+      const isArchiveOnly =
+        chatbot.chatbotStatus === 'active' &&
+        body.chatbotStatus === 'archived' &&
+        changedKeys.length === 1 &&
+        changedKeys[0]?.[0] === 'chatbotStatus';
+      const isUnarchive =
+        chatbot.chatbotStatus === 'archived' && body.chatbotStatus === 'active';
+
+      if (subscription.isOverLimit && !isArchiveOnly) {
+        if (isUnarchive || SubscriptionService.hasReachedChatbotLimit(subscription)) {
+          return status(403, {
+            code: 'CHATBOT_LIMIT_REACHED',
+            message: SubscriptionService.getLimitReachedMessage(subscription),
+            plan: subscription.plan,
+            activeChatbotLimit: subscription.activeChatbotLimit,
+            activeChatbotCount: subscription.activeChatbotCount,
+          });
+        }
+
+        return status(403, {
+          code: 'CHATBOT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
+      if (isUnarchive && SubscriptionService.hasReachedChatbotLimit(subscription)) {
+        return status(403, {
+          code: 'CHATBOT_LIMIT_REACHED',
+          message: SubscriptionService.getLimitReachedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
       return {
         chatbot: await ChatbotService.update(params.id, {
           ...body,
@@ -119,6 +178,7 @@ export const Chatbot = new Elysia({
       body: 'UpdateChatbotBody',
       response: {
         200: 'OneSmallChatbotResponse',
+        403: 'ChatbotRestrictedResponse',
       },
     },
   );

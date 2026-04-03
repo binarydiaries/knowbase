@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { BehaviourSchema } from '../behaviour/model';
 import { ChannelSchema } from '../channel/model';
 import { DocumentSchema } from '../document/model';
+import { SubscriptionStatusSchema } from '../subscription/model';
 
 const ChatbotStatus = z.enum(['active', 'archived']);
 
@@ -26,16 +27,25 @@ const SmallChatbot = ChatbotSchema.pick({
   updatedAt: true,
 });
 
+const SmallChatbotWithLock = SmallChatbot.extend({
+  locked: z.boolean(),
+});
+
+const ChatbotWithLock = ChatbotSchema.extend({
+  locked: z.boolean(),
+});
+
 const CreateChatbotBody = z.object({
   name: z.string(),
   description: z.string().optional(),
 });
 
 const OneChatbotResponse = z.object({
-  chatbot: ChatbotSchema,
+  chatbot: ChatbotWithLock,
   documents: z.array(DocumentSchema),
   channels: z.array(ChannelSchema),
   behaviour: BehaviourSchema.optional(),
+  subscription: SubscriptionStatusSchema,
 });
 
 const OneSmallChatbotResponse = z.object({
@@ -43,7 +53,8 @@ const OneSmallChatbotResponse = z.object({
 });
 
 const ManyChatbotResponse = z.object({
-  chatbots: z.array(SmallChatbot),
+  chatbots: z.array(SmallChatbotWithLock),
+  subscription: SubscriptionStatusSchema,
 });
 
 export const UpdateChatbotBody = ChatbotSchema.pick({

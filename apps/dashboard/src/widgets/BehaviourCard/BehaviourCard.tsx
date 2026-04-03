@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
@@ -16,6 +17,7 @@ import { FormSelect } from '@/components/FormSelect/FormSelect.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchBehaviourById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const behaviourTone = [
   { label: 'Friendly', value: 'friendly' },
@@ -47,7 +49,7 @@ export const chatbotBehaviourSchema = z.object({
 });
 type BehaviourFormValues = z.infer<typeof chatbotBehaviourSchema>;
 
-const BehaviourCard = () => {
+const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { chatbotId } = useParams({ strict: false });
   if (!chatbotId) throw new Error('ChatbotId not available');
 
@@ -82,6 +84,9 @@ const BehaviourCard = () => {
       // 🔥 instant UI update
       patchBehaviour(chatbotId, values);
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   const onSave = (values: BehaviourFormValues) => {
@@ -102,6 +107,7 @@ const BehaviourCard = () => {
               control={control}
               label="Sysyem Prompt"
               placeholder="Enter a system prompt"
+              disabled={readOnly}
             />
           </div>
 
@@ -112,6 +118,7 @@ const BehaviourCard = () => {
               label="Tone"
               placeholder="Select tone"
               options={behaviourTone}
+              disabled={readOnly}
             />
           </div>
           <div className="grid gap-2 ">
@@ -121,6 +128,7 @@ const BehaviourCard = () => {
               label="Verbosity"
               placeholder="Select verbosity"
               options={behaviorVerbosity}
+              disabled={readOnly}
             />
           </div>
           <div className="grid gap-2 ">
@@ -129,6 +137,7 @@ const BehaviourCard = () => {
               control={control}
               label="Fallback Message"
               placeholder="Enter a fallback message"
+              disabled={readOnly}
             />
           </div>
           <div className="grid gap-2 ">
@@ -137,12 +146,13 @@ const BehaviourCard = () => {
               control={control}
               label="Guardrails"
               placeholder="Enter a guardrails message"
+              disabled={readOnly}
             />
           </div>
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={!isDirty || saveBehaviourMutation.isPending}
+              disabled={readOnly || !isDirty || saveBehaviourMutation.isPending}
             >
               {saveBehaviourMutation.isPending ? 'Saving…' : 'Save'}
             </Button>

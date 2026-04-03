@@ -1,8 +1,11 @@
 import { Elysia } from 'elysia';
 import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
+import { ErrorModel } from '../../common/models/error';
 import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
+import { ChatbotService } from '../chatbot/service';
 import { DocumentService } from '../document/service';
+import { SubscriptionService } from '../subscription/service';
 import { IndexingModel } from './model';
 
 export const Indexing = new Elysia({
@@ -11,9 +14,33 @@ export const Indexing = new Elysia({
 })
   .use(AuthGuard)
   .use(IndexingModel)
+  .use(ErrorModel)
   .post(
     '',
     async ({ body, status, orgId }) => {
+      const chatbot = await ChatbotService.single({
+        id: body.chatbotId,
+        orgId,
+      });
+
+      if (!chatbot) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Chatbot not found',
+        });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'CHATBOT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
       const documents = await DocumentService.list({
         chatbotId: body.chatbotId,
         orgId,
@@ -36,7 +63,11 @@ export const Indexing = new Elysia({
     },
     {
       body: 'IndexingStartBody',
-      202: 'IndexingStartResponse',
+      response: {
+        202: 'IndexingStartResponse',
+        403: 'ChatbotLockedResponse',
+        404: 'NotFoundResponse',
+      },
     },
   )
   .get(

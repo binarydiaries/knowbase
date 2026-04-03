@@ -34,11 +34,13 @@ export function CreateChatbotDialog({
   setOpen,
   chatbot,
   onClose,
+  disabled = false,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   chatbot?: ChatbotSchema;
   onClose?: () => void;
+  disabled?: boolean;
 }) {
   const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
@@ -104,7 +106,9 @@ export function CreateChatbotDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Add Chatbot</Button>
+        <Button size="sm" disabled={disabled}>
+          Add Chatbot
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[420px]">

@@ -1,36 +1,57 @@
 import { Button } from '@knowbase/ui/components/button';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@knowbase/ui/components/popover';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
+import { toast } from '@knowbase/ui/components/sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@knowbase/ui/components/sidebar';
-import { FileText, MoreHorizontal, Settings2 } from 'lucide-react';
+  Archive,
+  ArchiveRestore,
+  MoreHorizontal,
+} from 'lucide-react';
+import { patchChatbotsById } from '@/services';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 
-export const ChatbotMenuActions = () => {
-  const data = [
-    [
-      {
-        label: 'Customize Page',
-        icon: Settings2,
-      },
-      {
-        label: 'Turn into wiki',
-        icon: FileText,
-      },
-    ],
-  ];
+export const ChatbotMenuActions = ({
+  chatbotStatus,
+  disableUnarchive = false,
+}: {
+  chatbotStatus: 'active' | 'archived';
+  disableUnarchive?: boolean;
+}) => {
+  const { chatbotId } = useParams({ strict: false });
+  const queryClient = useQueryClient();
+
+  const archiveMutation = useMutation({
+    mutationFn: async () => {
+      if (!chatbotId) {
+        throw new Error('ChatbotId not available');
+      }
+
+      return patchChatbotsById({
+        path: { id: chatbotId },
+        body: {
+          chatbotStatus:
+            chatbotStatus === 'archived' ? 'active' : 'archived',
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -38,32 +59,21 @@ export const ChatbotMenuActions = () => {
         >
           <MoreHorizontal />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-56 overflow-hidden rounded-lg p-0"
-        align="end"
-      >
-        <Sidebar collapsible="none" className="bg-transparent">
-          <SidebarContent>
-            {data.map((group, index) => (
-              <SidebarGroup key={+index} className="border-b last:border-none">
-                <SidebarGroupContent className="gap-0">
-                  <SidebarMenu>
-                    {group.map((item, index) => (
-                      <SidebarMenuItem key={+index}>
-                        <SidebarMenuButton>
-                          <item.icon />
-                          <span>{item.label}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
-          </SidebarContent>
-        </Sidebar>
-      </PopoverContent>
-    </Popover>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem
+          onClick={() => archiveMutation.mutate()}
+          disabled={archiveMutation.isPending || disableUnarchive}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          {chatbotStatus === 'archived' ? (
+            <ArchiveRestore className="h-4 w-4" />
+          ) : (
+            <Archive className="h-4 w-4" />
+          )}
+          {chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

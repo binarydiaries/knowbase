@@ -44,6 +44,7 @@ interface IDocumentItemProps {
   onEdit: MouseEventHandler;
   onDelete: MouseEventHandler;
   status: DocumentSchema['status'];
+  readOnly?: boolean;
 }
 
 export const DocumentItem = ({
@@ -54,6 +55,7 @@ export const DocumentItem = ({
   onDelete,
   status,
   lastTrainedAt,
+  readOnly = false,
 }: IDocumentItemProps) => {
   let docIcon = <Files className="h-4 w-4" />;
   switch (type) {
@@ -146,6 +148,7 @@ export const DocumentItem = ({
           <DropdownMenuContent align="end" className="w-40 ">
             <DropdownMenuItem
               onClick={onEdit}
+              disabled={readOnly}
               className="flex items-center cursor-pointer gap-2"
             >
               <Edit className="h-4 w-4" />
@@ -154,6 +157,7 @@ export const DocumentItem = ({
 
             <DropdownMenuItem
               onClick={onDelete}
+              disabled={readOnly}
               className="flex items-center gap-2  cursor-pointer text-destructive focus:text-destructive"
             >
               <Trash2 className="h-4 w-4 text-red" />

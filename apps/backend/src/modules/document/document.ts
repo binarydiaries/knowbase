@@ -2,6 +2,8 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
+import { ChatbotService } from '../chatbot/service';
+import { SubscriptionService } from '../subscription/service';
 import { DocumentModel } from './model';
 import { DocumentService } from './service';
 
@@ -15,7 +17,30 @@ export const Document = new Elysia({
   .use(ErrorModel)
   .post(
     '',
-    async ({ body, userId }) => {
+    async ({ body, userId, orgId, status }) => {
+      const chatbot = await ChatbotService.single({
+        id: body.chatbotId,
+        orgId,
+      });
+
+      if (!chatbot) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Chatbot not found',
+        });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'CHATBOT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
       const document = await DocumentService.create({
         ...body,
         contentSerialized: body.content.data,
@@ -28,7 +53,11 @@ export const Document = new Elysia({
     },
     {
       body: 'CreateDocumentBody',
-      response: 'OneDocumentResponse',
+      response: {
+        200: 'OneDocumentResponse',
+        403: 'ChatbotLockedResponse',
+        404: 'NotFoundResponse',
+      },
     },
   )
   .get(
@@ -50,6 +79,7 @@ export const Document = new Elysia({
   .guard({
     response: {
       404: 'NotFoundResponse',
+      403: 'ChatbotLockedResponse',
     },
   })
   .resolve(async ({ params, status, orgId }) => {
@@ -79,7 +109,30 @@ export const Document = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ params, body, document }) => {
+    async ({ params, body, document, orgId, status }) => {
+      const chatbot = await ChatbotService.single({
+        id: document.chatbotId,
+        orgId,
+      });
+
+      if (!chatbot) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Chatbot not found',
+        });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'CHATBOT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
       const updatedDocument = await DocumentService.update(params.id, {
         ...body,
         contentSerialized: body.content.data,
@@ -95,18 +148,43 @@ export const Document = new Elysia({
       body: 'UpdateDocumentBody',
       response: {
         200: 'OneDocumentResponse',
+        403: 'ChatbotLockedResponse',
       },
     },
   )
   .delete(
     '/:id',
-    async ({ params, status }) => {
+    async ({ params, status, document, orgId }) => {
+      const chatbot = await ChatbotService.single({
+        id: document.chatbotId,
+        orgId,
+      });
+
+      if (!chatbot) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Chatbot not found',
+        });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'CHATBOT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeChatbotLimit: subscription.activeChatbotLimit,
+          activeChatbotCount: subscription.activeChatbotCount,
+        });
+      }
+
       await DocumentService.delete(params.id);
       return status(204, undefined);
     },
     {
       response: {
         204: z.undefined(),
+        403: 'ChatbotLockedResponse',
       },
     },
   );

@@ -17,6 +17,7 @@ import {
 } from '@knowbase/ui/components/empty';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
@@ -30,7 +31,9 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { useState } from 'react';
+import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
 import { type ChatbotSchema, getChatbots, patchChatbotsById } from '@/services';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
@@ -48,6 +51,10 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const isChatbotAvailable =
     !query.isLoading && query?.data?.data?.chatbots?.length;
+  const subscription = query.data?.data.subscription;
+  const hasReachedChatbotLimit =
+    (subscription?.activeChatbotCount ?? 0) >=
+    (subscription?.activeChatbotLimit ?? Number.MAX_SAFE_INTEGER);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<ChatbotSchema>();
 
@@ -69,6 +76,9 @@ function RouteComponent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
   });
 
   return (
@@ -86,12 +96,16 @@ function RouteComponent() {
             setOpen={setDialogOpen}
             chatbot={editingBot}
             onClose={() => setEditingBot(undefined)}
+            disabled={hasReachedChatbotLimit}
           />
         </div>
       </header>
       <Separator />
 
       <div className="p-5">
+        <div className="mb-5">
+          <SubscriptionLimitBanner subscription={subscription} />
+        </div>
         {/* Chatbot List */}
         {query.isLoading ? (
           <div className="flex h-[300px] items-center justify-center">
@@ -121,6 +135,11 @@ function RouteComponent() {
                           <h3 className="text-base font-semibold leading-none">
                             {bot.name}
                           </h3>
+                          {bot.locked && (
+                            <Badge className={'bg-amber-100 text-amber-700'}>
+                              Locked
+                            </Badge>
+                          )}
                           {bot.chatbotStatus === 'archived' && (
                             <Badge className={'bg-muted text-muted-foreground'}>
                               Archived
@@ -136,6 +155,10 @@ function RouteComponent() {
                             size="icon"
                             variant="ghost"
                             className="text-muted-foreground  cursor-pointer "
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
                           >
                             <MoreHorizontal />
                           </Button>
@@ -148,6 +171,7 @@ function RouteComponent() {
                               setEditingBot(bot);
                               setDialogOpen(true);
                             }}
+                            disabled={subscription?.isOverLimit}
                             className="flex items-center  cursor-pointer gap-2"
                           >
                             <Edit className="h-4 w-4" />
@@ -167,6 +191,10 @@ function RouteComponent() {
                                 status: newStatus,
                               });
                             }}
+                            disabled={
+                              bot.chatbotStatus === 'archived' &&
+                              hasReachedChatbotLimit
+                            }
                             className="flex items-center gap-2 cursor-pointer "
                           >
                             {bot.chatbotStatus === 'archived' ? (
@@ -216,6 +244,7 @@ function RouteComponent() {
                 setOpen={setDialogOpen}
                 chatbot={editingBot}
                 onClose={() => setEditingBot(undefined)}
+                disabled={hasReachedChatbotLimit}
               />
             </EmptyContent>
             <Button

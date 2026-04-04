@@ -1,9 +1,10 @@
 import { useChat } from '@ai-sdk/react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { baseUrl } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
+import { parseChatError } from '@/utils/chatError.ts';
 
 interface IChatbotWidgetProps {
   channelSchema: ChannelSchema;
@@ -16,6 +17,8 @@ export const ChatbotWidget = ({
 }: IChatbotWidgetProps) => {
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
+  const [isUsageExhausted, setIsUsageExhausted] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string>();
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {
@@ -49,6 +52,17 @@ export const ChatbotWidget = ({
         };
       },
     }),
+    onError(error) {
+      const chatError = parseChatError(error);
+      if (chatError?.code !== 'MESSAGE_LIMIT_REACHED' || isUsageExhausted) {
+        return;
+      }
+
+      setIsUsageExhausted(true);
+      setAlertMessage(
+        'This assistant is temporarily unavailable right now. Please try again later.',
+      );
+    },
   });
   return (
     <Chatbot
@@ -58,6 +72,8 @@ export const ChatbotWidget = ({
       subTitle={channelConfig.subtitle}
       className="h-full"
       isLoading={status === 'submitted'}
+      inputDisabled={isUsageExhausted}
+      alertMessage={alertMessage}
       messages={messages.map((value) => ({
         id: value.id,
         message:

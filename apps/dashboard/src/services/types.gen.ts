@@ -213,6 +213,34 @@ export type NotFoundResponse = {
     message: string;
 };
 
+export type MessageLimitReachedResponse = {
+    code: 'MESSAGE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    messagesPerMonthLimit: number;
+    messagesThisMonth: number;
+};
+
+export type ChatbotLockedResponse = {
+    code: 'CHATBOT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+};
+
+export type TrainingLimitReachedResponse = {
+    code: 'TRAINING_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    trainingRunsPerDayLimit: number;
+    trainingRunsToday: number;
+};
+
+export type IndexingForbiddenResponse =
+    | ChatbotLockedResponse
+    | TrainingLimitReachedResponse;
+
 export type ChatbotSchema = {
     id: string;
     name: string;
@@ -319,10 +347,13 @@ export type ManyChatbotResponse = {
         activeChatbotCount: number;
         knowledgeSourceLimit: number;
         knowledgeSourceCount: number;
+        messagesPerMonthLimit: number;
+        messagesThisMonth: number;
         trainingRunsPerDayLimit: number;
         trainingRunsToday: number;
         isOverLimit: boolean;
         hasReachedKnowledgeSourceLimit: boolean;
+        hasReachedMessagesPerMonthLimit: boolean;
         hasReachedTrainingRunsPerDayLimit: boolean;
     };
 };
@@ -353,10 +384,13 @@ export type SubscriptionStatusSchema = {
     activeChatbotCount: number;
     knowledgeSourceLimit: number;
     knowledgeSourceCount: number;
+    messagesPerMonthLimit: number;
+    messagesThisMonth: number;
     trainingRunsPerDayLimit: number;
     trainingRunsToday: number;
     isOverLimit: boolean;
     hasReachedKnowledgeSourceLimit: boolean;
+    hasReachedMessagesPerMonthLimit: boolean;
     hasReachedTrainingRunsPerDayLimit: boolean;
 };
 
@@ -601,6 +635,24 @@ export type PostChatData = {
     url: '/chat';
 };
 
+export type PostChatErrors = {
+    /**
+     * Response for status 403
+     */
+    403: MessageLimitReachedResponse;
+};
+
+export type PostChatError = PostChatErrors[keyof PostChatErrors];
+
+export type PostChatResponses = {
+    /**
+     * Response for status 200
+     */
+    200: unknown;
+};
+
+export type PostChatResponse = PostChatResponses[keyof PostChatResponses];
+
 export type GetChatChannelData = {
     body?: never;
     path?: never;
@@ -616,6 +668,31 @@ export type GetChatChannelResponses = {
 };
 
 export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
+
+export type GetSubscriptionsStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/status';
+};
+
+export type GetSubscriptionsStatusErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetSubscriptionsStatusError = GetSubscriptionsStatusErrors[keyof GetSubscriptionsStatusErrors];
+
+export type GetSubscriptionsStatusResponses = {
+    /**
+     * Response for status 200
+     */
+    200: SubscriptionStatusSchema;
+};
+
+export type GetSubscriptionsStatusResponse = GetSubscriptionsStatusResponses[keyof GetSubscriptionsStatusResponses];
 
 export type GetMessagesData = {
     body?: never;

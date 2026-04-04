@@ -93,7 +93,9 @@ export const DocumentsWidget = ({
     subscription?.hasReachedTrainingRunsPerDayLimit ?? false;
   const hasReadyDocuments = documents.some((document) => document.status === 'ready');
   const nextUtcMidnight = dayjs.utc().add(1, 'day').startOf('day').local();
+  const nextUtcMonth = dayjs.utc().add(1, 'month').startOf('month').local();
   const trainingResetLabel = nextUtcMidnight.format('h:mm A');
+  const monthlyResetLabel = nextUtcMonth.format('MMM D, h:mm A');
   const isAddDisabled = readOnly || hasReachedKnowledgeSourceLimit;
   const isTrainDisabled =
     readOnly || hasReachedTrainingLimit || !hasReadyDocuments;
@@ -191,13 +193,20 @@ export const DocumentsWidget = ({
                     <div className="space-y-1">
                       <p className="text-sm font-medium">Usage</p>
                       <p className="text-sm text-muted-foreground">
-                        Track your knowledge source and daily training limits.
+                        Track your knowledge source, monthly message, and daily
+                        training limits.
                       </p>
                     </div>
                     <UsageMeter
                       label="Knowledge Sources"
                       current={subscription.knowledgeSourceCount}
                       limit={subscription.knowledgeSourceLimit}
+                    />
+                    <UsageMeter
+                      label="Monthly Messages"
+                      current={subscription.messagesThisMonth}
+                      limit={subscription.messagesPerMonthLimit}
+                      helperText={`Resets monthly on ${monthlyResetLabel}.`}
                     />
                     <UsageMeter
                       label="Daily Training"

@@ -11,6 +11,7 @@ import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
 import { Indexing } from './modules/indexing/indexing';
 import { message } from './modules/message/message';
+import { Subscription } from './modules/subscription/subscription';
 
 const app = new Elysia()
   .use(
@@ -47,6 +48,7 @@ const app = new Elysia()
   .use(Conversation)
   .use(Behaviour)
   .use(Channel)
+  .use(Subscription)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

@@ -1,23 +1,45 @@
 import { Elysia } from 'elysia';
+import { z } from 'zod';
+import { ErrorModel } from '../../common/models/error';
 import { ChannelService } from '../channel/service';
 import { Model } from './model';
-import { ChatService } from './service';
+import { ChatService, MessageLimitReachedError } from './service';
 
 export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .use(Model)
+  .use(ErrorModel)
   .post(
     '',
-    async ({ body }) => {
+    async ({ body, status }) => {
       const { message, channelId, conversationId, orgId } = body;
-      return ChatService.sendWeb({
-        conversationId,
-        message: message,
-        channelId,
-        orgId,
-      });
+
+      try {
+        return await ChatService.sendWeb({
+          conversationId,
+          message: message,
+          channelId,
+          orgId,
+        });
+      } catch (error) {
+        if (!(error instanceof MessageLimitReachedError)) {
+          throw error;
+        }
+
+        return status(403, {
+          code: 'MESSAGE_LIMIT_REACHED',
+          message: error.message,
+          plan: error.payload.plan,
+          messagesPerMonthLimit: error.payload.messagesPerMonthLimit,
+          messagesThisMonth: error.payload.messagesThisMonth,
+        });
+      }
     },
     {
       body: 'ChatBodySchema',
+      response: {
+        200: z.any(),
+        403: 'ChatForbiddenResponse',
+      },
     },
   )
   .get(

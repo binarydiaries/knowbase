@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
+import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -18,7 +18,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const postChat = <ThrowOnError extends boolean = true>(options: Options<PostChatData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
+export const postChat = <ThrowOnError extends boolean = true>(options: Options<PostChatData, ThrowOnError>) => (options.client ?? client).post<PostChatResponses, PostChatErrors, ThrowOnError>({
     url: '/chat',
     ...options,
     headers: {
@@ -30,6 +30,12 @@ export const postChat = <ThrowOnError extends boolean = true>(options: Options<P
 export const getChatChannel = <ThrowOnError extends boolean = true>(options?: Options<GetChatChannelData, ThrowOnError>) => (options?.client ?? client).get<GetChatChannelResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/chat/channel',
+    ...options
+});
+
+export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsStatusData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsStatusResponses, GetSubscriptionsStatusErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/subscriptions/status',
     ...options
 });
 

@@ -22,6 +22,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
+import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
 import { NavUser } from '../NavUser/NavUser.tsx';
 
 const data = {
@@ -125,6 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavMain items={data.footer} />
         <div className="p-2">
+          <SidebarUsage />
           <NavUser />
         </div>
       </SidebarFooter>

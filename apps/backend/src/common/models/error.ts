@@ -39,6 +39,14 @@ export const TrainingLimitReachedResponse = z.object({
   trainingRunsToday: z.number(),
 });
 
+export const MessageLimitReachedResponse = z.object({
+  code: z.enum(['MESSAGE_LIMIT_REACHED']),
+  message: z.string(),
+  plan: PlanNameSchema,
+  messagesPerMonthLimit: z.number(),
+  messagesThisMonth: z.number(),
+});
+
 export const KnowledgeSourceTextTooLargeResponse = z.object({
   code: z.enum(['KNOWLEDGE_SOURCE_TEXT_TOO_LARGE']),
   message: z.string(),
@@ -72,6 +80,8 @@ export const IndexingForbiddenResponse = z.union([
   TrainingLimitReachedResponse,
 ]);
 
+export const ChatForbiddenResponse = MessageLimitReachedResponse;
+
 export const ErrorModel = new Elysia().model({
   NotFoundResponse,
   ChatbotLimitReachedResponse,
@@ -79,9 +89,11 @@ export const ErrorModel = new Elysia().model({
   ChatbotRestrictedResponse,
   KnowledgeSourceLimitReachedResponse,
   TrainingLimitReachedResponse,
+  MessageLimitReachedResponse,
   KnowledgeSourceTextTooLargeResponse,
   KnowledgeSourceQnaTooLargeResponse,
   KnowledgeSourceQnaTooManyPairsResponse,
   DocumentWriteForbiddenResponse,
   IndexingForbiddenResponse,
+  ChatForbiddenResponse,
 });

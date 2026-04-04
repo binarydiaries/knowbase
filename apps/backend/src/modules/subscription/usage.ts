@@ -1,9 +1,14 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { orgUsageDaily } from '../../db/schema/orgUsageDaily';
+import { orgUsageMonthly } from '../../db/schema/orgUsageMonthly';
 
 function getUtcDateKey(date = new Date()) {
   return date.toISOString().slice(0, 10);
+}
+
+function getUtcMonthKey(date = new Date()) {
+  return date.toISOString().slice(0, 7);
 }
 
 export abstract class OrgUsageDailyService {
@@ -64,6 +69,53 @@ export abstract class OrgUsageDailyService {
         allowed: true as const,
         trainingRunsToday: updatedUsage.trainingRuns,
       };
+    });
+  }
+}
+
+export abstract class OrgUsageMonthlyService {
+  static async getCurrentMonthAssistantMessages(orgId: string) {
+    const monthKey = getUtcMonthKey();
+    const usage = await db.query.orgUsageMonthly.findFirst({
+      where: {
+        orgId,
+        monthKey,
+      },
+    });
+
+    return usage?.assistantMessages ?? 0;
+  }
+
+  static async incrementAssistantMessages(orgId: string) {
+    const monthKey = getUtcMonthKey();
+
+    return db.transaction(async (tx) => {
+      await tx
+        .insert(orgUsageMonthly)
+        .values({
+          orgId,
+          monthKey,
+          assistantMessages: 0,
+        })
+        .onConflictDoNothing();
+
+      const [updatedUsage] = await tx
+        .update(orgUsageMonthly)
+        .set({
+          assistantMessages: sql`${orgUsageMonthly.assistantMessages} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(orgUsageMonthly.orgId, orgId),
+            eq(orgUsageMonthly.monthKey, monthKey),
+          ),
+        )
+        .returning({
+          assistantMessages: orgUsageMonthly.assistantMessages,
+        });
+
+      return updatedUsage.assistantMessages;
     });
   }
 }

@@ -9,10 +9,13 @@ export const SubscriptionStatusSchema = z.object({
   activeChatbotCount: z.number(),
   knowledgeSourceLimit: z.number(),
   knowledgeSourceCount: z.number(),
+  messagesPerMonthLimit: z.number(),
+  messagesThisMonth: z.number(),
   trainingRunsPerDayLimit: z.number(),
   trainingRunsToday: z.number(),
   isOverLimit: z.boolean(),
   hasReachedKnowledgeSourceLimit: z.boolean(),
+  hasReachedMessagesPerMonthLimit: z.boolean(),
   hasReachedTrainingRunsPerDayLimit: z.boolean(),
 });
 

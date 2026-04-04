@@ -3,13 +3,14 @@ import { clerkClient } from 'elysia-clerk';
 import { db } from '../../db';
 import { chatbots } from '../../db/schema/chatbots';
 import { documents } from '../../db/schema/documents';
-import { OrgUsageDailyService } from './usage';
+import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 export const PLAN_LIMITS = {
   free: {
     chatbots: 1,
     knowledgeSources: 10,
-    messagesPerMonth: 500,
+    // This is temp. It should be 500
+    messagesPerMonth: 5,
     trainingRunsPerDay: 3,
   },
   starter: {
@@ -103,6 +104,7 @@ export abstract class SubscriptionService {
     const limits = this.getLimits(plan);
     const activeChatbotLimit = limits.chatbots;
     const knowledgeSourceLimit = limits.knowledgeSources;
+    const messagesPerMonthLimit = limits.messagesPerMonth;
     const trainingRunsPerDayLimit = limits.trainingRunsPerDay;
 
     const [{ value: activeChatbotCount }] = await db
@@ -120,6 +122,8 @@ export abstract class SubscriptionService {
 
     const trainingRunsToday =
       await OrgUsageDailyService.getTodayTrainingRuns(orgId);
+    const messagesThisMonth =
+      await OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId);
 
     return {
       plan,
@@ -127,11 +131,15 @@ export abstract class SubscriptionService {
       activeChatbotCount,
       knowledgeSourceLimit,
       knowledgeSourceCount,
+      messagesPerMonthLimit,
+      messagesThisMonth,
       trainingRunsPerDayLimit,
       trainingRunsToday,
       isOverLimit: activeChatbotCount > activeChatbotLimit,
       hasReachedKnowledgeSourceLimit:
         knowledgeSourceCount >= knowledgeSourceLimit,
+      hasReachedMessagesPerMonthLimit:
+        messagesThisMonth >= messagesPerMonthLimit,
       hasReachedTrainingRunsPerDayLimit:
         trainingRunsToday >= trainingRunsPerDayLimit,
     };
@@ -165,6 +173,12 @@ export abstract class SubscriptionService {
     return status.hasReachedTrainingRunsPerDayLimit;
   }
 
+  static hasReachedMessagesPerMonthLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
+    return status.hasReachedMessagesPerMonthLimit;
+  }
+
   static getLimitReachedMessage(
     subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
   ) {
@@ -189,6 +203,12 @@ export abstract class SubscriptionService {
     return `Your ${subscriptionStatus.plan} plan allows ${subscriptionStatus.trainingRunsPerDayLimit} training runs per day. This limit resets at 00:00 UTC.`;
   }
 
+  static getMessageLimitReachedMessage(
+    subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
+    return `Your ${subscriptionStatus.plan} plan allows ${subscriptionStatus.messagesPerMonthLimit} assistant messages per month. This limit resets at 00:00 UTC on the first day of each month.`;
+  }
+
   static async assertChatbotLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
 
@@ -209,6 +229,22 @@ export abstract class SubscriptionService {
     const subscriptionStatus = await this.getStatus(orgId);
 
     if (this.hasReachedKnowledgeSourceLimit(subscriptionStatus)) {
+      return {
+        allowed: false as const,
+        ...subscriptionStatus,
+      };
+    }
+
+    return {
+      allowed: true as const,
+      ...subscriptionStatus,
+    };
+  }
+
+  static async assertMessagesPerMonthLimitNotReached(orgId: string) {
+    const subscriptionStatus = await this.getStatus(orgId);
+
+    if (this.hasReachedMessagesPerMonthLimit(subscriptionStatus)) {
       return {
         allowed: false as const,
         ...subscriptionStatus,

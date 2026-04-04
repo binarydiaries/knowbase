@@ -7,6 +7,8 @@ import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
 import { MessageService } from '../message/service';
+import { SubscriptionService } from '../subscription/service';
+import { OrgUsageMonthlyService } from '../subscription/usage';
 import {
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
@@ -16,7 +18,27 @@ import {
 
 const model = openai('gpt-4.1-mini');
 
+export class MessageLimitReachedError extends Error {
+  constructor(
+    readonly payload: Awaited<
+      ReturnType<typeof SubscriptionService.assertMessagesPerMonthLimitNotReached>
+    > & { allowed: false },
+  ) {
+    super(SubscriptionService.getMessageLimitReachedMessage(payload));
+    this.name = 'MessageLimitReachedError';
+  }
+}
+
 export abstract class ChatService {
+  static async assertMessagesPerMonthLimitNotReached(orgId: string) {
+    const messageLimit =
+      await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
+
+    if (!messageLimit.allowed) {
+      throw new MessageLimitReachedError(messageLimit);
+    }
+  }
+
   static async resolveReferences({
     currentUserMessage,
     lastAssistantUtterance,
@@ -103,6 +125,7 @@ export abstract class ChatService {
     channelId: string;
     orgId: string;
   }) {
+    await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getChatbot({ chatbotId, orgId });
     const conversation = await ConversationService.single({
       id: conversationId,
@@ -150,6 +173,8 @@ export abstract class ChatService {
         } else {
           await ConversationService.update(conversationId, conversationData);
         }
+
+        await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
         await MessageService.addMessages([
           {

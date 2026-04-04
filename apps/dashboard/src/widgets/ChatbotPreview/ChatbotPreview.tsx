@@ -3,13 +3,16 @@ import { useAuth } from '@clerk/clerk-react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useChannels } from '@/store/useChannels.ts';
+import { parseChatError } from '@/utils/chatError.ts';
 
 export const ChatbotPreview = () => {
   const { chatbotId } = useParams({ strict: false });
   const { orgId } = useAuth();
   const initialMessageId = useId();
+  const [isUsageExhausted, setIsUsageExhausted] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string>();
   if (!chatbotId) {
     throw new Error('ChatbotId not available');
   }
@@ -53,6 +56,18 @@ export const ChatbotPreview = () => {
         };
       },
     }),
+    onError(error) {
+      const chatError = parseChatError(error);
+      if (chatError?.code !== 'MESSAGE_LIMIT_REACHED' || isUsageExhausted) {
+        return;
+      }
+
+      setIsUsageExhausted(true);
+      setAlertMessage(
+        chatError.message ||
+          'This assistant is temporarily unavailable due to the monthly message limit.',
+      );
+    },
   });
 
   useEffect(() => {
@@ -76,6 +91,8 @@ export const ChatbotPreview = () => {
       primaryColor={channelConfig?.primaryColor || ''}
       className="max-h-175 h-full"
       isLoading={status === 'submitted'}
+      inputDisabled={isUsageExhausted}
+      alertMessage={alertMessage}
       messages={messages.map((value) => ({
         id: value.id,
         message:

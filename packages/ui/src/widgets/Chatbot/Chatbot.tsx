@@ -1,4 +1,5 @@
 import { Button } from '@knowbase/ui/components/button';
+import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
 import { Ellipsis, SendHorizonal, X } from 'lucide-react';
@@ -10,6 +11,8 @@ interface IChatbotProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
   onSendMessage?: (message: string) => void;
   isLoading?: boolean;
+  inputDisabled?: boolean;
+  alertMessage?: string;
   onClose?: () => void;
   displayName: string;
   subTitle?: string;
@@ -22,6 +25,8 @@ export const Chatbot = ({
   className,
   onSendMessage,
   isLoading,
+  inputDisabled = false,
+  alertMessage,
   onClose,
   displayName,
   subTitle,
@@ -101,11 +106,17 @@ export const Chatbot = ({
         )}
       </div>
       <div className="p-5 flex flex-col gap-2">
+        {alertMessage ? (
+          <Alert variant="destructive">
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </Alert>
+        ) : null}
         <div className="relative">
           <Textarea
             className="min-h-12 rounded-2xl pr-14 py-3 resize-none placeholder:truncate"
             placeholder={inputPlaceholder || 'Type your message...'}
             value={input}
+            disabled={inputDisabled}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -118,7 +129,7 @@ export const Chatbot = ({
             variant="ghost"
             size="icon-sm"
             className="absolute right-3 top-2"
-            disabled={input.trim().length === 0}
+            disabled={inputDisabled || input.trim().length === 0}
             onClick={submitForm}
           >
             <SendHorizonal className="size-6" />

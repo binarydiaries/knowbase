@@ -9,8 +9,7 @@ export const PLAN_LIMITS = {
   free: {
     chatbots: 1,
     knowledgeSources: 10,
-    // This is temp. It should be 500
-    messagesPerMonth: 5,
+    messagesPerMonth: 500,
     trainingRunsPerDay: 3,
   },
   starter: {

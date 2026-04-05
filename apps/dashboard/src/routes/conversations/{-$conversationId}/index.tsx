@@ -13,6 +13,7 @@ import {
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -39,15 +40,25 @@ import {
 import { getErrorMessage } from '@/utils/errorHelper';
 
 export const Route = createFileRoute('/conversations/{-$conversationId}/')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Number(search.page) || 1,
+  }),
   component: RouteComponent,
 });
 
 const PAGE_SIZE = 10;
 
+function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, 'ellipsis', total];
+  if (current >= total - 3) return [1, 'ellipsis', total - 4, total - 3, total - 2, total - 1, total];
+  return [1, 'ellipsis', current - 1, current, current + 1, 'ellipsis', total];
+}
+
 function RouteComponent() {
   const { conversationId } = Route.useParams();
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
+  const { page } = Route.useSearch();
   const [searchTerm, setSearchTerm] = useState('');
   const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
   const [channelIdFilter, setChannelIdFilter] = useState<string>('all');
@@ -96,8 +107,13 @@ function RouteComponent() {
   }, [conversations, searchTerm]);
 
   useEffect(() => {
-    setPage((previousPage) => Math.min(previousPage, totalPages));
-  }, [totalPages]);
+    if (page > totalPages) {
+      void navigate({
+        search: (prev) => ({ ...prev, page: totalPages }),
+        replace: true,
+      });
+    }
+  }, [page, totalPages, navigate]);
 
   const selectedConversation = useMemo(
     () =>
@@ -172,17 +188,20 @@ function RouteComponent() {
               onChatbotIdFilterChange={(value) => {
                 setChatbotIdFilter(value);
                 setChannelIdFilter('all');
-                setPage(1);
                 navigate({
                   from: '/conversations/{-$conversationId}/',
                   params: { conversationId: undefined },
+                  search: (prev) => ({ ...prev, page: 1 }),
                   replace: true,
                 });
               }}
               channelIdFilter={channelIdFilter}
               onChannelIdFilterChange={(value) => {
                 setChannelIdFilter(value);
-                setPage(1);
+                void navigate({
+                  search: (prev) => ({ ...prev, page: 1 }),
+                  replace: true,
+                });
               }}
               chatbotOptions={chatbots.map((chatbot) => ({
                 id: chatbot.id,
@@ -262,19 +281,47 @@ function RouteComponent() {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() => setPage((p) => p - 1)}
-                        disabled={page === 1}
+                        onClick={() =>
+                          void navigate({
+                            search: (prev) => ({ ...prev, page: page - 1 }),
+                            replace: true,
+                          })
+                        }
+                        aria-disabled={page === 1}
+                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
                       />
                     </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink isActive>
-                        {page} / {totalPages}
-                      </PaginationLink>
-                    </PaginationItem>
+                    {getPageNumbers(page, totalPages).map((p, i) =>
+                      p === 'ellipsis' ? (
+                        <PaginationItem key={`ellipsis-${i}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={p}>
+                          <PaginationLink
+                            isActive={p === page}
+                            onClick={() =>
+                              void navigate({
+                                search: (prev) => ({ ...prev, page: p }),
+                                replace: true,
+                              })
+                            }
+                          >
+                            {p}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ),
+                    )}
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() => setPage((p) => p + 1)}
-                        disabled={page === totalPages}
+                        onClick={() =>
+                          void navigate({
+                            search: (prev) => ({ ...prev, page: page + 1 }),
+                            replace: true,
+                          })
+                        }
+                        aria-disabled={page === totalPages}
+                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
                       />
                     </PaginationItem>
                   </PaginationContent>

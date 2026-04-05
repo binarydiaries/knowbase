@@ -42,27 +42,10 @@ export abstract class ConversationService {
       orderBy: (table, { desc }) => [desc(table.lastMessageAt)],
       limit,
       offset,
-      with: {
-        channel: {
-          columns: {
-            enabled: true,
-          },
-        },
-      },
     });
 
     return {
-      conversations: list.map((conversation) => ({
-        id: conversation.id,
-        chatbotId: conversation.chatbotId,
-        channelId: conversation.channelId,
-        isTesting: !(conversation.channel?.enabled ?? true),
-        lastUserQuestion: conversation.lastUserQuestion,
-        lastAssistantUtterance: conversation.lastAssistantUtterance,
-        lastMessageAt: conversation.lastMessageAt,
-        createdAt: conversation.createdAt,
-        updatedAt: conversation.updatedAt,
-      })),
+      conversations: list,
       page,
       limit,
       total,

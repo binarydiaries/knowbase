@@ -3,7 +3,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@knowbase/ui/components/alert';
-import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Empty,
@@ -11,17 +10,6 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
-import { Input } from '@knowbase/ui/components/input';
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemHeader,
-  ItemMedia,
-  ItemTitle,
-} from '@knowbase/ui/components/item';
 import {
   Pagination,
   PaginationContent,
@@ -30,35 +18,18 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@knowbase/ui/components/pagination';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@knowbase/ui/components/popover';
 import { ScrollArea } from '@knowbase/ui/components/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@knowbase/ui/components/select';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import dayjs from 'dayjs';
-import {
-  AlertCircleIcon,
-  BotIcon,
-  ChevronRightIcon,
-  DatabaseIcon,
-  FilterIcon,
-  UserIcon,
-} from 'lucide-react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { AlertCircleIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import type { MessageSchema } from '@/services';
+import { ConversationFiltersPopover } from '@/components/Conversations/ConversationFiltersPopover';
+import { ConversationListItem } from '@/components/Conversations/ConversationListItem';
+import { ConversationMessageItem } from '@/components/Conversations/ConversationMessageItem';
+import { ConversationThreadMeta } from '@/components/Conversations/ConversationThreadMeta';
 import {
   getChannels,
   getChatbots,
@@ -88,14 +59,12 @@ function RouteComponent() {
 
   const channelsQuery = useQuery({
     queryKey: ['channels', chatbotIdFilter],
-    queryFn: () =>
-      getChannels({
-        query: { chatbotId: chatbotIdFilter },
-      }),
+    queryFn: () => getChannels({ query: { chatbotId: chatbotIdFilter } }),
     enabled: chatbotIdFilter !== 'all',
   });
 
   const channels = channelsQuery.data?.data.channels ?? [];
+  const chatbots = chatbotQuery.data?.data.chatbots ?? [];
 
   const conversationQuery = useQuery({
     queryKey: ['conversations', chatbotIdFilter, channelIdFilter, page],
@@ -111,13 +80,12 @@ function RouteComponent() {
   });
 
   const conversations = conversationQuery.data?.data.conversations ?? [];
+  const totalPages = conversationQuery.data?.data.totalPages ?? 1;
+
   const filteredConversations = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return conversations;
-    }
+    if (!searchTerm.trim()) return conversations;
 
     const query = searchTerm.toLowerCase();
-
     return conversations.filter((conversation) => {
       return (
         conversation.lastUserQuestion.toLowerCase().includes(query) ||
@@ -126,10 +94,6 @@ function RouteComponent() {
       );
     });
   }, [conversations, searchTerm]);
-
-  const totalPages = conversationQuery.data?.data.totalPages ?? 1;
-  const activeFilterCount =
-    (chatbotIdFilter !== 'all' ? 1 : 0) + (channelIdFilter !== 'all' ? 1 : 0);
 
   useEffect(() => {
     setPage((previousPage) => Math.min(previousPage, totalPages));
@@ -156,9 +120,7 @@ function RouteComponent() {
     ) {
       navigate({
         from: '/conversations/{-$conversationId}/',
-        params: {
-          conversationId: conversations[0].id,
-        },
+        params: { conversationId: conversations[0].id },
         replace: true,
       });
     }
@@ -169,6 +131,22 @@ function RouteComponent() {
     navigate,
     selectedConversation,
   ]);
+
+  const chatbotNameById = (id: string) => {
+    return (
+      chatbots.find((chatbot) => chatbot.id === id)?.name ?? 'Unknown chatbot'
+    );
+  };
+
+  const channelLabelById = (id: string) => {
+    const channel = channels.find((value) => value.id === id);
+
+    if (!channel) return `Channel ${id.slice(0, 8)}`;
+    const type = channel.additional.type;
+    if (type === 'web') return `Web · ${id.slice(0, 8)}`;
+    if (type === 'whatsapp') return `WhatsApp · ${id.slice(0, 8)}`;
+    return `Instagram · ${id.slice(0, 8)}`;
+  };
 
   return (
     <div className="flex h-screen min-h-0 flex-col">
@@ -183,123 +161,46 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
+
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <div className="flex min-h-0 w-full max-w-md flex-col border-r">
-          <div className="space-y-2 border-b p-3">
-            <div className="flex items-center gap-2">
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search thread, reply, or ID"
-                className="w-full"
-              />
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <FilterIcon className="size-4" />
-                    Filters
-                    {activeFilterCount > 0 && (
-                      <Badge variant="secondary" className="ml-1">
-                        {activeFilterCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-
-                <PopoverContent align="end" className="space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Chatbot</p>
-                    <Select
-                      value={chatbotIdFilter}
-                      onValueChange={(value) => {
-                        setChatbotIdFilter(value);
-                        setChannelIdFilter('all');
-                        setPage(1);
-                        navigate({
-                          from: '/conversations/{-$conversationId}/',
-                          params: { conversationId: undefined },
-                          replace: true,
-                        });
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="All chatbots" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All chatbots</SelectItem>
-                        {chatbotQuery.data?.data.chatbots.map((chatbot) => (
-                          <SelectItem key={chatbot.id} value={chatbot.id}>
-                            {chatbot.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Channel</p>
-                    <Select
-                      value={channelIdFilter}
-                      onValueChange={(value) => {
-                        setChannelIdFilter(value);
-                        setPage(1);
-                      }}
-                      disabled={chatbotIdFilter === 'all'}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={
-                            chatbotIdFilter === 'all'
-                              ? 'Select chatbot first'
-                              : 'All channels'
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All channels</SelectItem>
-                        {channels.map((channel) => (
-                          <SelectItem key={channel.id} value={channel.id}>
-                            {renderChannelLabel(
-                              channel.id,
-                              channel.additional.type,
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setChatbotIdFilter('all');
-                      setChannelIdFilter('all');
-                      setPage(1);
-                    }}
-                    disabled={activeFilterCount === 0}
-                  >
-                    Clear filters
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div className="border-b p-3">
+            <ConversationFiltersPopover
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              chatbotIdFilter={chatbotIdFilter}
+              onChatbotIdFilterChange={(value) => {
+                setChatbotIdFilter(value);
+                setChannelIdFilter('all');
+                setPage(1);
+                navigate({
+                  from: '/conversations/{-$conversationId}/',
+                  params: { conversationId: undefined },
+                  replace: true,
+                });
+              }}
+              channelIdFilter={channelIdFilter}
+              onChannelIdFilterChange={(value) => {
+                setChannelIdFilter(value);
+                setPage(1);
+              }}
+              chatbotOptions={chatbots.map((chatbot) => ({
+                id: chatbot.id,
+                name: chatbot.name,
+              }))}
+              channelOptions={channels.map((channel) => ({
+                id: channel.id,
+                label: channelLabelById(channel.id),
+              }))}
+            />
           </div>
 
           <ScrollArea className="min-h-0 flex-1">
             <div className="space-y-2 p-3">
               {conversationQuery.isLoading && (
                 <div className="space-y-2">
-                  {[
-                    'conversation-skeleton-1',
-                    'conversation-skeleton-2',
-                    'conversation-skeleton-3',
-                    'conversation-skeleton-4',
-                    'conversation-skeleton-5',
-                  ].map((skeletonId) => (
-                    <Skeleton key={skeletonId} className="h-20 w-full" />
+                  {['csk1', 'csk2', 'csk3', 'csk4', 'csk5'].map((id) => (
+                    <Skeleton key={id} className="h-20 w-full" />
                   ))}
                 </div>
               )}
@@ -337,53 +238,18 @@ function RouteComponent() {
                 )}
 
               {filteredConversations.map((conversation) => (
-                <Item
-                  asChild
+                <ConversationListItem
                   key={conversation.id}
-                  variant={
-                    conversation.id === conversationId ? 'muted' : 'default'
-                  }
-                  className="w-full"
-                >
-                  <Link
-                    to={'/conversations/{-$conversationId}'}
-                    params={{ conversationId: conversation.id }}
-                  >
-                    <ItemContent className="gap-2">
-                      <ItemHeader>
-                        <ItemTitle className="max-w-[190px] truncate">
-                          {conversation.lastUserQuestion}
-                        </ItemTitle>
-                        <Badge variant="outline" className="capitalize">
-                          {dayjs(conversation.lastMessageAt).format(
-                            'MMM D, h:mm A',
-                          )}
-                        </Badge>
-                      </ItemHeader>
-
-                      <ItemDescription>
-                        {conversation.lastAssistantUtterance}
-                      </ItemDescription>
-
-                      <ItemFooter>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="secondary">
-                            {getChannelBadgeLabelById(
-                              conversation.channelId,
-                              channels,
-                            )}
-                          </Badge>
-                          {conversation.isTesting && (
-                            <Badge variant="default">Testing</Badge>
-                          )}
-                        </div>
-                      </ItemFooter>
-                    </ItemContent>
-                    <ItemActions>
-                      <ChevronRightIcon className="size-4" />
-                    </ItemActions>
-                  </Link>
-                </Item>
+                  id={conversation.id}
+                  lastUserQuestion={conversation.lastUserQuestion}
+                  lastAssistantUtterance={conversation.lastAssistantUtterance}
+                  lastMessageAt={conversation.lastMessageAt}
+                  chatbotId={conversation.chatbotId}
+                  chatbotName={chatbotNameById(conversation.chatbotId)}
+                  channelId={conversation.channelId}
+                  channelLabel={channelLabelById(conversation.channelId)}
+                  active={conversation.id === conversationId}
+                />
               ))}
             </div>
           </ScrollArea>
@@ -396,9 +262,7 @@ function RouteComponent() {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() =>
-                          setPage((previousPage) => previousPage - 1)
-                        }
+                        onClick={() => setPage((p) => p - 1)}
                         disabled={page === 1}
                       />
                     </PaginationItem>
@@ -409,9 +273,7 @@ function RouteComponent() {
                     </PaginationItem>
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() =>
-                          setPage((previousPage) => previousPage + 1)
-                        }
+                        onClick={() => setPage((p) => p + 1)}
                         disabled={page === totalPages}
                       />
                     </PaginationItem>
@@ -436,15 +298,8 @@ function RouteComponent() {
 
           {conversationId && messageQuery.isLoading && (
             <div className="space-y-3">
-              {[
-                'message-skeleton-1',
-                'message-skeleton-2',
-                'message-skeleton-3',
-                'message-skeleton-4',
-                'message-skeleton-5',
-                'message-skeleton-6',
-              ].map((skeletonId) => (
-                <Skeleton key={skeletonId} className="h-24 w-full" />
+              {['msk1', 'msk2', 'msk3', 'msk4', 'msk5', 'msk6'].map((id) => (
+                <Skeleton key={id} className="h-24 w-full" />
               ))}
             </div>
           )}
@@ -483,107 +338,18 @@ function RouteComponent() {
             )}
 
           {messageQuery.data?.data.messages.map((message) => (
-            <MessageItem key={message.id} message={message} />
+            <ConversationMessageItem key={message.id} message={message} />
           ))}
 
           {selectedConversation && (
-            <div className="mt-4 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
-              <p className="font-medium">Thread metadata (admin)</p>
-              <p>Conversation ID: {selectedConversation.id}</p>
-              <p>Chatbot ID: {selectedConversation.chatbotId}</p>
-              <p>Channel ID: {selectedConversation.channelId}</p>
-              <p>Testing: {selectedConversation.isTesting ? 'Yes' : 'No'}</p>
-              <p>
-                Channel:{' '}
-                {getChannelBadgeLabelById(
-                  selectedConversation.channelId,
-                  channels,
-                )}
-              </p>
-              <p>
-                Created:{' '}
-                {dayjs(selectedConversation.createdAt).format(
-                  'MMM D, YYYY h:mm A',
-                )}
-              </p>
-              <p>
-                Last activity:{' '}
-                {dayjs(selectedConversation.lastMessageAt).format(
-                  'MMM D, YYYY h:mm A',
-                )}
-              </p>
-            </div>
+            <ConversationThreadMeta
+              conversation={selectedConversation}
+              chatbotName={chatbotNameById(selectedConversation.chatbotId)}
+              channelLabel={channelLabelById(selectedConversation.channelId)}
+            />
           )}
         </ScrollArea>
       </div>
     </div>
   );
-}
-
-function MessageItem({ message }: { message: MessageSchema }) {
-  const sourceCount = message?.metadata?.sources?.length ?? 0;
-
-  return (
-    <Item variant={message.role === 'user' ? 'default' : 'muted'}>
-      <ItemMedia variant="icon">
-        {message.role === 'user' ? <UserIcon /> : <BotIcon />}
-      </ItemMedia>
-      <ItemContent>
-        <ItemTitle>
-          <p>{message.role.toUpperCase()}</p>
-          <span className="text-xs font-light text-gray-400">
-            {dayjs(message.createdAt).format('h:mm A')}
-          </span>
-        </ItemTitle>
-        <ItemDescription>{message.content}</ItemDescription>
-
-        <div className="mt-2 flex flex-wrap gap-2">
-          {message?.metadata?.confidenceScore !== null &&
-            message?.metadata?.confidenceScore !== undefined && (
-              <Badge variant="outline">
-                Confidence {Math.round(message.metadata.confidenceScore * 100)}%
-              </Badge>
-            )}
-
-          <Badge variant="outline">
-            <DatabaseIcon className="mr-1 size-3" />
-            Sources {sourceCount}
-          </Badge>
-        </div>
-      </ItemContent>
-    </Item>
-  );
-}
-
-function getChannelBadgeLabelById(
-  channelId: string,
-  channels: Array<{
-    id: string;
-    additional: {
-      type: 'web' | 'whatsapp' | 'instagram';
-    };
-  }>,
-) {
-  const channel = channels.find((value) => value.id === channelId);
-
-  if (!channel) {
-    return `Channel ${channelId.slice(0, 8)}`;
-  }
-
-  return renderChannelLabel(channel.id, channel.additional.type);
-}
-
-function renderChannelLabel(
-  channelId: string,
-  channelType: 'web' | 'whatsapp' | 'instagram',
-) {
-  if (channelType === 'web') {
-    return `Web · ${channelId.slice(0, 8)}`;
-  }
-
-  if (channelType === 'whatsapp') {
-    return `WhatsApp · ${channelId.slice(0, 8)}`;
-  }
-
-  return `Instagram · ${channelId.slice(0, 8)}`;
 }

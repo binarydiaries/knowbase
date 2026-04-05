@@ -16,6 +16,7 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
+  ItemFooter,
   ItemHeader,
   ItemMedia,
   ItemTitle,
@@ -29,52 +30,66 @@ import {
   PaginationPrevious,
 } from '@knowbase/ui/components/pagination';
 import { ScrollArea } from '@knowbase/ui/components/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@knowbase/ui/components/select';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import dayjs from 'dayjs';
 import {
   AlertCircleIcon,
   BotIcon,
   ChevronRightIcon,
   DatabaseIcon,
-  MessageCircleIcon,
   UserIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { MessageSchema } from '@/services';
-import { getConversations, getMessages } from '@/services';
-import { timeAgo } from '@/utils/datetimeHelper';
+import { getChatbots, getConversations, getMessages } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 
 export const Route = createFileRoute('/conversations/{-$conversationId}/')({
   component: RouteComponent,
 });
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 function RouteComponent() {
   const { conversationId } = Route.useParams();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
+  const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
+
+  const chatbotQuery = useQuery({
+    queryKey: ['chatbots'],
+    queryFn: () => getChatbots(),
+  });
 
   const conversationQuery = useQuery({
-    queryKey: ['conversations'],
-    queryFn: () => getConversations(),
+    queryKey: ['conversations', chatbotIdFilter, page],
+    queryFn: () =>
+      getConversations({
+        query: {
+          page,
+          limit: PAGE_SIZE,
+          chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
+        },
+      }),
   });
 
   const conversations = conversationQuery.data?.data.conversations ?? [];
-  const totalPages = Math.max(1, Math.ceil(conversations.length / PAGE_SIZE));
+  const totalPages = conversationQuery.data?.data.totalPages ?? 1;
 
   useEffect(() => {
     setPage((previousPage) => Math.min(previousPage, totalPages));
   }, [totalPages]);
-
-  const pagedConversations = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return conversations.slice(start, start + PAGE_SIZE);
-  }, [conversations, page]);
 
   const selectedConversation = useMemo(
     () =>
@@ -90,7 +105,11 @@ function RouteComponent() {
   });
 
   useEffect(() => {
-    if (!conversationId && conversations[0]?.id) {
+    if (
+      !conversationQuery.isLoading &&
+      conversations.length > 0 &&
+      (!conversationId || !selectedConversation)
+    ) {
       navigate({
         from: '/conversations/{-$conversationId}/',
         params: {
@@ -99,26 +118,59 @@ function RouteComponent() {
         replace: true,
       });
     }
-  }, [conversationId, conversations, navigate]);
+  }, [
+    conversationId,
+    conversationQuery.isLoading,
+    conversations,
+    navigate,
+    selectedConversation,
+  ]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4 flex-1">
+        <div className="flex flex-1 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator
             orientation="vertical"
             className="mr-2 data-[orientation=vertical]:h-4"
           />
-          <h1 className="text-sm font-medium flex-1">Conversations</h1>
-          <Badge variant="secondary">Thread for testing</Badge>
+          <h1 className="flex-1 text-sm font-medium">Conversations</h1>
         </div>
       </header>
       <Separator />
       <div className="flex flex-1 overflow-hidden">
         <div className="flex w-full max-w-md flex-col border-r">
+          <div className="space-y-2 border-b p-3">
+            <p className="text-xs text-muted-foreground">Filter by chatbot</p>
+            <Select
+              value={chatbotIdFilter}
+              onValueChange={(value) => {
+                setChatbotIdFilter(value);
+                setPage(1);
+                navigate({
+                  from: '/conversations/{-$conversationId}/',
+                  params: { conversationId: undefined },
+                  replace: true,
+                });
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All chatbots" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All chatbots</SelectItem>
+                {chatbotQuery.data?.data.chatbots.map((chatbot) => (
+                  <SelectItem key={chatbot.id} value={chatbot.id}>
+                    {chatbot.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <ScrollArea className="flex-1">
-            <div className="p-3 space-y-2">
+            <div className="space-y-2 p-3">
               {conversationQuery.isLoading && (
                 <div className="space-y-2">
                   {[
@@ -156,16 +208,16 @@ function RouteComponent() {
                 conversations.length === 0 && (
                   <Empty className="min-h-[220px]">
                     <EmptyHeader>
-                      <EmptyTitle>No conversations yet</EmptyTitle>
+                      <EmptyTitle>No conversations found</EmptyTitle>
                       <EmptyDescription>
-                        New user threads will appear here once people start
-                        chatting.
+                        Try a different chatbot filter or wait for new incoming
+                        conversations.
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 )}
 
-              {pagedConversations.map((conversation) => (
+              {conversations.map((conversation) => (
                 <Item
                   asChild
                   key={conversation.id}
@@ -182,12 +234,19 @@ function RouteComponent() {
                       <ItemHeader>
                         <ItemTitle>{conversation.lastUserQuestion}</ItemTitle>
                         <Badge variant="outline" className="capitalize">
-                          {timeAgo(conversation.lastMessageAt)}
+                          {dayjs(conversation.lastMessageAt).format(
+                            'MMM D, h:mm A',
+                          )}
                         </Badge>
                       </ItemHeader>
                       <ItemDescription>
                         {conversation.lastAssistantUtterance}
                       </ItemDescription>
+                      <ItemFooter>
+                        <Badge variant="secondary">
+                          {getSourceBadgeLabel(conversation.channelType)}
+                        </Badge>
+                      </ItemFooter>
                     </ItemContent>
                     <ItemActions>
                       <ChevronRightIcon className="size-4" />
@@ -198,33 +257,37 @@ function RouteComponent() {
             </div>
           </ScrollArea>
 
-          {!conversationQuery.isLoading && conversations.length > 0 && (
-            <div className="border-t p-3">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() =>
-                        setPage((previousPage) => previousPage - 1)
-                      }
-                      disabled={page === 1}
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink isActive>{page}</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setPage((previousPage) => previousPage + 1)
-                      }
-                      disabled={page === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+          {!conversationQuery.isLoading &&
+            !conversationQuery.isError &&
+            conversations.length > 0 && (
+              <div className="border-t p-3">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setPage((previousPage) => previousPage - 1)
+                        }
+                        disabled={page === 1}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink isActive>
+                        {page} / {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setPage((previousPage) => previousPage + 1)
+                        }
+                        disabled={page === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
         </div>
 
         <ScrollArea className="w-full p-4">
@@ -233,7 +296,7 @@ function RouteComponent() {
               <EmptyHeader>
                 <EmptyTitle>Select a conversation</EmptyTitle>
                 <EmptyDescription>
-                  Choose a conversation from the left panel to inspect the
+                  Choose a conversation from the left panel to inspect this
                   thread.
                 </EmptyDescription>
               </EmptyHeader>
@@ -297,13 +360,21 @@ function RouteComponent() {
               <p className="font-medium">Thread metadata (admin)</p>
               <p>Conversation ID: {selectedConversation.id}</p>
               <p>Chatbot ID: {selectedConversation.chatbotId}</p>
+              <p>Channel ID: {selectedConversation.channelId}</p>
+              <p>
+                Source: {getSourceBadgeLabel(selectedConversation.channelType)}
+              </p>
               <p>
                 Created:{' '}
-                {new Date(selectedConversation.createdAt).toLocaleString()}
+                {dayjs(selectedConversation.createdAt).format(
+                  'MMM D, YYYY h:mm A',
+                )}
               </p>
               <p>
                 Last activity:{' '}
-                {new Date(selectedConversation.lastMessageAt).toLocaleString()}
+                {dayjs(selectedConversation.lastMessageAt).format(
+                  'MMM D, YYYY h:mm A',
+                )}
               </p>
             </div>
           )}
@@ -317,10 +388,7 @@ function MessageItem({ message }: { message: MessageSchema }) {
   const sourceCount = message?.metadata?.sources?.length ?? 0;
 
   return (
-    <Item
-      key={message.id}
-      variant={message.role === 'user' ? 'default' : 'muted'}
-    >
+    <Item variant={message.role === 'user' ? 'default' : 'muted'}>
       <ItemMedia variant="icon">
         {message.role === 'user' ? <UserIcon /> : <BotIcon />}
       </ItemMedia>
@@ -328,10 +396,7 @@ function MessageItem({ message }: { message: MessageSchema }) {
         <ItemTitle>
           <p>{message.role.toUpperCase()}</p>
           <span className="text-xs font-light text-gray-400">
-            {new Date(message.createdAt).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {dayjs(message.createdAt).format('h:mm A')}
           </span>
         </ItemTitle>
         <ItemDescription>{message.content}</ItemDescription>
@@ -348,15 +413,20 @@ function MessageItem({ message }: { message: MessageSchema }) {
             <DatabaseIcon className="mr-1 size-3" />
             Sources {sourceCount}
           </Badge>
-
-          {message?.systemMetadata?.finalQuery && (
-            <Badge variant="secondary" className="max-w-full truncate">
-              <MessageCircleIcon className="mr-1 size-3" />
-              Query: {message.systemMetadata.finalQuery}
-            </Badge>
-          )}
         </div>
       </ItemContent>
     </Item>
   );
+}
+
+function getSourceBadgeLabel(channelType: 'web' | 'whatsapp' | 'instagram') {
+  if (channelType === 'web') {
+    return 'Web Embed';
+  }
+
+  if (channelType === 'whatsapp') {
+    return 'WhatsApp';
+  }
+
+  return 'Instagram';
 }

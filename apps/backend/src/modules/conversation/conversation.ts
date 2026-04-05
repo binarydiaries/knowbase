@@ -12,12 +12,12 @@ export const Conversation = new Elysia({
   .get(
     '',
     async ({ query, orgId }) => {
-      return {
-        conversations: await ConversationService.list({
-          chatbotId: query.chatbotId,
-          orgId,
-        }),
-      };
+      return ConversationService.list({
+        chatbotId: query.chatbotId,
+        orgId,
+        page: query.page,
+        limit: query.limit,
+      });
     },
     {
       query: 'ListConversation',

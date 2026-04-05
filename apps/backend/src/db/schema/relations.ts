@@ -59,6 +59,10 @@ export const relations = defineRelations(
         from: r.conversations.chatbotId,
         to: r.chatbots.id,
       }),
+      channel: r.one.channels({
+        from: r.conversations.channelId,
+        to: r.channels.id,
+      }),
     },
     messages: {
       conversation: r.one.conversations({

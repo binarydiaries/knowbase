@@ -11,6 +11,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@knowbase/ui/components/empty';
+import { Input } from '@knowbase/ui/components/input';
 import {
   Item,
   ItemActions,
@@ -29,6 +30,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@knowbase/ui/components/pagination';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@knowbase/ui/components/popover';
 import { ScrollArea } from '@knowbase/ui/components/scroll-area';
 import {
   Select,
@@ -48,6 +54,7 @@ import {
   BotIcon,
   ChevronRightIcon,
   DatabaseIcon,
+  FilterIcon,
   UserIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -70,6 +77,7 @@ function RouteComponent() {
   const { conversationId } = Route.useParams();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
   const [channelIdFilter, setChannelIdFilter] = useState<string>('all');
 
@@ -103,7 +111,25 @@ function RouteComponent() {
   });
 
   const conversations = conversationQuery.data?.data.conversations ?? [];
+  const filteredConversations = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return conversations;
+    }
+
+    const query = searchTerm.toLowerCase();
+
+    return conversations.filter((conversation) => {
+      return (
+        conversation.lastUserQuestion.toLowerCase().includes(query) ||
+        conversation.lastAssistantUtterance.toLowerCase().includes(query) ||
+        conversation.id.toLowerCase().includes(query)
+      );
+    });
+  }, [conversations, searchTerm]);
+
   const totalPages = conversationQuery.data?.data.totalPages ?? 1;
+  const activeFilterCount =
+    (chatbotIdFilter !== 'all' ? 1 : 0) + (channelIdFilter !== 'all' ? 1 : 0);
 
   useEffect(() => {
     setPage((previousPage) => Math.min(previousPage, totalPages));
@@ -145,7 +171,7 @@ function RouteComponent() {
   ]);
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen min-h-0 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex flex-1 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -157,68 +183,112 @@ function RouteComponent() {
         </div>
       </header>
       <Separator />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex w-full max-w-md flex-col border-r">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className="flex min-h-0 w-full max-w-md flex-col border-r">
           <div className="space-y-2 border-b p-3">
-            <p className="text-xs text-muted-foreground">Filter by chatbot</p>
-            <Select
-              value={chatbotIdFilter}
-              onValueChange={(value) => {
-                setChatbotIdFilter(value);
-                setChannelIdFilter('all');
-                setPage(1);
-                navigate({
-                  from: '/conversations/{-$conversationId}/',
-                  params: { conversationId: undefined },
-                  replace: true,
-                });
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="All chatbots" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All chatbots</SelectItem>
-                {chatbotQuery.data?.data.chatbots.map((chatbot) => (
-                  <SelectItem key={chatbot.id} value={chatbot.id}>
-                    {chatbot.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search thread, reply, or ID"
+                className="w-full"
+              />
 
-            <p className="pt-2 text-xs text-muted-foreground">
-              Filter by channel
-            </p>
-            <Select
-              value={channelIdFilter}
-              onValueChange={(value) => {
-                setChannelIdFilter(value);
-                setPage(1);
-              }}
-              disabled={chatbotIdFilter === 'all'}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={
-                    chatbotIdFilter === 'all'
-                      ? 'Select chatbot first'
-                      : 'All channels'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All channels</SelectItem>
-                {channels.map((channel) => (
-                  <SelectItem key={channel.id} value={channel.id}>
-                    {renderChannelLabel(channel.id, channel.additional.type)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <FilterIcon className="size-4" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <Badge variant="secondary" className="ml-1">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent align="end" className="space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Chatbot</p>
+                    <Select
+                      value={chatbotIdFilter}
+                      onValueChange={(value) => {
+                        setChatbotIdFilter(value);
+                        setChannelIdFilter('all');
+                        setPage(1);
+                        navigate({
+                          from: '/conversations/{-$conversationId}/',
+                          params: { conversationId: undefined },
+                          replace: true,
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All chatbots" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All chatbots</SelectItem>
+                        {chatbotQuery.data?.data.chatbots.map((chatbot) => (
+                          <SelectItem key={chatbot.id} value={chatbot.id}>
+                            {chatbot.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Channel</p>
+                    <Select
+                      value={channelIdFilter}
+                      onValueChange={(value) => {
+                        setChannelIdFilter(value);
+                        setPage(1);
+                      }}
+                      disabled={chatbotIdFilter === 'all'}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={
+                            chatbotIdFilter === 'all'
+                              ? 'Select chatbot first'
+                              : 'All channels'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All channels</SelectItem>
+                        {channels.map((channel) => (
+                          <SelectItem key={channel.id} value={channel.id}>
+                            {renderChannelLabel(
+                              channel.id,
+                              channel.additional.type,
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setChatbotIdFilter('all');
+                      setChannelIdFilter('all');
+                      setPage(1);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Clear filters
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
-          <ScrollArea className="flex-1">
+          <ScrollArea className="min-h-0 flex-1">
             <div className="space-y-2 p-3">
               {conversationQuery.isLoading && (
                 <div className="space-y-2">
@@ -254,19 +324,19 @@ function RouteComponent() {
 
               {!conversationQuery.isLoading &&
                 !conversationQuery.isError &&
-                conversations.length === 0 && (
+                filteredConversations.length === 0 && (
                   <Empty className="min-h-[220px]">
                     <EmptyHeader>
                       <EmptyTitle>No conversations found</EmptyTitle>
                       <EmptyDescription>
-                        Try a different chatbot/channel filter or wait for new
+                        Try changing your search/filter or wait for new
                         conversations.
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 )}
 
-              {conversations.map((conversation) => (
+              {filteredConversations.map((conversation) => (
                 <Item
                   asChild
                   key={conversation.id}
@@ -279,25 +349,34 @@ function RouteComponent() {
                     to={'/conversations/{-$conversationId}'}
                     params={{ conversationId: conversation.id }}
                   >
-                    <ItemContent>
+                    <ItemContent className="gap-2">
                       <ItemHeader>
-                        <ItemTitle>{conversation.lastUserQuestion}</ItemTitle>
+                        <ItemTitle className="max-w-[190px] truncate">
+                          {conversation.lastUserQuestion}
+                        </ItemTitle>
                         <Badge variant="outline" className="capitalize">
                           {dayjs(conversation.lastMessageAt).format(
                             'MMM D, h:mm A',
                           )}
                         </Badge>
                       </ItemHeader>
+
                       <ItemDescription>
                         {conversation.lastAssistantUtterance}
                       </ItemDescription>
+
                       <ItemFooter>
-                        <Badge variant="secondary">
-                          {getChannelBadgeLabelById(
-                            conversation.channelId,
-                            channels,
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary">
+                            {getChannelBadgeLabelById(
+                              conversation.channelId,
+                              channels,
+                            )}
+                          </Badge>
+                          {conversation.isTesting && (
+                            <Badge variant="default">Testing</Badge>
                           )}
-                        </Badge>
+                        </div>
                       </ItemFooter>
                     </ItemContent>
                     <ItemActions>
@@ -342,7 +421,7 @@ function RouteComponent() {
             )}
         </div>
 
-        <ScrollArea className="w-full p-4">
+        <ScrollArea className="min-h-0 w-full p-4">
           {!conversationId && !conversationQuery.isLoading && (
             <Empty className="min-h-[300px] border">
               <EmptyHeader>
@@ -413,6 +492,7 @@ function RouteComponent() {
               <p>Conversation ID: {selectedConversation.id}</p>
               <p>Chatbot ID: {selectedConversation.chatbotId}</p>
               <p>Channel ID: {selectedConversation.channelId}</p>
+              <p>Testing: {selectedConversation.isTesting ? 'Yes' : 'No'}</p>
               <p>
                 Channel:{' '}
                 {getChannelBadgeLabelById(

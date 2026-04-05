@@ -5,6 +5,7 @@ const Conversation = z.object({
   id: z.string(),
   chatbotId: z.string(),
   channelId: z.string(),
+  isTesting: z.boolean(),
   lastUserQuestion: z.string(),
   lastAssistantUtterance: z.string(),
   lastMessageAt: z.date(),

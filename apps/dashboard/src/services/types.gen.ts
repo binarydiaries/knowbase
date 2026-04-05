@@ -424,6 +424,7 @@ export type ManyConversationResponse = {
         id: string;
         chatbotId: string;
         channelId: string;
+        isTesting: boolean;
         lastUserQuestion: string;
         lastAssistantUtterance: string;
         lastMessageAt: string;

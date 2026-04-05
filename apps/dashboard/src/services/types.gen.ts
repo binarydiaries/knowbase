@@ -414,18 +414,26 @@ export type IndexingStatusResponse = {
 
 export type ListConversation = {
     chatbotId?: string;
+    channelId?: string;
+    page?: number;
+    limit?: number;
 };
 
 export type ManyConversationResponse = {
     conversations: Array<{
         id: string;
         chatbotId: string;
+        channelId: string;
         lastUserQuestion: string;
         lastAssistantUtterance: string;
         lastMessageAt: string;
         createdAt: string;
         updatedAt: string;
     }>;
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
 };
 
 export type UpdateBehaviourBody = {
@@ -1021,7 +1029,7 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: ListConversation;
     url: '/conversations';
 };
 
@@ -1098,7 +1106,7 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: ChannelListQuerySchema;
     url: '/channels';
 };
 

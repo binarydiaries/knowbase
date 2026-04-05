@@ -9,10 +9,48 @@ export abstract class ConversationService {
     });
   }
 
-  static list({ chatbotId, orgId }: { chatbotId?: string; orgId: string }) {
-    return db.query.conversations.findMany({
-      where: { chatbotId, chatbot: { orgId } },
+  static async list({
+    chatbotId,
+    channelId,
+    orgId,
+    page,
+    limit,
+  }: {
+    chatbotId?: string;
+    channelId?: string;
+    orgId: string;
+    page: number;
+    limit: number;
+  }) {
+    const whereCondition = {
+      chatbot: { orgId },
+      chatbotId,
+      channelId,
+    };
+
+    const offset = (page - 1) * limit;
+
+    const total = (
+      await db.query.conversations.findMany({
+        where: whereCondition,
+        columns: { id: true },
+      })
+    ).length;
+
+    const list = await db.query.conversations.findMany({
+      where: whereCondition,
+      orderBy: (table, { desc }) => [desc(table.lastMessageAt)],
+      limit,
+      offset,
     });
+
+    return {
+      conversations: list,
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
   }
 
   static async create(data: typeof conversations.$inferInsert) {

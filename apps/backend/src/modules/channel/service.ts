@@ -8,11 +8,13 @@ export abstract class ChannelService {
     chatbotId,
     orgId,
   }: {
-    chatbotId: string;
+    chatbotId?: string;
     orgId: string;
   }) {
     return db.query.channels.findMany({
-      where: { chatbotId, chatbot: { orgId } },
+      where: chatbotId
+        ? { chatbotId, chatbot: { orgId } }
+        : { chatbot: { orgId } },
     });
   }
 

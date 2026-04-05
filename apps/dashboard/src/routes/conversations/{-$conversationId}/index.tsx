@@ -48,10 +48,14 @@ export const Route = createFileRoute('/conversations/{-$conversationId}/')({
 
 const PAGE_SIZE = 10;
 
-function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
+function getPageNumbers(
+  current: number,
+  total: number,
+): (number | 'ellipsis')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   if (current <= 4) return [1, 2, 3, 4, 5, 'ellipsis', total];
-  if (current >= total - 3) return [1, 'ellipsis', total - 4, total - 3, total - 2, total - 1, total];
+  if (current >= total - 3)
+    return [1, 'ellipsis', total - 4, total - 3, total - 2, total - 1, total];
   return [1, 'ellipsis', current - 1, current, current + 1, 'ellipsis', total];
 }
 
@@ -61,7 +65,6 @@ function RouteComponent() {
   const { page } = Route.useSearch();
   const [searchTerm, setSearchTerm] = useState('');
   const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
-  const [channelIdFilter, setChannelIdFilter] = useState<string>('all');
 
   const chatbotQuery = useQuery({
     queryKey: ['chatbots'],
@@ -70,22 +73,25 @@ function RouteComponent() {
 
   const channelsQuery = useQuery({
     queryKey: ['channels', chatbotIdFilter],
-    queryFn: () => getChannels({ query: { chatbotId: chatbotIdFilter } }),
-    enabled: chatbotIdFilter !== 'all',
+    queryFn: () =>
+      getChannels({
+        query: {
+          chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
+        },
+      }),
   });
 
   const channels = channelsQuery.data?.data.channels ?? [];
   const chatbots = chatbotQuery.data?.data.chatbots ?? [];
 
   const conversationQuery = useQuery({
-    queryKey: ['conversations', chatbotIdFilter, channelIdFilter, page],
+    queryKey: ['conversations', chatbotIdFilter, page],
     queryFn: () =>
       getConversations({
         query: {
           page,
           limit: PAGE_SIZE,
           chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
-          channelId: channelIdFilter === 'all' ? undefined : channelIdFilter,
         },
       }),
   });
@@ -97,13 +103,12 @@ function RouteComponent() {
     if (!searchTerm.trim()) return conversations;
 
     const query = searchTerm.toLowerCase();
-    return conversations.filter((conversation) => {
-      return (
-        conversation.lastUserQuestion.toLowerCase().includes(query) ||
-        conversation.lastAssistantUtterance.toLowerCase().includes(query) ||
-        conversation.id.toLowerCase().includes(query)
-      );
-    });
+    return conversations.filter(
+      (c) =>
+        c.lastUserQuestion.toLowerCase().includes(query) ||
+        c.lastAssistantUtterance.toLowerCase().includes(query) ||
+        c.id.toLowerCase().includes(query),
+    );
   }, [conversations, searchTerm]);
 
   useEffect(() => {
@@ -157,11 +162,11 @@ function RouteComponent() {
   const channelLabelById = (id: string) => {
     const channel = channels.find((value) => value.id === id);
 
-    if (!channel) return `Channel ${id.slice(0, 8)}`;
+    if (!channel) return 'Unknown channel';
     const type = channel.additional.type;
-    if (type === 'web') return `Web · ${id.slice(0, 8)}`;
-    if (type === 'whatsapp') return `WhatsApp · ${id.slice(0, 8)}`;
-    return `Instagram · ${id.slice(0, 8)}`;
+    if (type === 'web') return 'Web';
+    if (type === 'whatsapp') return 'WhatsApp';
+    return 'Instagram';
   };
 
   return (
@@ -187,7 +192,6 @@ function RouteComponent() {
               chatbotIdFilter={chatbotIdFilter}
               onChatbotIdFilterChange={(value) => {
                 setChatbotIdFilter(value);
-                setChannelIdFilter('all');
                 navigate({
                   from: '/conversations/{-$conversationId}/',
                   params: { conversationId: undefined },
@@ -195,21 +199,9 @@ function RouteComponent() {
                   replace: true,
                 });
               }}
-              channelIdFilter={channelIdFilter}
-              onChannelIdFilterChange={(value) => {
-                setChannelIdFilter(value);
-                void navigate({
-                  search: (prev) => ({ ...prev, page: 1 }),
-                  replace: true,
-                });
-              }}
               chatbotOptions={chatbots.map((chatbot) => ({
                 id: chatbot.id,
                 name: chatbot.name,
-              }))}
-              channelOptions={channels.map((channel) => ({
-                id: channel.id,
-                label: channelLabelById(channel.id),
               }))}
             />
           </div>
@@ -263,9 +255,7 @@ function RouteComponent() {
                   lastUserQuestion={conversation.lastUserQuestion}
                   lastAssistantUtterance={conversation.lastAssistantUtterance}
                   lastMessageAt={conversation.lastMessageAt}
-                  chatbotId={conversation.chatbotId}
                   chatbotName={chatbotNameById(conversation.chatbotId)}
-                  channelId={conversation.channelId}
                   channelLabel={channelLabelById(conversation.channelId)}
                   active={conversation.id === conversationId}
                 />
@@ -288,7 +278,9 @@ function RouteComponent() {
                           })
                         }
                         aria-disabled={page === 1}
-                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                        className={
+                          page === 1 ? 'pointer-events-none opacity-50' : ''
+                        }
                       />
                     </PaginationItem>
                     {getPageNumbers(page, totalPages).map((p, i) =>
@@ -321,7 +313,11 @@ function RouteComponent() {
                           })
                         }
                         aria-disabled={page === totalPages}
-                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        className={
+                          page === totalPages
+                            ? 'pointer-events-none opacity-50'
+                            : ''
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>

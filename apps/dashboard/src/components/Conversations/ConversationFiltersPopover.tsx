@@ -20,10 +20,7 @@ interface IConversationFiltersPopoverProps {
   onSearchTermChange: (value: string) => void;
   chatbotIdFilter: string;
   onChatbotIdFilterChange: (value: string) => void;
-  channelIdFilter: string;
-  onChannelIdFilterChange: (value: string) => void;
   chatbotOptions: Array<{ id: string; name: string }>;
-  channelOptions: Array<{ id: string; label: string }>;
 }
 
 export function ConversationFiltersPopover({
@@ -31,13 +28,9 @@ export function ConversationFiltersPopover({
   onSearchTermChange,
   chatbotIdFilter,
   onChatbotIdFilterChange,
-  channelIdFilter,
-  onChannelIdFilterChange,
   chatbotOptions,
-  channelOptions,
 }: IConversationFiltersPopoverProps) {
-  const activeFilterCount =
-    (chatbotIdFilter !== 'all' ? 1 : 0) + (channelIdFilter !== 'all' ? 1 : 0);
+  const activeFilterCount = chatbotIdFilter !== 'all' ? 1 : 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -82,40 +75,12 @@ export function ConversationFiltersPopover({
             </Select>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Channel</p>
-            <Select
-              value={channelIdFilter}
-              onValueChange={onChannelIdFilterChange}
-              disabled={chatbotIdFilter === 'all'}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={
-                    chatbotIdFilter === 'all'
-                      ? 'Select chatbot first'
-                      : 'All channels'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All channels</SelectItem>
-                {channelOptions.map((channel) => (
-                  <SelectItem key={channel.id} value={channel.id}>
-                    {channel.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <Button
             variant="ghost"
             size="sm"
             className="w-full"
             onClick={() => {
               onChatbotIdFilterChange('all');
-              onChannelIdFilterChange('all');
             }}
             disabled={activeFilterCount === 0}
           >

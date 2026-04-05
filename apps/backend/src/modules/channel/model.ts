@@ -48,7 +48,7 @@ export const ChannelSchema = z.object({
 export type IChannelSchema = z.infer<typeof ChannelSchema>;
 
 const ChannelListQuerySchema = z.object({
-  chatbotId: z.string(),
+  chatbotId: z.string().optional(),
 });
 
 const ManyChannelResponse = z.object({

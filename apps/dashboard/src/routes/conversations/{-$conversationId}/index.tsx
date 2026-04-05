@@ -52,7 +52,12 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { MessageSchema } from '@/services';
-import { getChatbots, getConversations, getMessages } from '@/services';
+import {
+  getChannels,
+  getChatbots,
+  getConversations,
+  getMessages,
+} from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 
 export const Route = createFileRoute('/conversations/{-$conversationId}/')({
@@ -66,20 +71,33 @@ function RouteComponent() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
+  const [channelIdFilter, setChannelIdFilter] = useState<string>('all');
 
   const chatbotQuery = useQuery({
     queryKey: ['chatbots'],
     queryFn: () => getChatbots(),
   });
 
+  const channelsQuery = useQuery({
+    queryKey: ['channels', chatbotIdFilter],
+    queryFn: () =>
+      getChannels({
+        query: { chatbotId: chatbotIdFilter },
+      }),
+    enabled: chatbotIdFilter !== 'all',
+  });
+
+  const channels = channelsQuery.data?.data.channels ?? [];
+
   const conversationQuery = useQuery({
-    queryKey: ['conversations', chatbotIdFilter, page],
+    queryKey: ['conversations', chatbotIdFilter, channelIdFilter, page],
     queryFn: () =>
       getConversations({
         query: {
           page,
           limit: PAGE_SIZE,
           chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
+          channelId: channelIdFilter === 'all' ? undefined : channelIdFilter,
         },
       }),
   });
@@ -147,6 +165,7 @@ function RouteComponent() {
               value={chatbotIdFilter}
               onValueChange={(value) => {
                 setChatbotIdFilter(value);
+                setChannelIdFilter('all');
                 setPage(1);
                 navigate({
                   from: '/conversations/{-$conversationId}/',
@@ -163,6 +182,36 @@ function RouteComponent() {
                 {chatbotQuery.data?.data.chatbots.map((chatbot) => (
                   <SelectItem key={chatbot.id} value={chatbot.id}>
                     {chatbot.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <p className="pt-2 text-xs text-muted-foreground">
+              Filter by channel
+            </p>
+            <Select
+              value={channelIdFilter}
+              onValueChange={(value) => {
+                setChannelIdFilter(value);
+                setPage(1);
+              }}
+              disabled={chatbotIdFilter === 'all'}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder={
+                    chatbotIdFilter === 'all'
+                      ? 'Select chatbot first'
+                      : 'All channels'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All channels</SelectItem>
+                {channels.map((channel) => (
+                  <SelectItem key={channel.id} value={channel.id}>
+                    {renderChannelLabel(channel.id, channel.additional.type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -210,7 +259,7 @@ function RouteComponent() {
                     <EmptyHeader>
                       <EmptyTitle>No conversations found</EmptyTitle>
                       <EmptyDescription>
-                        Try a different chatbot filter or wait for new incoming
+                        Try a different chatbot/channel filter or wait for new
                         conversations.
                       </EmptyDescription>
                     </EmptyHeader>
@@ -244,7 +293,10 @@ function RouteComponent() {
                       </ItemDescription>
                       <ItemFooter>
                         <Badge variant="secondary">
-                          {getSourceBadgeLabel(conversation.channelType)}
+                          {getChannelBadgeLabelById(
+                            conversation.channelId,
+                            channels,
+                          )}
                         </Badge>
                       </ItemFooter>
                     </ItemContent>
@@ -362,7 +414,11 @@ function RouteComponent() {
               <p>Chatbot ID: {selectedConversation.chatbotId}</p>
               <p>Channel ID: {selectedConversation.channelId}</p>
               <p>
-                Source: {getSourceBadgeLabel(selectedConversation.channelType)}
+                Channel:{' '}
+                {getChannelBadgeLabelById(
+                  selectedConversation.channelId,
+                  channels,
+                )}
               </p>
               <p>
                 Created:{' '}
@@ -419,14 +475,35 @@ function MessageItem({ message }: { message: MessageSchema }) {
   );
 }
 
-function getSourceBadgeLabel(channelType: 'web' | 'whatsapp' | 'instagram') {
+function getChannelBadgeLabelById(
+  channelId: string,
+  channels: Array<{
+    id: string;
+    additional: {
+      type: 'web' | 'whatsapp' | 'instagram';
+    };
+  }>,
+) {
+  const channel = channels.find((value) => value.id === channelId);
+
+  if (!channel) {
+    return `Channel ${channelId.slice(0, 8)}`;
+  }
+
+  return renderChannelLabel(channel.id, channel.additional.type);
+}
+
+function renderChannelLabel(
+  channelId: string,
+  channelType: 'web' | 'whatsapp' | 'instagram',
+) {
   if (channelType === 'web') {
-    return 'Web Embed';
+    return `Web · ${channelId.slice(0, 8)}`;
   }
 
   if (channelType === 'whatsapp') {
-    return 'WhatsApp';
+    return `WhatsApp · ${channelId.slice(0, 8)}`;
   }
 
-  return 'Instagram';
+  return `Instagram · ${channelId.slice(0, 8)}`;
 }

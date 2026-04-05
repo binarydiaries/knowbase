@@ -15,6 +15,7 @@ export const Conversation = new Elysia({
       return ConversationService.list({
         chatbotId: query.chatbotId,
         orgId,
+        channelId: query.channelId,
         page: query.page,
         limit: query.limit,
       });

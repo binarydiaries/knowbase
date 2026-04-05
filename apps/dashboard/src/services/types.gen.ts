@@ -414,6 +414,7 @@ export type IndexingStatusResponse = {
 
 export type ListConversation = {
     chatbotId?: string;
+    channelId?: string;
     page?: number;
     limit?: number;
 };
@@ -423,7 +424,6 @@ export type ManyConversationResponse = {
         id: string;
         chatbotId: string;
         channelId: string;
-        channelType: 'web' | 'whatsapp' | 'instagram';
         lastUserQuestion: string;
         lastAssistantUtterance: string;
         lastMessageAt: string;
@@ -1106,7 +1106,7 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: ChannelListQuerySchema;
     url: '/channels';
 };
 

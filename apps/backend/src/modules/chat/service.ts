@@ -52,7 +52,7 @@ export abstract class ChatService {
       lastAssistantUtterance,
     });
     const { text } = await generateText({
-      model: model,
+      model: nanoModel,
       prompt: resolverPrompt,
       maxOutputTokens: 50,
       temperature: 0,
@@ -181,21 +181,27 @@ export abstract class ChatService {
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
-        // Compute sentiment before saving (sequential, runs after stream — user doesn't feel it)
+        // Paid-plan features: sentiment scoring + conversation enrichment
+        const plan = await SubscriptionService.getPlan(orgId);
+        const isPaidPlan = plan !== 'free';
+
+        // Compute sentiment before saving — only for paid plans
         let sentiment: {
           label: 'positive' | 'neutral' | 'negative';
           score: number;
         } | null = null;
-        try {
-          const { text: sentimentJson } = await generateText({
-            model: nanoModel,
-            prompt: `Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1.\nRespond with JSON only, no explanation: {"label":"positive|neutral|negative","score":0.0}\n\n"${assistantMessage}"`,
-            maxOutputTokens: 30,
-            temperature: 0,
-          });
-          sentiment = JSON.parse(sentimentJson.trim());
-        } catch {
-          // Sentiment is best-effort — ignore failures
+        if (isPaidPlan) {
+          try {
+            const { text: sentimentJson } = await generateText({
+              model: nanoModel,
+              prompt: `Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1.\nRespond with JSON only, no explanation: {"label":"positive|neutral|negative","score":0.0}\n\n"${assistantMessage}"`,
+              maxOutputTokens: 30,
+              temperature: 0,
+            });
+            sentiment = JSON.parse(sentimentJson.trim());
+          } catch {
+            // Sentiment is best-effort — ignore failures
+          }
         }
 
         await MessageService.addMessages([
@@ -224,8 +230,10 @@ export abstract class ChatService {
           },
         ]);
 
-        // Fire-and-forget: enrich conversation with country + topic (new convs only)
-        void enrichConversationAsync(conversationId, message, isNew, ip);
+        // Fire-and-forget: enrich conversation with country + topic — only for paid plans
+        if (isPaidPlan) {
+          void enrichConversationAsync(conversationId, message, isNew, ip);
+        }
       },
     });
   }

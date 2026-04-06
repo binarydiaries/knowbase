@@ -150,6 +150,6 @@ ${recursiveChunk}
       .from(embeddings)
       .where(gt(similarity, 0.5))
       .orderBy((t) => desc(t.similarity))
-      .limit(4);
+      .limit(3);
   };
 }

@@ -9,25 +9,25 @@ export const PLAN_LIMITS = {
   free: {
     chatbots: 1,
     knowledgeSources: 10,
-    messagesPerMonth: 500,
+    messagesPerMonth: 100,
     trainingRunsPerDay: 3,
   },
   starter: {
     chatbots: 3,
     knowledgeSources: 250,
-    messagesPerMonth: 5000,
+    messagesPerMonth: 500,
     trainingRunsPerDay: 10,
   },
   growth: {
     chatbots: 10,
     knowledgeSources: 1000,
-    messagesPerMonth: 20000,
+    messagesPerMonth: 2000,
     trainingRunsPerDay: 20,
   },
   pro: {
     chatbots: 30,
     knowledgeSources: 5000,
-    messagesPerMonth: 75000,
+    messagesPerMonth: 8000,
     trainingRunsPerDay: 40,
   },
 } as const;

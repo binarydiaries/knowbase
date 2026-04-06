@@ -14,7 +14,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { getChatbots } from '@/services';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useClerkPlan } from '@/hooks/useClerkPlan';
 import { AnalyticsOverviewCards } from './_components/AnalyticsOverviewCards';
 import { ConversationsDailyChart } from './_components/ConversationsDailyChart';
 import { CountryDistributionChart } from './_components/CountryDistributionChart';
@@ -42,7 +42,7 @@ function AnalyticsUpgradePrompt() {
           </p>
         </div>
         <a
-          href="/settings/billing"
+          href="/subscriptions"
           className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
         >
           Upgrade to Starter — $4.9/mo
@@ -64,8 +64,7 @@ function RouteComponent() {
   });
   const chatbots = chatbotsData?.data?.chatbots ?? [];
 
-  const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
-  const isPaidPlan = subscription?.plan !== 'free';
+  const { isPaid: isPaidPlan, isLoading: subLoading } = useClerkPlan();
 
   return (
     <>

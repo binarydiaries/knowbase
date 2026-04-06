@@ -19,7 +19,6 @@ import {
   LifeBuoy,
   LineChart,
   MessageCircle,
-  Settings,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -92,11 +91,6 @@ const data = {
       name: 'Help & Support',
       url: '/',
       icon: LifeBuoy,
-    },
-    {
-      name: 'Settings',
-      url: '/',
-      icon: Settings,
     },
   ],
 };

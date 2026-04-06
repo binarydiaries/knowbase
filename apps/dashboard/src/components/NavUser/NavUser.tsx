@@ -19,13 +19,16 @@ import {
   BadgeCheck,
   Building,
   ChevronsUpDown,
+  CreditCard,
   LogOut,
   Sparkles,
 } from 'lucide-react';
+import { useClerkPlan } from '@/hooks/useClerkPlan';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user } = useUser();
+  const { isPaid, planLabel } = useClerkPlan();
 
   return (
     <SidebarMenu>
@@ -39,11 +42,14 @@ export function NavUser() {
               <UserAvatar />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user?.fullName}</span>
-                <span className="truncate text-xs">
+                <span className="truncate text-xs text-muted-foreground">
                   {user?.primaryEmailAddress?.emailAddress}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <span className="ml-auto text-xs font-medium text-primary shrink-0">
+                {planLabel}
+              </span>
+              <ChevronsUpDown className="size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -57,9 +63,10 @@ export function NavUser() {
                 <UserAvatar />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user?.fullName}</span>
-                  <span className="truncate text-xs">
+                  <span className="truncate text-xs text-muted-foreground">
                     {user?.primaryEmailAddress?.emailAddress}
                   </span>
+                  <span className="text-xs font-medium text-primary">{planLabel}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -67,8 +74,8 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link to={'/subscriptions'}>
-                  <Sparkles />
-                  Upgrade Plan
+                  {isPaid ? <CreditCard /> : <Sparkles />}
+                  {isPaid ? 'Manage Billing' : 'Upgrade Plan'}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

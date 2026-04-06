@@ -4,6 +4,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
 import { Behaviour } from './modules/behaviour/behaviour';
+import { Analytics } from './modules/analytics/analytics';
 import { UsageCharts } from './modules/usage/usage';
 import { Channel } from './modules/channel/channel';
 import { Chat } from './modules/chat/chat';
@@ -42,6 +43,7 @@ const app = new Elysia()
   )
   .use(cors())
   .use(UsageCharts)
+  .use(Analytics)
   .use(Chat)
   .use(message)
   .use(Document)

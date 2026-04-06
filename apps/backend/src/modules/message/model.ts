@@ -13,6 +13,13 @@ const MessageSource = z.object({
 export const MessageMetaData = z.object({
   confidenceScore: z.number().nullable(),
   sources: z.array(MessageSource).nullable().optional(),
+  sentiment: z
+    .object({
+      label: z.enum(['positive', 'neutral', 'negative']),
+      score: z.number(),
+    })
+    .nullable()
+    .optional(),
 });
 
 export const MessageSystemMetaData = z.object({

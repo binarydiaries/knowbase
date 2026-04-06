@@ -14,6 +14,7 @@ import { Route as UsageIndexRouteImport } from './routes/usage/index'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions/index'
 import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
+import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as ActivitiesIndexRouteImport } from './routes/activities/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
@@ -43,6 +44,11 @@ const OrganizationIndexRoute = OrganizationIndexRouteImport.update({
 const ChatbotsIndexRoute = ChatbotsIndexRouteImport.update({
   id: '/chatbots/',
   path: '/chatbots/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsIndexRoute = AnalyticsIndexRouteImport.update({
+  id: '/analytics/',
+  path: '/analytics/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivitiesIndexRoute = ActivitiesIndexRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account/': typeof AccountIndexRoute
   '/activities/': typeof ActivitiesIndexRoute
+  '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountIndexRoute
   '/activities': typeof ActivitiesIndexRoute
+  '/analytics': typeof AnalyticsIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account/': typeof AccountIndexRoute
   '/activities/': typeof ActivitiesIndexRoute
+  '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account/'
     | '/activities/'
+    | '/analytics/'
     | '/chatbots/'
     | '/organization/'
     | '/subscriptions/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/activities'
+    | '/analytics'
     | '/chatbots'
     | '/organization'
     | '/subscriptions'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account/'
     | '/activities/'
+    | '/analytics/'
     | '/chatbots/'
     | '/organization/'
     | '/subscriptions/'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountIndexRoute: typeof AccountIndexRoute
   ActivitiesIndexRoute: typeof ActivitiesIndexRoute
+  AnalyticsIndexRoute: typeof AnalyticsIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
   OrganizationIndexRoute: typeof OrganizationIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
@@ -199,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatbotsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics/': {
+      id: '/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof AnalyticsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/activities/': {
       id: '/activities/'
       path: '/activities'
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountIndexRoute: AccountIndexRoute,
   ActivitiesIndexRoute: ActivitiesIndexRoute,
+  AnalyticsIndexRoute: AnalyticsIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
   OrganizationIndexRoute: OrganizationIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,

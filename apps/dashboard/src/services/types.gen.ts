@@ -48,6 +48,93 @@ export type KnowledgeByChatbotResponseSchema = {
     }>;
 };
 
+export type AnalyticsOverviewResponseSchema = {
+    totalConversations: number;
+    totalMessages: number;
+    avgMessagesPerConv: number;
+    avgConfidenceScore: string | null;
+};
+
+export type ConversationsDailyQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type ConversationsDailyResponseSchema = {
+    data: Array<{
+        date: string;
+        count: number;
+    }>;
+};
+
+export type MessagesByChannelQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type MessagesByChannelResponseSchema = {
+    data: Array<{
+        channelType: string;
+        count: number;
+    }>;
+};
+
+export type TopChatbotsQuerySchema = {
+    startDate: string;
+    endDate: string;
+};
+
+export type TopChatbotsResponseSchema = {
+    data: Array<{
+        chatbotId: string;
+        chatbotName: string;
+        conversations: number;
+        messages: number;
+        avgConfidence: string | null;
+    }>;
+};
+
+export type SentimentQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type SentimentResponseSchema = {
+    data: Array<{
+        label: string;
+        count: number;
+    }>;
+};
+
+export type TopTopicsQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type TopTopicsResponseSchema = {
+    data: Array<{
+        topic: string;
+        count: number;
+    }>;
+};
+
+export type CountryDistributionQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type CountryDistributionResponseSchema = {
+    data: Array<{
+        country: string;
+        count: number;
+    }>;
+};
+
 export type ChatBodySchema = {
     conversationId: string;
     message: string;
@@ -218,6 +305,10 @@ export type MessageSchema = {
             chunkIndex: number;
             similarity: number;
         }> | null;
+        sentiment?: {
+            label: 'positive' | 'neutral' | 'negative';
+            score: number;
+        } | null;
     } | null;
     systemMetadata: {
         finalQuery?: string;
@@ -240,6 +331,10 @@ export type ManyMessageResponse = {
                 chunkIndex: number;
                 similarity: number;
             }> | null;
+            sentiment?: {
+                label: 'positive' | 'neutral' | 'negative';
+                score: number;
+            } | null;
         } | null;
         systemMetadata: {
             finalQuery?: string;
@@ -845,6 +940,181 @@ export type GetUsageKnowledgeByChatbotResponses = {
 };
 
 export type GetUsageKnowledgeByChatbotResponse = GetUsageKnowledgeByChatbotResponses[keyof GetUsageKnowledgeByChatbotResponses];
+
+export type GetAnalyticsOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/overview';
+};
+
+export type GetAnalyticsOverviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsOverviewError = GetAnalyticsOverviewErrors[keyof GetAnalyticsOverviewErrors];
+
+export type GetAnalyticsOverviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: AnalyticsOverviewResponseSchema;
+};
+
+export type GetAnalyticsOverviewResponse = GetAnalyticsOverviewResponses[keyof GetAnalyticsOverviewResponses];
+
+export type GetAnalyticsConversationsDailyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/conversations-daily';
+};
+
+export type GetAnalyticsConversationsDailyErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsConversationsDailyError = GetAnalyticsConversationsDailyErrors[keyof GetAnalyticsConversationsDailyErrors];
+
+export type GetAnalyticsConversationsDailyResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ConversationsDailyResponseSchema;
+};
+
+export type GetAnalyticsConversationsDailyResponse = GetAnalyticsConversationsDailyResponses[keyof GetAnalyticsConversationsDailyResponses];
+
+export type GetAnalyticsMessagesByChannelData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/messages-by-channel';
+};
+
+export type GetAnalyticsMessagesByChannelErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsMessagesByChannelError = GetAnalyticsMessagesByChannelErrors[keyof GetAnalyticsMessagesByChannelErrors];
+
+export type GetAnalyticsMessagesByChannelResponses = {
+    /**
+     * Response for status 200
+     */
+    200: MessagesByChannelResponseSchema;
+};
+
+export type GetAnalyticsMessagesByChannelResponse = GetAnalyticsMessagesByChannelResponses[keyof GetAnalyticsMessagesByChannelResponses];
+
+export type GetAnalyticsTopChatbotsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/top-chatbots';
+};
+
+export type GetAnalyticsTopChatbotsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsTopChatbotsError = GetAnalyticsTopChatbotsErrors[keyof GetAnalyticsTopChatbotsErrors];
+
+export type GetAnalyticsTopChatbotsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: TopChatbotsResponseSchema;
+};
+
+export type GetAnalyticsTopChatbotsResponse = GetAnalyticsTopChatbotsResponses[keyof GetAnalyticsTopChatbotsResponses];
+
+export type GetAnalyticsSentimentData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/sentiment';
+};
+
+export type GetAnalyticsSentimentErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsSentimentError = GetAnalyticsSentimentErrors[keyof GetAnalyticsSentimentErrors];
+
+export type GetAnalyticsSentimentResponses = {
+    /**
+     * Response for status 200
+     */
+    200: SentimentResponseSchema;
+};
+
+export type GetAnalyticsSentimentResponse = GetAnalyticsSentimentResponses[keyof GetAnalyticsSentimentResponses];
+
+export type GetAnalyticsTopTopicsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/top-topics';
+};
+
+export type GetAnalyticsTopTopicsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsTopTopicsError = GetAnalyticsTopTopicsErrors[keyof GetAnalyticsTopTopicsErrors];
+
+export type GetAnalyticsTopTopicsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: TopTopicsResponseSchema;
+};
+
+export type GetAnalyticsTopTopicsResponse = GetAnalyticsTopTopicsResponses[keyof GetAnalyticsTopTopicsResponses];
+
+export type GetAnalyticsCountryDistributionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/country-distribution';
+};
+
+export type GetAnalyticsCountryDistributionErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetAnalyticsCountryDistributionError = GetAnalyticsCountryDistributionErrors[keyof GetAnalyticsCountryDistributionErrors];
+
+export type GetAnalyticsCountryDistributionResponses = {
+    /**
+     * Response for status 200
+     */
+    200: CountryDistributionResponseSchema;
+};
+
+export type GetAnalyticsCountryDistributionResponse = GetAnalyticsCountryDistributionResponses[keyof GetAnalyticsCountryDistributionResponses];
 
 export type PostChatData = {
     body: ChatBodySchema;

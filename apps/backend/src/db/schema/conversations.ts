@@ -16,6 +16,8 @@ export const conversations = pgTable(
     lastUserQuestion: text().notNull(),
     lastAssistantUtterance: text().notNull(),
     lastMessageAt: timestamp({ withTimezone: true }).notNull(),
+    country: text(),
+    topic: text(),
     ...timestamps,
   },
   (table) => [

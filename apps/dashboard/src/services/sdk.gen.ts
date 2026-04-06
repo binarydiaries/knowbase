@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByChatbotData, GetUsageKnowledgeByChatbotErrors, GetUsageKnowledgeByChatbotResponses, GetUsageMessagesByChatbotData, GetUsageMessagesByChatbotErrors, GetUsageMessagesByChatbotResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
+import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopChatbotsData, GetAnalyticsTopChatbotsErrors, GetAnalyticsTopChatbotsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByChatbotData, GetUsageKnowledgeByChatbotErrors, GetUsageKnowledgeByChatbotResponses, GetUsageMessagesByChatbotData, GetUsageMessagesByChatbotErrors, GetUsageMessagesByChatbotResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -33,6 +33,48 @@ export const getUsageMessagesByChatbot = <ThrowOnError extends boolean = true>(o
 export const getUsageKnowledgeByChatbot = <ThrowOnError extends boolean = true>(options?: Options<GetUsageKnowledgeByChatbotData, ThrowOnError>) => (options?.client ?? client).get<GetUsageKnowledgeByChatbotResponses, GetUsageKnowledgeByChatbotErrors, ThrowOnError>({
     responseType: 'json',
     url: '/usage/knowledge-by-chatbot',
+    ...options
+});
+
+export const getAnalyticsOverview = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsOverviewData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsOverviewResponses, GetAnalyticsOverviewErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/overview',
+    ...options
+});
+
+export const getAnalyticsConversationsDaily = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsConversationsDailyData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsConversationsDailyResponses, GetAnalyticsConversationsDailyErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/conversations-daily',
+    ...options
+});
+
+export const getAnalyticsMessagesByChannel = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsMessagesByChannelData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsMessagesByChannelResponses, GetAnalyticsMessagesByChannelErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/messages-by-channel',
+    ...options
+});
+
+export const getAnalyticsTopChatbots = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsTopChatbotsData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsTopChatbotsResponses, GetAnalyticsTopChatbotsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/top-chatbots',
+    ...options
+});
+
+export const getAnalyticsSentiment = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsSentimentData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsSentimentResponses, GetAnalyticsSentimentErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/sentiment',
+    ...options
+});
+
+export const getAnalyticsTopTopics = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsTopTopicsData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsTopTopicsResponses, GetAnalyticsTopTopicsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/top-topics',
+    ...options
+});
+
+export const getAnalyticsCountryDistribution = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsCountryDistributionData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsCountryDistributionResponses, GetAnalyticsCountryDistributionErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/analytics/country-distribution',
     ...options
 });
 

@@ -10,8 +10,14 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .use(ErrorModel)
   .post(
     '',
-    async ({ body, status }) => {
+    async ({ body, status, headers }) => {
       const { message, channelId, conversationId, orgId } = body;
+      const ip =
+        (headers['x-forwarded-for'] as string | undefined)
+          ?.split(',')[0]
+          ?.trim() ??
+        (headers['x-real-ip'] as string | undefined) ??
+        undefined;
 
       try {
         return await ChatService.sendWeb({
@@ -19,6 +25,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
           message: message,
           channelId,
           orgId,
+          ip,
         });
       } catch (error) {
         if (!(error instanceof MessageLimitReachedError)) {

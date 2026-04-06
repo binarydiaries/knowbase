@@ -4,6 +4,50 @@ export type ClientOptions = {
     baseURL: 'http://localhost:3000' | (string & {});
 };
 
+export type UnauthorizedSchema = {
+    code: 'UNAUTHORIZED';
+    message: string;
+};
+
+export type MessagesDailyQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type MessagesDailyResponseSchema = {
+    data: Array<{
+        date: string;
+        count: number;
+    }>;
+};
+
+export type MessagesByChatbotQuerySchema = {
+    startDate: string;
+    endDate: string;
+    chatbotId?: string;
+};
+
+export type MessagesByChatbotResponseSchema = {
+    data: Array<{
+        chatbotId: string;
+        chatbotName: string;
+        count: number;
+    }>;
+};
+
+export type KnowledgeByChatbotQuerySchema = {
+    chatbotId?: string;
+};
+
+export type KnowledgeByChatbotResponseSchema = {
+    data: Array<{
+        chatbotId: string;
+        chatbotName: string;
+        count: number;
+    }>;
+};
+
 export type ChatBodySchema = {
     conversationId: string;
     message: string;
@@ -48,9 +92,117 @@ export type ChatChannelResponseSchema = {
     };
 };
 
-export type UnauthorizedSchema = {
-    code: 'UNAUTHORIZED';
+export type NotFoundResponse = {
+    code: 'NOT_FOUND';
     message: string;
+};
+
+export type ChatbotLimitReachedResponse = {
+    code: 'CHATBOT_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+};
+
+export type ChatbotLockedResponse = {
+    code: 'CHATBOT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+};
+
+export type ChatbotRestrictedResponse = {
+    code: 'CHATBOT_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+} | {
+    code: 'CHATBOT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+};
+
+export type KnowledgeSourceLimitReachedResponse = {
+    code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+};
+
+export type TrainingLimitReachedResponse = {
+    code: 'TRAINING_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    trainingRunsPerDayLimit: number;
+    trainingRunsToday: number;
+};
+
+export type MessageLimitReachedResponse = {
+    code: 'MESSAGE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    messagesPerMonthLimit: number;
+    messagesThisMonth: number;
+};
+
+export type KnowledgeSourceTextTooLargeResponse = {
+    code: 'KNOWLEDGE_SOURCE_TEXT_TOO_LARGE';
+    message: string;
+    maxCharacters: number;
+};
+
+export type KnowledgeSourceQnaTooLargeResponse = {
+    code: 'KNOWLEDGE_SOURCE_QNA_TOO_LARGE';
+    message: string;
+    maxCharacters: number;
+};
+
+export type KnowledgeSourceQnaTooManyPairsResponse = {
+    code: 'KNOWLEDGE_SOURCE_QNA_TOO_MANY_PAIRS';
+    message: string;
+    maxPairs: number;
+};
+
+export type DocumentWriteForbiddenResponse = {
+    code: 'CHATBOT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+} | {
+    code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+};
+
+export type IndexingForbiddenResponse = {
+    code: 'CHATBOT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+} | {
+    code: 'TRAINING_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    trainingRunsPerDayLimit: number;
+    trainingRunsToday: number;
+};
+
+export type ChatForbiddenResponse = {
+    code: 'MESSAGE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    messagesPerMonthLimit: number;
+    messagesThisMonth: number;
 };
 
 export type MessageSchema = {
@@ -208,39 +360,6 @@ export type DocumentContentQna = Array<{
 
 export type DocumentContentText = string;
 
-export type NotFoundResponse = {
-    code: 'NOT_FOUND';
-    message: string;
-};
-
-export type MessageLimitReachedResponse = {
-    code: 'MESSAGE_LIMIT_REACHED';
-    message: string;
-    plan: 'free' | 'starter' | 'growth' | 'pro';
-    messagesPerMonthLimit: number;
-    messagesThisMonth: number;
-};
-
-export type ChatbotLockedResponse = {
-    code: 'CHATBOT_LOCKED';
-    message: string;
-    plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
-};
-
-export type TrainingLimitReachedResponse = {
-    code: 'TRAINING_LIMIT_REACHED';
-    message: string;
-    plan: 'free' | 'starter' | 'growth' | 'pro';
-    trainingRunsPerDayLimit: number;
-    trainingRunsToday: number;
-};
-
-export type IndexingForbiddenResponse =
-    | ChatbotLockedResponse
-    | TrainingLimitReachedResponse;
-
 export type ChatbotSchema = {
     id: string;
     name: string;
@@ -262,10 +381,10 @@ export type OneChatbotResponse = {
         name: string;
         description: string | null;
         chatbotStatus: 'active' | 'archived';
-        locked: boolean;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        locked: boolean;
     };
     documents: Array<{
         id: string;
@@ -327,7 +446,21 @@ export type OneChatbotResponse = {
         createdAt: string;
         updatedAt: string;
     };
-    subscription: SubscriptionStatusSchema;
+    subscription: {
+        plan: 'free' | 'starter' | 'growth' | 'pro';
+        activeChatbotLimit: number;
+        activeChatbotCount: number;
+        knowledgeSourceLimit: number;
+        knowledgeSourceCount: number;
+        messagesPerMonthLimit: number;
+        messagesThisMonth: number;
+        trainingRunsPerDayLimit: number;
+        trainingRunsToday: number;
+        isOverLimit: boolean;
+        hasReachedKnowledgeSourceLimit: boolean;
+        hasReachedMessagesPerMonthLimit: boolean;
+        hasReachedTrainingRunsPerDayLimit: boolean;
+    };
 };
 
 export type ManyChatbotResponse = {
@@ -336,10 +469,10 @@ export type ManyChatbotResponse = {
         name: string;
         description: string | null;
         chatbotStatus: 'active' | 'archived';
-        locked: boolean;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        locked: boolean;
     }>;
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
@@ -378,22 +511,6 @@ export type OneSmallChatbotResponse = {
     };
 };
 
-export type SubscriptionStatusSchema = {
-    plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
-    knowledgeSourceLimit: number;
-    knowledgeSourceCount: number;
-    messagesPerMonthLimit: number;
-    messagesThisMonth: number;
-    trainingRunsPerDayLimit: number;
-    trainingRunsToday: number;
-    isOverLimit: boolean;
-    hasReachedKnowledgeSourceLimit: boolean;
-    hasReachedMessagesPerMonthLimit: boolean;
-    hasReachedTrainingRunsPerDayLimit: boolean;
-};
-
 export type IndexingStartBody = {
     chatbotId: string;
 };
@@ -415,8 +532,8 @@ export type IndexingStatusResponse = {
 export type ListConversation = {
     chatbotId?: string;
     channelId?: string;
-    page?: number;
-    limit?: number;
+    page: number;
+    limit: number;
 };
 
 export type ManyConversationResponse = {
@@ -515,7 +632,7 @@ export type ChannelSchema = {
 };
 
 export type ChannelListQuerySchema = {
-    chatbotId: string;
+    chatbotId?: string;
 };
 
 export type ManyChannelResponse = {
@@ -636,6 +753,99 @@ export type OneChannelResponse = {
     };
 };
 
+export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
+
+export type SubscriptionStatusSchema = {
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeChatbotLimit: number;
+    activeChatbotCount: number;
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+    messagesPerMonthLimit: number;
+    messagesThisMonth: number;
+    trainingRunsPerDayLimit: number;
+    trainingRunsToday: number;
+    isOverLimit: boolean;
+    hasReachedKnowledgeSourceLimit: boolean;
+    hasReachedMessagesPerMonthLimit: boolean;
+    hasReachedTrainingRunsPerDayLimit: boolean;
+};
+
+export type GetUsageMessagesDailyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usage/messages-daily';
+};
+
+export type GetUsageMessagesDailyErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetUsageMessagesDailyError = GetUsageMessagesDailyErrors[keyof GetUsageMessagesDailyErrors];
+
+export type GetUsageMessagesDailyResponses = {
+    /**
+     * Response for status 200
+     */
+    200: MessagesDailyResponseSchema;
+};
+
+export type GetUsageMessagesDailyResponse = GetUsageMessagesDailyResponses[keyof GetUsageMessagesDailyResponses];
+
+export type GetUsageMessagesByChatbotData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usage/messages-by-chatbot';
+};
+
+export type GetUsageMessagesByChatbotErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetUsageMessagesByChatbotError = GetUsageMessagesByChatbotErrors[keyof GetUsageMessagesByChatbotErrors];
+
+export type GetUsageMessagesByChatbotResponses = {
+    /**
+     * Response for status 200
+     */
+    200: MessagesByChatbotResponseSchema;
+};
+
+export type GetUsageMessagesByChatbotResponse = GetUsageMessagesByChatbotResponses[keyof GetUsageMessagesByChatbotResponses];
+
+export type GetUsageKnowledgeByChatbotData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usage/knowledge-by-chatbot';
+};
+
+export type GetUsageKnowledgeByChatbotErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetUsageKnowledgeByChatbotError = GetUsageKnowledgeByChatbotErrors[keyof GetUsageKnowledgeByChatbotErrors];
+
+export type GetUsageKnowledgeByChatbotResponses = {
+    /**
+     * Response for status 200
+     */
+    200: KnowledgeByChatbotResponseSchema;
+};
+
+export type GetUsageKnowledgeByChatbotResponse = GetUsageKnowledgeByChatbotResponses[keyof GetUsageKnowledgeByChatbotResponses];
+
 export type PostChatData = {
     body: ChatBodySchema;
     path?: never;
@@ -647,7 +857,7 @@ export type PostChatErrors = {
     /**
      * Response for status 403
      */
-    403: MessageLimitReachedResponse;
+    403: ChatForbiddenResponse;
 };
 
 export type PostChatError = PostChatErrors[keyof PostChatErrors];
@@ -658,8 +868,6 @@ export type PostChatResponses = {
      */
     200: unknown;
 };
-
-export type PostChatResponse = PostChatResponses[keyof PostChatResponses];
 
 export type GetChatChannelData = {
     body?: never;
@@ -676,31 +884,6 @@ export type GetChatChannelResponses = {
 };
 
 export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
-
-export type GetSubscriptionsStatusData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/subscriptions/status';
-};
-
-export type GetSubscriptionsStatusErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-};
-
-export type GetSubscriptionsStatusError = GetSubscriptionsStatusErrors[keyof GetSubscriptionsStatusErrors];
-
-export type GetSubscriptionsStatusResponses = {
-    /**
-     * Response for status 200
-     */
-    200: SubscriptionStatusSchema;
-};
-
-export type GetSubscriptionsStatusResponse = GetSubscriptionsStatusResponses[keyof GetSubscriptionsStatusResponses];
 
 export type GetMessagesData = {
     body?: never;
@@ -766,6 +949,14 @@ export type PostDocumentsErrors = {
      * Response for status 401
      */
     401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: DocumentWriteForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
 };
 
 export type PostDocumentsError = PostDocumentsErrors[keyof PostDocumentsErrors];
@@ -789,6 +980,10 @@ export type DeleteDocumentsByIdData = {
 };
 
 export type DeleteDocumentsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -814,6 +1009,10 @@ export type GetDocumentsByIdData = {
 };
 
 export type GetDocumentsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -841,6 +1040,10 @@ export type PatchDocumentsByIdData = {
 };
 
 export type PatchDocumentsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -895,6 +1098,10 @@ export type PostChatbotsErrors = {
      * Response for status 401
      */
     401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: ChatbotRestrictedResponse;
 };
 
 export type PostChatbotsError = PostChatbotsErrors[keyof PostChatbotsErrors];
@@ -918,6 +1125,10 @@ export type GetChatbotsByIdData = {
 };
 
 export type GetChatbotsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -945,6 +1156,10 @@ export type PatchChatbotsByIdData = {
 };
 
 export type PatchChatbotsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -1029,7 +1244,7 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: ListConversation;
+    query?: never;
     url: '/conversations';
 };
 
@@ -1087,6 +1302,10 @@ export type PatchBehaviourByIdData = {
 
 export type PatchBehaviourByIdErrors = {
     /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
+    /**
      * Response for status 404
      */
     404: NotFoundResponse;
@@ -1106,7 +1325,7 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query: ChannelListQuerySchema;
+    query?: never;
     url: '/channels';
 };
 
@@ -1140,6 +1359,14 @@ export type PostChannelsErrors = {
      * Response for status 401
      */
     401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
 };
 
 export type PostChannelsError = PostChannelsErrors[keyof PostChannelsErrors];
@@ -1163,6 +1390,10 @@ export type GetChannelsByIdData = {
 };
 
 export type GetChannelsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
     /**
      * Response for status 404
      */
@@ -1191,6 +1422,10 @@ export type PatchChannelsByIdData = {
 
 export type PatchChannelsByIdErrors = {
     /**
+     * Response for status 403
+     */
+    403: ChatbotLockedResponse;
+    /**
      * Response for status 404
      */
     404: NotFoundResponse;
@@ -1206,3 +1441,28 @@ export type PatchChannelsByIdResponses = {
 };
 
 export type PatchChannelsByIdResponse = PatchChannelsByIdResponses[keyof PatchChannelsByIdResponses];
+
+export type GetSubscriptionsStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/status';
+};
+
+export type GetSubscriptionsStatusErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetSubscriptionsStatusError = GetSubscriptionsStatusErrors[keyof GetSubscriptionsStatusErrors];
+
+export type GetSubscriptionsStatusResponses = {
+    /**
+     * Response for status 200
+     */
+    200: SubscriptionStatusSchema;
+};
+
+export type GetSubscriptionsStatusResponse = GetSubscriptionsStatusResponses[keyof GetSubscriptionsStatusResponses];

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsageIndexRouteImport } from './routes/usage/index'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions/index'
 import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
@@ -22,6 +23,11 @@ import { Route as ActivitiesChatbotIdIndexRouteImport } from './routes/activitie
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsageIndexRoute = UsageIndexRouteImport.update({
+  id: '/usage/',
+  path: '/usage/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscriptionsIndexRoute = SubscriptionsIndexRouteImport.update({
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/chatbots/': typeof ChatbotsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
+  '/usage/': typeof UsageIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/chatbots': typeof ChatbotsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
+  '/usage': typeof UsageIndexRoute
   '/activities/$chatbotId': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/chatbots/': typeof ChatbotsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
+  '/usage/': typeof UsageIndexRoute
   '/activities/$chatbotId/': typeof ActivitiesChatbotIdIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/chatbots/'
     | '/organization/'
     | '/subscriptions/'
+    | '/usage/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/chatbots'
     | '/organization'
     | '/subscriptions'
+    | '/usage'
     | '/activities/$chatbotId'
     | '/chatbots/$chatbotId'
     | '/conversations/{-$conversationId}'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/chatbots/'
     | '/organization/'
     | '/subscriptions/'
+    | '/usage/'
     | '/activities/$chatbotId/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
   OrganizationIndexRoute: typeof OrganizationIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
+  UsageIndexRoute: typeof UsageIndexRoute
   ActivitiesChatbotIdIndexRoute: typeof ActivitiesChatbotIdIndexRoute
   ChatbotsChatbotIdIndexRoute: typeof ChatbotsChatbotIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -156,6 +169,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usage/': {
+      id: '/usage/'
+      path: '/usage'
+      fullPath: '/usage/'
+      preLoaderRoute: typeof UsageIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscriptions/': {
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatbotsIndexRoute: ChatbotsIndexRoute,
   OrganizationIndexRoute: OrganizationIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
+  UsageIndexRoute: UsageIndexRoute,
   ActivitiesChatbotIdIndexRoute: ActivitiesChatbotIdIndexRoute,
   ChatbotsChatbotIdIndexRoute: ChatbotsChatbotIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:

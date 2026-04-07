@@ -1,6 +1,7 @@
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +22,9 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
+  AlertCircle,
   Archive,
   ArchiveRestore,
-  ArrowUpRightIcon,
   Bot,
   Edit,
   Loader2,
@@ -40,18 +41,23 @@ import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/Su
 import { type ChatbotSchema, getChatbots, patchChatbotsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
+import { ArchiveChatbotDialog } from '@/components/ArchiveChatbotDialog/ArchiveChatbotDialog.tsx';
 import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
 
 export const Route = createFileRoute('/chatbots/')({
   component: RouteComponent,
 });
 
+type ArchiveConfirm = {
+  id: string;
+  name: string;
+  newStatus: 'active' | 'archived';
+};
+
 function RouteComponent() {
   const query = useQuery({
     queryKey: ['chatbots'],
-    queryFn: () => {
-      return getChatbots();
-    },
+    queryFn: () => getChatbots(),
   });
   const queryClient = useQueryClient();
   const isChatbotAvailable =
@@ -62,27 +68,22 @@ function RouteComponent() {
     (subscription?.activeChatbotLimit ?? Number.MAX_SAFE_INTEGER);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<ChatbotSchema>();
+  const [archiveConfirm, setArchiveConfirm] = useState<ArchiveConfirm | null>(null);
 
   const archiveChatbotMutation = useMutation({
-    mutationFn: async ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: 'active' | 'archived';
-    }) => {
+    mutationFn: async ({ id, status }: { id: string; status: 'active' | 'archived' }) => {
       return patchChatbotsById({
         path: { id },
-        body: {
-          chatbotStatus: status,
-        },
+        body: { chatbotStatus: status },
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+      setArchiveConfirm(null);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
+      setArchiveConfirm(null);
     },
   });
 
@@ -112,22 +113,42 @@ function RouteComponent() {
         <div className="mb-5">
           <SubscriptionLimitBanner subscription={subscription} />
         </div>
-        {/* Chatbot List */}
-        {query.isLoading ? (
+
+        {/* Loading */}
+        {query.isLoading && (
           <div className="flex h-[300px] items-center justify-center">
             <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
           </div>
-        ) : (
+        )}
+
+        {/* Error */}
+        {query.isError && (
+          <div className="flex h-[300px] flex-col items-center justify-center gap-3 text-center">
+            <AlertCircle className="h-8 w-8 text-muted-foreground" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Failed to load chatbots</p>
+              <p className="text-xs text-muted-foreground">
+                Something went wrong. Please try again.
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => query.refetch()}>
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {/* Chatbot List */}
+        {query.isSuccess && isChatbotAvailable && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {query?.data?.data.chatbots.map((bot) => (
+            {query.data.data.chatbots.map((bot) => (
               <Link
                 key={bot.id}
-                to={`/chatbots/$chatbotId`}
+                to="/chatbots/$chatbotId"
                 params={{ chatbotId: bot.id }}
                 className="block"
               >
                 <Card className="rounded-xl border bg-background shadow-sm hover:shadow-md transition">
-                  <CardContent className="">
+                  <CardContent>
                     {/* Top row */}
                     <div className="flex items-start gap-4">
                       {/* Icon */}
@@ -136,18 +157,18 @@ function RouteComponent() {
                       </div>
 
                       {/* Title + status */}
-                      <div className={'flex-1'}>
+                      <div className="flex-1">
                         <div className="flex flex-col gap-2">
                           <h3 className="text-base font-semibold leading-none">
                             {bot.name}
                           </h3>
                           {bot.locked && bot.chatbotStatus === 'active' && (
-                            <Badge className={'bg-amber-100 text-amber-700'}>
+                            <Badge className="bg-amber-100 text-amber-700">
                               Locked
                             </Badge>
                           )}
                           {bot.chatbotStatus === 'archived' && (
-                            <Badge className={'bg-muted text-muted-foreground'}>
+                            <Badge className="bg-muted text-muted-foreground">
                               Archived
                             </Badge>
                           )}
@@ -160,7 +181,7 @@ function RouteComponent() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="text-muted-foreground  cursor-pointer "
+                            className="text-muted-foreground cursor-pointer"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -170,7 +191,7 @@ function RouteComponent() {
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="w-40 ">
+                        <DropdownMenuContent align="end" className="w-40">
                           <DisabledTooltip
                             disabled={subscription?.isOverLimit}
                             content={CHATBOT_LOCK_TOOLTIP}
@@ -178,12 +199,12 @@ function RouteComponent() {
                             <div>
                               <DropdownMenuItem
                                 onClick={(e) => {
-                                  e.stopPropagation(); // IMPORTANT: prevent Link navigation
+                                  e.stopPropagation();
                                   setEditingBot(bot);
                                   setDialogOpen(true);
                                 }}
                                 disabled={subscription?.isOverLimit}
-                                className="flex items-center  cursor-pointer gap-2"
+                                className="flex items-center cursor-pointer gap-2"
                               >
                                 <Edit className="h-4 w-4" />
                                 Edit
@@ -192,54 +213,50 @@ function RouteComponent() {
                           </DisabledTooltip>
 
                           <DisabledTooltip
-                            disabled={
-                              bot.chatbotStatus === 'archived' &&
-                              hasReachedChatbotLimit
-                            }
+                            disabled={bot.chatbotStatus === 'archived' && hasReachedChatbotLimit}
                             content={CHATBOT_LIMIT_TOOLTIP}
                           >
                             <div>
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const newStatus =
-                                    bot.chatbotStatus === 'archived'
-                                      ? 'active'
-                                      : 'archived';
-
-                                  archiveChatbotMutation.mutate({
+                                  setArchiveConfirm({
                                     id: bot.id,
-                                    status: newStatus,
+                                    name: bot.name,
+                                    newStatus:
+                                      bot.chatbotStatus === 'archived'
+                                        ? 'active'
+                                        : 'archived',
                                   });
                                 }}
                                 disabled={
-                                  bot.chatbotStatus === 'archived' &&
-                                  hasReachedChatbotLimit
+                                  (bot.chatbotStatus === 'archived' && hasReachedChatbotLimit) ||
+                                  archiveChatbotMutation.isPending
                                 }
-                                className="flex items-center gap-2 cursor-pointer "
+                                className="flex items-center gap-2 cursor-pointer"
                               >
                                 {bot.chatbotStatus === 'archived' ? (
                                   <ArchiveRestore className="h-4 w-4" />
                                 ) : (
                                   <Archive className="h-4 w-4" />
                                 )}
-                                {bot.chatbotStatus === 'archived'
-                                  ? 'Unarchive'
-                                  : 'Archive'}
+                                {bot.chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
                               </DropdownMenuItem>
                             </div>
                           </DisabledTooltip>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    {/* Description (optional / placeholder) */}
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {bot.description}
-                    </p>
+
+                    {/* Description */}
+                    {bot.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {bot.description}
+                      </p>
+                    )}
 
                     {/* Bottom row */}
-                    <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                      <span>0 conversations</span>
+                    <div className="mt-4 flex items-center justify-end text-sm text-muted-foreground">
                       <span>Updated {timeAgo(bot.updatedAt)}</span>
                     </div>
                   </CardContent>
@@ -249,6 +266,7 @@ function RouteComponent() {
           </div>
         )}
 
+        {/* Empty state */}
         {query.isSuccess && !isChatbotAvailable && (
           <Empty className="md:py-5">
             <EmptyHeader>
@@ -257,8 +275,7 @@ function RouteComponent() {
               </EmptyMedia>
               <EmptyTitle>No chatbots yet</EmptyTitle>
               <EmptyDescription>
-                Create your first chatbot to answer questions using your
-                content.
+                Create your first chatbot to answer questions using your content.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">
@@ -271,19 +288,26 @@ function RouteComponent() {
                 disabledReason={CHATBOT_LIMIT_TOOLTIP}
               />
             </EmptyContent>
-            <Button
-              variant="link"
-              asChild
-              className="text-muted-foreground"
-              size="sm"
-            >
-              <a href="/">
-                Learn More <ArrowUpRightIcon />
-              </a>
-            </Button>
           </Empty>
         )}
       </div>
+
+      {/* Archive confirmation dialog */}
+      <ArchiveChatbotDialog
+        open={!!archiveConfirm}
+        onOpenChange={(open) => { if (!open) setArchiveConfirm(null); }}
+        chatbotName={archiveConfirm?.name}
+        currentStatus={archiveConfirm?.newStatus === 'archived' ? 'active' : 'archived'}
+        isPending={archiveChatbotMutation.isPending}
+        onConfirm={() => {
+          if (archiveConfirm) {
+            archiveChatbotMutation.mutate({
+              id: archiveConfirm.id,
+              status: archiveConfirm.newStatus,
+            });
+          }
+        }}
+      />
     </>
   );
 }

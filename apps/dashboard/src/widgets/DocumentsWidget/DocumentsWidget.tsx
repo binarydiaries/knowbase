@@ -35,7 +35,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { ArrowUpRightIcon, FolderIcon } from 'lucide-react';
+import { FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -77,6 +77,7 @@ export const DocumentsWidget = ({
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   if (!chatbotId) {
     throw 'Not chatbot id';
@@ -285,7 +286,7 @@ export const DocumentsWidget = ({
               }}
               onDelete={(e) => {
                 e.stopPropagation();
-                deleteDocumentMutation.mutate(doc.id);
+                setDeleteConfirmId(doc.id);
               }}
               readOnly={readOnly}
               disabledReason={CHATBOT_LOCK_TOOLTIP}
@@ -330,16 +331,6 @@ export const DocumentsWidget = ({
                   </DisabledTooltip>
                 )}
               </EmptyContent>
-              <Button
-                variant="link"
-                asChild
-                className="text-muted-foreground"
-                size="sm"
-              >
-                <a href="http://help.com">
-                  Learn More <ArrowUpRightIcon />
-                </a>
-              </Button>
             </Empty>
           )}
         </CardContent>
@@ -417,6 +408,40 @@ export const DocumentsWidget = ({
           />
         )}
       </Sheet>
+      <Dialog
+        open={!!deleteConfirmId}
+        onOpenChange={(open) => { if (!open) setDeleteConfirmId(null); }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete knowledge source?</DialogTitle>
+            <DialogDescription>
+              This knowledge source will be permanently deleted. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmId(null)}
+              disabled={deleteDocumentMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteDocumentMutation.isPending}
+              onClick={() => {
+                if (deleteConfirmId) {
+                  deleteDocumentMutation.mutate(deleteConfirmId);
+                  setDeleteConfirmId(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Sheet
         open={isQASheetOpen}
         onOpenChange={(open) => {

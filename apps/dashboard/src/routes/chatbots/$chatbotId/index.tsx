@@ -146,7 +146,7 @@ function RouteComponent() {
         </div>
       )}
 
-      {query.isLoadingError && (
+      {query.isError && (
         <div className="flex flex-1 h-full items-center justify-center">
           <Alert variant="destructive" className="max-w-md">
             <AlertCircleIcon />

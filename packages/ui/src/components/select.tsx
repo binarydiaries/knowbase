@@ -5,7 +5,20 @@ import { cn } from '@knowbase/ui/lib/utils';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import type * as React from 'react';
 
-const Select = SelectPrimitive.Root;
+type SelectProps = Omit<SelectPrimitive.Root.Props<string>, 'onValueChange'> & {
+  onValueChange?: (value: string) => void;
+};
+
+function Select({ onValueChange, ...props }: SelectProps) {
+  return (
+    <SelectPrimitive.Root<string>
+      {...props}
+      onValueChange={
+        onValueChange ? (value) => { if (value != null) onValueChange(value); } : undefined
+      }
+    />
+  );
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (

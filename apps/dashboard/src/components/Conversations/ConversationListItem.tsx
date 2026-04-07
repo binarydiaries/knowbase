@@ -36,6 +36,7 @@ export function ConversationListItem({
       <Link
         to={'/conversations/{-$conversationId}'}
         params={{ conversationId: id }}
+        search={(prev) => ({ page: prev.page ?? 1 })}
       >
         <ItemContent className="gap-2">
           <ItemHeader>

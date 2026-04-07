@@ -23,6 +23,9 @@ import { patchBehaviourById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
+const toneValues = ['friendly', 'professional', 'neutral'] as const;
+const verbosityValues = ['short', 'balanced', 'detailed'] as const;
+
 const behaviourTone = [
   { label: 'Friendly', value: 'friendly' },
   { label: 'Professional', value: 'professional' },
@@ -40,8 +43,8 @@ export const chatbotBehaviourSchema = z.object({
     .string()
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
-  tone: z.enum(behaviourTone.map((value) => value.value)),
-  verbosity: z.enum(behaviorVerbosity.map((value) => value.value)),
+  tone: z.enum(toneValues),
+  verbosity: z.enum(verbosityValues),
   fallbackMessage: z
     .string()
     .min(5, 'Fallback message is too short')

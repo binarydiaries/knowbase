@@ -1514,7 +1514,12 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        chatbotId?: string;
+        channelId?: string;
+        page?: number;
+        limit?: number;
+    };
     url: '/conversations';
 };
 
@@ -1595,7 +1600,9 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        chatbotId?: string;
+    };
     url: '/channels';
 };
 

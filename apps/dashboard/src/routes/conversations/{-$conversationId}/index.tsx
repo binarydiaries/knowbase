@@ -114,6 +114,7 @@ function RouteComponent() {
   useEffect(() => {
     if (page > totalPages) {
       void navigate({
+        from: '/conversations/{-$conversationId}/',
         search: (prev) => ({ ...prev, page: totalPages }),
         replace: true,
       });
@@ -139,9 +140,10 @@ function RouteComponent() {
       conversations.length > 0 &&
       (!conversationId || !selectedConversation)
     ) {
-      navigate({
+      void navigate({
         from: '/conversations/{-$conversationId}/',
         params: { conversationId: conversations[0].id },
+        search: true,
         replace: true,
       });
     }
@@ -192,9 +194,8 @@ function RouteComponent() {
               chatbotIdFilter={chatbotIdFilter}
               onChatbotIdFilterChange={(value) => {
                 setChatbotIdFilter(value);
-                navigate({
+                void navigate({
                   from: '/conversations/{-$conversationId}/',
-                  params: { conversationId: undefined },
                   search: (prev) => ({ ...prev, page: 1 }),
                   replace: true,
                 });
@@ -273,6 +274,7 @@ function RouteComponent() {
                       <PaginationPrevious
                         onClick={() =>
                           void navigate({
+                            from: '/conversations/{-$conversationId}/',
                             search: (prev) => ({ ...prev, page: page - 1 }),
                             replace: true,
                           })
@@ -294,6 +296,7 @@ function RouteComponent() {
                             isActive={p === page}
                             onClick={() =>
                               void navigate({
+                                from: '/conversations/{-$conversationId}/',
                                 search: (prev) => ({ ...prev, page: p }),
                                 replace: true,
                               })
@@ -308,6 +311,7 @@ function RouteComponent() {
                       <PaginationNext
                         onClick={() =>
                           void navigate({
+                            from: '/conversations/{-$conversationId}/',
                             search: (prev) => ({ ...prev, page: page + 1 }),
                             replace: true,
                           })

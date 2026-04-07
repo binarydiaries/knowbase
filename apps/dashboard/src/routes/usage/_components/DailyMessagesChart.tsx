@@ -82,8 +82,8 @@ export function DailyMessagesChart({ chatbotId, startDate, endDate }: Props) {
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(val: string) => {
-                      const d = new Date(val + 'T00:00:00Z');
+                    labelFormatter={(val) => {
+                      const d = new Date((val as string) + 'T00:00:00Z');
                       return d.toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',

@@ -3,12 +3,15 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/server.ts",
+    "dev:app": "bun run --watch src/server.ts",
     "dev:worker": "bun run --watch src/queue/indexing/indexing.worker.ts",
-    "build": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile server \\\n\tsrc/index.ts",
+    "dev": "bun run dev:app & bun run dev:worker",
+    "build:app": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile server \\\n\tsrc/index.ts",
     "build:worker": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile worker-server \\\n\tsrc/queue/indexing/indexing.worker.ts",
-    "start": "./server",
+    "build": "bun run build:app & bun run build:worker",
+    "start:app": "./server",
     "start:worker": "./worker-server",
+    "start": "bun run start:app & bun run start:worker",
     "db:push": "npx drizzle-kit push",
     "studio": "npx drizzle-kit studio"
   },

@@ -58,15 +58,20 @@ export const ChatbotPreview = () => {
     }),
     onError(error) {
       const chatError = parseChatError(error);
-      if (chatError?.code !== 'MESSAGE_LIMIT_REACHED' || isUsageExhausted) {
+      if (!chatError) return;
+
+      if (chatError.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
+        setIsUsageExhausted(true);
+        setAlertMessage(
+          chatError.message ||
+            'This assistant is temporarily unavailable due to the monthly message limit.',
+        );
         return;
       }
 
-      setIsUsageExhausted(true);
-      setAlertMessage(
-        chatError.message ||
-          'This assistant is temporarily unavailable due to the monthly message limit.',
-      );
+      if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
+        setAlertMessage(chatError.message || 'Something went wrong. Please try again.');
+      }
     },
   });
 

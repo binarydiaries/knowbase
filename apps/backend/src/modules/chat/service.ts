@@ -19,6 +19,13 @@ import {
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
 
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
 export class MessageLimitReachedError extends Error {
   constructor(
     readonly payload: Awaited<
@@ -100,14 +107,14 @@ export abstract class ChatService {
       return chatbot;
     }
 
-    throw new Error('Chatbot not found or inactive');
+    throw new NotFoundError('Chatbot not found or inactive');
   }
 
   static async getBehaviour(chatbotId: string) {
     const behaviour = await BehaviourService.singleByChatbot(chatbotId);
 
     if (!behaviour) {
-      throw new Error('Behaviour not found');
+      throw new NotFoundError('Behaviour not found');
     }
 
     return behaviour;
@@ -253,7 +260,7 @@ export abstract class ChatService {
     const channel = await ChannelService.single({ id: channelId, orgId });
 
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new NotFoundError('Channel not found');
     }
 
     return ChatService.send({

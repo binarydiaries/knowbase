@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ErrorModel } from '../../common/models/error';
 import { ChannelService } from '../channel/service';
 import { Model } from './model';
-import { ChatService, MessageLimitReachedError } from './service';
+import { ChatService, MessageLimitReachedError, NotFoundError } from './service';
 
 export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .use(Model)
@@ -28,6 +28,10 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
           ip,
         });
       } catch (error) {
+        if (error instanceof NotFoundError) {
+          return status(404, { code: 'NOT_FOUND', message: error.message });
+        }
+
         if (!(error instanceof MessageLimitReachedError)) {
           throw error;
         }
@@ -46,19 +50,20 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       response: {
         200: z.any(),
         403: 'ChatForbiddenResponse',
+        404: 'NotFoundResponse',
       },
     },
   )
   .get(
     '/channel',
-    async ({ query }) => {
+    async ({ query, status }) => {
       const channel = await ChannelService.single({
         id: query.channelId,
         orgId: query.orgId,
       });
 
       if (!channel) {
-        throw new Error('Channel not found or Invalid');
+        return status(404, { code: 'NOT_FOUND', message: 'Channel not found or Invalid' });
       }
 
       return {
@@ -67,6 +72,9 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
     },
     {
       query: 'ChatChannelQueryParamSchema',
-      response: 'ChatChannelResponseSchema',
+      response: {
+        200: 'ChatChannelResponseSchema',
+        404: 'NotFoundResponse',
+      },
     },
   );

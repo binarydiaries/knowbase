@@ -1,10 +1,10 @@
 import { openai } from '@ai-sdk/openai';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { embed, embedMany } from 'ai';
-import { cosineDistance, desc, eq, gt, sql } from 'drizzle-orm';
+import { and, cosineDistance, desc, eq, gt, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db } from '../../db';
-import type { documents } from '../../db/schema/documents';
+import { documents } from '../../db/schema/documents';
 import { embeddings } from '../../db/schema/embeddings';
 import { MarkdownHeaderTextSplitter } from '../../utils/MarkdownHeaderTextSplitter';
 import type { DocumentContent, DocumentContentQna } from '../document/model';
@@ -133,7 +133,7 @@ ${recursiveChunk}
     return embedding;
   };
 
-  static findRelevantContent = async (userQuery: string) => {
+  static findRelevantContent = async (userQuery: string, chatbotId: string) => {
     const userQueryEmbedded = await this.generateEmbedding(userQuery);
     const similarity = sql<number>`1 - (${cosineDistance(
       embeddings.embedding,
@@ -148,7 +148,8 @@ ${recursiveChunk}
         chunkIndex: embeddings.chunkIndex,
       })
       .from(embeddings)
-      .where(gt(similarity, 0.5))
+      .innerJoin(documents, eq(embeddings.documentId, documents.id))
+      .where(and(gt(similarity, 0.5), eq(documents.chatbotId, chatbotId)))
       .orderBy((t) => desc(t.similarity))
       .limit(3);
   };

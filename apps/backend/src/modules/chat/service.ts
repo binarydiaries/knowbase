@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { generateText, stepCountIs, streamText } from 'ai';
+import { generateText, streamText } from 'ai';
 import type { conversations } from '../../db/schema/conversations';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
@@ -79,8 +79,8 @@ export abstract class ChatService {
     return finalQuery;
   }
 
-  static async getSearchChunks(finalQuery: string) {
-    const chunks = await IndexingService.findRelevantContent(finalQuery);
+  static async getSearchChunks(finalQuery: string, chatbotId: string) {
+    const chunks = await IndexingService.findRelevantContent(finalQuery, chatbotId);
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
@@ -140,7 +140,7 @@ export abstract class ChatService {
       conversation,
     });
     const { knowledgeBase, chunks } =
-      await ChatService.getSearchChunks(finalQuery);
+      await ChatService.getSearchChunks(finalQuery, chatbotId);
 
     const systemPrompt = [
       buildPlatformRules(),
@@ -152,7 +152,6 @@ export abstract class ChatService {
       system: systemPrompt,
       model,
       messages: [{ role: 'user', content: finalQuery }],
-      stopWhen: stepCountIs(5),
     });
 
     return result.toUIMessageStreamResponse({
@@ -216,9 +215,9 @@ export abstract class ChatService {
             role: 'assistant',
             content: assistantMessage,
             metadata: {
-              confidenceScore:
-                chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) /
-                chunks.length,
+              confidenceScore: chunks.length
+                ? chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) / chunks.length
+                : 0,
               sources: chunks.map((chunk) => ({
                 documentId: chunk.documentId,
                 documentVersion: chunk.documentVersion,

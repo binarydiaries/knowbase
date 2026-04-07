@@ -21,7 +21,7 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
 
   return (
     <Card>
-      <div className="p-6 pb-2">
+      <div className="px-6 pb-2">
         <h3 className="text-base font-semibold">Top Chatbots</h3>
       </div>
       <CardContent className="space-y-3">
@@ -53,7 +53,9 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{bot.chatbotName}</p>
+                  <p className="truncate text-sm font-medium">
+                    {bot.chatbotName}
+                  </p>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>{bot.conversations.toLocaleString()} convs</span>
                     <span>·</span>

@@ -112,7 +112,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             <FormTextarea
               name="systemPrompt"
               control={control}
-              label="Sysyem Prompt"
+              label="System Prompt"
               placeholder="Enter a system prompt"
               disabled={readOnly}
             />

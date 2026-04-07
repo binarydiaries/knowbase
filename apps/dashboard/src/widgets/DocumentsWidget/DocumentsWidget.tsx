@@ -80,7 +80,7 @@ export const DocumentsWidget = ({
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   if (!chatbotId) {
-    throw 'Not chatbot id';
+    throw new Error('chatbotId not available');
   }
 
   const documents = (documentsByChatbotId[chatbotId] || []).sort(

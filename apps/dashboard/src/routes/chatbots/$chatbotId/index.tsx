@@ -127,7 +127,6 @@ function RouteComponent() {
             <DocumentsWidget readOnly={readOnly} subscription={subscription} />
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
-            {/*<SettingsCard />*/}
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
             <Badge variant="secondary" className="rounded-l-none">

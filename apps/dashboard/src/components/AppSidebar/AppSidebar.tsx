@@ -9,12 +9,8 @@ import {
   SidebarRail,
 } from '@knowbase/ui/components/sidebar';
 import {
-  AudioWaveform,
   Bot,
   Bubbles,
-  Command,
-  Dot,
-  GalleryVerticalEnd,
   Gauge,
   LifeBuoy,
   LineChart,
@@ -24,76 +20,16 @@ import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
 import { NavUser } from '../NavUser/NavUser.tsx';
 
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  teams: [
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Evil Corp.',
-      logo: Command,
-      plan: 'Free',
-    },
-  ],
-  main: [
-    {
-      name: 'Chatbots',
-      url: '/chatbots',
-      icon: Bot,
-    },
-    // {
-    //   name: 'Activities',
-    //   url: '/activities',
-    //   icon: Activity,
-    // },
-    {
-      name: 'Conversations',
-      url: '/conversations',
-      icon: MessageCircle,
-    },
-    {
-      name: 'Analytics',
-      url: '/analytics',
-      icon: LineChart,
-    },
-    {
-      name: 'Usage',
-      url: '/usage',
-      icon: Gauge,
-    },
-  ],
-  chatbots: [
-    {
-      name: 'Customer support',
-      url: '/',
-      icon: Dot,
-    },
-    {
-      name: 'Sales Representative',
-      url: '/',
-      icon: Dot,
-    },
-  ],
-  footer: [
-    {
-      name: 'Help & Support',
-      url: '/',
-      icon: LifeBuoy,
-    },
-  ],
-};
+const mainNav = [
+  { name: 'Chatbots', url: '/chatbots', icon: Bot },
+  { name: 'Conversations', url: '/conversations', icon: MessageCircle },
+  { name: 'Analytics', url: '/analytics', icon: LineChart },
+  { name: 'Usage', url: '/usage', icon: Gauge },
+];
+
+const footerNav = [
+  { name: 'Help & Support', url: '/', icon: LifeBuoy },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -114,11 +50,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.main} title="Platform" />
-        {/*<NavProjects projects={data.chatbots} title={'Favourites'} />*/}
+        <NavMain items={mainNav} title="Platform" />
       </SidebarContent>
       <SidebarFooter>
-        <NavMain items={data.footer} />
+        <NavMain items={footerNav} />
         <div className="p-2">
           <SidebarUsage />
           <NavUser />

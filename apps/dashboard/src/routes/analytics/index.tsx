@@ -10,7 +10,7 @@ import {
 import { Card, CardContent } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { getChatbots } from '@/services';
@@ -41,12 +41,12 @@ function AnalyticsUpgradePrompt() {
             See conversations over time, sentiment breakdown, top topics, country reach, and more.
           </p>
         </div>
-        <a
-          href="/subscriptions"
+        <Link
+          to="/subscriptions"
           className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
         >
-          Upgrade to Starter — $4.9/mo
-        </a>
+          View plans
+        </Link>
       </CardContent>
     </Card>
   );

@@ -1,5 +1,4 @@
 import { useAuth } from '@clerk/clerk-react';
-import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Dialog,
@@ -45,7 +44,7 @@ window.KnowBaseChat = {
     <Dialog>
       <DialogTrigger>
         <Button size="sm" variant="outline">
-          Use Chabot
+          Use Chatbot
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-160">
@@ -89,22 +88,7 @@ window.KnowBaseChat = {
 
           {/* WhatsApp */}
           <TabsContent value="whatsapp" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium">WhatsApp number</div>
-                <div className="text-sm text-muted-foreground">
-                  +1 234 567 890
-                </div>
-              </div>
-              <Button size="sm" variant="secondary">
-                Copy
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Status</span>
-              <Badge variant="secondary">Not connected</Badge>
-            </div>
+            <p className="text-sm text-muted-foreground">Coming soon</p>
           </TabsContent>
         </Tabs>
       </DialogContent>

@@ -29,7 +29,7 @@ export const useDocuments = create<IDocumentsState>((set) => ({
         return {
           documentsByChatbotId: {
             ...state.documentsByChatbotId,
-            [chatbotId]: [{ ...docs[index], ...document }, ...docs],
+            [chatbotId]: [document as DocumentSchema, ...docs],
           },
         };
       }

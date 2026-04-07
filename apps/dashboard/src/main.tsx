@@ -37,6 +37,14 @@ client.setConfig({
   baseURL: import.meta.env.VITE_API_BASE,
 });
 
+client.instance.interceptors.request.use(async (config) => {
+  const token = await (window as Window & { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk?.session?.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Render the app
 // biome-ignore lint/style/noNonNullAssertion: Its from vite
 const rootElement = document.getElementById('root')!;

@@ -1,17 +1,31 @@
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
+import {
+  type ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from '@knowbase/ui/components/chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Cell, Pie, PieChart } from 'recharts';
-import { getUsageMessagesByChatbot } from '@/services';
-import { CHART_COLORS } from '../_utils/dateRange';
+import { getAnalyticsMessagesByChannel } from '@/services';
+import { CHART_COLORS } from '../utils/dateRange.ts';
+
+function capitalizeChannel(type: string): string {
+  const map: Record<string, string> = {
+    web: 'Web',
+    whatsapp: 'WhatsApp',
+    instagram: 'Instagram',
+  };
+  return map[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
+}
 
 type Props = {
   chatbotId: string;
@@ -19,11 +33,15 @@ type Props = {
   endDate: string;
 };
 
-export function MessagesByChatbotChart({ chatbotId, startDate, endDate }: Props) {
+export function MessagesByChannelChart({
+  chatbotId,
+  startDate,
+  endDate,
+}: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['usage-msgs-chatbot', chatbotId, startDate, endDate],
+    queryKey: ['analytics-msgs-channel', chatbotId, startDate, endDate],
     queryFn: async () => {
-      const res = await getUsageMessagesByChatbot({
+      const res = await getAnalyticsMessagesByChannel({
         query: {
           startDate,
           endDate,
@@ -36,8 +54,8 @@ export function MessagesByChatbotChart({ chatbotId, startDate, endDate }: Props)
 
   const chartConfig: ChartConfig = {};
   data?.data.forEach((item, i) => {
-    chartConfig[item.chatbotId] = {
-      label: item.chatbotName,
+    chartConfig[item.channelType] = {
+      label: capitalizeChannel(item.channelType),
       color: CHART_COLORS[i % CHART_COLORS.length],
     };
   });
@@ -45,18 +63,18 @@ export function MessagesByChatbotChart({ chatbotId, startDate, endDate }: Props)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Messages per Chatbot</CardTitle>
+        <CardTitle className="text-base">Messages by Channel</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-64 w-full" />
         ) : isError ? (
           <div className="flex h-64 items-center justify-center text-sm text-destructive">
-            Failed to load messages by chatbot
+            Failed to load channel data
           </div>
         ) : !data?.data.length ? (
           <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-            No message data for this period
+            No channel data for this period
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-64 w-full">
@@ -64,7 +82,7 @@ export function MessagesByChatbotChart({ chatbotId, startDate, endDate }: Props)
               <Pie
                 data={data.data}
                 dataKey="count"
-                nameKey="chatbotName"
+                nameKey="channelType"
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -72,13 +90,15 @@ export function MessagesByChatbotChart({ chatbotId, startDate, endDate }: Props)
               >
                 {data.data.map((entry, i) => (
                   <Cell
-                    key={entry.chatbotId}
+                    key={entry.channelType}
                     fill={CHART_COLORS[i % CHART_COLORS.length]}
                   />
                 ))}
               </Pie>
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-              <ChartLegend content={<ChartLegendContent nameKey="chatbotName" />} />
+              <ChartLegend
+                content={<ChartLegendContent nameKey="channelType" />}
+              />
             </PieChart>
           </ChartContainer>
         )}

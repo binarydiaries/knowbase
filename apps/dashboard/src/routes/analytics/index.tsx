@@ -1,5 +1,4 @@
-import { Separator } from '@knowbase/ui/components/separator';
-import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { Card, CardContent } from '@knowbase/ui/components/card';
 import {
   Select,
   SelectContent,
@@ -7,22 +6,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@knowbase/ui/components/select';
-import { Card, CardContent } from '@knowbase/ui/components/card';
+import { Separator } from '@knowbase/ui/components/separator';
+import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
-import { getChatbots } from '@/services';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { AnalyticsOverviewCards } from './_components/AnalyticsOverviewCards';
-import { ConversationsDailyChart } from './_components/ConversationsDailyChart';
-import { CountryDistributionChart } from './_components/CountryDistributionChart';
-import { MessagesByChannelChart } from './_components/MessagesByChannelChart';
-import { SentimentChart } from './_components/SentimentChart';
-import { TopChatbotsCards } from './_components/TopChatbotsCards';
-import { TopTopicsChart } from './_components/TopTopicsChart';
-import { type DateRange, getDateRange } from '../usage/_utils/dateRange';
+import { getChatbots } from '@/services';
+import { type DateRange, getDateRange } from '../../utils/dateRange.ts';
+import { AnalyticsOverviewCards } from '../../widgets/AnalyticsOverviewCards.tsx';
+import { ConversationsDailyChart } from '../../widgets/ConversationsDailyChart.tsx';
+import { CountryDistributionChart } from '../../widgets/CountryDistributionChart.tsx';
+import { MessagesByChannelChart } from '../../widgets/MessagesByChannelChart.tsx';
+import { SentimentChart } from '../../widgets/SentimentChart.tsx';
+import { TopChatbotsCards } from '../../widgets/TopChatbotsCards.tsx';
+import { TopTopicsChart } from '../../widgets/TopTopicsChart.tsx';
 
 export const Route = createFileRoute('/analytics/')({
   component: RouteComponent,
@@ -36,9 +36,12 @@ function AnalyticsUpgradePrompt() {
           <Lock className="h-6 w-6 text-muted-foreground" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold">Analytics is available on Starter and above</h3>
+          <h3 className="text-base font-semibold">
+            Analytics is available on Starter and above
+          </h3>
           <p className="text-sm text-muted-foreground max-w-sm">
-            See conversations over time, sentiment breakdown, top topics, country reach, and more.
+            See conversations over time, sentiment breakdown, top topics,
+            country reach, and more.
           </p>
         </div>
         <Link

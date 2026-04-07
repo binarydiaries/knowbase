@@ -1,7 +1,7 @@
 import { Skeleton } from '@knowbase/ui/components/skeleton';
-import { Bot, BookOpen, MessageCircle } from 'lucide-react';
-import { UsageStatCard } from '@/components/UsageStatCard/UsageStatCard';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { BookOpen, Bot, MessageCircle } from 'lucide-react';
+import { UsageStatCard } from '@/components/UsageStatCard/UsageStatCard.tsx';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus.ts';
 
 function UsageStatCardSkeleton() {
   return <Skeleton className="h-[72px] w-full rounded-xl" />;
@@ -36,13 +36,22 @@ export function UsageStatCards() {
   }
 
   const messagesUsed = subscription.messagesThisMonth;
-  const messagesRemaining = Math.max(0, subscription.messagesPerMonthLimit - messagesUsed);
+  const messagesRemaining = Math.max(
+    0,
+    subscription.messagesPerMonthLimit - messagesUsed,
+  );
 
   const agentsUsed = subscription.activeChatbotCount;
-  const agentsRemaining = Math.max(0, subscription.activeChatbotLimit - agentsUsed);
+  const agentsRemaining = Math.max(
+    0,
+    subscription.activeChatbotLimit - agentsUsed,
+  );
 
   const knowledgeUsed = subscription.knowledgeSourceCount;
-  const knowledgeRemaining = Math.max(0, subscription.knowledgeSourceLimit - knowledgeUsed);
+  const knowledgeRemaining = Math.max(
+    0,
+    subscription.knowledgeSourceLimit - knowledgeUsed,
+  );
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -1,17 +1,22 @@
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
+import {
+  type ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from '@knowbase/ui/components/chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Cell, Pie, PieChart } from 'recharts';
 import { getUsageKnowledgeByChatbot } from '@/services';
-import { CHART_COLORS } from '../_utils/dateRange';
+import { CHART_COLORS } from '../utils/dateRange.ts';
 
 type Props = {
   chatbotId: string;
@@ -41,7 +46,9 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Knowledge Sources per Chatbot</CardTitle>
+        <CardTitle className="text-base">
+          Knowledge Sources per Chatbot
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -74,7 +81,9 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
                 ))}
               </Pie>
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-              <ChartLegend content={<ChartLegendContent nameKey="chatbotName" />} />
+              <ChartLegend
+                content={<ChartLegendContent nameKey="chatbotName" />}
+              />
             </PieChart>
           </ChartContainer>
         )}

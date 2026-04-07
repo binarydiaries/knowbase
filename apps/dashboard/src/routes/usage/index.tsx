@@ -1,5 +1,3 @@
-import { Separator } from '@knowbase/ui/components/separator';
-import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import {
   Select,
   SelectContent,
@@ -7,15 +5,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@knowbase/ui/components/select';
+import { Separator } from '@knowbase/ui/components/separator';
+import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { getChatbots } from '@/services';
-import { DailyMessagesChart } from './_components/DailyMessagesChart';
-import { KnowledgeByChatbotChart } from './_components/KnowledgeByChatbotChart';
-import { MessagesByChatbotChart } from './_components/MessagesByChatbotChart';
-import { UsageStatCards } from './_components/UsageStatCards';
-import { type DateRange, getDateRange } from './_utils/dateRange';
+import { type DateRange, getDateRange } from '../../utils/dateRange.ts';
+import { DailyMessagesChart } from '../../widgets/DailyMessagesChart.tsx';
+import { KnowledgeByChatbotChart } from '../../widgets/KnowledgeByChatbotChart.tsx';
+import { MessagesByChatbotChart } from '../../widgets/MessagesByChatbotChart.tsx';
+import { UsageStatCards } from '../../widgets/UsageStatCards.tsx';
 
 export const Route = createFileRoute('/usage/')({
   component: RouteComponent,

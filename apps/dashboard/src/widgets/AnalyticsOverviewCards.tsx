@@ -1,7 +1,12 @@
 import { Skeleton } from '@knowbase/ui/components/skeleton';
-import { BarChart2, MessageCircle, MessagesSquare, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { StatCard } from '@/components/StatCard/StatCard';
+import {
+  BarChart2,
+  MessageCircle,
+  MessagesSquare,
+  TrendingUp,
+} from 'lucide-react';
+import { StatCard } from '@/components/StatCard/StatCard.tsx';
 import { getAnalyticsOverview } from '@/services';
 
 function SkeletonCard() {
@@ -28,14 +33,16 @@ export function AnalyticsOverviewCards() {
   if (isError || !data?.data) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {['Conversations', 'Messages', 'Avg Msgs/Conv', 'Avg Confidence'].map((title) => (
-          <div
-            key={title}
-            className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-          >
-            Failed to load {title.toLowerCase()}
-          </div>
-        ))}
+        {['Conversations', 'Messages', 'Avg Msgs/Conv', 'Avg Confidence'].map(
+          (title) => (
+            <div
+              key={title}
+              className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+            >
+              Failed to load {title.toLowerCase()}
+            </div>
+          ),
+        )}
       </div>
     );
   }

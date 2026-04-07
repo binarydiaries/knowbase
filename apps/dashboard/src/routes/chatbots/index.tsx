@@ -26,11 +26,19 @@ import {
   Archive,
   ArchiveRestore,
   Bot,
+  Brain,
+  Cpu,
   Edit,
   Loader2,
   MessageCircle,
+  MessageSquare,
   MoreHorizontal,
+  Sparkles,
+  Star,
+  Wand2,
+  Zap,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import {
   CHATBOT_LIMIT_TOOLTIP,
@@ -47,6 +55,29 @@ import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbot
 export const Route = createFileRoute('/chatbots/')({
   component: RouteComponent,
 });
+
+type BotAppearance = { Icon: LucideIcon; bg: string; fg: string };
+
+const APPEARANCES: BotAppearance[] = [
+  { Icon: Sparkles,      bg: 'bg-violet-100',  fg: 'text-violet-600'  },
+  { Icon: Zap,           bg: 'bg-amber-100',   fg: 'text-amber-600'   },
+  { Icon: Brain,         bg: 'bg-blue-100',    fg: 'text-blue-600'    },
+  { Icon: MessageSquare, bg: 'bg-emerald-100', fg: 'text-emerald-600' },
+  { Icon: Star,          bg: 'bg-rose-100',    fg: 'text-rose-600'    },
+  { Icon: Cpu,           bg: 'bg-cyan-100',    fg: 'text-cyan-600'    },
+  { Icon: Wand2,         bg: 'bg-indigo-100',  fg: 'text-indigo-600'  },
+  { Icon: Bot,           bg: 'bg-orange-100',  fg: 'text-orange-600'  },
+];
+
+function hashId(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function getBotAppearance(id: string): BotAppearance {
+  return APPEARANCES[hashId(id) % APPEARANCES.length];
+}
 
 type ArchiveConfirm = {
   id: string;
@@ -140,129 +171,136 @@ function RouteComponent() {
         {/* Chatbot List */}
         {query.isSuccess && isChatbotAvailable && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {query.data.data.chatbots.map((bot) => (
-              <Link
-                key={bot.id}
-                to="/chatbots/$chatbotId"
-                params={{ chatbotId: bot.id }}
-                className="block"
-              >
-                <Card className="rounded-xl border bg-background shadow-sm hover:shadow-md transition">
-                  <CardContent>
-                    {/* Top row */}
-                    <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                        <Bot className="h-5 w-5" />
-                      </div>
+            {query.data.data.chatbots.map((bot) => {
+              const { Icon, bg, fg } = getBotAppearance(bot.id);
+              const isArchived = bot.chatbotStatus === 'archived';
 
-                      {/* Title + status */}
-                      <div className="flex-1">
-                        <div className="flex flex-col gap-2">
-                          <h3 className="text-base font-semibold leading-none">
+              return (
+                <Link
+                  key={bot.id}
+                  to="/chatbots/$chatbotId"
+                  params={{ chatbotId: bot.id }}
+                  className="block"
+                >
+                  <Card className={`rounded-xl border bg-background shadow-sm transition-all duration-150 hover:shadow-md ${isArchived ? 'opacity-50' : ''}`}>
+                    <CardContent>
+                      {/* Top row */}
+                      <div className="flex items-start gap-3">
+                        {/* Icon */}
+                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${isArchived ? 'bg-muted' : bg}`}>
+                          <Icon className={`h-6 w-6 ${isArchived ? 'text-muted-foreground' : fg}`} />
+                        </div>
+
+                        {/* Title + badges */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold leading-snug line-clamp-1">
                             {bot.name}
                           </h3>
-                          {bot.locked && bot.chatbotStatus === 'active' && (
-                            <Badge className="bg-amber-100 text-amber-700">
-                              Locked
-                            </Badge>
-                          )}
-                          {bot.chatbotStatus === 'archived' && (
-                            <Badge className="bg-muted text-muted-foreground">
-                              Archived
-                            </Badge>
-                          )}
+                          <div className="mt-1 flex gap-1 flex-wrap">
+                            {bot.locked && !isArchived && (
+                              <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0">
+                                Locked
+                              </Badge>
+                            )}
+                            {isArchived && (
+                              <Badge className="bg-muted text-muted-foreground text-[10px] px-1.5 py-0">
+                                Archived
+                              </Badge>
+                            )}
+                          </div>
                         </div>
+
+                        {/* Menu */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-muted-foreground cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DisabledTooltip
+                              disabled={subscription?.isOverLimit}
+                              content={CHATBOT_LOCK_TOOLTIP}
+                            >
+                              <div>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingBot(bot);
+                                    setDialogOpen(true);
+                                  }}
+                                  disabled={subscription?.isOverLimit}
+                                  className="flex items-center cursor-pointer gap-2"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                              </div>
+                            </DisabledTooltip>
+
+                            <DisabledTooltip
+                              disabled={bot.chatbotStatus === 'archived' && hasReachedChatbotLimit}
+                              content={CHATBOT_LIMIT_TOOLTIP}
+                            >
+                              <div>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setArchiveConfirm({
+                                      id: bot.id,
+                                      name: bot.name,
+                                      newStatus:
+                                        bot.chatbotStatus === 'archived'
+                                          ? 'active'
+                                          : 'archived',
+                                    });
+                                  }}
+                                  disabled={
+                                    (bot.chatbotStatus === 'archived' && hasReachedChatbotLimit) ||
+                                    archiveChatbotMutation.isPending
+                                  }
+                                  className="flex items-center gap-2 cursor-pointer"
+                                >
+                                  {bot.chatbotStatus === 'archived' ? (
+                                    <ArchiveRestore className="h-4 w-4" />
+                                  ) : (
+                                    <Archive className="h-4 w-4" />
+                                  )}
+                                  {bot.chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
+                                </DropdownMenuItem>
+                              </div>
+                            </DisabledTooltip>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
 
-                      {/* Menu */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-muted-foreground cursor-pointer"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
-                            <MoreHorizontal />
-                          </Button>
-                        </DropdownMenuTrigger>
+                      {/* Description */}
+                      {bot.description ? (
+                        <p className="mt-2 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                          {bot.description}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-muted-foreground/40 italic">No description</p>
+                      )}
 
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DisabledTooltip
-                            disabled={subscription?.isOverLimit}
-                            content={CHATBOT_LOCK_TOOLTIP}
-                          >
-                            <div>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingBot(bot);
-                                  setDialogOpen(true);
-                                }}
-                                disabled={subscription?.isOverLimit}
-                                className="flex items-center cursor-pointer gap-2"
-                              >
-                                <Edit className="h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                            </div>
-                          </DisabledTooltip>
-
-                          <DisabledTooltip
-                            disabled={bot.chatbotStatus === 'archived' && hasReachedChatbotLimit}
-                            content={CHATBOT_LIMIT_TOOLTIP}
-                          >
-                            <div>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setArchiveConfirm({
-                                    id: bot.id,
-                                    name: bot.name,
-                                    newStatus:
-                                      bot.chatbotStatus === 'archived'
-                                        ? 'active'
-                                        : 'archived',
-                                  });
-                                }}
-                                disabled={
-                                  (bot.chatbotStatus === 'archived' && hasReachedChatbotLimit) ||
-                                  archiveChatbotMutation.isPending
-                                }
-                                className="flex items-center gap-2 cursor-pointer"
-                              >
-                                {bot.chatbotStatus === 'archived' ? (
-                                  <ArchiveRestore className="h-4 w-4" />
-                                ) : (
-                                  <Archive className="h-4 w-4" />
-                                )}
-                                {bot.chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
-                              </DropdownMenuItem>
-                            </div>
-                          </DisabledTooltip>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    {/* Description */}
-                    {bot.description && (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {bot.description}
-                      </p>
-                    )}
-
-                    {/* Bottom row */}
-                    <div className="mt-4 flex items-center justify-end text-sm text-muted-foreground">
-                      <span>Updated {timeAgo(bot.updatedAt)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                      {/* Footer */}
+                      <div className="mt-4 flex items-center justify-end">
+                        <span className="text-[11px] text-muted-foreground">Updated {timeAgo(bot.updatedAt)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
 

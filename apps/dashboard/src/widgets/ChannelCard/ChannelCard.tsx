@@ -10,6 +10,7 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -51,6 +52,7 @@ export const ChannelSchema = z.object({
 });
 type ChannelFormValues = z.infer<typeof ChannelSchema>;
 const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
+  const posthog = usePostHog();
   // const [primaryColor, setPrimaryColor] = React.useState('#915964');
   const { chatbotId } = useParams({ strict: false });
   // const initialMessageId = useId();
@@ -122,6 +124,12 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           type: 'web',
           config: updatedConfig,
         },
+      });
+    },
+    onSuccess: () => {
+      posthog.capture('chatbot_channel_saved', {
+        chatbot_id: chatbotId,
+        channel_type: 'web',
       });
     },
     onError: (error) => {

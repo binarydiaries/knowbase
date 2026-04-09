@@ -36,6 +36,7 @@ import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { FolderIcon } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -68,6 +69,7 @@ export const DocumentsWidget = ({
   readOnly?: boolean;
   subscription?: SubscriptionStatusSchema;
 }) => {
+  const posthog = usePostHog();
   const { chatbotId } = useParams({ strict: false });
   const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
     useDocuments();
@@ -126,6 +128,10 @@ export const DocumentsWidget = ({
       };
     },
     onSuccess: ({ documentId }) => {
+      posthog.capture('knowledge_source_deleted', {
+        chatbot_id: chatbotId,
+        document_id: documentId,
+      });
       deleteDocument(chatbotId, documentId);
       queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
     },
@@ -143,6 +149,10 @@ export const DocumentsWidget = ({
         return;
       }
 
+      posthog.capture('chatbot_training_started', {
+        chatbot_id: chatbotId,
+        documents_count: documents.filter((d) => d.status === 'ready').length,
+      });
       setIsPollingActive(true);
       queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
       setIsTrainDialogOpen(false);

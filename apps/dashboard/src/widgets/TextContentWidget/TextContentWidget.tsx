@@ -13,6 +13,7 @@ import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
   type DocumentSchema,
@@ -39,6 +40,7 @@ export const TextContentWidget = ({
   onClose,
   readOnly = false,
 }: ITextContentWidgetProps) => {
+  const posthog = usePostHog();
   const [content, setContent] = useState(
     (document?.content.type === 'text' && document?.content?.data) || '',
   );
@@ -90,8 +92,14 @@ export const TextContentWidget = ({
         document: data.document,
       };
     },
-    onSuccess: ({ document }) => {
-      addUpdateDocument(chatbotId, document);
+    onSuccess: ({ document: savedDocument }) => {
+      posthog.capture('knowledge_source_saved', {
+        chatbot_id: chatbotId,
+        document_id: savedDocument.id,
+        source_type: 'text',
+        mode,
+      });
+      addUpdateDocument(chatbotId, savedDocument);
       queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
       onClose?.();
     },

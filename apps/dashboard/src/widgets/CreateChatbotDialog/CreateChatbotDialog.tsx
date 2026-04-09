@@ -12,6 +12,7 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -48,6 +49,7 @@ export function CreateChatbotDialog({
   disabled?: boolean;
   disabledReason?: string;
 }) {
+  const posthog = usePostHog();
   const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
     mode: 'all',
@@ -83,7 +85,17 @@ export function CreateChatbotDialog({
       // ✨ CREATE
       return postChatbots({ body: { name, description } });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      if (chatbot) {
+        posthog.capture('chatbot_updated', {
+          chatbot_id: chatbot.id,
+          chatbot_name: variables.name,
+        });
+      } else {
+        posthog.capture('chatbot_created', {
+          chatbot_name: variables.name,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
       reset();
       setOpen(false);

@@ -10,6 +10,7 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
+import { usePostHog } from 'posthog-js/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -57,6 +58,7 @@ export const chatbotBehaviourSchema = z.object({
 type BehaviourFormValues = z.infer<typeof chatbotBehaviourSchema>;
 
 const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
+  const posthog = usePostHog();
   const { chatbotId } = useParams({ strict: false });
   if (!chatbotId) throw new Error('ChatbotId not available');
 
@@ -90,6 +92,13 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
       // 🔥 instant UI update
       patchBehaviour(chatbotId, values);
+    },
+    onSuccess: (_, values) => {
+      posthog.capture('chatbot_behaviour_saved', {
+        chatbot_id: chatbotId,
+        tone: values.tone,
+        verbosity: values.verbosity,
+      });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

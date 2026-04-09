@@ -9,6 +9,7 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Archive, ArchiveRestore, MoreHorizontal } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import { ArchiveChatbotDialog } from '@/components/ArchiveChatbotDialog/ArchiveChatbotDialog.tsx';
 import { patchChatbotsById } from '@/services';
@@ -27,6 +28,7 @@ export const ChatbotMenuActions = ({
   disableUnarchive?: boolean;
   disableUnarchiveReason?: string;
 }) => {
+  const posthog = usePostHog();
   const { chatbotId } = useParams({ strict: false });
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -45,6 +47,11 @@ export const ChatbotMenuActions = ({
       });
     },
     onSuccess: () => {
+      if (chatbotStatus === 'active') {
+        posthog.capture('chatbot_archived', { chatbot_id: chatbotId });
+      } else {
+        posthog.capture('chatbot_unarchived', { chatbot_id: chatbotId });
+      }
       queryClient.invalidateQueries({ queryKey: ['chatbots'] });
       queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
       setConfirmOpen(false);

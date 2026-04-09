@@ -2,12 +2,20 @@ import { PricingTable } from '@clerk/clerk-react';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
+import { usePostHog } from 'posthog-js/react';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture('subscription_page_viewed');
+  }, [posthog]);
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

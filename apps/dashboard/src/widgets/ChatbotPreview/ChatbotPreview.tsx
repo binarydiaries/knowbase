@@ -3,14 +3,17 @@ import { useAuth } from '@clerk/clerk-react';
 import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useEffect, useId, useState } from 'react';
+import { usePostHog } from 'posthog-js/react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
 export const ChatbotPreview = () => {
+  const posthog = usePostHog();
   const { chatbotId } = useParams({ strict: false });
   const { orgId } = useAuth();
   const initialMessageId = useId();
+  const sendStartTimeRef = useRef<number>(0);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
   if (!chatbotId) {
@@ -37,7 +40,7 @@ export const ChatbotPreview = () => {
       }
     : undefined;
 
-  const { messages, setMessages, sendMessage, status } = useChat({
+  const { messages, setMessages, sendMessage, status, id: conversationId } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: `${import.meta.env.VITE_API_BASE}/chat`,
@@ -56,6 +59,21 @@ export const ChatbotPreview = () => {
         };
       },
     }),
+    onFinish({ isError }) {
+      const latency = sendStartTimeRef.current
+        ? (Date.now() - sendStartTimeRef.current) / 1000
+        : undefined;
+      sendStartTimeRef.current = 0;
+
+      posthog.capture('$ai_generation', {
+        $ai_trace_id: conversationId,
+        $ai_session_id: chatbotId,
+        $ai_provider: 'custom',
+        $ai_stream: true,
+        $ai_latency: latency,
+        $ai_is_error: isError,
+      });
+    },
     onError(error) {
       const chatError = parseChatError(error);
       if (!chatError) return;
@@ -104,9 +122,10 @@ export const ChatbotPreview = () => {
           value.parts.find((value1) => value1?.type === 'text')?.text || '',
         type: value.role === 'user' ? 'user' : 'system',
       }))}
-      onSendMessage={(message) =>
-        sendMessage({ text: message }, { body: { channelId: channelWeb?.id } })
-      }
+      onSendMessage={(message) => {
+        sendStartTimeRef.current = Date.now();
+        sendMessage({ text: message }, { body: { channelId: channelWeb?.id } });
+      }}
     />
   );
 };

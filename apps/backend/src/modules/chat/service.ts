@@ -1,3 +1,4 @@
+import { createId } from '@paralleldrive/cuid2';
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText } from 'ai';
 import type { conversations } from '../../db/schema/conversations';
@@ -9,6 +10,7 @@ import { IndexingService } from '../indexing/service';
 import { MessageService } from '../message/service';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
+import type { IChannelWhatsAppConfig } from '../channel/model';
 import {
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
@@ -242,6 +244,156 @@ export abstract class ChatService {
         }
       },
     });
+  }
+
+  static async generateWhatsAppResponse({
+    chatbotId,
+    channelId,
+    message,
+    conversationId,
+    orgId,
+    ip,
+  }: {
+    chatbotId: string;
+    channelId: string;
+    message: string;
+    conversationId?: string;
+    orgId: string;
+    ip?: string;
+  }) {
+    await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
+    await ChatService.getChatbot({ chatbotId, orgId });
+
+    const conversation = conversationId
+      ? await ConversationService.single({ id: conversationId, orgId })
+      : undefined;
+
+    const behavior = await ChatService.getBehaviour(chatbotId);
+    const finalQuery = await ChatService.getFinalQuery({ message, conversation });
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
+
+    const systemPrompt = [
+      buildPlatformRules(),
+      buildBehaviorPrompt(behavior),
+      buildKnowledgeBasePrompt(knowledgeBase),
+    ].join('\n');
+
+    const { text: assistantMessage } = await generateText({
+      model,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: finalQuery }],
+    });
+
+    return { assistantMessage, chunks, finalQuery, conversation };
+  }
+
+  static async sendWhatsApp({
+    channelId,
+    orgId,
+    senderPhone,
+    message,
+    ip,
+  }: {
+    channelId: string;
+    orgId: string;
+    senderPhone: string;
+    message: string;
+    ip?: string;
+  }) {
+    const channel = await ChannelService.single({ id: channelId, orgId });
+    if (!channel || channel.type !== 'whatsapp') {
+      throw new NotFoundError('WhatsApp channel not found');
+    }
+    const config = channel.config as IChannelWhatsAppConfig;
+    if (!config.phoneNumberId || !config.accessToken) {
+      throw new NotFoundError('WhatsApp channel not configured');
+    }
+
+    const conversation = await ConversationService.findByExternalId({
+      channelId,
+      externalId: senderPhone,
+    });
+
+    const { assistantMessage, chunks, finalQuery } =
+      await ChatService.generateWhatsAppResponse({
+        chatbotId: channel.chatbotId,
+        channelId,
+        message,
+        conversationId: conversation?.id,
+        orgId,
+        ip,
+      });
+
+    // Send reply via WhatsApp Cloud API
+    await fetch(
+      `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: senderPhone,
+          type: 'text',
+          text: { body: assistantMessage },
+        }),
+      },
+    );
+
+    // Persist conversation + messages
+    const conversationData = {
+      lastUserQuestion: finalQuery,
+      lastAssistantUtterance: assistantMessage,
+      lastMessageAt: new Date(),
+    };
+
+    let conversationId: string;
+    if (!conversation) {
+      const newId = createId();
+      await ConversationService.create({
+        id: newId,
+        chatbotId: channel.chatbotId,
+        channelId,
+        externalId: senderPhone,
+        ...conversationData,
+      });
+      conversationId = newId;
+    } else {
+      await ConversationService.update(conversation.id, conversationData);
+      conversationId = conversation.id;
+    }
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    const confidenceScore = chunks.length
+      ? chunks.reduce((acc, c) => acc + c.similarity, 0) / chunks.length
+      : 0;
+
+    await MessageService.addMessages([
+      {
+        conversationId,
+        role: 'user',
+        content: message,
+        systemMetadata: { finalQuery },
+      },
+      {
+        conversationId,
+        role: 'assistant',
+        content: assistantMessage,
+        metadata: {
+          confidenceScore,
+          sources: chunks.map((c) => ({
+            documentId: c.documentId,
+            documentVersion: c.documentVersion,
+            chunkIndex: c.chunkIndex,
+            similarity: c.similarity,
+          })),
+          sentiment: null,
+        },
+      },
+    ]);
   }
 
   static async sendWeb({

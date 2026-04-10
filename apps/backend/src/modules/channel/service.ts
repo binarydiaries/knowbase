@@ -1,6 +1,7 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
+import { chatbots } from '../../db/schema/chatbots';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {
@@ -38,6 +39,23 @@ export abstract class ChannelService {
     return channel;
   }
 
+  static async findByWhatsappPhoneNumberId(phoneNumberId: string) {
+    const rows = await db
+      .select({ channel: channels, chatbot: chatbots })
+      .from(channels)
+      .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+      .where(
+        and(
+          eq(channels.type, 'whatsapp'),
+          sql`${channels.config}->>'phoneNumberId' = ${phoneNumberId}`,
+        ),
+      )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, chatbot: rows[0].chatbot };
+  }
+
   static transformChannel(
     channel: typeof channels.$inferSelect,
   ): IChannelSchema {
@@ -47,6 +65,6 @@ export abstract class ChannelService {
         type: channel.type,
         config: channel.config,
       },
-    };
+    } as IChannelSchema;
   }
 }

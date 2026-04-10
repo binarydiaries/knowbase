@@ -18,6 +18,7 @@ export const conversations = pgTable(
     lastMessageAt: timestamp({ withTimezone: true }).notNull(),
     country: text(),
     topic: text(),
+    externalId: text(),
     ...timestamps,
   },
   (table) => [
@@ -28,6 +29,12 @@ export const conversations = pgTable(
     index('conversations_chatbot_lastmsg_idx').on(
       table.chatbotId,
       table.lastMessageAt,
+    ),
+
+    // 🔥 WhatsApp: lookup by sender phone number per channel
+    index('conversations_channel_external_idx').on(
+      table.channelId,
+      table.externalId,
     ),
   ],
 );

@@ -33,6 +33,16 @@ export abstract class ChatbotService {
         createdBy: data.createdBy,
       });
 
+      await tx.insert(channels).values({
+        chatbotId,
+        type: 'whatsapp',
+        enabled: false,
+        config: {},
+        channelStatus: 'inactive',
+        usage: {},
+        createdBy: data.createdBy,
+      });
+
       return chatbot;
     });
   }

@@ -9,6 +9,18 @@ export abstract class ConversationService {
     });
   }
 
+  static findByExternalId({
+    channelId,
+    externalId,
+  }: {
+    channelId: string;
+    externalId: string;
+  }) {
+    return db.query.conversations.findFirst({
+      where: { channelId, externalId },
+    });
+  }
+
   static async list({
     chatbotId,
     channelId,

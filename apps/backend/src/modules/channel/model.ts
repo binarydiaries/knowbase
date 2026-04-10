@@ -14,6 +14,13 @@ export const ChannelWebConfigSchema = z.object({
 
 export type IChannelWebConfig = z.infer<typeof ChannelWebConfigSchema>;
 
+export const ChannelWhatsAppConfigSchema = z.object({
+  phoneNumberId: z.string().optional(),
+  displayPhone: z.string().optional(),
+});
+
+export type IChannelWhatsAppConfig = z.infer<typeof ChannelWhatsAppConfigSchema>;
+
 const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
@@ -24,7 +31,7 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal('whatsapp'),
-      config: z.object({}),
+      config: ChannelWhatsAppConfigSchema,
     })
     .meta({ title: 'whatsapp' }),
   z

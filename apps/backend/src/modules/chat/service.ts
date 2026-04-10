@@ -11,6 +11,7 @@ import { MessageService } from '../message/service';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import type { IChannelWhatsAppConfig } from '../channel/model';
+import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import {
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
@@ -305,8 +306,13 @@ export abstract class ChatService {
       throw new NotFoundError('WhatsApp channel not found');
     }
     const config = channel.config as IChannelWhatsAppConfig;
-    if (!config.phoneNumberId || !config.accessToken) {
+    if (!config.phoneNumberId) {
       throw new NotFoundError('WhatsApp channel not configured');
+    }
+
+    const connection = await WhatsAppConnectionService.findByOrg(orgId);
+    if (!connection) {
+      throw new NotFoundError('WhatsApp not connected for this org');
     }
 
     const conversation = await ConversationService.findByExternalId({
@@ -330,7 +336,7 @@ export abstract class ChatService {
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${config.accessToken}`,
+          Authorization: `Bearer ${connection.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

@@ -16,8 +16,6 @@ export type IChannelWebConfig = z.infer<typeof ChannelWebConfigSchema>;
 
 export const ChannelWhatsAppConfigSchema = z.object({
   phoneNumberId: z.string().optional(),
-  accessToken: z.string().optional(),
-  businessAccountId: z.string().optional(),
   displayPhone: z.string().optional(),
 });
 

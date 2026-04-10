@@ -15,6 +15,7 @@ import {
   LifeBuoy,
   LineChart,
   MessageCircle,
+  Plug,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -25,6 +26,7 @@ const mainNav = [
   { name: 'Conversations', url: '/conversations', icon: MessageCircle },
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
+  { name: 'Integrations', url: '/integrations', icon: Plug },
 ];
 
 const footerNav = [

@@ -8,6 +8,7 @@ import { embeddings } from './embeddings';
 import { messages } from './messages';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
+import { whatsappConnections } from './whatsappConnections';
 
 export const relations = defineRelations(
   {
@@ -20,6 +21,7 @@ export const relations = defineRelations(
     embeddings,
     orgUsageDaily,
     orgUsageMonthly,
+    whatsappConnections,
   },
   (r) => ({
     chatbots: {
@@ -78,5 +80,6 @@ export const relations = defineRelations(
     },
     orgUsageDaily: {},
     orgUsageMonthly: {},
+    whatsappConnections: {},
   }),
 );

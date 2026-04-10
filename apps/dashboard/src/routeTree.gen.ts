@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsageIndexRouteImport } from './routes/usage/index'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions/index'
 import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
+import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
 import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
@@ -37,6 +38,11 @@ const SubscriptionsIndexRoute = SubscriptionsIndexRouteImport.update({
 const OrganizationIndexRoute = OrganizationIndexRouteImport.update({
   id: '/organization/',
   path: '/organization/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
+  id: '/integrations/',
+  path: '/integrations/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatbotsIndexRoute = ChatbotsIndexRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/account/': typeof AccountIndexRoute
   '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountIndexRoute
   '/analytics': typeof AnalyticsIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
+  '/integrations': typeof IntegrationsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/account/': typeof AccountIndexRoute
   '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/analytics/'
     | '/chatbots/'
+    | '/integrations/'
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/analytics'
     | '/chatbots'
+    | '/integrations'
     | '/organization'
     | '/subscriptions'
     | '/usage'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/analytics/'
     | '/chatbots/'
+    | '/integrations/'
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AccountIndexRoute: typeof AccountIndexRoute
   AnalyticsIndexRoute: typeof AnalyticsIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
+  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   OrganizationIndexRoute: typeof OrganizationIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/organization'
       fullPath: '/organization/'
       preLoaderRoute: typeof OrganizationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations/': {
+      id: '/integrations/'
+      path: '/integrations'
+      fullPath: '/integrations/'
+      preLoaderRoute: typeof IntegrationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chatbots/': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountIndexRoute: AccountIndexRoute,
   AnalyticsIndexRoute: AnalyticsIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
+  IntegrationsIndexRoute: IntegrationsIndexRoute,
   OrganizationIndexRoute: OrganizationIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,

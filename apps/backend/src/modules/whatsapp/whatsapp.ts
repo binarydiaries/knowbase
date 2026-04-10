@@ -1,10 +1,15 @@
+import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
+import { db } from '../../db';
+import { channels } from '../../db/schema/channels';
+import { chatbots } from '../../db/schema/chatbots';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
+import { WhatsAppConnectionService } from './connectionService';
 
 const BadRequestResponse = z.object({
   code: z.string(),
@@ -29,10 +34,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
         return new Response(challenge ?? '', { status: 200 });
       }
 
-      return new Response(JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid verify token' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid verify token' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
     },
     {
       query: t.Object({
@@ -47,13 +52,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/webhook/whatsapp',
     async ({ body }) => {
-      // Acknowledge immediately — Meta requires a fast 200 response
       void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },
-    {
-      body: t.Any(),
-    },
+    { body: t.Any() },
   )
 
   // ─── Authenticated endpoints ───────────────────────────────────────────────
@@ -66,19 +68,75 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     },
   })
 
-  // POST /whatsapp/connect — OAuth exchange after Embedded Signup
+  // GET /whatsapp/connection — org's connection status + phone numbers with bindings
+  .get(
+    '/whatsapp/connection',
+    async ({ orgId }) => {
+      const connection = await WhatsAppConnectionService.findByOrg(orgId);
+
+      if (!connection) {
+        return { connected: false, phoneNumbers: [] };
+      }
+
+      // Fetch live phone numbers from Meta
+      let phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
+      try {
+        const res = await fetch(
+          `https://graph.facebook.com/v19.0/${connection.businessAccountId}/phone_numbers?fields=display_phone_number,id`,
+          { headers: { Authorization: `Bearer ${connection.accessToken}` } },
+        );
+        if (res.ok) {
+          const data = (await res.json()) as {
+            data: { id: string; display_phone_number: string }[];
+          };
+          phoneNumbers = data.data.map((p) => ({
+            phoneNumberId: p.id,
+            displayPhone: p.display_phone_number,
+          }));
+        }
+      } catch {
+        // Best-effort — return connection status even if Meta is slow
+      }
+
+      // For each phone number, check which chatbot's channel has it bound
+      const enriched = await Promise.all(
+        phoneNumbers.map(async (phone) => {
+          const bound = await db
+            .select({ channelId: channels.id, chatbotId: chatbots.id, chatbotName: chatbots.name })
+            .from(channels)
+            .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+            .where(
+              and(
+                eq(channels.type, 'whatsapp'),
+                eq(chatbots.orgId, orgId),
+                sql`${channels.config}->>'phoneNumberId' = ${phone.phoneNumberId}`,
+              ),
+            )
+            .limit(1);
+
+          return {
+            ...phone,
+            boundToChatbotId: bound[0]?.chatbotId ?? null,
+            chatbotName: bound[0]?.chatbotName ?? null,
+          };
+        }),
+      );
+
+      return {
+        connected: true,
+        businessAccountId: connection.businessAccountId,
+        phoneNumbers: enriched,
+      };
+    },
+  )
+
+  // POST /whatsapp/connect — org-level OAuth exchange (Embedded Signup)
   .post(
     '/whatsapp/connect',
     async ({ body, orgId, status }) => {
-      const { code, channelId } = body;
+      const { code } = body;
 
-      // 1. Validate channel belongs to this org
-      const channel = await ChannelService.single({ id: channelId, orgId });
-      if (!channel || channel.type !== 'whatsapp') {
-        return status(404, { code: 'NOT_FOUND', message: 'WhatsApp channel not found' });
-      }
-
-      // 2. Exchange code → short-lived user access token
+      // 1. Exchange code → access token
       const tokenRes = await fetch(
         `https://graph.facebook.com/v19.0/oauth/access_token` +
           `?client_id=${process.env.FACEBOOK_APP_ID}` +
@@ -92,7 +150,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
         access_token: string;
       };
 
-      // 3. Get WABA ID from granular_scopes
+      // 2. Get WABA ID from granular_scopes
       const meRes = await fetch(
         'https://graph.facebook.com/v19.0/me?fields=granular_scopes',
         { headers: { Authorization: `Bearer ${accessToken}` } },
@@ -111,38 +169,115 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
         return status(400, { code: 'BAD_REQUEST', message: 'No WhatsApp Business Account found' });
       }
 
-      // 4. Get phone number details
+      // 3. Get phone numbers
       const phoneRes = await fetch(
         `https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?fields=display_phone_number,id`,
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
-      if (!phoneRes.ok) {
-        return status(400, { code: 'BAD_REQUEST', message: 'Failed to fetch phone number' });
-      }
-      const phoneData = (await phoneRes.json()) as {
-        data: { id: string; display_phone_number: string }[];
-      };
-      const phone = phoneData.data[0];
-      if (!phone) {
-        return status(400, { code: 'BAD_REQUEST', message: 'No phone number found in WABA' });
+      const phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
+      if (phoneRes.ok) {
+        const phoneData = (await phoneRes.json()) as {
+          data: { id: string; display_phone_number: string }[];
+        };
+        for (const p of phoneData.data) {
+          phoneNumbers.push({ phoneNumberId: p.id, displayPhone: p.display_phone_number });
+        }
       }
 
-      // 5. Subscribe WABA to our app (automated — no user action needed)
+      // 4. Subscribe WABA to our app (automated)
       await fetch(`https://graph.facebook.com/v19.0/${wabaId}/subscribed_apps`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      // 6. Save config
-      const config: IChannelWhatsAppConfig = {
-        phoneNumberId: phone.id,
+      // 5. Upsert org-level connection
+      await WhatsAppConnectionService.upsert(orgId, {
         accessToken,
         businessAccountId: wabaId,
-        displayPhone: phone.display_phone_number,
-      };
+      });
+
+      return { businessAccountId: wabaId, phoneNumbers };
+    },
+    {
+      body: t.Object({ code: t.String() }),
+    },
+  )
+
+  // DELETE /whatsapp/connection — org-level disconnect
+  .delete(
+    '/whatsapp/connection',
+    async ({ orgId, status }) => {
+      const connection = await WhatsAppConnectionService.findByOrg(orgId);
+      if (!connection) {
+        return status(404, { code: 'NOT_FOUND', message: 'No WhatsApp connection found' });
+      }
+
+      // Unsubscribe WABA (best-effort)
+      await fetch(
+        `https://graph.facebook.com/v19.0/${connection.businessAccountId}/subscribed_apps`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${connection.accessToken}` },
+        },
+      ).catch(() => {});
+
+      // Clear all WhatsApp channel configs in this org
+      const orgWhatsAppChannels = await db
+        .select({ id: channels.id })
+        .from(channels)
+        .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+        .where(and(eq(channels.type, 'whatsapp'), eq(chatbots.orgId, orgId)));
+
+      for (const ch of orgWhatsAppChannels) {
+        await ChannelService.update(ch.id, {
+          config: {},
+          channelStatus: 'inactive',
+          enabled: false,
+        });
+      }
+
+      // Delete the connection record
+      await WhatsAppConnectionService.delete(orgId);
+
+      return { success: true };
+    },
+  )
+
+  // POST /whatsapp/bind — bind a phone number to a chatbot's WhatsApp channel
+  .post(
+    '/whatsapp/bind',
+    async ({ body, orgId, status }) => {
+      const { channelId, phoneNumberId, displayPhone } = body;
+
+      // Validate channel belongs to org and is whatsapp type
+      const channel = await ChannelService.single({ id: channelId, orgId });
+      if (!channel || channel.type !== 'whatsapp') {
+        return status(404, { code: 'NOT_FOUND', message: 'WhatsApp channel not found' });
+      }
+
+      // Validate no other channel in org already has this phoneNumberId
+      const existing = await db
+        .select({ id: channels.id })
+        .from(channels)
+        .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+        .where(
+          and(
+            eq(channels.type, 'whatsapp'),
+            eq(chatbots.orgId, orgId),
+            sql`${channels.config}->>'phoneNumberId' = ${phoneNumberId}`,
+          ),
+        )
+        .limit(1);
+
+      if (existing.length > 0 && existing[0].id !== channelId) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: 'This phone number is already assigned to another chatbot',
+        });
+      }
 
       const updated = await ChannelService.update(channelId, {
-        config,
+        config: { phoneNumberId, displayPhone } satisfies IChannelWhatsAppConfig,
         channelStatus: 'active',
         enabled: true,
       });
@@ -151,37 +286,20 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     },
     {
       body: t.Object({
-        code: t.String(),
         channelId: t.String(),
+        phoneNumberId: t.String(),
+        displayPhone: t.String(),
       }),
     },
   )
 
-  // DELETE /whatsapp/connect/:channelId — Disconnect WhatsApp
+  // DELETE /whatsapp/bind/:channelId — unassign number (WABA stays connected)
   .delete(
-    '/whatsapp/connect/:channelId',
+    '/whatsapp/bind/:channelId',
     async ({ params, orgId, status }) => {
-      const channel = await ChannelService.single({
-        id: params.channelId,
-        orgId,
-      });
+      const channel = await ChannelService.single({ id: params.channelId, orgId });
       if (!channel || channel.type !== 'whatsapp') {
         return status(404, { code: 'NOT_FOUND', message: 'WhatsApp channel not found' });
-      }
-
-      const config = channel.config as IChannelWhatsAppConfig;
-
-      // Unsubscribe WABA from our app (best-effort)
-      if (config.businessAccountId && config.accessToken) {
-        await fetch(
-          `https://graph.facebook.com/v19.0/${config.businessAccountId}/subscribed_apps`,
-          {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${config.accessToken}` },
-          },
-        ).catch(() => {
-          // Unsubscribe is best-effort — don't block disconnect if it fails
-        });
       }
 
       const updated = await ChannelService.update(params.channelId, {

@@ -5,6 +5,7 @@ import { Link, NavLink } from 'react-router-dom';
 
 const navLinks = [
   { label: 'Features', to: '/features' },
+  { label: 'How It Works', to: '/#how-it-works' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'Blog', to: '/blog' },
 ];

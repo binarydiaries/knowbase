@@ -1,50 +1,102 @@
-import { Badge } from '@knowbase/ui/components/badge';
+import { Button } from '@knowbase/ui/components/button';
+import { Card, CardContent } from '@knowbase/ui/components/card';
+import { ArrowRight, Bot, Calendar, Settings2, BarChart3 } from 'lucide-react';
 
 const steps = [
   {
     number: '01',
-    title: 'Create a chatbot & add knowledge',
+    icon: Bot,
+    title: 'Setup your Account',
     description:
-      'Sign up, create your first chatbot, and upload your knowledge sources -- paste text, add Q&A pairs, or write custom content. Knowbase stores and organises everything for you.',
+      'Sign up and create your first chatbot. Give it a name, choose a default language, and set your brand tone in minutes.',
+    mockupLines: ['Name: Support Bot', 'Language: English', 'Tone: Professional'],
   },
   {
     number: '02',
-    title: 'Train and configure behaviour',
+    icon: Calendar,
+    title: 'Add Your Knowledge',
     description:
-      "Trigger training with one click. Knowbase indexes your documents in the background using AI embeddings. Configure the bot's personality, tone, and response style to match your brand.",
+      'Upload documents, paste text, or define Q&A pairs. Knowbase indexes everything using AI embeddings in the background.',
+    mockupLines: ['Product Manual.pdf ✓', 'FAQ Document.docx ✓', 'Support Guide.txt ✓'],
   },
   {
     number: '03',
-    title: 'Deploy to your channels',
+    icon: Settings2,
+    title: 'Configure Behaviour',
     description:
-      'Connect Web, WhatsApp, or Instagram. Embed the widget on your site with a single script tag, or activate the channel integration -- your chatbot is live within minutes.',
+      "Set your bot's personality, system prompt, and escalation rules. Preview responses before going live.",
+    mockupLines: ['System prompt set', 'Escalation: enabled', 'Preview: ✓ Passed'],
+  },
+  {
+    number: '04',
+    icon: BarChart3,
+    title: 'Deploy & Track',
+    description:
+      'Activate Web, WhatsApp, or Instagram channels. Monitor conversations, satisfaction scores, and topics in real-time.',
+    mockupLines: ['Web Widget: Live', 'WhatsApp: Live', 'Messages today: 142'],
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="bg-muted/30 px-6 py-20">
+    <section id="how-it-works" className="px-6 py-20">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-12 text-center">
-          <Badge variant="secondary" className="mb-4">How it works</Badge>
+        <div className="mb-14 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
+            How it works
+          </p>
           <h2 className="mb-4 font-bold text-3xl tracking-tight md:text-4xl">
-            From knowledge to chatbot in three steps
+            Steps to Seamless AI Chatbot Setup
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground text-lg">
             No engineers needed. If you can type, you can ship a production-ready AI chatbot.
           </p>
         </div>
 
-        <div className="relative grid gap-8 md:grid-cols-3">
-          {steps.map((step) => (
-            <div key={step.number} className="relative flex flex-col items-center text-center">
-              <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-border bg-background shadow-sm">
-                <span className="font-bold text-2xl text-primary">{step.number}</span>
-              </div>
-              <h3 className="mb-3 font-semibold text-lg">{step.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
-            </div>
-          ))}
+        <div className="grid gap-6 sm:grid-cols-2">
+          {steps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <Card key={step.number} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="font-bold text-2xl text-primary/30">{step.number}</span>
+                  </div>
+                  <h3 className="mb-2 font-semibold text-lg">{step.title}</h3>
+                  <p className="mb-5 text-muted-foreground text-sm leading-relaxed">
+                    {step.description}
+                  </p>
+                  {/* Mini mockup */}
+                  <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 space-y-1.5">
+                    {step.mockupLines.map((line) => (
+                      <p key={line} className="text-xs text-muted-foreground font-mono">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Mid-section CTA */}
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl bg-primary/5 px-8 py-6 text-center sm:flex-row sm:text-left">
+          <div>
+            <p className="font-semibold text-lg">Ready to deploy your AI chatbot?</p>
+            <p className="text-muted-foreground text-sm">
+              Set up your account and go live in under 10 minutes.
+            </p>
+          </div>
+          <Button asChild>
+            <a href="http://localhost:4001">
+              Get Started
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
         </div>
       </div>
     </section>

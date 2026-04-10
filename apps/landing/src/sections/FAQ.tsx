@@ -53,8 +53,9 @@ export default function FAQ() {
     <section className="px-6 py-20">
       <div className="mx-auto max-w-3xl">
         <div className="mb-12 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">FAQ</p>
           <h2 className="mb-4 font-bold text-3xl tracking-tight md:text-4xl">
-            Frequently asked questions
+            Explore Common Questions About Our AI Chatbot
           </h2>
           <p className="text-muted-foreground text-lg">
             {"Can't find your answer? "}

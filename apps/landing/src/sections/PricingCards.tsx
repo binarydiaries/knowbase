@@ -17,10 +17,6 @@ export const plans = [
     period: '/month',
     description: 'Perfect for trying Knowbase and small personal projects.',
     badge: null,
-    chatbots: 1,
-    sources: 10,
-    messages: 100,
-    training: 3,
     features: [
       '1 chatbot',
       '10 knowledge sources',
@@ -30,38 +26,14 @@ export const plans = [
     ],
     cta: 'Get started free',
     variant: 'outline' as const,
-  },
-  {
-    name: 'Starter',
-    price: '$29',
-    period: '/month',
-    description: 'For small teams and growing customer support operations.',
-    badge: null,
-    chatbots: 3,
-    sources: 250,
-    messages: 500,
-    training: 10,
-    features: [
-      '3 chatbots',
-      '250 knowledge sources',
-      '500 messages / month',
-      '10 training runs / day',
-      'Web, WhatsApp & Instagram',
-      'Basic analytics',
-    ],
-    cta: 'Start Starter plan',
-    variant: 'outline' as const,
+    highlight: false,
   },
   {
     name: 'Growth',
     price: '$79',
     period: '/month',
     description: 'For scaling businesses with higher volume and advanced needs.',
-    badge: 'Most popular',
-    chatbots: 10,
-    sources: 1000,
-    messages: 2000,
-    training: 20,
+    badge: 'Most Popular',
     features: [
       '10 chatbots',
       '1,000 knowledge sources',
@@ -72,6 +44,7 @@ export const plans = [
     ],
     cta: 'Start Growth plan',
     variant: 'default' as const,
+    highlight: true,
   },
   {
     name: 'Pro',
@@ -79,10 +52,6 @@ export const plans = [
     period: '/month',
     description: 'For enterprises and high-traffic customer support at scale.',
     badge: null,
-    chatbots: 30,
-    sources: 5000,
-    messages: 8000,
-    training: 40,
     features: [
       '30 chatbots',
       '5,000 knowledge sources',
@@ -94,21 +63,20 @@ export const plans = [
     ],
     cta: 'Start Pro plan',
     variant: 'outline' as const,
+    highlight: false,
   },
 ];
 
-interface PricingCardsProps {
-  highlight?: boolean;
-}
-
-export default function PricingCards({ highlight = true }: PricingCardsProps) {
+export default function PricingCards() {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-3">
       {plans.map((plan) => (
         <Card
           key={plan.name}
           className={`relative flex flex-col transition-shadow hover:shadow-md ${
-            plan.badge && highlight ? 'border-primary shadow-md ring-1 ring-primary' : ''
+            plan.highlight
+              ? 'border-primary shadow-lg ring-2 ring-primary'
+              : ''
           }`}
         >
           {plan.badge && (
@@ -117,7 +85,7 @@ export default function PricingCards({ highlight = true }: PricingCardsProps) {
             </div>
           )}
 
-          <CardHeader>
+          <CardHeader className={plan.badge ? 'pt-6' : ''}>
             <CardTitle className="text-lg">{plan.name}</CardTitle>
             <div className="flex items-baseline gap-1">
               <span className="font-bold text-3xl">{plan.price}</span>

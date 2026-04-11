@@ -7,34 +7,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import { Input } from '@knowbase/ui/components/input';
+import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 import { client } from '@/services/client.gen';
 import {
   useWhatsAppConnection,
   type WhatsAppPhoneNumber,
 } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
-
-declare global {
-  interface Window {
-    FB?: {
-      init: (options: {
-        appId: string;
-        version: string;
-        xfbml?: boolean;
-        cookie?: boolean;
-      }) => void;
-      login: (
-        callback: (response: { authResponse?: { code?: string } }) => void,
-        options: { scope: string; extras: Record<string, unknown> },
-      ) => void;
-    };
-    fbAsyncInit?: () => void;
-  }
-}
 
 interface ConnectionResponse {
   connected: boolean;
@@ -43,7 +28,9 @@ interface ConnectionResponse {
 }
 
 export function WhatsAppIntegrationCard() {
-  const fbSdkLoaded = useRef(false);
+  const [accessToken, setAccessToken] = useState('');
+  const [businessAccountId, setBusinessAccountId] = useState('');
+
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
 
@@ -66,32 +53,11 @@ export function WhatsAppIntegrationCard() {
     },
   });
 
-  // Load Facebook JS SDK once
-  useEffect(() => {
-    if (fbSdkLoaded.current || !import.meta.env.VITE_FACEBOOK_APP_ID) return;
-    fbSdkLoaded.current = true;
-
-    window.fbAsyncInit = () => {
-      window.FB?.init({
-        appId: import.meta.env.VITE_FACEBOOK_APP_ID as string,
-        version: 'v19.0',
-        cookie: true,
-        xfbml: false,
-      });
-    };
-
-    const script = document.createElement('script');
-    script.src = 'https://connect.facebook.net/en_US/sdk.js';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-  }, []);
-
   const connectMutation = useMutation({
-    mutationFn: async (code: string) => {
+    mutationFn: async () => {
       const res = await client.post({
         url: '/whatsapp/connect',
-        body: { code },
+        body: { accessToken, businessAccountId },
         responseType: 'json',
       });
       return res.data as {
@@ -108,6 +74,8 @@ export function WhatsAppIntegrationCard() {
           chatbotName: null,
         })),
       });
+      setAccessToken('');
+      setBusinessAccountId('');
       toast.success('WhatsApp Business Account connected');
     },
     onError: (error) => {
@@ -128,31 +96,6 @@ export function WhatsAppIntegrationCard() {
     },
   });
 
-  const handleConnect = () => {
-    if (!window.FB) {
-      toast.error('Facebook SDK not loaded yet. Please try again.');
-      return;
-    }
-
-    window.FB.login(
-      (response) => {
-        const code = response.authResponse?.code;
-        if (code) {
-          connectMutation.mutate(code);
-        } else {
-          toast.error('WhatsApp login was cancelled or failed.');
-        }
-      },
-      {
-        scope: 'whatsapp_business_management,whatsapp_business_messaging',
-        extras: {
-          feature: 'whatsapp_embedded_signup',
-          setup: {},
-        },
-      },
-    );
-  };
-
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -172,28 +115,64 @@ export function WhatsAppIntegrationCard() {
             <CardDescription className="text-sm">
               {connected
                 ? 'Your WhatsApp Business Account is connected.'
-                : 'Connect your WABA to receive messages across your chatbots.'}
+                : 'Enter your Meta credentials to connect your WABA.'}
             </CardDescription>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {connected && (
-            <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
-              <span className="size-1.5 rounded-full bg-green-500 mr-1.5 inline-block" />
-              Connected
-            </Badge>
-          )}
-          {!connected && !isLoading && (
+        {connected && (
+          <Badge
+            variant="outline"
+            className="shrink-0 text-green-600 border-green-300 bg-green-50"
+          >
+            <span className="size-1.5 rounded-full bg-green-500 mr-1.5 inline-block" />
+            Connected
+          </Badge>
+        )}
+      </CardHeader>
+
+      {!connected && !isLoading && (
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="wa-waba-id">Business Account ID</Label>
+              <Input
+                id="wa-waba-id"
+                placeholder="1234567890"
+                value={businessAccountId}
+                onChange={(e) => setBusinessAccountId(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="wa-token">Access Token</Label>
+              <Input
+                id="wa-token"
+                type="password"
+                placeholder="EAAxxxxxxxx…"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <a
+              href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ExternalLink className="size-3" />
+              How to get these
+            </a>
             <Button
               size="sm"
-              onClick={handleConnect}
-              disabled={connectMutation.isPending}
+              disabled={!accessToken || !businessAccountId || connectMutation.isPending}
+              onClick={() => connectMutation.mutate()}
             >
               {connectMutation.isPending ? 'Connecting…' : 'Connect'}
             </Button>
-          )}
-        </div>
-      </CardHeader>
+          </div>
+        </CardContent>
+      )}
 
       {connected && (
         <CardContent className="space-y-4">
@@ -224,7 +203,7 @@ export function WhatsAppIntegrationCard() {
               onClick={() => {
                 if (
                   window.confirm(
-                    'This will unsubscribe your WhatsApp Business Account and disable all WhatsApp channels across your chatbots. Continue?',
+                    'This will disable all WhatsApp channels across your chatbots. Continue?',
                   )
                 ) {
                   disconnectMutation.mutate();

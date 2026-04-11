@@ -114,7 +114,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
       if (phone) {
-        updatePhoneBinding(phone.phoneNumberId, chatbotId, undefined ?? null);
+        updatePhoneBinding(phone.phoneNumberId, chatbotId, null);
       }
       setSelectedPhoneNumberId('');
       posthog.capture('chatbot_channel_connected', {

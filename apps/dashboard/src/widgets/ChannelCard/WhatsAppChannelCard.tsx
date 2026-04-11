@@ -23,6 +23,7 @@ import {
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import type { ChannelSchema } from '@/services';
+import { postChannels } from '@/services';
 import { client } from '@/services/client.gen';
 import { useChannels } from '@/store/useChannels.ts';
 import type { WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
@@ -47,6 +48,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     ),
   );
   const updateChannel = useChannels((s) => s.updateChannel);
+  const setChannels = useChannels((s) => s.setChannels);
   const { connected, phoneNumbers, setConnection, updatePhoneBinding } =
     useWhatsAppConnection();
 
@@ -95,21 +97,50 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       const phone = phoneNumbers.find(
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
-      if (!channelWhatsApp || !phone) return;
+      if (!phone) return null;
+
+      let channelId: string;
+      let wasCreated = false;
+
+      if (!channelWhatsApp) {
+        const createRes = await postChannels({
+          body: {
+            chatbotId,
+            enabled: false,
+            channelStatus: 'inactive',
+            additional: { type: 'whatsapp', config: {} },
+          },
+        });
+        channelId = createRes.data.channel.id;
+        wasCreated = true;
+      } else {
+        channelId = channelWhatsApp.id;
+      }
+
       const res = await client.post({
         url: '/whatsapp/bind',
         body: {
-          channelId: channelWhatsApp.id,
+          channelId,
           phoneNumberId: phone.phoneNumberId,
           displayPhone: phone.displayPhone,
         },
         responseType: 'json',
       });
-      return (res.data as { channel: ChannelSchema }).channel;
+      return {
+        channel: (res.data as { channel: ChannelSchema }).channel,
+        wasCreated,
+      };
     },
-    onSuccess: (updatedChannel) => {
-      if (!updatedChannel) return;
-      updateChannel(chatbotId, updatedChannel);
+    onSuccess: (result) => {
+      if (!result) return;
+      const { channel: updatedChannel, wasCreated } = result;
+      if (wasCreated) {
+        const current =
+          useChannels.getState().channelsByChatbotId[chatbotId] ?? [];
+        setChannels(chatbotId, [...current, updatedChannel]);
+      } else {
+        updateChannel(chatbotId, updatedChannel);
+      }
       const phone = phoneNumbers.find(
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
@@ -155,8 +186,6 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       toast.error(getErrorMessage(error));
     },
   });
-
-  if (!channelWhatsApp) return null;
 
   // State 1: No WABA connected at org level
   if (!connected) {

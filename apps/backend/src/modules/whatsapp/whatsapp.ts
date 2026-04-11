@@ -130,6 +130,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     },
   )
 
+<<<<<<< HEAD
   // POST /whatsapp/connect — manual credential entry (accessToken + businessAccountId)
   .post(
     '/whatsapp/connect',
@@ -154,10 +155,69 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
 
       // 2. Subscribe WABA to our app to receive webhooks (best-effort)
       await fetch(`https://graph.facebook.com/v19.0/${businessAccountId}/subscribed_apps`, {
+=======
+  // POST /whatsapp/connect — org-level OAuth exchange (Embedded Signup)
+  .post(
+    '/whatsapp/connect',
+    async ({ body, orgId, status }) => {
+      const { code } = body;
+
+      // 1. Exchange code → access token
+      const tokenRes = await fetch(
+        `https://graph.facebook.com/v19.0/oauth/access_token` +
+          `?client_id=${process.env.FACEBOOK_APP_ID}` +
+          `&client_secret=${process.env.FACEBOOK_APP_SECRET}` +
+          `&code=${code}`,
+      );
+      if (!tokenRes.ok) {
+        return status(400, { code: 'BAD_REQUEST', message: 'Failed to exchange OAuth code' });
+      }
+      const { access_token: accessToken } = (await tokenRes.json()) as {
+        access_token: string;
+      };
+
+      // 2. Get WABA ID from granular_scopes
+      const meRes = await fetch(
+        'https://graph.facebook.com/v19.0/me?fields=granular_scopes',
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (!meRes.ok) {
+        return status(400, { code: 'BAD_REQUEST', message: 'Failed to fetch WABA info' });
+      }
+      const meData = (await meRes.json()) as {
+        granular_scopes?: { scope: string; target_ids?: string[] }[];
+      };
+      const wabaId = meData.granular_scopes
+        ?.find((s) => s.scope === 'whatsapp_business_management')
+        ?.target_ids?.[0];
+
+      if (!wabaId) {
+        return status(400, { code: 'BAD_REQUEST', message: 'No WhatsApp Business Account found' });
+      }
+
+      // 3. Get phone numbers
+      const phoneRes = await fetch(
+        `https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?fields=display_phone_number,id`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      const phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
+      if (phoneRes.ok) {
+        const phoneData = (await phoneRes.json()) as {
+          data: { id: string; display_phone_number: string }[];
+        };
+        for (const p of phoneData.data) {
+          phoneNumbers.push({ phoneNumberId: p.id, displayPhone: p.display_phone_number });
+        }
+      }
+
+      // 4. Subscribe WABA to our app (automated)
+      await fetch(`https://graph.facebook.com/v19.0/${wabaId}/subscribed_apps`, {
+>>>>>>> main
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
+<<<<<<< HEAD
       // 3. Upsert org-level connection
       await WhatsAppConnectionService.upsert(orgId, { accessToken, businessAccountId });
 
@@ -168,6 +228,18 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
         accessToken: t.String(),
         businessAccountId: t.String(),
       }),
+=======
+      // 5. Upsert org-level connection
+      await WhatsAppConnectionService.upsert(orgId, {
+        accessToken,
+        businessAccountId: wabaId,
+      });
+
+      return { businessAccountId: wabaId, phoneNumbers };
+    },
+    {
+      body: t.Object({ code: t.String() }),
+>>>>>>> main
     },
   )
 

@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+<<<<<<< HEAD
 import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
@@ -14,6 +15,12 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+=======
+import { Separator } from '@knowbase/ui/components/separator';
+import { toast } from '@knowbase/ui/components/sonner';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+>>>>>>> main
 import { client } from '@/services/client.gen';
 import {
   useWhatsAppConnection,
@@ -21,6 +28,27 @@ import {
 } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
+<<<<<<< HEAD
+=======
+declare global {
+  interface Window {
+    FB?: {
+      init: (options: {
+        appId: string;
+        version: string;
+        xfbml?: boolean;
+        cookie?: boolean;
+      }) => void;
+      login: (
+        callback: (response: { authResponse?: { code?: string } }) => void,
+        options: { scope: string; extras: Record<string, unknown> },
+      ) => void;
+    };
+    fbAsyncInit?: () => void;
+  }
+}
+
+>>>>>>> main
 interface ConnectionResponse {
   connected: boolean;
   businessAccountId?: string;
@@ -28,9 +56,13 @@ interface ConnectionResponse {
 }
 
 export function WhatsAppIntegrationCard() {
+<<<<<<< HEAD
   const [accessToken, setAccessToken] = useState('');
   const [businessAccountId, setBusinessAccountId] = useState('');
 
+=======
+  const fbSdkLoaded = useRef(false);
+>>>>>>> main
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
 
@@ -53,11 +85,40 @@ export function WhatsAppIntegrationCard() {
     },
   });
 
+<<<<<<< HEAD
   const connectMutation = useMutation({
     mutationFn: async () => {
       const res = await client.post({
         url: '/whatsapp/connect',
         body: { accessToken, businessAccountId },
+=======
+  // Load Facebook JS SDK once
+  useEffect(() => {
+    if (fbSdkLoaded.current || !import.meta.env.VITE_FACEBOOK_APP_ID) return;
+    fbSdkLoaded.current = true;
+
+    window.fbAsyncInit = () => {
+      window.FB?.init({
+        appId: import.meta.env.VITE_FACEBOOK_APP_ID as string,
+        version: 'v19.0',
+        cookie: true,
+        xfbml: false,
+      });
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const connectMutation = useMutation({
+    mutationFn: async (code: string) => {
+      const res = await client.post({
+        url: '/whatsapp/connect',
+        body: { code },
+>>>>>>> main
         responseType: 'json',
       });
       return res.data as {
@@ -74,8 +135,11 @@ export function WhatsAppIntegrationCard() {
           chatbotName: null,
         })),
       });
+<<<<<<< HEAD
       setAccessToken('');
       setBusinessAccountId('');
+=======
+>>>>>>> main
       toast.success('WhatsApp Business Account connected');
     },
     onError: (error) => {
@@ -96,6 +160,34 @@ export function WhatsAppIntegrationCard() {
     },
   });
 
+<<<<<<< HEAD
+=======
+  const handleConnect = () => {
+    if (!window.FB) {
+      toast.error('Facebook SDK not loaded yet. Please try again.');
+      return;
+    }
+
+    window.FB.login(
+      (response) => {
+        const code = response.authResponse?.code;
+        if (code) {
+          connectMutation.mutate(code);
+        } else {
+          toast.error('WhatsApp login was cancelled or failed.');
+        }
+      },
+      {
+        scope: 'whatsapp_business_management,whatsapp_business_messaging',
+        extras: {
+          feature: 'whatsapp_embedded_signup',
+          setup: {},
+        },
+      },
+    );
+  };
+
+>>>>>>> main
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -115,6 +207,7 @@ export function WhatsAppIntegrationCard() {
             <CardDescription className="text-sm">
               {connected
                 ? 'Your WhatsApp Business Account is connected.'
+<<<<<<< HEAD
                 : 'Enter your Meta credentials to connect your WABA.'}
             </CardDescription>
           </div>
@@ -173,6 +266,30 @@ export function WhatsAppIntegrationCard() {
           </div>
         </CardContent>
       )}
+=======
+                : 'Connect your WABA to receive messages across your chatbots.'}
+            </CardDescription>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {connected && (
+            <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+              <span className="size-1.5 rounded-full bg-green-500 mr-1.5 inline-block" />
+              Connected
+            </Badge>
+          )}
+          {!connected && !isLoading && (
+            <Button
+              size="sm"
+              onClick={handleConnect}
+              disabled={connectMutation.isPending}
+            >
+              {connectMutation.isPending ? 'Connecting…' : 'Connect'}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+>>>>>>> main
 
       {connected && (
         <CardContent className="space-y-4">
@@ -203,7 +320,11 @@ export function WhatsAppIntegrationCard() {
               onClick={() => {
                 if (
                   window.confirm(
+<<<<<<< HEAD
                     'This will disable all WhatsApp channels across your chatbots. Continue?',
+=======
+                    'This will unsubscribe your WhatsApp Business Account and disable all WhatsApp channels across your chatbots. Continue?',
+>>>>>>> main
                   )
                 ) {
                   disconnectMutation.mutate();

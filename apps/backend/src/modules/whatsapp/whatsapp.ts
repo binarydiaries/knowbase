@@ -1,11 +1,11 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
+import { AuthGuard } from '../../common/authGuard/authGuard';
+import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
 import { chatbots } from '../../db/schema/chatbots';
-import { AuthGuard } from '../../common/authGuard/authGuard';
-import { ErrorModel } from '../../common/models/error';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
@@ -69,179 +69,157 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   })
 
   // GET /whatsapp/connection — org's connection status + phone numbers with bindings
-  .get(
-    '/whatsapp/connection',
-    async ({ orgId }) => {
-      const connection = await WhatsAppConnectionService.findByOrg(orgId);
+  .get('/whatsapp/connection', async ({ orgId }) => {
+    const connection = await WhatsAppConnectionService.findByOrg(orgId);
 
-      if (!connection) {
-        return { connected: false, phoneNumbers: [] };
-      }
+    if (!connection) {
+      return { connected: false, phoneNumbers: [] };
+    }
 
-      // Fetch live phone numbers from Meta
-      let phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
-      try {
-        const res = await fetch(
-          `https://graph.facebook.com/v19.0/${connection.businessAccountId}/phone_numbers?fields=display_phone_number,id`,
-          { headers: { Authorization: `Bearer ${connection.accessToken}` } },
-        );
-        if (res.ok) {
-          const data = (await res.json()) as {
-            data: { id: string; display_phone_number: string }[];
-          };
-          phoneNumbers = data.data.map((p) => ({
-            phoneNumberId: p.id,
-            displayPhone: p.display_phone_number,
-          }));
-        }
-      } catch {
-        // Best-effort — return connection status even if Meta is slow
-      }
-
-      // For each phone number, check which chatbot's channel has it bound
-      const enriched = await Promise.all(
-        phoneNumbers.map(async (phone) => {
-          const bound = await db
-            .select({ channelId: channels.id, chatbotId: chatbots.id, chatbotName: chatbots.name })
-            .from(channels)
-            .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
-            .where(
-              and(
-                eq(channels.type, 'whatsapp'),
-                eq(chatbots.orgId, orgId),
-                sql`${channels.config}->>'phoneNumberId' = ${phone.phoneNumberId}`,
-              ),
-            )
-            .limit(1);
-
-          return {
-            ...phone,
-            boundToChatbotId: bound[0]?.chatbotId ?? null,
-            chatbotName: bound[0]?.chatbotName ?? null,
-          };
-        }),
+    // Fetch live phone numbers from Meta
+    let phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
+    try {
+      const res = await fetch(
+        `https://graph.facebook.com/v19.0/${connection.businessAccountId}/phone_numbers?fields=display_phone_number,id`,
+        { headers: { Authorization: `Bearer ${connection.accessToken}` } },
       );
+      if (res.ok) {
+        const data = (await res.json()) as {
+          data: { id: string; display_phone_number: string }[];
+        };
+        phoneNumbers = data.data.map((p) => ({
+          phoneNumberId: p.id,
+          displayPhone: p.display_phone_number,
+        }));
+      }
+    } catch {
+      // Best-effort — return connection status even if Meta is slow
+    }
 
-      return {
-        connected: true,
-        businessAccountId: connection.businessAccountId,
-        phoneNumbers: enriched,
-      };
-    },
-  )
+    // For each phone number, check which chatbot's channel has it bound
+    const enriched = await Promise.all(
+      phoneNumbers.map(async (phone) => {
+        const bound = await db
+          .select({
+            channelId: channels.id,
+            chatbotId: chatbots.id,
+            chatbotName: chatbots.name,
+          })
+          .from(channels)
+          .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+          .where(
+            and(
+              eq(channels.type, 'whatsapp'),
+              eq(chatbots.orgId, orgId),
+              sql`${channels.config}->>'phoneNumberId' = ${phone.phoneNumberId}`,
+            ),
+          )
+          .limit(1);
 
-  // POST /whatsapp/connect — org-level OAuth exchange (Embedded Signup)
+        return {
+          ...phone,
+          boundToChatbotId: bound[0]?.chatbotId ?? null,
+          chatbotName: bound[0]?.chatbotName ?? null,
+        };
+      }),
+    );
+
+    return {
+      connected: true,
+      businessAccountId: connection.businessAccountId,
+      phoneNumbers: enriched,
+    };
+  })
+
+  // POST /whatsapp/connect — manual credential entry (accessToken + businessAccountId)
   .post(
     '/whatsapp/connect',
     async ({ body, orgId, status }) => {
-      const { code } = body;
+      const { accessToken, businessAccountId } = body;
 
-      // 1. Exchange code → access token
-      const tokenRes = await fetch(
-        `https://graph.facebook.com/v19.0/oauth/access_token` +
-          `?client_id=${process.env.FACEBOOK_APP_ID}` +
-          `&client_secret=${process.env.FACEBOOK_APP_SECRET}` +
-          `&code=${code}`,
-      );
-      if (!tokenRes.ok) {
-        return status(400, { code: 'BAD_REQUEST', message: 'Failed to exchange OAuth code' });
-      }
-      const { access_token: accessToken } = (await tokenRes.json()) as {
-        access_token: string;
-      };
-
-      // 2. Get WABA ID from granular_scopes
-      const meRes = await fetch(
-        'https://graph.facebook.com/v19.0/me?fields=granular_scopes',
-        { headers: { Authorization: `Bearer ${accessToken}` } },
-      );
-      if (!meRes.ok) {
-        return status(400, { code: 'BAD_REQUEST', message: 'Failed to fetch WABA info' });
-      }
-      const meData = (await meRes.json()) as {
-        granular_scopes?: { scope: string; target_ids?: string[] }[];
-      };
-      const wabaId = meData.granular_scopes
-        ?.find((s) => s.scope === 'whatsapp_business_management')
-        ?.target_ids?.[0];
-
-      if (!wabaId) {
-        return status(400, { code: 'BAD_REQUEST', message: 'No WhatsApp Business Account found' });
-      }
-
-      // 3. Get phone numbers
+      // 1. Verify credentials by fetching phone numbers (fails fast on bad token)
       const phoneRes = await fetch(
-        `https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?fields=display_phone_number,id`,
+        `https://graph.facebook.com/v19.0/${businessAccountId}/phone_numbers?fields=display_phone_number,id`,
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
-      const phoneNumbers: { phoneNumberId: string; displayPhone: string }[] = [];
-      if (phoneRes.ok) {
-        const phoneData = (await phoneRes.json()) as {
-          data: { id: string; display_phone_number: string }[];
-        };
-        for (const p of phoneData.data) {
-          phoneNumbers.push({ phoneNumberId: p.id, displayPhone: p.display_phone_number });
-        }
+      if (!phoneRes.ok) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message:
+            'Invalid credentials — could not reach WhatsApp Business Account',
+        });
       }
+      const phoneData = (await phoneRes.json()) as {
+        data: { id: string; display_phone_number: string }[];
+      };
+      const phoneNumbers = phoneData.data.map((p) => ({
+        phoneNumberId: p.id,
+        displayPhone: p.display_phone_number,
+      }));
 
-      // 4. Subscribe WABA to our app (automated)
-      await fetch(`https://graph.facebook.com/v19.0/${wabaId}/subscribed_apps`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      // 5. Upsert org-level connection
+      // 2. Subscribe WABA to our app to receive webhooks (best-effort)
+      await fetch(
+        `https://graph.facebook.com/v19.0/${businessAccountId}/subscribed_apps`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+      // 3. Upsert org-level connection
       await WhatsAppConnectionService.upsert(orgId, {
         accessToken,
-        businessAccountId: wabaId,
+        businessAccountId,
       });
 
-      return { businessAccountId: wabaId, phoneNumbers };
+      return { businessAccountId, phoneNumbers };
     },
     {
-      body: t.Object({ code: t.String() }),
+      body: t.Object({
+        accessToken: t.String(),
+        businessAccountId: t.String(),
+      }),
     },
   )
 
   // DELETE /whatsapp/connection — org-level disconnect
-  .delete(
-    '/whatsapp/connection',
-    async ({ orgId, status }) => {
-      const connection = await WhatsAppConnectionService.findByOrg(orgId);
-      if (!connection) {
-        return status(404, { code: 'NOT_FOUND', message: 'No WhatsApp connection found' });
-      }
+  .delete('/whatsapp/connection', async ({ orgId, status }) => {
+    const connection = await WhatsAppConnectionService.findByOrg(orgId);
+    if (!connection) {
+      return status(404, {
+        code: 'NOT_FOUND',
+        message: 'No WhatsApp connection found',
+      });
+    }
 
-      // Unsubscribe WABA (best-effort)
-      await fetch(
-        `https://graph.facebook.com/v19.0/${connection.businessAccountId}/subscribed_apps`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${connection.accessToken}` },
-        },
-      ).catch(() => {});
+    // Unsubscribe WABA (best-effort)
+    await fetch(
+      `https://graph.facebook.com/v19.0/${connection.businessAccountId}/subscribed_apps`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${connection.accessToken}` },
+      },
+    ).catch(() => {});
 
-      // Clear all WhatsApp channel configs in this org
-      const orgWhatsAppChannels = await db
-        .select({ id: channels.id })
-        .from(channels)
-        .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
-        .where(and(eq(channels.type, 'whatsapp'), eq(chatbots.orgId, orgId)));
+    // Clear all WhatsApp channel configs in this org
+    const orgWhatsAppChannels = await db
+      .select({ id: channels.id })
+      .from(channels)
+      .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+      .where(and(eq(channels.type, 'whatsapp'), eq(chatbots.orgId, orgId)));
 
-      for (const ch of orgWhatsAppChannels) {
-        await ChannelService.update(ch.id, {
-          config: {},
-          channelStatus: 'inactive',
-          enabled: false,
-        });
-      }
+    for (const ch of orgWhatsAppChannels) {
+      await ChannelService.update(ch.id, {
+        config: {},
+        channelStatus: 'inactive',
+        enabled: false,
+      });
+    }
 
-      // Delete the connection record
-      await WhatsAppConnectionService.delete(orgId);
+    // Delete the connection record
+    await WhatsAppConnectionService.delete(orgId);
 
-      return { success: true };
-    },
-  )
+    return { success: true };
+  })
 
   // POST /whatsapp/bind — bind a phone number to a chatbot's WhatsApp channel
   .post(
@@ -252,7 +230,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       // Validate channel belongs to org and is whatsapp type
       const channel = await ChannelService.single({ id: channelId, orgId });
       if (!channel || channel.type !== 'whatsapp') {
-        return status(404, { code: 'NOT_FOUND', message: 'WhatsApp channel not found' });
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'WhatsApp channel not found',
+        });
       }
 
       // Validate no other channel in org already has this phoneNumberId
@@ -277,7 +258,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       }
 
       const updated = await ChannelService.update(channelId, {
-        config: { phoneNumberId, displayPhone } satisfies IChannelWhatsAppConfig,
+        config: {
+          phoneNumberId,
+          displayPhone,
+        } satisfies IChannelWhatsAppConfig,
         channelStatus: 'active',
         enabled: true,
       });
@@ -294,23 +278,26 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   )
 
   // DELETE /whatsapp/bind/:channelId — unassign number (WABA stays connected)
-  .delete(
-    '/whatsapp/bind/:channelId',
-    async ({ params, orgId, status }) => {
-      const channel = await ChannelService.single({ id: params.channelId, orgId });
-      if (!channel || channel.type !== 'whatsapp') {
-        return status(404, { code: 'NOT_FOUND', message: 'WhatsApp channel not found' });
-      }
-
-      const updated = await ChannelService.update(params.channelId, {
-        config: {},
-        channelStatus: 'inactive',
-        enabled: false,
+  .delete('/whatsapp/bind/:channelId', async ({ params, orgId, status }) => {
+    const channel = await ChannelService.single({
+      id: params.channelId,
+      orgId,
+    });
+    if (!channel || channel.type !== 'whatsapp') {
+      return status(404, {
+        code: 'NOT_FOUND',
+        message: 'WhatsApp channel not found',
       });
+    }
 
-      return { channel: ChannelService.transformChannel(updated) };
-    },
-  );
+    const updated = await ChannelService.update(params.channelId, {
+      config: {},
+      channelStatus: 'inactive',
+      enabled: false,
+    });
+
+    return { channel: ChannelService.transformChannel(updated) };
+  });
 
 // ─── Fire-and-forget: process inbound WhatsApp message ──────────────────────
 async function processInboundMessage(body: unknown) {
@@ -320,7 +307,11 @@ async function processInboundMessage(body: unknown) {
       changes?: {
         value?: {
           metadata?: { phone_number_id?: string };
-          messages?: { from?: string; type?: string; text?: { body?: string } }[];
+          messages?: {
+            from?: string;
+            type?: string;
+            text?: { body?: string };
+          }[];
         };
       }[];
     }[];
@@ -335,11 +326,17 @@ async function processInboundMessage(body: unknown) {
       const messages = value?.messages ?? [];
 
       for (const msg of messages) {
-        if (msg.type !== 'text' || !msg.from || !msg.text?.body || !phoneNumberId) {
+        if (
+          msg.type !== 'text' ||
+          !msg.from ||
+          !msg.text?.body ||
+          !phoneNumberId
+        ) {
           continue;
         }
 
-        const result = await ChannelService.findByWhatsappPhoneNumberId(phoneNumberId);
+        const result =
+          await ChannelService.findByWhatsappPhoneNumberId(phoneNumberId);
         if (!result?.enabled || !result.chatbot) continue;
 
         await ChatService.sendWhatsApp({

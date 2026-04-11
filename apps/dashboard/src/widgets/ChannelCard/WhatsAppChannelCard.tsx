@@ -22,12 +22,12 @@ import {
   CHATBOT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import type { ChannelSchema } from '@/services';
 import { client } from '@/services/client.gen';
 import { useChannels } from '@/store/useChannels.ts';
+import type { WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
 import { useWhatsAppConnection } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
-import type { ChannelSchema } from '@/services';
-import type { WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
 
 interface ConnectionResponse {
   connected: boolean;
@@ -50,7 +50,8 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { connected, phoneNumbers, setConnection, updatePhoneBinding } =
     useWhatsAppConnection();
 
-  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState<string>('');
+  const [selectedPhoneNumberId, setSelectedPhoneNumberId] =
+    useState<string>('');
 
   // Fetch connection status if not already in store
   useQuery({
@@ -86,8 +87,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   // Numbers not bound to any other chatbot (available to assign to this one)
   const availableNumbers = phoneNumbers.filter(
-    (p) =>
-      !p.boundToChatbotId || p.boundToChatbotId === chatbotId,
+    (p) => !p.boundToChatbotId || p.boundToChatbotId === chatbotId,
   );
 
   const assignMutation = useMutation({

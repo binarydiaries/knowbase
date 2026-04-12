@@ -293,12 +293,14 @@ export abstract class ChatService {
     orgId,
     senderPhone,
     message,
+    messageId,
     ip,
   }: {
     channelId: string;
     orgId: string;
     senderPhone: string;
     message: string;
+    messageId?: string;
     ip?: string;
   }) {
     const channel = await ChannelService.single({ id: channelId, orgId });
@@ -319,6 +321,44 @@ export abstract class ChatService {
       channelId,
       externalId: senderPhone,
     });
+
+    // ── Seen receipt (blue ticks) — best-effort, fire-and-forget ──────────────
+    if (messageId) {
+      fetch(
+        `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${connection.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            status: 'read',
+            message_id: messageId,
+          }),
+        },
+      ).catch(console.error);
+    }
+
+    // ── Typing indicator — best-effort, fire-and-forget ───────────────────────
+    fetch(
+      `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${connection.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: senderPhone,
+          type: 'typing',
+          typing: { action: 'typing_on' },
+        }),
+      },
+    ).catch(console.error);
 
     const { assistantMessage, chunks, finalQuery } =
       await ChatService.generateWhatsAppResponse({

@@ -309,6 +309,7 @@ async function processInboundMessage(body: unknown) {
         value?: {
           metadata?: { phone_number_id?: string };
           messages?: {
+            id?: string;
             from?: string;
             type?: string;
             text?: { body?: string };
@@ -345,6 +346,7 @@ async function processInboundMessage(body: unknown) {
           orgId: result.chatbot.orgId,
           senderPhone: msg.from,
           message: msg.text.body,
+          messageId: msg.id,
         });
       }
     }

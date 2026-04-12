@@ -35,7 +35,7 @@ const CoreValueSection = () => {
 
                 {/* Container with BG image */}
                 <div
-                    className="relative rounded-3xl p-10 md:p-14 border border-[#301B69]/10 bg-cover bg-center overflow-hidden"
+                    className="relative rounded-3xl p-10 md:p-14  bg-cover bg-center overflow-hidden"
                     style={{
                         backgroundImage: "url('/core-bg.png')", // 👈 your bg image
                     }}

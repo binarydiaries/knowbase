@@ -35,7 +35,7 @@ const PlatformSection = () => {
 
                 {/* Container */}
                 <div
-                    className="relative rounded-3xl p-10 md:p-14 overflow-hidden border border-[#301B69]/10 bg-cover bg-center"
+                    className="relative rounded-3xl p-10 md:p-14 overflow-hidden  bg-cover bg-center"
                     style={{
                         backgroundImage: "url('/platform-bg.png')", // 👈 your bg
                     }}

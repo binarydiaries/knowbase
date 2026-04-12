@@ -9,7 +9,7 @@ const features = [
     {
         icon: FileText,
         title: "Knowledge Sources",
-        desc: "Import your data from text, FAQs, and documents. Continuously expand your bot's knowledge as you grow.",
+        desc: "Import your data from text, FAQs, and documents. Continuously expand your bot’s knowledge as you grow.",
     },
     {
         icon: Zap,
@@ -51,7 +51,7 @@ const CoreValueSection = () => {
                     <div className="relative z-10">
 
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-1 text-sm rounded-full bg-white/70 backdrop-blur border border-[#301B69]/10 text-[#301B69] mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-1 text-sm rounded-full bg-white/70 backdrop-blur  text-[#301B69] mb-6">
                             ✦ CORE VALUE
                         </div>
 
@@ -61,9 +61,8 @@ const CoreValueSection = () => {
                         </h2>
 
                         {/* Subtext */}
-                        <p className="text-[#301B69]/70 max-w-2xl mb-10 leading-relaxed">
-                            KnowBase lets you create intelligent chatbots trained on your own
-                            data—so responses are accurate, contextual, and useful.
+                        <p className="text-[#301B69] max-w-2xl mb-10 leading-relaxed">
+                            KnowBase lets you create intelligent chatbots trained on your own <br/>data—so responses are accurate, contextual, and useful.
                         </p>
 
                         {/* Features Grid */}
@@ -85,7 +84,7 @@ const CoreValueSection = () => {
                                             <h3 className="font-semibold text-[#301B69] mb-1">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-sm text-[#301B69]/70 leading-relaxed">
+                                            <p className="text-sm text-[#301B69]/80 leading-relaxed">
                                                 {item.desc}
                                             </p>
                                         </div>

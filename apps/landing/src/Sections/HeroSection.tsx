@@ -36,8 +36,10 @@ const HeroSection = () => {
             {/* Content */}
             <div className="relative z-10 text-center max-w-4xl mx-auto px-6 pt-16 pb-28">
 
+
                 <div className="relative">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">
+
 
                         {/* Gradient part */}
                         <span className="bg-gradient-to-b from-[#301B69] to-[#B07CD1] bg-clip-text text-transparent">
@@ -55,7 +57,7 @@ const HeroSection = () => {
                 </div>
 
                 <p className="text-[#301B69] mb-8">
-                    Turn your documents, notes, and data into powerful AI chatbots—instantly.
+                    Turn your documents, notes, and data into powerful AI chatbots—instantly.<br/> No coding required. Deploy anywhere.
                 </p>
 
                 <div className="flex justify-center gap-4 flex-wrap">
@@ -63,7 +65,7 @@ const HeroSection = () => {
                         Get Started →
                     </button>
 
-                    <button className="px-6 py-3 text-[#301B69] bg-white border rounded-xl">
+                    <button className="px-6 py-3 text-[#301B69] bg-white  rounded-xl">
                         Contact Us
                     </button>
                 </div>

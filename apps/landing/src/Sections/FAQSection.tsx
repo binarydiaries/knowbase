@@ -3,37 +3,56 @@ import { ChevronDown } from "lucide-react";
 
 const faqs = [
     {
-        question: "Can I upgrade or downgrade my plan at any time?",
+        question: "What is KnowBase?",
         answer:
-            "Yes, you can change your plan anytime. Your billing will be adjusted accordingly.",
+            "KnowBase is a platform that lets you create AI-powered chatbots using your own data. Instead of generic answers, your chatbot responds based on your knowledge sources. It works for personal use, teams, and businesses with no coding required.",
     },
     {
-        question: "Is there a free trial available?",
+        question: "What kind of data can I use?",
         answer:
-            "Yes, we offer a 14-day free trial for all our plans. You can sign up without any commitment and explore all features.",
+            "You can currently add text content and structured FAQs to train your chatbot with precise information. Support for PDFs and additional formats is coming soon as we continue expanding supported sources.",
     },
     {
-        question: "Is there a discount for annual subscriptions?",
+        question: "Do I need coding skills to use KnowBase?",
         answer:
-            "Yes, we offer discounts for annual plans. You can save more by choosing yearly billing.",
+            "No, KnowBase is built for everyone. You can create and manage chatbots without writing any code. The interface is simple and beginner-friendly, with advanced features coming later for power users.",
     },
     {
-        question: "How secure is my data?",
+        question: "Can I create multiple chatbots?",
         answer:
-            "Your data is encrypted and securely stored. We follow industry best practices to ensure safety.",
+            "Yes, you can create multiple chatbots for different use cases. Each chatbot can have its own knowledge and behavior, making it useful for teams, products, or workflows. Limits depend on your selected plan.",
     },
     {
-        question: "Can I integrate this tool with other software we use?",
+        question: "How accurate are the responses?",
         answer:
-            "Yes, we support integrations with multiple platforms and tools to fit your workflow.",
+            "Responses are generated based on your provided data, making them more relevant than generic AI answers. Accuracy improves as you add better structured knowledge, and you stay in control of what your bot knows.",
     },
     {
-        question: "What kind of support is available?",
+        question: "Is my data secure?",
         answer:
-            "We provide email, chat, and priority support depending on your plan.",
+            "Yes, your data is private and scoped to your account. We prioritize security and do not expose your data publicly. Only you and your configured bots can access it, with more advanced controls coming soon.",
+    },
+    {
+        question: "Can I customize how the chatbot behaves?",
+        answer:
+            "Yes, you can control tone, style, and responses to match your brand voice or use case. You can make your bot formal, friendly, or task-focused to ensure a consistent experience.",
+    },
+    {
+        question: "Where can I use my chatbot?",
+        answer:
+            "You can currently use your chatbot within KnowBase. Embedding and integrations are coming soon, with future support for websites, apps, and APIs to make your chatbot accessible everywhere.",
+    },
+    {
+        question: "How does pricing work?",
+        answer:
+            "KnowBase offers simple subscription-based pricing with plans based on usage, limits, and features. You can start for free and upgrade as you grow, with no hidden charges.",
+    },
+    {
+        question: "What’s coming next?",
+        answer:
+            "We are actively building new features including PDF support, integrations, APIs, and analytics. Our goal is to make KnowBase a complete AI platform for individuals, teams, and businesses.",
     },
 ];
-
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(1);
 
@@ -42,7 +61,7 @@ const FAQSection = () => {
     };
 
     return (
-        <section className="px-6 py-24">
+        <section className="px-6 pt-16">
             <div className="max-w-6xl mx-auto">
 
                 {/* Container */}
@@ -61,8 +80,8 @@ const FAQSection = () => {
 
                         {/* Header */}
                         <div className="text-center mb-12">
-                            <div className="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 border border-[#301B69]/10 text-[#301B69] mb-4">
-                                ✦ Frequently Asked Questions
+                            <div className="inline-flex px-4 py-1 text-xs rounded-full gap-2 bg-white/80 text-[#301B69] mb-4">
+                                <div className={"px-1  rounded-full border border-[#301B69]"}>?</div>  Frequently Asked Questions
                             </div>
 
                             <h2 className="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">

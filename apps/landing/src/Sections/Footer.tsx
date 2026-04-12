@@ -36,7 +36,7 @@ const Footer = () => {
                             <div className="col-span-1">
                                 <div className="flex items-center gap-2 text-[#301B69] font-semibold text-lg">
                                     <div className="w-6 h-6 rounded-full bg-[#301B69]" />
-                                    Flowvy
+                                    Knowbase
                                 </div>
                             </div>
 
@@ -121,7 +121,7 @@ const Footer = () => {
 
                         {/* Bottom */}
                         <div className="text-center text-sm text-[#301B69]/70 mt-6">
-                            © 2025 Flowvy. All rights reserved.
+                            © 2026 Knowbase. All rights reserved.
                         </div>
 
                     </div>

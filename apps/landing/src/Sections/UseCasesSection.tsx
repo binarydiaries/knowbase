@@ -48,7 +48,7 @@ const UseCasesSection = () => {
                     <div className="relative z-10">
 
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur border border-[#301B69]/10 text-[#301B69] mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur  text-[#301B69] mb-6">
                             ✦ USE CASES
                         </div>
 
@@ -81,7 +81,7 @@ const UseCasesSection = () => {
                                             <h3 className="font-semibold text-[#301B69] mb-1 text-sm md:text-base">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-xs md:text-sm text-[#301B69]/70 leading-relaxed">
+                                            <p className="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">
                                                 {item.desc}
                                             </p>
                                         </div>

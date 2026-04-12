@@ -1,5 +1,7 @@
+import LandingPage from "./Sections/LandingPage.tsx";
+
 function App() {
-  return <h1>Hello</h1>;
+  return <LandingPage/>;
 }
 
 export default App;

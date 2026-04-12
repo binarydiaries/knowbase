@@ -5,7 +5,7 @@ const plans = [
         name: "Basic",
         subtitle: "For Individuals",
         price: "$10",
-        desc: "Perfect for small teams and individuals just starting out with project management.",
+        desc: "Perfect for Small teams and individuals just starting out with project management.",
         features: [
             "Basic Task Management",
             "Team Collaboration",
@@ -69,16 +69,16 @@ const PricingSection = () => {
 
                         {/* Header */}
                         <div className="text-center mb-16">
-                            <div className="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 border border-[#301B69]/10 text-[#301B69] mb-4">
+                            <div className="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 text-[#301B69] mb-4">
                                 ✦ Pricing
                             </div>
 
                             <h2 className="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">
-                                Simple, transparent pricing that scales with you
+                                Simple, transparent pricing that <br/>scales with you
                             </h2>
 
                             <p className="text-[#301B69]/70 max-w-2xl mx-auto text-sm md:text-base">
-                                Start for free and upgrade as your usage grows. No hidden fees, no complicated tiers—just clear limits and value.
+                                Start for free and upgrade as your usage grows. No hidden fees, no complicated tiers—just,<br/> clear limits and value. Whether you're building a personal bot or scaling for a team,<br/> KnowBase adapts to your needs.
                             </p>
                         </div>
 

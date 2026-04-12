@@ -11,6 +11,14 @@ import {
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
+    const scrollToSection = (id: string) => {
+        const el = document.getElementById(id);
+        if (el) {
+            const offset = 80; // adjust if navbar height changes
+            const top = el.offsetTop - offset;
+            window.scrollTo({ top, behavior: "smooth" });
+        }
+    };
     return (
         <footer className="px-6 ">
             <div className="w-full mx-auto">
@@ -46,11 +54,25 @@ const Footer = () => {
                                     Quick Links
                                 </h4>
                                 <ul className="space-y-2 text-sm text-[#301B69]/70">
-                                    <li>Home</li>
-                                    <li>User Stories</li>
-                                    <li>FAQ</li>
-                                    <li>Support</li>
-                                    <li>Blog</li>
+                                    <li className="cursor-pointer hover:text-[#301B69]" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                                        Home
+                                    </li>
+
+                                    <li className="cursor-pointer hover:text-[#301B69]" onClick={() => scrollToSection("features")}>
+                                        Features
+                                    </li>
+
+                                    <li className="cursor-pointer hover:text-[#301B69]" onClick={() => scrollToSection("how-it-works")}>
+                                        How it Works
+                                    </li>
+
+                                    <li className="cursor-pointer hover:text-[#301B69]" onClick={() => scrollToSection("pricing")}>
+                                        Pricing
+                                    </li>
+
+                                    <li className="cursor-pointer hover:text-[#301B69]" onClick={() => scrollToSection("faq")}>
+                                        FAQ
+                                    </li>
                                 </ul>
                             </div>
 
@@ -60,7 +82,9 @@ const Footer = () => {
                                     Support
                                 </h4>
                                 <ul className="space-y-2 text-sm text-[#301B69]/70">
-                                    <li>Help Center</li>
+                                    <li onClick={() => scrollToSection("faq")} className="cursor-pointer hover:text-[#301B69]">
+                                        Help Center
+                                    </li>
                                     <li>Getting Started</li>
                                     <li>Contact Support</li>
                                     <li>Community Forums</li>

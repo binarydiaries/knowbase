@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
+import { InstagramIntegrationCard } from '@/widgets/InstagramIntegrationCard/InstagramIntegrationCard.tsx';
 
 export const Route = createFileRoute('/integrations/')({
   component: RouteComponent,
@@ -70,6 +71,7 @@ function RouteComponent() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <WhatsAppIntegrationCard />
+          <InstagramIntegrationCard />
           <ComingSoonCard
             name="Slack"
             description="Send and receive messages in Slack channels."
@@ -77,10 +79,6 @@ function RouteComponent() {
           <ComingSoonCard
             name="Discord"
             description="Integrate your chatbot into Discord servers."
-          />
-          <ComingSoonCard
-            name="Instagram"
-            description="Handle Instagram Direct Message conversations."
           />
         </div>
       </div>

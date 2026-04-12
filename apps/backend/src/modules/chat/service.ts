@@ -10,8 +10,9 @@ import { IndexingService } from '../indexing/service';
 import { MessageService } from '../message/service';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
-import type { IChannelWhatsAppConfig } from '../channel/model';
+import type { IChannelWhatsAppConfig, IChannelInstagramConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
+import { InstagramConnectionService } from '../instagram/connectionService';
 import {
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
@@ -417,6 +418,142 @@ export abstract class ChatService {
         chatbotId: channel.chatbotId,
         channelId,
         externalId: senderPhone,
+        ...conversationData,
+      });
+      conversationId = newId;
+    } else {
+      await ConversationService.update(conversation.id, conversationData);
+      conversationId = conversation.id;
+    }
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    const confidenceScore = chunks.length
+      ? chunks.reduce((acc, c) => acc + c.similarity, 0) / chunks.length
+      : 0;
+
+    await MessageService.addMessages([
+      {
+        conversationId,
+        role: 'user',
+        content: message,
+        systemMetadata: { finalQuery },
+      },
+      {
+        conversationId,
+        role: 'assistant',
+        content: assistantMessage,
+        metadata: {
+          confidenceScore,
+          sources: chunks.map((c) => ({
+            documentId: c.documentId,
+            documentVersion: c.documentVersion,
+            chunkIndex: c.chunkIndex,
+            similarity: c.similarity,
+          })),
+          sentiment: null,
+        },
+      },
+    ]);
+  }
+
+  static async sendInstagram({
+    channelId,
+    orgId,
+    senderPsid,
+    message,
+    ip,
+  }: {
+    channelId: string;
+    orgId: string;
+    senderPsid: string;
+    message: string;
+    ip?: string;
+  }) {
+    const channel = await ChannelService.single({ id: channelId, orgId });
+    if (!channel || channel.type !== 'instagram') {
+      throw new NotFoundError('Instagram channel not found');
+    }
+    const config = channel.config as IChannelInstagramConfig;
+    if (!config.pageId) {
+      throw new NotFoundError('Instagram channel not configured');
+    }
+
+    const connection = await InstagramConnectionService.findByOrg(orgId);
+    if (!connection) {
+      throw new NotFoundError('Instagram not connected for this org');
+    }
+
+    const conversation = await ConversationService.findByExternalId({
+      channelId,
+      externalId: senderPsid,
+    });
+
+    // ── Typing indicator ──────────────────────────────────────────────────────
+    try {
+      const typingRes = await fetch(
+        `https://graph.facebook.com/v19.0/${config.pageId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${connection.pageAccessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipient: { id: senderPsid },
+            sender_action: 'typing_on',
+          }),
+        },
+      );
+      if (!typingRes.ok) {
+        console.error('[IG typing] error:', await typingRes.text());
+      }
+    } catch (e) {
+      console.error('[IG typing] fetch error:', e);
+    }
+
+    const { assistantMessage, chunks, finalQuery } =
+      await ChatService.generateWhatsAppResponse({
+        chatbotId: channel.chatbotId,
+        channelId,
+        message,
+        conversationId: conversation?.id,
+        orgId,
+        ip,
+      });
+
+    // Send reply via Messenger Platform
+    await fetch(
+      `https://graph.facebook.com/v19.0/${config.pageId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${connection.pageAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipient: { id: senderPsid },
+          message: { text: assistantMessage },
+          messaging_type: 'RESPONSE',
+        }),
+      },
+    );
+
+    // Persist conversation + messages
+    const conversationData = {
+      lastUserQuestion: finalQuery,
+      lastAssistantUtterance: assistantMessage,
+      lastMessageAt: new Date(),
+    };
+
+    let conversationId: string;
+    if (!conversation) {
+      const newId = createId();
+      await ConversationService.create({
+        id: newId,
+        chatbotId: channel.chatbotId,
+        channelId,
+        externalId: senderPsid,
         ...conversationData,
       });
       conversationId = newId;

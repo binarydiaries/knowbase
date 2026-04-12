@@ -39,6 +39,23 @@ export abstract class ChannelService {
     return channel;
   }
 
+  static async findByInstagramPageId(pageId: string) {
+    const rows = await db
+      .select({ channel: channels, chatbot: chatbots })
+      .from(channels)
+      .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+      .where(
+        and(
+          eq(channels.type, 'instagram'),
+          sql`${channels.config}->>'pageId' = ${pageId}`,
+        ),
+      )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, chatbot: rows[0].chatbot };
+  }
+
   static async findByWhatsappPhoneNumberId(phoneNumberId: string) {
     const rows = await db
       .select({ channel: channels, chatbot: chatbots })

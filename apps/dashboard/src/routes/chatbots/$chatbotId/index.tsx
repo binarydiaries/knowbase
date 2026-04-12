@@ -30,6 +30,7 @@ import { useDocuments } from '@/store/useDocuments.ts';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
 import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
+import InstagramChannelCard from '@/widgets/ChannelCard/InstagramChannelCard.tsx';
 import { ChatbotMenuActions } from '@/widgets/ChatbotMenuActions/ChatbotMenuActions.tsx';
 import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
 import { ChatbotUseWidget } from '@/widgets/ChatbotUseWidget/ChatbotUseWidget.tsx';
@@ -129,6 +130,7 @@ function RouteComponent() {
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             <WhatsAppChannelCard readOnly={readOnly} />
+            <InstagramChannelCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
             <Badge variant="secondary" className="rounded-l-none">

@@ -9,6 +9,7 @@ import { messages } from './messages';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
 import { whatsappConnections } from './whatsappConnections';
+import { instagramConnections } from './instagramConnections';
 
 export const relations = defineRelations(
   {
@@ -22,6 +23,7 @@ export const relations = defineRelations(
     orgUsageDaily,
     orgUsageMonthly,
     whatsappConnections,
+    instagramConnections,
   },
   (r) => ({
     chatbots: {
@@ -81,5 +83,6 @@ export const relations = defineRelations(
     orgUsageDaily: {},
     orgUsageMonthly: {},
     whatsappConnections: {},
+    instagramConnections: {},
   }),
 );

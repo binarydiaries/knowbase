@@ -21,6 +21,13 @@ export const ChannelWhatsAppConfigSchema = z.object({
 
 export type IChannelWhatsAppConfig = z.infer<typeof ChannelWhatsAppConfigSchema>;
 
+export const ChannelInstagramConfigSchema = z.object({
+  pageId: z.string().optional(),
+  instagramUsername: z.string().optional(),
+});
+
+export type IChannelInstagramConfig = z.infer<typeof ChannelInstagramConfigSchema>;
+
 const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
@@ -37,7 +44,7 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal('instagram'),
-      config: z.object({}),
+      config: ChannelInstagramConfigSchema,
     })
     .meta({ title: 'instagram' }),
 ]);

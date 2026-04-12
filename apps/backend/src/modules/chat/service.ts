@@ -354,8 +354,8 @@ export abstract class ChatService {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to: senderPhone,
-          type: 'typing',
-          typing: { action: 'typing_on' },
+          type: 'typing_indicator',
+          typing_indicator: { type: 'text' },
         }),
       },
     ).catch(console.error);

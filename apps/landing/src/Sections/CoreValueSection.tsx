@@ -30,7 +30,7 @@ const features = [
 
 const CoreValueSection = () => {
     return (
-        <section className="px-6 pt-6">
+        <section id="features" className="px-6 pt-6">
             <div className="max-w-6xl mx-auto">
 
                 {/* Container with BG image */}

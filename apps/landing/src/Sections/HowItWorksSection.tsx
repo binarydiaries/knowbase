@@ -30,7 +30,7 @@ const steps = [
 
 const HowItWorksSection = () => {
     return (
-        <section className="px-6 pt-16">
+        <section id="how-it-works" className="px-6 pt-16">
             <div className="max-w-6xl mx-auto">
 
                 {/* Container */}

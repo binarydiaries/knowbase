@@ -2,6 +2,14 @@
 
 
 const HeroSection = () => {
+    const scrollToSection = (id: string) => {
+        const el = document.getElementById(id);
+        if (el) {
+            const offset = 10; // navbar height
+            const top = el.offsetTop - offset;
+            window.scrollTo({ top, behavior: "smooth" });
+        }
+    };
     return (
         <section
             className="relative w-full overflow-hidden bg-cover bg-center"
@@ -21,10 +29,26 @@ const HeroSection = () => {
                     </div>
 
                     <div className="hidden md:flex gap-8 text-sm text-[#301B69]">
-                        <a href="#">Features</a>
-                        <a href="#">How it Works</a>
-                        <a href="#">Pricing</a>
-                        <a href="#">FAQ</a>
+                        {/*<a href="#features" className="hover:opacity-80">Features</a>*/}
+                        {/*<a href="#how-it-works" className="hover:opacity-80">How it Works</a>*/}
+                        {/*<a href="#pricing" className="hover:opacity-80">Pricing</a>*/}
+                        {/*<a href="#faq" className="hover:opacity-80">FAQ</a>*/}
+
+                        <button onClick={() => scrollToSection("features")}>
+                            Features
+                        </button>
+
+                        <button onClick={() => scrollToSection("how-it-works")}>
+                            How it Works
+                        </button>
+
+                        <button onClick={() => scrollToSection("pricing")}>
+                            Pricing
+                        </button>
+
+                        <button onClick={() => scrollToSection("faq")}>
+                            FAQ
+                        </button>
                     </div>
 
                     <button className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">

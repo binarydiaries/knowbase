@@ -61,7 +61,7 @@ const FAQSection = () => {
     };
 
     return (
-        <section className="px-6 pt-16">
+        <section id="faq"  className="px-6 pt-16">
             <div className="max-w-6xl mx-auto">
 
                 {/* Container */}

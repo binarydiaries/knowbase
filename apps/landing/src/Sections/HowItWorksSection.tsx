@@ -1,34 +1,42 @@
+import {
+    User,
+    Bot,
+    Database,
+    Settings,
+    Share2,
+} from "lucide-react";
 
 const steps = [
     {
         title: "Setup your Account",
         desc: "Create your workspace and get started in seconds.\n" +
             "Sign up with minimal friction and access your dashboard instantly. No complex onboarding—just a smooth entry into building AI. Everything is ready for you right out of the box.",
-        image: "/step1.png",
+        image: "/step1.png", icon: User,
     },
     {
         title: "Create Your Chatbot",
         desc: "Define your chatbot’s purpose, name, and identity. Whether it's for support, learning, or internal use—set the intent clearly. Each chatbot is independent and customizable. You can create multiple bots for different use cases.",
-        image: "/step2.png",
+        image: "/step2.png",  icon: Bot,
     },
     {
         title: "Add Knowledge",
         desc: "Upload your content or add structured FAQs. Train your chatbot using real data that matters to you. Your bot learns context, not just keywords. Continuously update knowledge as your needs evolve.",
-        image: "/step3.png",
+        image: "/step3.png",icon: Database,
     },
     {
         title: "Customize Behavior",
         desc: "Control how your chatbot thinks and responds. Adjust tone, personality, and response style. Fine-tune outputs to match your brand or use case. Make your AI feel truly yours.",
-        image: "/step4.png",
+        image: "/step4.png",icon: Settings,
     },
     {
         title: "Embed & Share",
         desc: "Deploy your chatbot wherever your users are. Embed on websites or use it internally with your team. Share access instantly—no complex integrations required. Your AI is ready to assist, anywhere.",
-        image: "/step5.png",
+        image: "/step5.png",icon: Share2,
     },
 ];
 
 const HowItWorksSection = () => {
+
     return (
         <section id="how-it-works" className="px-6 pt-16">
             <div className="max-w-6xl mx-auto">
@@ -72,6 +80,8 @@ const HowItWorksSection = () => {
 
                                 {steps.map((step, index) => {
                                     const isLeft = index % 2 === 0;
+                                    const Icon = step.icon;
+
 
                                     return (
                                         <div
@@ -92,8 +102,8 @@ const HowItWorksSection = () => {
                                             </div>
 
                                             {/* Center Dot */}
-                                            <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#301B69]/10 shadow">
-                                                <span className="text-xs text-[#301B69]">{index + 1}</span>
+                                            <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#301B69]/10 shadow relative z-10">
+                                                <Icon size={16} className="text-[#301B69]" />
                                             </div>
 
                                             {/* Image */}

@@ -105,13 +105,13 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <SignOutButton
-              signOutCallback={() => {
-                posthog.capture('user_signed_out');
-                posthog.reset();
-              }}
-            >
-              <DropdownMenuItem>
+            <SignOutButton>
+              <DropdownMenuItem
+                onClick={() => {
+                  posthog.capture('user_signed_out');
+                  posthog.reset();
+                }}
+              >
                 <LogOut />
                 Log out
               </DropdownMenuItem>

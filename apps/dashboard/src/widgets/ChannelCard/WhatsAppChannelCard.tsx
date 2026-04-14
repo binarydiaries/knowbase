@@ -22,12 +22,13 @@ import {
   CHATBOT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import type { ChannelSchema } from '@/services';
+import { postChannels } from '@/services';
 import { client } from '@/services/client.gen';
 import { useChannels } from '@/store/useChannels.ts';
+import type { WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
 import { useWhatsAppConnection } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
-import type { ChannelSchema } from '@/services';
-import type { WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
 
 interface ConnectionResponse {
   connected: boolean;
@@ -47,10 +48,12 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     ),
   );
   const updateChannel = useChannels((s) => s.updateChannel);
+  const setChannels = useChannels((s) => s.setChannels);
   const { connected, phoneNumbers, setConnection, updatePhoneBinding } =
     useWhatsAppConnection();
 
-  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState<string>('');
+  const [selectedPhoneNumberId, setSelectedPhoneNumberId] =
+    useState<string>('');
 
   // Fetch connection status if not already in store
   useQuery({
@@ -86,8 +89,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   // Numbers not bound to any other chatbot (available to assign to this one)
   const availableNumbers = phoneNumbers.filter(
-    (p) =>
-      !p.boundToChatbotId || p.boundToChatbotId === chatbotId,
+    (p) => !p.boundToChatbotId || p.boundToChatbotId === chatbotId,
   );
 
   const assignMutation = useMutation({
@@ -95,26 +97,55 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       const phone = phoneNumbers.find(
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
-      if (!channelWhatsApp || !phone) return;
+      if (!phone) return null;
+
+      let channelId: string;
+      let wasCreated = false;
+
+      if (!channelWhatsApp) {
+        const createRes = await postChannels({
+          body: {
+            chatbotId,
+            enabled: false,
+            channelStatus: 'inactive',
+            additional: { type: 'whatsapp', config: {} },
+          },
+        });
+        channelId = createRes.data.channel.id;
+        wasCreated = true;
+      } else {
+        channelId = channelWhatsApp.id;
+      }
+
       const res = await client.post({
         url: '/whatsapp/bind',
         body: {
-          channelId: channelWhatsApp.id,
+          channelId,
           phoneNumberId: phone.phoneNumberId,
           displayPhone: phone.displayPhone,
         },
         responseType: 'json',
       });
-      return (res.data as { channel: ChannelSchema }).channel;
+      return {
+        channel: (res.data as { channel: ChannelSchema }).channel,
+        wasCreated,
+      };
     },
-    onSuccess: (updatedChannel) => {
-      if (!updatedChannel) return;
-      updateChannel(chatbotId, updatedChannel);
+    onSuccess: (result) => {
+      if (!result) return;
+      const { channel: updatedChannel, wasCreated } = result;
+      if (wasCreated) {
+        const current =
+          useChannels.getState().channelsByChatbotId[chatbotId] ?? [];
+        setChannels(chatbotId, [...current, updatedChannel]);
+      } else {
+        updateChannel(chatbotId, updatedChannel);
+      }
       const phone = phoneNumbers.find(
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
       if (phone) {
-        updatePhoneBinding(phone.phoneNumberId, chatbotId, undefined ?? null);
+        updatePhoneBinding(phone.phoneNumberId, chatbotId, null);
       }
       setSelectedPhoneNumberId('');
       posthog.capture('chatbot_channel_connected', {
@@ -155,8 +186,6 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       toast.error(getErrorMessage(error));
     },
   });
-
-  if (!channelWhatsApp) return null;
 
   // State 1: No WABA connected at org level
   if (!connected) {

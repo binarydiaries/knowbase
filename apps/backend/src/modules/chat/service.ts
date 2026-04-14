@@ -293,12 +293,14 @@ export abstract class ChatService {
     orgId,
     senderPhone,
     message,
+    messageId,
     ip,
   }: {
     channelId: string;
     orgId: string;
     senderPhone: string;
     message: string;
+    messageId?: string;
     ip?: string;
   }) {
     const channel = await ChannelService.single({ id: channelId, orgId });
@@ -319,6 +321,58 @@ export abstract class ChatService {
       channelId,
       externalId: senderPhone,
     });
+
+    // ── Seen receipt (blue ticks) — await so Meta registers it before typing ───
+    if (messageId) {
+      try {
+        const seenRes = await fetch(
+          `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${connection.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              messaging_product: 'whatsapp',
+              status: 'read',
+              message_id: messageId,
+            }),
+          },
+        );
+        if (!seenRes.ok) {
+          console.error('[WA seen] error:', await seenRes.text());
+        }
+      } catch (e) {
+        console.error('[WA seen] fetch error:', e);
+      }
+    }
+
+    // ── Typing indicator ──────────────────────────────────────────────────────
+    try {
+      const typingRes = await fetch(
+        `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${connection.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: senderPhone,
+            type: 'typing_indicator',
+            typing_indicator: { type: 'text' },
+          }),
+        },
+      );
+      if (!typingRes.ok) {
+        console.error('[WA typing] error:', await typingRes.text());
+      }
+    } catch (e) {
+      console.error('[WA typing] fetch error:', e);
+    }
 
     const { assistantMessage, chunks, finalQuery } =
       await ChatService.generateWhatsAppResponse({

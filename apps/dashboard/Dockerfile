@@ -1,21 +1,20 @@
-# Stage 1: Build
 FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-# Copy root files (important for monorepo)
-COPY package.json bun.lock ./
+# ✅ Copy ALL root config (CRITICAL)
+COPY package.json bun.lock turbo.json ./
+
+# Install deps
 RUN bun install
 
-# Copy required code only
-COPY apps/dashboard ./apps/dashboard
-COPY packages ./packages
+# ✅ Copy EVERYTHING (not partial)
+COPY . .
 
-# Build dashboard
+# ✅ Now Turbo will work properly
 RUN bun run build:dashboard
 
 
-# Stage 2: Serve
 FROM nginx:alpine
 
 COPY --from=builder /app/apps/dashboard/dist /usr/share/nginx/html
@@ -28,7 +27,5 @@ RUN echo 'server { \
     try_files $uri /index.html; \
   } \
 }' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]

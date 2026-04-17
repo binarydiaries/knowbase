@@ -2,16 +2,13 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-# ✅ Copy ALL root config (CRITICAL)
-COPY package.json bun.lock turbo.json ./
-
-# Install deps
-RUN bun install
-
-# ✅ Copy EVERYTHING (not partial)
+# Copy everything FIRST (important for workspaces)
 COPY . .
 
-# ✅ Now Turbo will work properly
+# Install ALL workspace deps properly
+RUN bun install --frozen-lockfile
+
+# Build
 RUN bun run build:dashboard
 
 

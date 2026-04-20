@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:dashboard": "turbo run build --filter=dashboard",
     "dev": "turbo run dev",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",

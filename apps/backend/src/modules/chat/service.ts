@@ -7,17 +7,21 @@ import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
+import { ActionService } from '../action/service';
+import { LeadService } from '../lead/service';
 import { MessageService } from '../message/service';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import {
+  buildActionsPrompt,
   buildBehaviorPrompt,
   buildKnowledgeBasePrompt,
   buildPlatformRules,
   referenceResolverPrompt,
 } from './prompts';
+import { buildLeadCaptureTool } from './tools';
 
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
@@ -152,23 +156,43 @@ export abstract class ChatService {
     const { knowledgeBase, chunks } =
       await ChatService.getSearchChunks(finalQuery, chatbotId);
 
-    const systemPrompt = [
+    // Load enabled actions — only adds cost/tools if actions are configured
+    const enabledActions = await ActionService.getEnabledByChatbot(chatbotId);
+    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+
+    // Build tools and system prompt additions when actions are enabled
+    const tools = leadAction
+      ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
+      : undefined;
+
+    const successMessage =
+      leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
+
+    const systemPromptParts = [
       buildPlatformRules(),
       buildBehaviorPrompt(behavior),
       buildKnowledgeBasePrompt(knowledgeBase),
-    ].join('\n');
+    ];
+    if (tools) {
+      systemPromptParts.push(buildActionsPrompt(successMessage));
+    }
+    const systemPrompt = systemPromptParts.join('\n');
+
+    // Pass recent conversation history only when actions are active (for multi-turn collection)
+    const historyMessages = leadAction && conversation
+      ? await MessageService.getMessages({ conversationId, orgId })
+      : [];
+    const priorMessages = historyMessages.slice(-6).map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }));
 
     const result = streamText({
       system: systemPrompt,
       model,
-      messages: [{ role: 'user', content: finalQuery }],
-    });
-
-    return result.toUIMessageStreamResponse({
-      onFinish: async ({ responseMessage }) => {
-        const assistantMessage =
-          responseMessage?.parts?.find((value) => value?.type === 'text')
-            ?.text || '';
+      messages: [...priorMessages, { role: 'user', content: finalQuery }],
+      ...(tools ? { tools, maxSteps: 2 } : {}),
+      onFinish: async ({ text: assistantMessage, toolCalls }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
           lastAssistantUtterance: assistantMessage,
@@ -189,6 +213,32 @@ export abstract class ChatService {
         }
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+        // Handle action tool calls
+        for (const toolCall of toolCalls ?? []) {
+          if (toolCall.toolName === 'capture_lead') {
+            try {
+              const input = toolCall.input as {
+                name?: string;
+                email?: string;
+                phone?: string;
+                company?: string;
+              };
+              await LeadService.create({
+                chatbotId,
+                conversationId,
+                channelId,
+                orgId,
+                name: input.name ?? null,
+                email: input.email ?? null,
+                phone: input.phone ?? null,
+                company: input.company ?? null,
+              });
+            } catch {
+              // Lead capture is best-effort — never break the chat
+            }
+          }
+        }
 
         // Paid-plan features: sentiment scoring + conversation enrichment
         const plan = await SubscriptionService.getPlan(orgId);
@@ -245,6 +295,8 @@ export abstract class ChatService {
         }
       },
     });
+
+    return result.toUIMessageStreamResponse();
   }
 
   static async generateWhatsAppResponse({
@@ -273,19 +325,47 @@ export abstract class ChatService {
     const finalQuery = await ChatService.getFinalQuery({ message, conversation });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
 
-    const systemPrompt = [
+    // Load enabled actions
+    const enabledActions = await ActionService.getEnabledByChatbot(chatbotId);
+    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+
+    const tools = leadAction
+      ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
+      : undefined;
+
+    const successMessage =
+      leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
+
+    const systemPromptParts = [
       buildPlatformRules(),
       buildBehaviorPrompt(behavior),
       buildKnowledgeBasePrompt(knowledgeBase),
-    ].join('\n');
+    ];
+    if (tools) {
+      systemPromptParts.push(buildActionsPrompt(successMessage));
+    }
+    const systemPrompt = systemPromptParts.join('\n');
 
-    const { text: assistantMessage } = await generateText({
+    // Pass recent history for multi-turn lead collection
+    const historyMessages = leadAction && conversationId && conversation
+      ? await MessageService.getMessages({ conversationId, orgId })
+      : [];
+    const priorMessages = historyMessages.slice(-6).map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }));
+
+    const result = await generateText({
       model,
       system: systemPrompt,
-      messages: [{ role: 'user', content: finalQuery }],
+      messages: [...priorMessages, { role: 'user', content: finalQuery }],
+      ...(tools ? { tools, maxSteps: 2 } : {}),
     });
 
-    return { assistantMessage, chunks, finalQuery, conversation };
+    const assistantMessage = result.text;
+    const toolCalls = result.toolCalls ?? [];
+
+    return { assistantMessage, chunks, finalQuery, conversation, toolCalls, channelId };
   }
 
   static async sendWhatsApp({
@@ -374,7 +454,7 @@ export abstract class ChatService {
       console.error('[WA typing] fetch error:', e);
     }
 
-    const { assistantMessage, chunks, finalQuery } =
+    const { assistantMessage, chunks, finalQuery, toolCalls } =
       await ChatService.generateWhatsAppResponse({
         chatbotId: channel.chatbotId,
         channelId,
@@ -426,6 +506,32 @@ export abstract class ChatService {
     }
 
     await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    // Handle action tool calls
+    for (const toolCall of toolCalls ?? []) {
+      if (toolCall.toolName === 'capture_lead') {
+        try {
+          const input = toolCall.input as {
+            name?: string;
+            email?: string;
+            phone?: string;
+            company?: string;
+          };
+          await LeadService.create({
+            chatbotId: channel.chatbotId,
+            conversationId,
+            channelId,
+            orgId,
+            name: input.name ?? null,
+            email: input.email ?? null,
+            phone: input.phone ?? null,
+            company: input.company ?? null,
+          });
+        } catch {
+          // Lead capture is best-effort — never break the chat
+        }
+      }
+    }
 
     const confidenceScore = chunks.length
       ? chunks.reduce((acc, c) => acc + c.similarity, 0) / chunks.length

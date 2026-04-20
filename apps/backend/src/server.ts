@@ -15,6 +15,8 @@ import { Document } from './modules/document/document';
 import { Indexing } from './modules/indexing/indexing';
 import { message } from './modules/message/message';
 import { Subscription } from './modules/subscription/subscription';
+import { Action } from './modules/action/action';
+import { Lead } from './modules/lead/lead';
 
 const app = new Elysia()
   .use(
@@ -55,6 +57,8 @@ const app = new Elysia()
   .use(Channel)
   .use(Subscription)
   .use(WhatsApp)
+  .use(Action)
+  .use(Lead)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsageIndexRouteImport } from './routes/usage/index'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions/index'
 import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
+import { Route as LeadsIndexRouteImport } from './routes/leads/index'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ChatbotsIndexRouteImport } from './routes/chatbots/index'
 import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
@@ -38,6 +39,11 @@ const SubscriptionsIndexRoute = SubscriptionsIndexRouteImport.update({
 const OrganizationIndexRoute = OrganizationIndexRouteImport.update({
   id: '/organization/',
   path: '/organization/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeadsIndexRoute = LeadsIndexRouteImport.update({
+  id: '/leads/',
+  path: '/leads/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/leads/': typeof LeadsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsIndexRoute
   '/chatbots': typeof ChatbotsIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
+  '/leads': typeof LeadsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/analytics/': typeof AnalyticsIndexRoute
   '/chatbots/': typeof ChatbotsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/leads/': typeof LeadsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/analytics/'
     | '/chatbots/'
     | '/integrations/'
+    | '/leads/'
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/chatbots'
     | '/integrations'
+    | '/leads'
     | '/organization'
     | '/subscriptions'
     | '/usage'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/analytics/'
     | '/chatbots/'
     | '/integrations/'
+    | '/leads/'
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   AnalyticsIndexRoute: typeof AnalyticsIndexRoute
   ChatbotsIndexRoute: typeof ChatbotsIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
+  LeadsIndexRoute: typeof LeadsIndexRoute
   OrganizationIndexRoute: typeof OrganizationIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/organization'
       fullPath: '/organization/'
       preLoaderRoute: typeof OrganizationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leads/': {
+      id: '/leads/'
+      path: '/leads'
+      fullPath: '/leads/'
+      preLoaderRoute: typeof LeadsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations/': {
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsIndexRoute: AnalyticsIndexRoute,
   ChatbotsIndexRoute: ChatbotsIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
+  LeadsIndexRoute: LeadsIndexRoute,
   OrganizationIndexRoute: OrganizationIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,

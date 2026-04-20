@@ -16,6 +16,7 @@ import {
   LineChart,
   MessageCircle,
   Plug,
+  UserRound,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -27,6 +28,10 @@ const mainNav = [
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
   { name: 'Integrations', url: '/integrations', icon: Plug },
+];
+
+const actionsNav = [
+  { name: 'Leads', url: '/leads', icon: UserRound },
 ];
 
 const footerNav = [
@@ -53,6 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={mainNav} title="Platform" />
+        <NavMain items={actionsNav} title="Actions" />
       </SidebarContent>
       <SidebarFooter>
         <NavMain items={footerNav} />

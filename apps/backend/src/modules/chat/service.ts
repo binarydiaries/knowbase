@@ -7,24 +7,20 @@ import { ChannelService } from '../channel/service';
 import { ChatbotService } from '../chatbot/service';
 import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
-import { ActionService } from '../action/service';
-import { LeadService } from '../lead/service';
-import { MessageService } from '../message/service';
-import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
+import { SubscriptionService } from '../subscription/service';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
-import {
-  buildActionsPrompt,
-  buildBehaviorPrompt,
-  buildKnowledgeBasePrompt,
-  buildPlatformRules,
-  referenceResolverPrompt,
-} from './prompts';
-import { buildLeadCaptureTool } from './tools';
+import { referenceResolverPrompt } from './prompts';
+import { buildChatContext } from './context';
+import { handleLeadCapture, persistMessages } from './persistence';
 
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
+
+// ---------------------------------------------------------------------------
+// Error types
+// ---------------------------------------------------------------------------
 
 export class NotFoundError extends Error {
   constructor(message: string) {
@@ -44,7 +40,13 @@ export class MessageLimitReachedError extends Error {
   }
 }
 
+// ---------------------------------------------------------------------------
+// ChatService
+// ---------------------------------------------------------------------------
+
 export abstract class ChatService {
+  // ── Guards ────────────────────────────────────────────────────────────────
+
   static async assertMessagesPerMonthLimitNotReached(orgId: string) {
     const messageLimit =
       await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
@@ -53,6 +55,8 @@ export abstract class ChatService {
       throw new MessageLimitReachedError(messageLimit);
     }
   }
+
+  // ── Query helpers ─────────────────────────────────────────────────────────
 
   static async resolveReferences({
     currentUserMessage,
@@ -82,15 +86,12 @@ export abstract class ChatService {
     message: string;
     conversation?: typeof conversations.$inferSelect;
   }) {
-    let finalQuery = message;
-    if (conversation?.lastAssistantUtterance) {
-      finalQuery = await ChatService.resolveReferences({
-        lastAssistantUtterance: conversation.lastAssistantUtterance,
-        currentUserMessage: message,
-      });
-    }
+    if (!conversation?.lastAssistantUtterance) return message;
 
-    return finalQuery;
+    return ChatService.resolveReferences({
+      lastAssistantUtterance: conversation.lastAssistantUtterance,
+      currentUserMessage: message,
+    });
   }
 
   static async getSearchChunks(finalQuery: string, chatbotId: string) {
@@ -101,13 +102,7 @@ export abstract class ChatService {
     };
   }
 
-  static async getChatbot({
-    chatbotId,
-    orgId,
-  }: {
-    chatbotId: string;
-    orgId: string;
-  }) {
+  static async getChatbot({ chatbotId, orgId }: { chatbotId: string; orgId: string }) {
     const chatbot = await ChatbotService.single({ id: chatbotId, orgId });
 
     if (chatbot && chatbot.chatbotStatus === 'active') {
@@ -127,6 +122,27 @@ export abstract class ChatService {
     return behaviour;
   }
 
+  // ── Sentiment scoring (paid plans) ────────────────────────────────────────
+
+  static async scoreSentiment(assistantMessage: string) {
+    try {
+      const { text: sentimentJson } = await generateText({
+        model: nanoModel,
+        prompt: `Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1.\nRespond with JSON only, no explanation: {"label":"positive|neutral|negative","score":0.0}\n\n"${assistantMessage}"`,
+        maxOutputTokens: 30,
+        temperature: 0,
+      });
+      return JSON.parse(sentimentJson.trim()) as {
+        label: 'positive' | 'neutral' | 'negative';
+        score: number;
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // ── Web (streaming) ───────────────────────────────────────────────────────
+
   static async send({
     chatbotId,
     channelId,
@@ -144,48 +160,20 @@ export abstract class ChatService {
   }) {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getChatbot({ chatbotId, orgId });
-    const conversation = await ConversationService.single({
-      id: conversationId,
-      orgId,
-    });
+
+    const conversation = await ConversationService.single({ id: conversationId, orgId });
     const behavior = await ChatService.getBehaviour(chatbotId);
-    const finalQuery = await ChatService.getFinalQuery({
-      message,
-      conversation,
+    const finalQuery = await ChatService.getFinalQuery({ message, conversation });
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
+
+    const { tools, systemPrompt, priorMessages } = await buildChatContext({
+      chatbotId,
+      conversationId,
+      orgId,
+      knowledgeBase,
+      behavior,
+      hasExistingConversation: !!conversation,
     });
-    const { knowledgeBase, chunks } =
-      await ChatService.getSearchChunks(finalQuery, chatbotId);
-
-    // Load enabled actions — only adds cost/tools if actions are configured
-    const enabledActions = await ActionService.getEnabledByChatbot(chatbotId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
-
-    // Build tools and system prompt additions when actions are enabled
-    const tools = leadAction
-      ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
-      : undefined;
-
-    const successMessage =
-      leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
-
-    const systemPromptParts = [
-      buildPlatformRules(),
-      buildBehaviorPrompt(behavior),
-      buildKnowledgeBasePrompt(knowledgeBase),
-    ];
-    if (tools) {
-      systemPromptParts.push(buildActionsPrompt(successMessage));
-    }
-    const systemPrompt = systemPromptParts.join('\n');
-
-    // Pass recent conversation history only when actions are active (for multi-turn collection)
-    const historyMessages = leadAction && conversation
-      ? await MessageService.getMessages({ conversationId, orgId })
-      : [];
-    const priorMessages = historyMessages.slice(-6).map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    }));
 
     const result = streamText({
       system: systemPrompt,
@@ -200,7 +188,6 @@ export abstract class ChatService {
         };
 
         const isNew = !conversation;
-
         if (isNew) {
           await ConversationService.create({
             id: conversationId,
@@ -214,83 +201,25 @@ export abstract class ChatService {
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
-        // Handle action tool calls
-        for (const toolCall of toolCalls ?? []) {
-          if (toolCall.toolName === 'capture_lead') {
-            try {
-              const input = toolCall.input as {
-                name?: string;
-                email?: string;
-                phone?: string;
-                company?: string;
-              };
-              await LeadService.create({
-                chatbotId,
-                conversationId,
-                channelId,
-                orgId,
-                name: input.name ?? null,
-                email: input.email ?? null,
-                phone: input.phone ?? null,
-                company: input.company ?? null,
-              });
-            } catch {
-              // Lead capture is best-effort — never break the chat
-            }
-          }
-        }
+        await handleLeadCapture(toolCalls ?? [], { chatbotId, conversationId, channelId, orgId });
 
-        // Paid-plan features: sentiment scoring + conversation enrichment
+        // Sentiment scoring — paid plans only
         const plan = await SubscriptionService.getPlan(orgId);
-        const isPaidPlan = plan !== 'free';
+        const sentiment = plan !== 'free'
+          ? await ChatService.scoreSentiment(assistantMessage)
+          : null;
 
-        // Compute sentiment before saving — only for paid plans
-        let sentiment: {
-          label: 'positive' | 'neutral' | 'negative';
-          score: number;
-        } | null = null;
-        if (isPaidPlan) {
-          try {
-            const { text: sentimentJson } = await generateText({
-              model: nanoModel,
-              prompt: `Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1.\nRespond with JSON only, no explanation: {"label":"positive|neutral|negative","score":0.0}\n\n"${assistantMessage}"`,
-              maxOutputTokens: 30,
-              temperature: 0,
-            });
-            sentiment = JSON.parse(sentimentJson.trim());
-          } catch {
-            // Sentiment is best-effort — ignore failures
-          }
-        }
+        await persistMessages({
+          conversationId,
+          userMessage: message,
+          assistantMessage,
+          finalQuery,
+          chunks,
+          sentiment,
+        });
 
-        await MessageService.addMessages([
-          {
-            conversationId,
-            role: 'user',
-            content: message,
-            systemMetadata: { finalQuery },
-          },
-          {
-            conversationId,
-            role: 'assistant',
-            content: assistantMessage,
-            metadata: {
-              confidenceScore: chunks.length
-                ? chunks.reduce((acc, chunk) => acc + chunk.similarity, 0) / chunks.length
-                : 0,
-              sources: chunks.map((chunk) => ({
-                documentId: chunk.documentId,
-                documentVersion: chunk.documentVersion,
-                chunkIndex: chunk.chunkIndex,
-                similarity: chunk.similarity,
-              })),
-              sentiment,
-            },
-          },
-        ]);
-
-        // Fire-and-forget: enrich conversation with country + topic — only for paid plans
-        if (isPaidPlan) {
+        // Fire-and-forget enrichment — paid plans only
+        if (plan !== 'free') {
           void enrichConversationAsync(conversationId, message, isNew, ip);
         }
       },
@@ -298,6 +227,8 @@ export abstract class ChatService {
 
     return result.toUIMessageStreamResponse();
   }
+
+  // ── WhatsApp — LLM call ───────────────────────────────────────────────────
 
   static async generateWhatsAppResponse({
     chatbotId,
@@ -325,35 +256,14 @@ export abstract class ChatService {
     const finalQuery = await ChatService.getFinalQuery({ message, conversation });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
 
-    // Load enabled actions
-    const enabledActions = await ActionService.getEnabledByChatbot(chatbotId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
-
-    const tools = leadAction
-      ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
-      : undefined;
-
-    const successMessage =
-      leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
-
-    const systemPromptParts = [
-      buildPlatformRules(),
-      buildBehaviorPrompt(behavior),
-      buildKnowledgeBasePrompt(knowledgeBase),
-    ];
-    if (tools) {
-      systemPromptParts.push(buildActionsPrompt(successMessage));
-    }
-    const systemPrompt = systemPromptParts.join('\n');
-
-    // Pass recent history for multi-turn lead collection
-    const historyMessages = leadAction && conversationId && conversation
-      ? await MessageService.getMessages({ conversationId, orgId })
-      : [];
-    const priorMessages = historyMessages.slice(-6).map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    }));
+    const { tools, systemPrompt, priorMessages } = await buildChatContext({
+      chatbotId,
+      conversationId,
+      orgId,
+      knowledgeBase,
+      behavior,
+      hasExistingConversation: !!conversation,
+    });
 
     const result = await generateText({
       model,
@@ -362,11 +272,17 @@ export abstract class ChatService {
       ...(tools ? { tools, maxSteps: 2 } : {}),
     });
 
-    const assistantMessage = result.text;
-    const toolCalls = result.toolCalls ?? [];
-
-    return { assistantMessage, chunks, finalQuery, conversation, toolCalls, channelId };
+    return {
+      assistantMessage: result.text,
+      chunks,
+      finalQuery,
+      conversation,
+      toolCalls: result.toolCalls ?? [],
+      channelId,
+    };
   }
+
+  // ── WhatsApp — full handler ───────────────────────────────────────────────
 
   static async sendWhatsApp({
     channelId,
@@ -402,7 +318,7 @@ export abstract class ChatService {
       externalId: senderPhone,
     });
 
-    // ── Seen receipt (blue ticks) — await so Meta registers it before typing ───
+    // ── Seen receipt (blue ticks) ─────────────────────────────────────────
     if (messageId) {
       try {
         const seenRes = await fetch(
@@ -428,7 +344,7 @@ export abstract class ChatService {
       }
     }
 
-    // ── Typing indicator ──────────────────────────────────────────────────────
+    // ── Typing indicator ──────────────────────────────────────────────────
     try {
       const typingRes = await fetch(
         `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
@@ -464,7 +380,7 @@ export abstract class ChatService {
         ip,
       });
 
-    // Send reply via WhatsApp Cloud API
+    // ── Send reply ────────────────────────────────────────────────────────
     await fetch(
       `https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`,
       {
@@ -482,7 +398,7 @@ export abstract class ChatService {
       },
     );
 
-    // Persist conversation + messages
+    // ── Persist conversation ──────────────────────────────────────────────
     const conversationData = {
       lastUserQuestion: finalQuery,
       lastAssistantUtterance: assistantMessage,
@@ -491,15 +407,14 @@ export abstract class ChatService {
 
     let conversationId: string;
     if (!conversation) {
-      const newId = createId();
+      conversationId = createId();
       await ConversationService.create({
-        id: newId,
+        id: conversationId,
         chatbotId: channel.chatbotId,
         channelId,
         externalId: senderPhone,
         ...conversationData,
       });
-      conversationId = newId;
     } else {
       await ConversationService.update(conversation.id, conversationData);
       conversationId = conversation.id;
@@ -507,60 +422,24 @@ export abstract class ChatService {
 
     await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
-    // Handle action tool calls
-    for (const toolCall of toolCalls ?? []) {
-      if (toolCall.toolName === 'capture_lead') {
-        try {
-          const input = toolCall.input as {
-            name?: string;
-            email?: string;
-            phone?: string;
-            company?: string;
-          };
-          await LeadService.create({
-            chatbotId: channel.chatbotId,
-            conversationId,
-            channelId,
-            orgId,
-            name: input.name ?? null,
-            email: input.email ?? null,
-            phone: input.phone ?? null,
-            company: input.company ?? null,
-          });
-        } catch {
-          // Lead capture is best-effort — never break the chat
-        }
-      }
-    }
+    await handleLeadCapture(toolCalls, {
+      chatbotId: channel.chatbotId,
+      conversationId,
+      channelId,
+      orgId,
+    });
 
-    const confidenceScore = chunks.length
-      ? chunks.reduce((acc, c) => acc + c.similarity, 0) / chunks.length
-      : 0;
-
-    await MessageService.addMessages([
-      {
-        conversationId,
-        role: 'user',
-        content: message,
-        systemMetadata: { finalQuery },
-      },
-      {
-        conversationId,
-        role: 'assistant',
-        content: assistantMessage,
-        metadata: {
-          confidenceScore,
-          sources: chunks.map((c) => ({
-            documentId: c.documentId,
-            documentVersion: c.documentVersion,
-            chunkIndex: c.chunkIndex,
-            similarity: c.similarity,
-          })),
-          sentiment: null,
-        },
-      },
-    ]);
+    await persistMessages({
+      conversationId,
+      userMessage: message,
+      assistantMessage,
+      finalQuery,
+      chunks,
+      sentiment: null, // WhatsApp doesn't score sentiment
+    });
   }
+
+  // ── Web — channel-level entry point ──────────────────────────────────────
 
   static async sendWeb({
     channelId,
@@ -592,7 +471,11 @@ export abstract class ChatService {
   }
 }
 
-/** Fire-and-forget: attach country (IP lookup) and topic (AI label) to a conversation */
+// ---------------------------------------------------------------------------
+// Private helpers
+// ---------------------------------------------------------------------------
+
+/** Fire-and-forget: attach country (IP lookup) and topic (AI label) to a conversation. */
 async function enrichConversationAsync(
   conversationId: string,
   firstUserMessage: string,
@@ -600,18 +483,13 @@ async function enrichConversationAsync(
   ip?: string,
 ) {
   try {
-    // Country from IP using ip-api.com (free, no key required)
     if (ip && ip !== '127.0.0.1' && ip !== '::1') {
       try {
-        const geoRes = await fetch(
-          `http://ip-api.com/json/${ip}?fields=countryCode`,
-        );
+        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
         if (geoRes.ok) {
           const geo = (await geoRes.json()) as { countryCode?: string };
           if (geo.countryCode) {
-            await ConversationService.update(conversationId, {
-              country: geo.countryCode,
-            });
+            await ConversationService.update(conversationId, { country: geo.countryCode });
           }
         }
       } catch {
@@ -619,7 +497,6 @@ async function enrichConversationAsync(
       }
     }
 
-    // Topic label — only for brand-new conversations
     if (isNew) {
       try {
         const { text: topic } = await generateText({
@@ -630,15 +507,13 @@ async function enrichConversationAsync(
         });
         const cleanTopic = topic.trim().replace(/^["']|["']$/g, '');
         if (cleanTopic) {
-          await ConversationService.update(conversationId, {
-            topic: cleanTopic,
-          });
+          await ConversationService.update(conversationId, { topic: cleanTopic });
         }
       } catch {
         // Topic is best-effort
       }
     }
   } catch {
-    // Enrichment is always best-effort — never let it break the main flow
+    // Enrichment is always best-effort
   }
 }

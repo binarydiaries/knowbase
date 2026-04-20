@@ -14,7 +14,7 @@ RUN bun run build:landing
 
 FROM nginx:alpine
 
-COPY --from=builder /app/apps/dashboard/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/landing/dist /usr/share/nginx/html
 
 RUN echo 'server { \
   listen 3000; \

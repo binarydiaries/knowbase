@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopChatbotsData, GetAnalyticsTopChatbotsErrors, GetAnalyticsTopChatbotsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByChatbotData, GetUsageKnowledgeByChatbotErrors, GetUsageKnowledgeByChatbotResponses, GetUsageMessagesByChatbotData, GetUsageMessagesByChatbotErrors, GetUsageMessagesByChatbotResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
+import type { DeleteChatbotActionsByIdData, DeleteChatbotActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopChatbotsData, GetAnalyticsTopChatbotsErrors, GetAnalyticsTopChatbotsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotActionsData, GetChatbotActionsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByChatbotData, GetUsageKnowledgeByChatbotErrors, GetUsageKnowledgeByChatbotResponses, GetUsageMessagesByChatbotData, GetUsageMessagesByChatbotErrors, GetUsageMessagesByChatbotResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotActionsById as PatchChatbotActionsByIdData, PatchChatbotActionsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChatbotActionsData, PostChatbotActionsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -243,5 +243,43 @@ export const patchChannelsById = <ThrowOnError extends boolean = true>(options: 
 export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsStatusData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsStatusResponses, GetSubscriptionsStatusErrors, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/status',
+    ...options
+});
+
+export const getChatbotActions = <ThrowOnError extends boolean = true>(options: Options<GetChatbotActionsData, ThrowOnError>) => (options.client ?? client).get<GetChatbotActionsResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatbot-actions',
+    ...options
+});
+
+export const postChatbotActions = <ThrowOnError extends boolean = true>(options: Options<PostChatbotActionsData, ThrowOnError>) => (options.client ?? client).post<PostChatbotActionsResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatbot-actions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    }
+});
+
+export const patchChatbotActionsById = <ThrowOnError extends boolean = true>(options: Options<PatchChatbotActionsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchChatbotActionsByIdResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatbot-actions/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    }
+});
+
+export const deleteChatbotActionsById = <ThrowOnError extends boolean = true>(options: Options<DeleteChatbotActionsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteChatbotActionsByIdResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatbot-actions/{id}',
+    ...options
+});
+
+export const getLeads = <ThrowOnError extends boolean = true>(options?: Options<GetLeadsData, ThrowOnError>) => (options?.client ?? client).get<GetLeadsResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/leads',
     ...options
 });

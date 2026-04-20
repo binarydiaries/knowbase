@@ -1743,3 +1743,109 @@ export type GetSubscriptionsStatusResponses = {
 };
 
 export type GetSubscriptionsStatusResponse = GetSubscriptionsStatusResponses[keyof GetSubscriptionsStatusResponses];
+
+// ── Actions & Leads (added with Actions feature) ──────────────────────────────
+
+export type LeadFieldConfig = {
+    collect: boolean;
+    required: boolean;
+};
+
+export type LeadGenerationConfig = {
+    fields?: {
+        name?: LeadFieldConfig;
+        email?: LeadFieldConfig;
+        phone?: LeadFieldConfig;
+        company?: LeadFieldConfig;
+    };
+    triggerInstructions?: string;
+    successMessage?: string;
+};
+
+export type ChatbotActionSchema = {
+    id: string;
+    chatbotId: string;
+    actionType: 'lead_generation';
+    enabled: boolean;
+    config: LeadGenerationConfig;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type GetChatbotActionsData = {
+    query: {
+        chatbotId: string;
+    };
+};
+
+export type GetChatbotActionsResponses = {
+    200: { actions: Array<ChatbotActionSchema> };
+};
+
+export type PostChatbotActionsData = {
+    body: {
+        chatbotId: string;
+        actionType: 'lead_generation';
+        config?: LeadGenerationConfig;
+    };
+};
+
+export type PostChatbotActionsResponses = {
+    200: { action: ChatbotActionSchema };
+};
+
+export type PatchChatbotActionsById = {
+    path: { id: string };
+    body: {
+        enabled?: boolean;
+        config?: LeadGenerationConfig;
+    };
+};
+
+export type PatchChatbotActionsByIdResponses = {
+    200: { action: ChatbotActionSchema };
+};
+
+export type DeleteChatbotActionsByIdData = {
+    path: { id: string };
+};
+
+export type DeleteChatbotActionsByIdResponses = {
+    200: { success: boolean };
+};
+
+export type LeadWithRelations = {
+    id: string;
+    chatbotId: string;
+    conversationId: string | null;
+    channelId: string | null;
+    orgId: string;
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+    customFields: Record<string, string>;
+    createdAt: string;
+    updatedAt: string;
+    chatbot: { id: string; name: string } | null;
+    channel: { id: string; type: string } | null;
+    conversation: { id: string } | null;
+};
+
+export type GetLeadsData = {
+    query?: {
+        chatbotId?: string;
+        page?: number;
+        limit?: number;
+    };
+};
+
+export type GetLeadsResponses = {
+    200: {
+        leads: Array<LeadWithRelations>;
+        total: number;
+        page: number;
+        limit: number;
+    };
+};

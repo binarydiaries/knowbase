@@ -1,10 +1,12 @@
 import { defineRelations } from 'drizzle-orm';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
+import { chatbotActions } from './chatbotActions';
 import { chatbots } from './chatbots';
 import { conversations } from './conversations';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
+import { leads } from './leads';
 import { messages } from './messages';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
@@ -15,10 +17,12 @@ export const relations = defineRelations(
     chatbots,
     channels,
     behaviors,
+    chatbotActions,
     documents,
     conversations,
     messages,
     embeddings,
+    leads,
     orgUsageDaily,
     orgUsageMonthly,
     whatsappConnections,
@@ -36,6 +40,14 @@ export const relations = defineRelations(
       documents: r.many.documents({
         from: r.chatbots.id,
         to: r.documents.chatbotId,
+      }),
+      chatbotActions: r.many.chatbotActions({
+        from: r.chatbots.id,
+        to: r.chatbotActions.chatbotId,
+      }),
+      leads: r.many.leads({
+        from: r.chatbots.id,
+        to: r.leads.chatbotId,
       }),
     },
     documents: {
@@ -76,6 +88,26 @@ export const relations = defineRelations(
       document: r.one.documents({
         from: r.embeddings.documentId,
         to: r.documents.id,
+      }),
+    },
+    chatbotActions: {
+      chatbot: r.one.chatbots({
+        from: r.chatbotActions.chatbotId,
+        to: r.chatbots.id,
+      }),
+    },
+    leads: {
+      chatbot: r.one.chatbots({
+        from: r.leads.chatbotId,
+        to: r.chatbots.id,
+      }),
+      conversation: r.one.conversations({
+        from: r.leads.conversationId,
+        to: r.conversations.id,
+      }),
+      channel: r.one.channels({
+        from: r.leads.channelId,
+        to: r.channels.id,
       }),
     },
     orgUsageDaily: {},

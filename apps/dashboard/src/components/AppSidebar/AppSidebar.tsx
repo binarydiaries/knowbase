@@ -16,6 +16,7 @@ import {
   LineChart,
   MessageCircle,
   Plug,
+  UserRound,
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -23,10 +24,14 @@ import { NavUser } from '../NavUser/NavUser.tsx';
 
 const mainNav = [
   { name: 'Chatbots', url: '/chatbots', icon: Bot },
-  { name: 'Conversations', url: '/conversations', icon: MessageCircle },
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
   { name: 'Integrations', url: '/integrations', icon: Plug },
+];
+
+const inboxNav = [
+  { name: 'Conversations', url: '/conversations', icon: MessageCircle },
+  { name: 'Leads', url: '/leads', icon: UserRound },
 ];
 
 const footerNav = [
@@ -53,6 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={mainNav} title="Platform" />
+        <NavMain items={inboxNav} title="Inbox" />
       </SidebarContent>
       <SidebarFooter>
         <NavMain items={footerNav} />

@@ -79,3 +79,12 @@ Knowledge Base:
 ${knowledgeBase}
 `;
 }
+
+export function buildActionsPrompt(successMessage: string) {
+  return `
+You also have access to tools that allow you to take actions on behalf of the user.
+- You may use these tools when the user's intent clearly matches — do NOT force tool usage.
+- After successfully calling a tool, respond with: "${successMessage}"
+- Continue answering questions from the Knowledge Base as normal.
+`;
+}

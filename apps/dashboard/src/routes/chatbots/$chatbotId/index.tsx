@@ -27,6 +27,7 @@ import { getChatbotsById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
+import ActionsCard from '@/widgets/ActionsCard/ActionsCard.tsx';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
 import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
@@ -129,6 +130,7 @@ function RouteComponent() {
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             <WhatsAppChannelCard readOnly={readOnly} />
+            <ActionsCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
             <Badge variant="secondary" className="rounded-l-none">

@@ -9,7 +9,7 @@ COPY . .
 RUN bun install --frozen-lockfile
 
 # Build
-RUN bun run build:dashboard
+RUN bun run build:landing
 
 
 FROM nginx:alpine

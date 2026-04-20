@@ -1774,9 +1774,12 @@ export type ChatbotActionSchema = {
 };
 
 export type GetChatbotActionsData = {
+    body?: never;
+    path?: never;
     query: {
         chatbotId: string;
     };
+    url: '/chatbot-actions';
 };
 
 export type GetChatbotActionsResponses = {
@@ -1789,6 +1792,9 @@ export type PostChatbotActionsData = {
         actionType: 'lead_generation';
         config?: LeadGenerationConfig;
     };
+    path?: never;
+    query?: never;
+    url: '/chatbot-actions';
 };
 
 export type PostChatbotActionsResponses = {
@@ -1801,6 +1807,8 @@ export type PatchChatbotActionsById = {
         enabled?: boolean;
         config?: LeadGenerationConfig;
     };
+    query?: never;
+    url: '/chatbot-actions/{id}';
 };
 
 export type PatchChatbotActionsByIdResponses = {
@@ -1809,6 +1817,9 @@ export type PatchChatbotActionsByIdResponses = {
 
 export type DeleteChatbotActionsByIdData = {
     path: { id: string };
+    body?: never;
+    query?: never;
+    url: '/chatbot-actions/{id}';
 };
 
 export type DeleteChatbotActionsByIdResponses = {
@@ -1834,11 +1845,14 @@ export type LeadWithRelations = {
 };
 
 export type GetLeadsData = {
+    body?: never;
+    path?: never;
     query?: {
         chatbotId?: string;
         page?: number;
         limit?: number;
     };
+    url: '/leads';
 };
 
 export type GetLeadsResponses = {

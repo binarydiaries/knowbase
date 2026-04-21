@@ -7,36 +7,34 @@ import { usePostHog } from 'posthog-js/react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
+import type { ChannelSchema } from '@/services';
 
-export const ChatbotPreview = () => {
+interface IChatbotPreviewContentProps {
+  channelWeb: ChannelSchema;
+  chatbotId: string;
+  orgId: string | null | undefined;
+  onNewChat: () => void;
+}
+
+const ChatbotPreviewContent = ({
+  channelWeb,
+  chatbotId,
+  orgId,
+  onNewChat,
+}: IChatbotPreviewContentProps) => {
   const posthog = usePostHog();
-  const { chatbotId } = useParams({ strict: false });
-  const { orgId } = useAuth();
   const initialMessageId = useId();
   const sendStartTimeRef = useRef<number>(0);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
-  if (!chatbotId) {
-    throw new Error('ChatbotId not available');
-  }
 
-  const channelWeb = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
-      (channel) => channel.additional.type === 'web',
-    ),
-  );
-  const channelConfig = channelWeb?.additional.config;
+  const channelConfig = channelWeb.additional.config;
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {
         id: initialMessageId,
         role: 'system',
-        parts: [
-          {
-            type: 'text',
-            text: channelConfig.welcomeMessage,
-          },
-        ],
+        parts: [{ type: 'text', text: channelConfig.welcomeMessage }],
       }
     : undefined;
 
@@ -46,9 +44,7 @@ export const ChatbotPreview = () => {
       api: `${import.meta.env.VITE_API_BASE}/chat`,
       prepareSendMessagesRequest({ messages, id, body }) {
         const lastMessage = messages[messages.length - 1];
-        const messageText = lastMessage.parts.find(
-          (value) => value.type === 'text',
-        );
+        const messageText = lastMessage.parts.find((v) => v.type === 'text');
         return {
           body: {
             ...body,
@@ -95,16 +91,12 @@ export const ChatbotPreview = () => {
 
   useEffect(() => {
     if (initialMessage) {
-      setMessages((exisingMessages) => {
-        exisingMessages[0] = initialMessage;
-        return exisingMessages;
+      setMessages((existing) => {
+        existing[0] = initialMessage;
+        return existing;
       });
     }
   }, [setMessages, initialMessage]);
-
-  if (!channelWeb) {
-    return null;
-  }
 
   return (
     <Chatbot
@@ -118,14 +110,44 @@ export const ChatbotPreview = () => {
       alertMessage={alertMessage}
       messages={messages.map((value) => ({
         id: value.id,
-        message:
-          value.parts.find((value1) => value1?.type === 'text')?.text || '',
+        message: value.parts.find((v) => v?.type === 'text')?.text || '',
         type: value.role === 'user' ? 'user' : 'system',
       }))}
       onSendMessage={(message) => {
         sendStartTimeRef.current = Date.now();
-        sendMessage({ text: message }, { body: { channelId: channelWeb?.id } });
+        sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
       }}
+      onNewChat={onNewChat}
+    />
+  );
+};
+
+export const ChatbotPreview = () => {
+  const { chatbotId } = useParams({ strict: false });
+  const { orgId } = useAuth();
+  const [chatKey, setChatKey] = useState(0);
+
+  if (!chatbotId) {
+    throw new Error('ChatbotId not available');
+  }
+
+  const channelWeb = useChannels((state) =>
+    state.channelsByChatbotId[chatbotId]?.find(
+      (channel) => channel.additional.type === 'web',
+    ),
+  );
+
+  if (!channelWeb) {
+    return null;
+  }
+
+  return (
+    <ChatbotPreviewContent
+      key={chatKey}
+      channelWeb={channelWeb}
+      chatbotId={chatbotId}
+      orgId={orgId}
+      onNewChat={() => setChatKey((k) => k + 1)}
     />
   );
 };

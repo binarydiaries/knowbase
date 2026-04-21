@@ -2,14 +2,15 @@ import { Button } from '@knowbase/ui/components/button';
 import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, SendHorizonal, X } from 'lucide-react';
-import { type ComponentProps, useState } from 'react';
+import { Ellipsis, MessageSquarePlus, SendHorizonal, X } from 'lucide-react';
+import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Chatbot.types';
 import { ChatMessage } from './ChatMessage';
 
 interface IChatbotProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
   onSendMessage?: (message: string) => void;
+  onNewChat?: () => void;
   isLoading?: boolean;
   inputDisabled?: boolean;
   alertMessage?: string;
@@ -24,6 +25,7 @@ export const Chatbot = ({
   messages,
   className,
   onSendMessage,
+  onNewChat,
   isLoading,
   inputDisabled = false,
   alertMessage,
@@ -35,13 +37,20 @@ export const Chatbot = ({
   ...otherProps
 }: IChatbotProps) => {
   const [input, setInput] = useState('');
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
 
   const submitForm = () => {
-    if (input.trim()) {
+    if (input.trim() && !isLoading && !inputDisabled) {
       onSendMessage?.(input);
       setInput('');
     }
   };
+
+  const isEmpty = !messages || messages.length === 0;
 
   return (
     <div
@@ -55,19 +64,20 @@ export const Chatbot = ({
         className="flex h-18 px-5 items-center gap-5 shrink-0"
         style={{ backgroundColor: primaryColor }}
       >
-        {/** biome-ignore lint/a11y/noSvgWithoutTitle: This is svg icon */}
         <svg
           width="27"
           height="27"
           viewBox="0 0 27 27"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
+          <title>Chatbot</title>
           <path
             d="M13.5 18.5V8.5M8.5 16V11M18.5 16V11M19.75 2.67228C17.9114 1.60871 15.7768 1 13.5 1C6.59644 1 1 6.59644 1 13.5C1 15.4996 1.46952 17.3895 2.30432 19.0656C2.52617 19.511 2.60001 20.0201 2.4714 20.5007L1.72689 23.2834C1.40369 24.4912 2.50876 25.5963 3.71669 25.2731L6.49924 24.5286C6.97991 24.4 7.48901 24.4739 7.93441 24.6956C9.61046 25.5305 11.5004 26 13.5 26C20.4035 26 26 20.4035 26 13.5C26 11.2232 25.3913 9.08859 24.3278 7.25"
             stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
+            strokeWidth="2"
+            strokeLinecap="round"
           />
         </svg>
 
@@ -75,35 +85,57 @@ export const Chatbot = ({
           <h2 className="text-base font-semibold">{displayName}</h2>
           {subTitle && <p className="text-sm">{subTitle}</p>}
         </div>
+        {onNewChat && (
+          <Button
+            size="icon-sm"
+            variant="link"
+            onClick={onNewChat}
+            className="cursor-pointer"
+            aria-label="New chat"
+          >
+            <MessageSquarePlus className="text-white size-5" />
+          </Button>
+        )}
         {onClose && (
           <Button
             size="icon-sm"
             variant="link"
             onClick={onClose}
             className="cursor-pointer"
+            aria-label="Close chat"
           >
             <X className="text-white size-5" />
           </Button>
         )}
       </div>
       <div className="flex flex-col gap-5 p-5 overflow-auto h-full">
-        {messages?.map((message) => (
-          <ChatMessage
-            systemTitle={displayName}
-            type={message.type}
-            message={message.message}
-            key={message.id}
-            primaryColor={primaryColor}
-          />
-        ))}
-
-        {isLoading && (
-          <div className="flex">
-            <div className="rounded-2xl px-4 py-2 bg-[#F0F0F0]">
-              <Ellipsis />
-            </div>
+        {isEmpty && !isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+            <MessageSquarePlus className="size-10 opacity-30" />
+            <p className="text-sm text-center">Ask me anything…</p>
           </div>
+        ) : (
+          <>
+            {messages?.map((message) => (
+              <ChatMessage
+                systemTitle={displayName}
+                type={message.type}
+                message={message.message}
+                key={message.id}
+                primaryColor={primaryColor}
+              />
+            ))}
+
+            {isLoading && (
+              <div className="flex">
+                <div className="rounded-2xl px-4 py-2 bg-[#F0F0F0]">
+                  <Ellipsis />
+                </div>
+              </div>
+            )}
+          </>
         )}
+        <div ref={bottomRef} />
       </div>
       <div className="p-5 flex flex-col gap-2">
         {alertMessage ? (
@@ -116,11 +148,11 @@ export const Chatbot = ({
             className="min-h-12 rounded-2xl pr-14 py-3 resize-none placeholder:truncate"
             placeholder={inputPlaceholder || 'Type your message...'}
             value={input}
-            disabled={inputDisabled}
+            disabled={inputDisabled || isLoading}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // prevent new line
+                e.preventDefault();
                 submitForm();
               }
             }}
@@ -129,8 +161,9 @@ export const Chatbot = ({
             variant="ghost"
             size="icon-sm"
             className="absolute right-3 top-2"
-            disabled={inputDisabled || input.trim().length === 0}
+            disabled={inputDisabled || isLoading || input.trim().length === 0}
             onClick={submitForm}
+            aria-label="Send message"
           >
             <SendHorizonal className="size-6" />
           </Button>

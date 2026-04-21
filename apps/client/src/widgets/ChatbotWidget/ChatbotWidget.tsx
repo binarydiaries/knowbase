@@ -11,10 +11,15 @@ interface IChatbotWidgetProps {
   orgId: string;
 }
 
-export const ChatbotWidget = ({
+interface IChatbotWidgetContentProps extends IChatbotWidgetProps {
+  onNewChat: () => void;
+}
+
+const ChatbotWidgetContent = ({
   channelSchema,
   orgId,
-}: IChatbotWidgetProps) => {
+  onNewChat,
+}: IChatbotWidgetContentProps) => {
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
@@ -24,12 +29,7 @@ export const ChatbotWidget = ({
     ? {
         id: initialMessageId,
         role: 'system',
-        parts: [
-          {
-            type: 'text',
-            text: channelConfig.welcomeMessage,
-          },
-        ],
+        parts: [{ type: 'text', text: channelConfig.welcomeMessage }],
       }
     : undefined;
 
@@ -39,9 +39,7 @@ export const ChatbotWidget = ({
       api: baseUrl,
       prepareSendMessagesRequest({ messages, id }) {
         const lastMessage = messages[messages.length - 1];
-        const messageText = lastMessage.parts.find(
-          (value) => value.type === 'text',
-        );
+        const messageText = lastMessage.parts.find((v) => v.type === 'text');
         return {
           body: {
             message: messageText?.text,
@@ -69,6 +67,7 @@ export const ChatbotWidget = ({
       }
     },
   });
+
   return (
     <Chatbot
       displayName={channelConfig.displayName}
@@ -81,14 +80,27 @@ export const ChatbotWidget = ({
       alertMessage={alertMessage}
       messages={messages.map((value) => ({
         id: value.id,
-        message:
-          value.parts.find((value1) => value1?.type === 'text')?.text || '',
+        message: value.parts.find((v) => v?.type === 'text')?.text || '',
         type: value.role === 'user' ? 'user' : 'system',
       }))}
       onSendMessage={(message) => sendMessage({ text: message })}
+      onNewChat={onNewChat}
       onClose={() => {
         window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
       }}
+    />
+  );
+};
+
+export const ChatbotWidget = ({ channelSchema, orgId }: IChatbotWidgetProps) => {
+  const [chatKey, setChatKey] = useState(0);
+
+  return (
+    <ChatbotWidgetContent
+      key={chatKey}
+      channelSchema={channelSchema}
+      orgId={orgId}
+      onNewChat={() => setChatKey((k) => k + 1)}
     />
   );
 };

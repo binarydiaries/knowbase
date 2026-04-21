@@ -17,6 +17,7 @@ import { message } from './modules/message/message';
 import { Subscription } from './modules/subscription/subscription';
 import { Action } from './modules/action/action';
 import { Lead } from './modules/lead/lead';
+import { Admin } from './modules/admin/admin';
 
 const app = new Elysia()
   .use(
@@ -59,6 +60,7 @@ const app = new Elysia()
   .use(WhatsApp)
   .use(Action)
   .use(Lead)
+  .use(Admin)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

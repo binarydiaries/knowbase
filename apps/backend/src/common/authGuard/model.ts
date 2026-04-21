@@ -6,6 +6,12 @@ const UnauthorizedSchema = z.object({
   message: z.string(),
 });
 
+const ForbiddenSchema = z.object({
+  code: z.literal('FORBIDDEN'),
+  message: z.string(),
+});
+
 export const ClerkModel = new Elysia().model({
   UnauthorizedSchema,
+  ForbiddenSchema,
 });

@@ -16,10 +16,13 @@ import {
   LineChart,
   MessageCircle,
   Plug,
+  Shield,
   UserRound,
 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
+import { isAdminEmail } from '@/utils/adminAccess';
 import { NavUser } from '../NavUser/NavUser.tsx';
 
 const mainNav = [
@@ -39,6 +42,11 @@ const footerNav = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+  const adminNav = isAdminEmail(user?.primaryEmailAddress?.emailAddress)
+    ? [{ name: 'Admin Costs', url: '/admin/costs', icon: Shield }]
+    : [];
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -59,6 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={mainNav} title="Platform" />
         <NavMain items={inboxNav} title="Inbox" />
+        {adminNav.length > 0 && <NavMain items={adminNav} title="Admin" />}
       </SidebarContent>
       <SidebarFooter>
         <NavMain items={footerNav} />

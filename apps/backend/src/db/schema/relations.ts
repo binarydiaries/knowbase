@@ -1,4 +1,5 @@
 import { defineRelations } from 'drizzle-orm';
+import { aiCostEvents } from './aiCostEvents';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
 import { chatbotActions } from './chatbotActions';
@@ -14,6 +15,7 @@ import { whatsappConnections } from './whatsappConnections';
 
 export const relations = defineRelations(
   {
+    aiCostEvents,
     chatbots,
     channels,
     behaviors,
@@ -112,6 +114,7 @@ export const relations = defineRelations(
     },
     orgUsageDaily: {},
     orgUsageMonthly: {},
+    aiCostEvents: {},
     whatsappConnections: {},
   }),
 );

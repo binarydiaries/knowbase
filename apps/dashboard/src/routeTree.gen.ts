@@ -20,6 +20,7 @@ import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as ChatbotsChatbotIdIndexRouteImport } from './routes/chatbots/$chatbotId/index'
+import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +78,11 @@ const ChatbotsChatbotIdIndexRoute = ChatbotsChatbotIdIndexRouteImport.update({
   path: '/chatbots/$chatbotId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
+  id: '/admin/costs/',
+  path: '/admin/costs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
+  '/admin/costs/': typeof AdminCostsIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/organization': typeof OrganizationIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
+  '/admin/costs': typeof AdminCostsIndexRoute
   '/chatbots/$chatbotId': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/organization/': typeof OrganizationIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
+  '/admin/costs/': typeof AdminCostsIndexRoute
   '/chatbots/$chatbotId/': typeof ChatbotsChatbotIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
+    | '/admin/costs/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesByTo: FileRoutesByTo
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/organization'
     | '/subscriptions'
     | '/usage'
+    | '/admin/costs'
     | '/chatbots/$chatbotId'
     | '/conversations/{-$conversationId}'
   id:
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/organization/'
     | '/subscriptions/'
     | '/usage/'
+    | '/admin/costs/'
     | '/chatbots/$chatbotId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesById: FileRoutesById
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   OrganizationIndexRoute: typeof OrganizationIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
+  AdminCostsIndexRoute: typeof AdminCostsIndexRoute
   ChatbotsChatbotIdIndexRoute: typeof ChatbotsChatbotIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatbotsChatbotIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/costs/': {
+      id: '/admin/costs/'
+      path: '/admin/costs'
+      fullPath: '/admin/costs/'
+      preLoaderRoute: typeof AdminCostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -266,6 +286,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrganizationIndexRoute: OrganizationIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,
+  AdminCostsIndexRoute: AdminCostsIndexRoute,
   ChatbotsChatbotIdIndexRoute: ChatbotsChatbotIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:
     ConversationsChar123ConversationIdChar125IndexRoute,

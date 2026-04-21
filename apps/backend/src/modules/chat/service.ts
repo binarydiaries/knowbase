@@ -11,6 +11,7 @@ import { OrgUsageMonthlyService } from '../subscription/usage';
 import { SubscriptionService } from '../subscription/service';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
+import { AiCostEventService } from '../admin/costEvent.service';
 import { referenceResolverPrompt } from './prompts';
 import { buildChatContext } from './context';
 import { handleLeadCapture, persistMessages } from './persistence';
@@ -61,36 +62,60 @@ export abstract class ChatService {
   static async resolveReferences({
     currentUserMessage,
     lastAssistantUtterance,
+    orgId,
+    chatbotId,
+    conversationId,
   }: {
     currentUserMessage: string;
     lastAssistantUtterance: string;
+    orgId: string;
+    chatbotId: string;
+    conversationId?: string;
   }) {
     const resolverPrompt = referenceResolverPrompt({
       currentUserMessage,
       lastAssistantUtterance,
     });
-    const { text } = await generateText({
+    const result = await generateText({
       model: nanoModel,
       prompt: resolverPrompt,
       maxOutputTokens: 50,
       temperature: 0,
     });
+    await AiCostEventService.recordEvent({
+      orgId,
+      chatbotId,
+      conversationId,
+      provider: 'openai',
+      model: 'gpt-4.1-nano',
+      usage: result.usage ?? {},
+      metadata: { operation: 'resolve-references' },
+    });
 
-    return text.trim() || currentUserMessage;
+    return result.text.trim() || currentUserMessage;
   }
 
   static async getFinalQuery({
     message,
     conversation,
+    orgId,
+    chatbotId,
+    conversationId,
   }: {
     message: string;
     conversation?: typeof conversations.$inferSelect;
+    orgId: string;
+    chatbotId: string;
+    conversationId?: string;
   }) {
     if (!conversation?.lastAssistantUtterance) return message;
 
     return ChatService.resolveReferences({
       lastAssistantUtterance: conversation.lastAssistantUtterance,
       currentUserMessage: message,
+      orgId,
+      chatbotId,
+      conversationId,
     });
   }
 
@@ -124,15 +149,34 @@ export abstract class ChatService {
 
   // ── Sentiment scoring (paid plans) ────────────────────────────────────────
 
-  static async scoreSentiment(assistantMessage: string) {
+  static async scoreSentiment({
+    assistantMessage,
+    orgId,
+    chatbotId,
+    conversationId,
+  }: {
+    assistantMessage: string;
+    orgId: string;
+    chatbotId: string;
+    conversationId: string;
+  }) {
     try {
-      const { text: sentimentJson } = await generateText({
+      const result = await generateText({
         model: nanoModel,
         prompt: `Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1.\nRespond with JSON only, no explanation: {"label":"positive|neutral|negative","score":0.0}\n\n"${assistantMessage}"`,
         maxOutputTokens: 30,
         temperature: 0,
       });
-      return JSON.parse(sentimentJson.trim()) as {
+      await AiCostEventService.recordEvent({
+        orgId,
+        chatbotId,
+        conversationId,
+        provider: 'openai',
+        model: 'gpt-4.1-nano',
+        usage: result.usage ?? {},
+        metadata: { operation: 'sentiment-score' },
+      });
+      return JSON.parse(result.text.trim()) as {
         label: 'positive' | 'neutral' | 'negative';
         score: number;
       };
@@ -163,7 +207,13 @@ export abstract class ChatService {
 
     const conversation = await ConversationService.single({ id: conversationId, orgId });
     const behavior = await ChatService.getBehaviour(chatbotId);
-    const finalQuery = await ChatService.getFinalQuery({ message, conversation });
+    const finalQuery = await ChatService.getFinalQuery({
+      message,
+      conversation,
+      orgId,
+      chatbotId,
+      conversationId,
+    });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
@@ -180,7 +230,7 @@ export abstract class ChatService {
       model,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
       ...(tools ? { tools, maxSteps: 2 } : {}),
-      onFinish: async ({ text: assistantMessage, toolCalls }) => {
+      onFinish: async ({ text: assistantMessage, toolCalls, usage }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
           lastAssistantUtterance: assistantMessage,
@@ -200,13 +250,27 @@ export abstract class ChatService {
         }
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+        await AiCostEventService.recordEvent({
+          orgId,
+          chatbotId,
+          conversationId,
+          provider: 'openai',
+          model: 'gpt-4.1-mini',
+          usage: usage ?? {},
+          metadata: { operation: 'web-chat-response' },
+        });
 
         await handleLeadCapture(toolCalls ?? [], { chatbotId, conversationId, channelId, orgId });
 
         // Sentiment scoring — paid plans only
         const plan = await SubscriptionService.getPlan(orgId);
         const sentiment = plan !== 'free'
-          ? await ChatService.scoreSentiment(assistantMessage)
+          ? await ChatService.scoreSentiment({
+            assistantMessage,
+            orgId,
+            chatbotId,
+            conversationId,
+          })
           : null;
 
         await persistMessages({
@@ -220,7 +284,14 @@ export abstract class ChatService {
 
         // Fire-and-forget enrichment — paid plans only
         if (plan !== 'free') {
-          void enrichConversationAsync(conversationId, message, isNew, ip);
+          void enrichConversationAsync({
+            conversationId,
+            firstUserMessage: message,
+            isNew,
+            orgId,
+            chatbotId,
+            ip,
+          });
         }
       },
     });
@@ -253,7 +324,13 @@ export abstract class ChatService {
       : undefined;
 
     const behavior = await ChatService.getBehaviour(chatbotId);
-    const finalQuery = await ChatService.getFinalQuery({ message, conversation });
+    const finalQuery = await ChatService.getFinalQuery({
+      message,
+      conversation,
+      orgId,
+      chatbotId,
+      conversationId,
+    });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
@@ -270,6 +347,15 @@ export abstract class ChatService {
       system: systemPrompt,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
       ...(tools ? { tools, maxSteps: 2 } : {}),
+    });
+    await AiCostEventService.recordEvent({
+      orgId,
+      chatbotId,
+      conversationId,
+      provider: 'openai',
+      model: 'gpt-4.1-mini',
+      usage: result.usage ?? {},
+      metadata: { operation: 'whatsapp-chat-response' },
     });
 
     return {
@@ -477,10 +563,21 @@ export abstract class ChatService {
 
 /** Fire-and-forget: attach country (IP lookup) and topic (AI label) to a conversation. */
 async function enrichConversationAsync(
-  conversationId: string,
-  firstUserMessage: string,
-  isNew: boolean,
-  ip?: string,
+  {
+    conversationId,
+    firstUserMessage,
+    isNew,
+    orgId,
+    chatbotId,
+    ip,
+  }: {
+    conversationId: string;
+    firstUserMessage: string;
+    isNew: boolean;
+    orgId: string;
+    chatbotId: string;
+    ip?: string;
+  },
 ) {
   try {
     if (ip && ip !== '127.0.0.1' && ip !== '::1') {
@@ -499,13 +596,22 @@ async function enrichConversationAsync(
 
     if (isNew) {
       try {
-        const { text: topic } = await generateText({
+        const result = await generateText({
           model: nanoModel,
           prompt: `In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${firstUserMessage}"`,
           maxOutputTokens: 20,
           temperature: 0,
         });
-        const cleanTopic = topic.trim().replace(/^["']|["']$/g, '');
+        await AiCostEventService.recordEvent({
+          orgId,
+          chatbotId,
+          conversationId,
+          provider: 'openai',
+          model: 'gpt-4.1-nano',
+          usage: result.usage ?? {},
+          metadata: { operation: 'topic-enrichment' },
+        });
+        const cleanTopic = result.text.trim().replace(/^["']|["']$/g, '');
         if (cleanTopic) {
           await ConversationService.update(conversationId, { topic: cleanTopic });
         }

@@ -25,6 +25,7 @@ const AgentPreviewContent = ({
   const posthog = usePostHog();
   const initialMessageId = useId();
   const sendStartTimeRef = useRef<number>(0);
+  const firstTokenTimeRef = useRef<number>(0);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
 
@@ -56,10 +57,16 @@ const AgentPreviewContent = ({
       },
     }),
     onFinish({ isError }) {
+      const now = Date.now();
       const latency = sendStartTimeRef.current
-        ? (Date.now() - sendStartTimeRef.current) / 1000
+        ? (now - sendStartTimeRef.current) / 1000
         : undefined;
+      const timeToFirstToken =
+        sendStartTimeRef.current && firstTokenTimeRef.current
+          ? (firstTokenTimeRef.current - sendStartTimeRef.current) / 1000
+          : undefined;
       sendStartTimeRef.current = 0;
+      firstTokenTimeRef.current = 0;
 
       posthog.capture('$ai_generation', {
         $ai_trace_id: conversationId,
@@ -67,7 +74,10 @@ const AgentPreviewContent = ({
         $ai_provider: 'custom',
         $ai_stream: true,
         $ai_latency: latency,
+        $ai_time_to_first_token: timeToFirstToken,
         $ai_is_error: isError,
+        $ai_span_name: 'agent_preview_chat',
+        $ai_base_url: import.meta.env.VITE_API_BASE,
       });
     },
     onError(error) {
@@ -88,6 +98,13 @@ const AgentPreviewContent = ({
       }
     },
   });
+
+  // Record time of first streaming token for $ai_time_to_first_token
+  useEffect(() => {
+    if (status === 'streaming' && sendStartTimeRef.current > 0 && firstTokenTimeRef.current === 0) {
+      firstTokenTimeRef.current = Date.now();
+    }
+  }, [status]);
 
   useEffect(() => {
     if (initialMessage) {

@@ -13,6 +13,7 @@ import { Switch } from '@knowbase/ui/components/switch';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import { patchAgentActionsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
@@ -63,6 +64,7 @@ export function LeadGenerationConfigDrawer({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const posthog = usePostHog();
   const cfg = action.config;
   const [fields, setFields] = useState<NonNullable<LeadConfig['fields']>>(
     cfg.fields ?? DEFAULT_FIELDS,
@@ -87,6 +89,12 @@ export function LeadGenerationConfigDrawer({
         },
       }),
     onSuccess: () => {
+      posthog.capture('lead_generation_configured', {
+        action_id: action.id,
+        fields_collected: Object.entries(fields)
+          .filter(([, v]) => v?.collect)
+          .map(([k]) => k),
+      });
       toast.success('Lead generation settings saved.');
       onSaved();
     },

@@ -13,6 +13,7 @@ import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import { client } from '@/services/client.gen';
 import {
@@ -28,6 +29,7 @@ interface ConnectionResponse {
 }
 
 export function WhatsAppIntegrationCard() {
+  const posthog = usePostHog();
   const [accessToken, setAccessToken] = useState('');
   const [businessAccountId, setBusinessAccountId] = useState('');
   const { connected, phoneNumbers, setConnection, clearConnection } =
@@ -75,6 +77,10 @@ export function WhatsAppIntegrationCard() {
       });
       setAccessToken('');
       setBusinessAccountId('');
+      posthog.capture('whatsapp_connected', {
+        business_account_id: data.businessAccountId,
+        phone_numbers_count: data.phoneNumbers.length,
+      });
       toast.success('WhatsApp Business Account connected');
     },
     onError: (error) => {
@@ -91,6 +97,7 @@ export function WhatsAppIntegrationCard() {
     },
     onSuccess: () => {
       clearConnection();
+      posthog.capture('whatsapp_disconnected');
       toast.success('WhatsApp disconnected');
     },
     onError: (error) => {

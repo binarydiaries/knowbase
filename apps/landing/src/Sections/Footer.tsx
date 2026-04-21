@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const socialLinks = [
     { Icon: FaFacebook, label: "Facebook", href: "#" },
@@ -103,7 +104,10 @@ const Footer = () => {
                         <div className="mt-12 border-t border-[#301B69]/10" />
 
                         <p className="text-center text-sm text-[#301B69]/70 mt-6">
-                            © 2026 Agenvik. All rights reserved.
+                            © 2026 Agenvik. All rights reserved. ·{' '}
+                            <Link to="/privacy-policy" className="hover:text-[#301B69]">Privacy Policy</Link>
+                            {' · '}
+                            <Link to="/terms" className="hover:text-[#301B69]">Terms & Conditions</Link>
                         </p>
                     </div>
                 </div>

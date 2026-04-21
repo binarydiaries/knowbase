@@ -1,3 +1,5 @@
+import GetStartedButton from '../components/GetStartedButton'
+
 const HeroSection = () => {
     return (
         <section
@@ -21,9 +23,9 @@ const HeroSection = () => {
                         <a href="#faq" className="hover:opacity-80">FAQ</a>
                     </nav>
 
-                    <a href="/signup" className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">
+                    <GetStartedButton className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">
                         Get Started
-                    </a>
+                    </GetStartedButton>
                 </div>
             </header>
 
@@ -43,9 +45,9 @@ const HeroSection = () => {
                 </p>
 
                 <div className="flex justify-center gap-4 flex-wrap">
-                    <a href="/signup" className="px-6 py-3 bg-[#301B69] text-white rounded-xl">
+                    <GetStartedButton className="px-6 py-3 bg-[#301B69] text-white rounded-xl">
                         Get Started →
-                    </a>
+                    </GetStartedButton>
                     <a href="/contact" className="px-6 py-3 text-[#301B69] bg-white rounded-xl">
                         Contact Us
                     </a>
@@ -61,7 +63,7 @@ const HeroSection = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent rounded-2xl" aria-hidden="true" />
             </div>
         </section>
-    );
-};
+    )
+}
 
-export default HeroSection;
+export default HeroSection

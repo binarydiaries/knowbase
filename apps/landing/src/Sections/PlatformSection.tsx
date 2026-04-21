@@ -1,32 +1,28 @@
-import {
-    BarChart3,
-    Database,
-    Settings,
-    ShieldCheck,
-} from "lucide-react";
+import { BarChart3, Database, Settings, ShieldCheck } from 'lucide-react'
+import GetStartedButton from '../components/GetStartedButton'
 
 const platformFeatures = [
     {
         icon: BarChart3,
-        title: "Usage Insights",
-        desc: "Track agent usage, queries, and performance over time. Understand exactly how users interact with your AI.",
+        title: 'Usage Insights',
+        desc: 'Track agent usage, queries, and performance over time. Understand exactly how users interact with your AI.',
     },
     {
         icon: Database,
-        title: "Knowledge Management",
-        desc: "Organize, update, and control your knowledge base from one place. Keep your agents accurate and always up to date.",
+        title: 'Knowledge Management',
+        desc: 'Organize, update, and control your knowledge base from one place. Keep your agents accurate and always up to date.',
     },
     {
         icon: Settings,
-        title: "Custom Agent Settings",
-        desc: "Customize tone, behavior, and response style for each agent. Fine-tune outputs to match your brand or use case.",
+        title: 'Custom Agent Settings',
+        desc: 'Customize tone, behavior, and response style for each agent. Fine-tune outputs to match your brand or use case.',
     },
     {
         icon: ShieldCheck,
-        title: "Secure & Scalable",
-        desc: "Your data stays private and is handled securely. Built to scale from personal projects to enterprise deployments.",
+        title: 'Secure & Scalable',
+        desc: 'Your data stays private and is handled securely. Built to scale from personal projects to enterprise deployments.',
     },
-];
+]
 
 const PlatformSection = () => {
     return (
@@ -53,37 +49,33 @@ const PlatformSection = () => {
 
                         <ul className="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
                             {platformFeatures.map((item, index) => {
-                                const Icon = item.icon;
+                                const Icon = item.icon
                                 return (
                                     <li key={index} className="flex gap-4">
                                         <div className="mt-1 text-[#301B69]" aria-hidden="true">
                                             <Icon size={18} />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-[#301B69] mb-1 text-sm md:text-base">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">
-                                                {item.desc}
-                                            </p>
+                                            <h3 className="font-semibold text-[#301B69] mb-1 text-sm md:text-base">{item.title}</h3>
+                                            <p className="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
                                         </div>
                                     </li>
-                                );
+                                )
                             })}
                             <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true" />
                             <div className="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true" />
                         </ul>
 
                         <div className="mt-12">
-                            <a href="/signup" className="inline-block bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition">
+                            <GetStartedButton className="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition">
                                 Get Started →
-                            </a>
+                            </GetStartedButton>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-    );
-};
+    )
+}
 
-export default PlatformSection;
+export default PlatformSection

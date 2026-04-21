@@ -1,32 +1,28 @@
-import {
-    MessageSquare,
-    GraduationCap,
-    Database,
-    Box,
-} from "lucide-react";
+import { MessageSquare, GraduationCap, Database, Box } from 'lucide-react'
+import GetStartedButton from '../components/GetStartedButton'
 
 const useCases = [
     {
         icon: MessageSquare,
-        title: "Customer Support Agents",
-        desc: "Automate repetitive queries and reduce support load. Provide instant, 24/7 assistance without growing your team.",
+        title: 'Customer Support Agents',
+        desc: 'Automate repetitive queries and reduce support load. Provide instant, 24/7 assistance without growing your team.',
     },
     {
         icon: GraduationCap,
-        title: "Study Assistants",
-        desc: "Convert your notes into an interactive tutor. Ask questions and learn faster with AI-guided explanations.",
+        title: 'Study Assistants',
+        desc: 'Convert your notes into an interactive tutor. Ask questions and learn faster with AI-guided explanations.',
     },
     {
         icon: Database,
-        title: "Internal Knowledge Agents",
-        desc: "Help teams find answers across internal docs instantly. Reduce reliance on individuals and improve overall productivity.",
+        title: 'Internal Knowledge Agents',
+        desc: 'Help teams find answers across internal docs instantly. Reduce reliance on individuals and improve overall productivity.',
     },
     {
         icon: Box,
-        title: "Product Assistants",
-        desc: "Guide users through your product with AI-powered help. Boost conversions with contextual, real-time recommendations.",
+        title: 'Product Assistants',
+        desc: 'Guide users through your product with AI-powered help. Boost conversions with contextual, real-time recommendations.',
     },
-];
+]
 
 const UseCasesSection = () => {
     return (
@@ -53,37 +49,33 @@ const UseCasesSection = () => {
 
                         <ul className="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
                             {useCases.map((item, index) => {
-                                const Icon = item.icon;
+                                const Icon = item.icon
                                 return (
                                     <li key={index} className="flex gap-4">
                                         <div className="mt-1 text-[#301B69]" aria-hidden="true">
                                             <Icon size={18} />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-[#301B69] mb-1 text-sm md:text-base">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">
-                                                {item.desc}
-                                            </p>
+                                            <h3 className="font-semibold text-[#301B69] mb-1 text-sm md:text-base">{item.title}</h3>
+                                            <p className="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
                                         </div>
                                     </li>
-                                );
+                                )
                             })}
                             <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true" />
                             <div className="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true" />
                         </ul>
 
                         <div className="mt-12">
-                            <a href="/signup" className="inline-block bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition">
+                            <GetStartedButton className="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition">
                                 Get Started →
-                            </a>
+                            </GetStartedButton>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-    );
-};
+    )
+}
 
-export default UseCasesSection;
+export default UseCasesSection

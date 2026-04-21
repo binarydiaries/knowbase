@@ -25,7 +25,7 @@ export const Analytics = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
@@ -40,7 +40,7 @@ export const Analytics = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
@@ -49,17 +49,17 @@ export const Analytics = new Elysia({
     },
   )
   .get(
-    '/top-chatbots',
+    '/top-agents',
     async ({ query, orgId }) => {
-      return AnalyticsService.getTopChatbots(
+      return AnalyticsService.getTopAgents(
         orgId,
         query.startDate,
         query.endDate,
       );
     },
     {
-      query: 'TopChatbotsQuerySchema',
-      response: 'TopChatbotsResponseSchema',
+      query: 'TopAgentsQuerySchema',
+      response: 'TopAgentsResponseSchema',
     },
   )
   .get(
@@ -69,7 +69,7 @@ export const Analytics = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
@@ -84,7 +84,7 @@ export const Analytics = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
@@ -99,7 +99,7 @@ export const Analytics = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {

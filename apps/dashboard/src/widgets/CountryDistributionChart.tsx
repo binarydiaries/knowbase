@@ -18,20 +18,20 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function CountryDistributionChart({ chatbotId, startDate, endDate }: Props) {
+export function CountryDistributionChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-country', chatbotId, startDate, endDate],
+    queryKey: ['analytics-country', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getAnalyticsCountryDistribution({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

@@ -44,7 +44,7 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
 
 export const ChannelSchema = z.object({
   id: z.string(),
-  chatbotId: z.string(),
+  agentId: z.string(),
   enabled: z.boolean(),
   channelStatus: ChannelStatusSchema,
   additional: ChannelSchemaType,
@@ -55,7 +55,7 @@ export const ChannelSchema = z.object({
 export type IChannelSchema = z.infer<typeof ChannelSchema>;
 
 const ChannelListQuerySchema = z.object({
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const ManyChannelResponse = z.object({

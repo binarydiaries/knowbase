@@ -18,20 +18,20 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function ConversationsDailyChart({ chatbotId, startDate, endDate }: Props) {
+export function ConversationsDailyChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-conv-daily', chatbotId, startDate, endDate],
+    queryKey: ['analytics-conv-daily', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getAnalyticsConversationsDaily({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

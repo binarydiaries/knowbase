@@ -18,19 +18,19 @@ import { FilterIcon } from 'lucide-react';
 interface IConversationFiltersPopoverProps {
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
-  chatbotIdFilter: string;
-  onChatbotIdFilterChange: (value: string) => void;
-  chatbotOptions: Array<{ id: string; name: string }>;
+  agentIdFilter: string;
+  onAgentIdFilterChange: (value: string) => void;
+  agentOptions: Array<{ id: string; name: string }>;
 }
 
 export function ConversationFiltersPopover({
   searchTerm,
   onSearchTermChange,
-  chatbotIdFilter,
-  onChatbotIdFilterChange,
-  chatbotOptions,
+  agentIdFilter,
+  onAgentIdFilterChange,
+  agentOptions,
 }: IConversationFiltersPopoverProps) {
-  const activeFilterCount = chatbotIdFilter !== 'all' ? 1 : 0;
+  const activeFilterCount = agentIdFilter !== 'all' ? 1 : 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -56,19 +56,19 @@ export function ConversationFiltersPopover({
 
         <PopoverContent align="end" className="space-y-3">
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Chatbot</p>
+            <p className="text-xs text-muted-foreground">Agent</p>
             <Select
-              value={chatbotIdFilter}
-              onValueChange={onChatbotIdFilterChange}
+              value={agentIdFilter}
+              onValueChange={onAgentIdFilterChange}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="All chatbots" />
+                <SelectValue placeholder="All agents" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All chatbots</SelectItem>
-                {chatbotOptions.map((chatbot) => (
-                  <SelectItem key={chatbot.id} value={chatbot.id}>
-                    {chatbot.name}
+                <SelectItem value="all">All agents</SelectItem>
+                {agentOptions.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -80,7 +80,7 @@ export function ConversationFiltersPopover({
             size="sm"
             className="w-full"
             onClick={() => {
-              onChatbotIdFilterChange('all');
+              onAgentIdFilterChange('all');
             }}
             disabled={activeFilterCount === 0}
           >

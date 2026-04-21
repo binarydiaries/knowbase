@@ -46,7 +46,7 @@ import {
   postIndexing,
 } from '@/services';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
   KNOWLEDGE_SOURCE_LIMIT_TOOLTIP,
   NO_READY_TRAINING_TOOLTIP,
@@ -70,8 +70,8 @@ export const DocumentsWidget = ({
   subscription?: SubscriptionStatusSchema;
 }) => {
   const posthog = usePostHog();
-  const { chatbotId } = useParams({ strict: false });
-  const { documentsByChatbotId, deleteDocument, addUpdateDocument } =
+  const { agentId } = useParams({ strict: false });
+  const { documentsByAgentId, deleteDocument, addUpdateDocument } =
     useDocuments();
   const queryClient = useQueryClient();
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
@@ -81,11 +81,11 @@ export const DocumentsWidget = ({
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  if (!chatbotId) {
-    throw new Error('chatbotId not available');
+  if (!agentId) {
+    throw new Error('agentId not available');
   }
 
-  const documents = (documentsByChatbotId[chatbotId] || []).sort(
+  const documents = (documentsByAgentId[agentId] || []).sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   );
 
@@ -103,10 +103,10 @@ export const DocumentsWidget = ({
   const isTrainDisabled =
     readOnly || hasReachedTrainingLimit || !hasReadyDocuments;
   const addDisabledReason = readOnly
-    ? CHATBOT_LOCK_TOOLTIP
+    ? AGENT_LOCK_TOOLTIP
     : KNOWLEDGE_SOURCE_LIMIT_TOOLTIP;
   const trainDisabledReason = readOnly
-    ? CHATBOT_LOCK_TOOLTIP
+    ? AGENT_LOCK_TOOLTIP
     : hasReachedTrainingLimit
       ? TRAINING_LIMIT_TOOLTIP
       : NO_READY_TRAINING_TOOLTIP;
@@ -129,11 +129,11 @@ export const DocumentsWidget = ({
     },
     onSuccess: ({ documentId }) => {
       posthog.capture('knowledge_source_deleted', {
-        chatbot_id: chatbotId,
+        agent_id: agentId,
         document_id: documentId,
       });
-      deleteDocument(chatbotId, documentId);
-      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+      deleteDocument(agentId, documentId);
+      queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -141,7 +141,7 @@ export const DocumentsWidget = ({
   });
 
   const trainMutation = useMutation({
-    mutationFn: () => postIndexing({ body: { chatbotId } }),
+    mutationFn: () => postIndexing({ body: { agentId } }),
     onSuccess: ({ data }) => {
       if (data.status === 'no_documents_ready') {
         toast.info(data.message);
@@ -149,12 +149,12 @@ export const DocumentsWidget = ({
         return;
       }
 
-      posthog.capture('chatbot_training_started', {
-        chatbot_id: chatbotId,
+      posthog.capture('agent_training_started', {
+        agent_id: agentId,
         documents_count: documents.filter((d) => d.status === 'ready').length,
       });
       setIsPollingActive(true);
-      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+      queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       setIsTrainDialogOpen(false);
     },
     onError: (error) => {
@@ -163,8 +163,8 @@ export const DocumentsWidget = ({
   });
 
   const indexStatusQuery = useQuery({
-    queryFn: () => getIndexingStatus({ query: { chatbotId } }),
-    queryKey: ['indexStatus', chatbotId],
+    queryFn: () => getIndexingStatus({ query: { agentId } }),
+    queryKey: ['indexStatus', agentId],
     enabled: isPollingActive,
     refetchInterval: 3000,
   });
@@ -173,10 +173,10 @@ export const DocumentsWidget = ({
     if (indexStatusQuery.data?.data) {
       setIsPollingActive(indexStatusQuery.data?.data.isPollingActive);
       indexStatusQuery.data.data.documentIds?.forEach((value) => {
-        addUpdateDocument(chatbotId, value);
+        addUpdateDocument(agentId, value);
       });
     }
-  }, [addUpdateDocument, chatbotId, indexStatusQuery?.data?.data]);
+  }, [addUpdateDocument, agentId, indexStatusQuery?.data?.data]);
 
   const isDocumentsAvailable = !!documents?.length;
   return (
@@ -185,7 +185,7 @@ export const DocumentsWidget = ({
         <CardHeader>
           <CardTitle className={'text-xl'}>Knowledge Sources</CardTitle>
           <CardDescription>
-            Your chatbot will only answer based on the sources you add here.
+            Your agent will only answer based on the sources you add here.
           </CardDescription>
           {(isDocumentsAvailable || subscription) && (
             <CardAction className="flex gap-2">
@@ -299,7 +299,7 @@ export const DocumentsWidget = ({
                 setDeleteConfirmId(doc.id);
               }}
               readOnly={readOnly}
-              disabledReason={CHATBOT_LOCK_TOOLTIP}
+              disabledReason={AGENT_LOCK_TOOLTIP}
             />
           ))}
 
@@ -311,7 +311,7 @@ export const DocumentsWidget = ({
                 </EmptyMedia>
                 <EmptyTitle>No Knowledge Sources Yet</EmptyTitle>
                 <EmptyDescription>
-                  Add documents, links, or text to help your chatbot answer
+                  Add documents, links, or text to help your agent answer
                   questions accurately.
                 </EmptyDescription>
               </EmptyHeader>
@@ -334,7 +334,7 @@ export const DocumentsWidget = ({
                   )
                 ) : (
                   <DisabledTooltip
-                    content={CHATBOT_LOCK_TOOLTIP}
+                    content={AGENT_LOCK_TOOLTIP}
                     disabled
                   >
                     <Button disabled>Add Source</Button>
@@ -350,7 +350,7 @@ export const DocumentsWidget = ({
           <DialogHeader>
             <DialogTitle>Start training?</DialogTitle>
             <DialogDescription>
-              Training will queue all ready knowledge sources for this chatbot.
+              Training will queue all ready knowledge sources for this agent.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm">

@@ -1,31 +1,31 @@
 import { and, count, eq } from 'drizzle-orm';
 import { clerkClient } from 'elysia-clerk';
 import { db } from '../../db';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 export const PLAN_LIMITS = {
   free: {
-    chatbots: 1,
+    agents: 1,
     knowledgeSources: 10,
     messagesPerMonth: 100,
     trainingRunsPerDay: 3,
   },
   starter: {
-    chatbots: 3,
+    agents: 3,
     knowledgeSources: 250,
     messagesPerMonth: 500,
     trainingRunsPerDay: 10,
   },
   growth: {
-    chatbots: 10,
+    agents: 10,
     knowledgeSources: 1000,
     messagesPerMonth: 2000,
     trainingRunsPerDay: 20,
   },
   pro: {
-    chatbots: 30,
+    agents: 30,
     knowledgeSources: 5000,
     messagesPerMonth: 8000,
     trainingRunsPerDay: 40,
@@ -101,23 +101,23 @@ export abstract class SubscriptionService {
   static async getStatus(orgId: string) {
     const plan = await this.getPlan(orgId);
     const limits = this.getLimits(plan);
-    const activeChatbotLimit = limits.chatbots;
+    const activeAgentLimit = limits.agents;
     const knowledgeSourceLimit = limits.knowledgeSources;
     const messagesPerMonthLimit = limits.messagesPerMonth;
     const trainingRunsPerDayLimit = limits.trainingRunsPerDay;
 
-    const [{ value: activeChatbotCount }] = await db
+    const [{ value: activeAgentCount }] = await db
       .select({ value: count() })
-      .from(chatbots)
+      .from(agents)
       .where(
-        and(eq(chatbots.orgId, orgId), eq(chatbots.chatbotStatus, 'active')),
+        and(eq(agents.orgId, orgId), eq(agents.agentStatus, 'active')),
       );
 
     const [{ value: knowledgeSourceCount }] = await db
       .select({ value: count() })
       .from(documents)
-      .innerJoin(chatbots, eq(documents.chatbotId, chatbots.id))
-      .where(eq(chatbots.orgId, orgId));
+      .innerJoin(agents, eq(documents.agentId, agents.id))
+      .where(eq(agents.orgId, orgId));
 
     const trainingRunsToday =
       await OrgUsageDailyService.getTodayTrainingRuns(orgId);
@@ -126,15 +126,15 @@ export abstract class SubscriptionService {
 
     return {
       plan,
-      activeChatbotLimit,
-      activeChatbotCount,
+      activeAgentLimit,
+      activeAgentCount,
       knowledgeSourceLimit,
       knowledgeSourceCount,
       messagesPerMonthLimit,
       messagesThisMonth,
       trainingRunsPerDayLimit,
       trainingRunsToday,
-      isOverLimit: activeChatbotCount > activeChatbotLimit,
+      isOverLimit: activeAgentCount > activeAgentLimit,
       hasReachedKnowledgeSourceLimit:
         knowledgeSourceCount >= knowledgeSourceLimit,
       hasReachedMessagesPerMonthLimit:
@@ -144,13 +144,13 @@ export abstract class SubscriptionService {
     };
   }
 
-  static hasReachedChatbotLimit(
+  static hasReachedAgentLimit(
     status: Awaited<ReturnType<typeof this.getStatus>>,
   ) {
-    return status.activeChatbotCount >= status.activeChatbotLimit;
+    return status.activeAgentCount >= status.activeAgentLimit;
   }
 
-  static isChatbotLocked({
+  static isAgentLocked({
     subscriptionStatus,
   }: {
     subscriptionStatus: Awaited<
@@ -181,13 +181,13 @@ export abstract class SubscriptionService {
   static getLimitReachedMessage(
     subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
   ) {
-    return `Your ${subscriptionStatus.plan} plan allows up to ${subscriptionStatus.activeChatbotLimit} active chatbot${subscriptionStatus.activeChatbotLimit === 1 ? '' : 's'}. Archive active chatbots or upgrade your subscription to create more.`;
+    return `Your ${subscriptionStatus.plan} plan allows up to ${subscriptionStatus.activeAgentLimit} active agent${subscriptionStatus.activeAgentLimit === 1 ? '' : 's'}. Archive active agents or upgrade your subscription to create more.`;
   }
 
   static getLockedMessage(
     subscriptionStatus: Awaited<ReturnType<typeof this.getStatus>>,
   ) {
-    return `Your organization is over the ${subscriptionStatus.plan} plan limit of ${subscriptionStatus.activeChatbotLimit} active chatbot${subscriptionStatus.activeChatbotLimit === 1 ? '' : 's'}. Archive active chatbots or upgrade your subscription to edit chatbot settings.`;
+    return `Your organization is over the ${subscriptionStatus.plan} plan limit of ${subscriptionStatus.activeAgentLimit} active agent${subscriptionStatus.activeAgentLimit === 1 ? '' : 's'}. Archive active agents or upgrade your subscription to edit agent settings.`;
   }
 
   static getKnowledgeSourceLimitReachedMessage(
@@ -208,10 +208,20 @@ export abstract class SubscriptionService {
     return `Your ${subscriptionStatus.plan} plan allows ${subscriptionStatus.messagesPerMonthLimit} assistant messages per month. This limit resets at 00:00 UTC on the first day of each month.`;
   }
 
-  static async assertChatbotLimitNotReached(orgId: string) {
+  static planHasLeadGeneration(plan: PlanName): boolean {
+    return plan !== 'free';
+  }
+
+  static async assertLeadGenerationAccess(orgId: string) {
+    const plan = await this.getPlan(orgId);
+    const allowed = this.planHasLeadGeneration(plan);
+    return { allowed, plan };
+  }
+
+  static async assertAgentLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
 
-    if (this.hasReachedChatbotLimit(subscriptionStatus)) {
+    if (this.hasReachedAgentLimit(subscriptionStatus)) {
       return {
         allowed: false as const,
         ...subscriptionStatus,

@@ -33,7 +33,7 @@ import { ConversationMessageItem } from '@/components/Conversations/Conversation
 import { ConversationThreadMeta } from '@/components/Conversations/ConversationThreadMeta';
 import {
   getChannels,
-  getChatbots,
+  getAgents,
   getConversations,
   getMessages,
 } from '@/services';
@@ -64,34 +64,34 @@ function RouteComponent() {
   const navigate = useNavigate();
   const { page } = Route.useSearch();
   const [searchTerm, setSearchTerm] = useState('');
-  const [chatbotIdFilter, setChatbotIdFilter] = useState<string>('all');
+  const [agentIdFilter, setAgentIdFilter] = useState<string>('all');
 
-  const chatbotQuery = useQuery({
-    queryKey: ['chatbots'],
-    queryFn: () => getChatbots(),
+  const agentQuery = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getAgents(),
   });
 
   const channelsQuery = useQuery({
-    queryKey: ['channels', chatbotIdFilter],
+    queryKey: ['channels', agentIdFilter],
     queryFn: () =>
       getChannels({
         query: {
-          chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
+          agentId: agentIdFilter === 'all' ? undefined : agentIdFilter,
         },
       }),
   });
 
   const channels = channelsQuery.data?.data.channels ?? [];
-  const chatbots = chatbotQuery.data?.data.chatbots ?? [];
+  const agents = agentQuery.data?.data.agents ?? [];
 
   const conversationQuery = useQuery({
-    queryKey: ['conversations', chatbotIdFilter, page],
+    queryKey: ['conversations', agentIdFilter, page],
     queryFn: () =>
       getConversations({
         query: {
           page,
           limit: PAGE_SIZE,
-          chatbotId: chatbotIdFilter === 'all' ? undefined : chatbotIdFilter,
+          agentId: agentIdFilter === 'all' ? undefined : agentIdFilter,
         },
       }),
   });
@@ -155,9 +155,9 @@ function RouteComponent() {
     selectedConversation,
   ]);
 
-  const chatbotNameById = (id: string) => {
+  const agentNameById = (id: string) => {
     return (
-      chatbots.find((chatbot) => chatbot.id === id)?.name ?? 'Unknown chatbot'
+      agents.find((agent) => agent.id === id)?.name ?? 'Unknown agent'
     );
   };
 
@@ -191,18 +191,18 @@ function RouteComponent() {
             <ConversationFiltersPopover
               searchTerm={searchTerm}
               onSearchTermChange={setSearchTerm}
-              chatbotIdFilter={chatbotIdFilter}
-              onChatbotIdFilterChange={(value) => {
-                setChatbotIdFilter(value);
+              agentIdFilter={agentIdFilter}
+              onAgentIdFilterChange={(value) => {
+                setAgentIdFilter(value);
                 void navigate({
                   from: '/conversations/{-$conversationId}/',
                   search: (prev) => ({ ...prev, page: 1 }),
                   replace: true,
                 });
               }}
-              chatbotOptions={chatbots.map((chatbot) => ({
-                id: chatbot.id,
-                name: chatbot.name,
+              agentOptions={agents.map((agent) => ({
+                id: agent.id,
+                name: agent.name,
               }))}
             />
           </div>
@@ -256,7 +256,7 @@ function RouteComponent() {
                   lastUserQuestion={conversation.lastUserQuestion}
                   lastAssistantUtterance={conversation.lastAssistantUtterance}
                   lastMessageAt={conversation.lastMessageAt}
-                  chatbotName={chatbotNameById(conversation.chatbotId)}
+                  agentName={agentNameById(conversation.agentId)}
                   channelLabel={channelLabelById(conversation.channelId)}
                   active={conversation.id === conversationId}
                 />
@@ -391,7 +391,7 @@ function RouteComponent() {
           {selectedConversation && (
             <ConversationThreadMeta
               conversation={selectedConversation}
-              chatbotName={chatbotNameById(selectedConversation.chatbotId)}
+              agentName={agentNameById(selectedConversation.agentId)}
               channelLabel={channelLabelById(selectedConversation.channelId)}
             />
           )}

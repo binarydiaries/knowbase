@@ -63,7 +63,7 @@ function RouteComponent() {
       <div className="p-6 space-y-6">
         <div>
           <p className="text-sm text-muted-foreground">
-            Connect external platforms to your chatbots. Each integration is
+            Connect external platforms to your agents. Each integration is
             configured once per organization.
           </p>
         </div>
@@ -76,7 +76,7 @@ function RouteComponent() {
           />
           <ComingSoonCard
             name="Discord"
-            description="Integrate your chatbot into Discord servers."
+            description="Integrate your agent into Discord servers."
           />
           <ComingSoonCard
             name="Instagram"

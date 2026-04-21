@@ -4,7 +4,7 @@ import { generateText, streamText } from 'ai';
 import type { conversations } from '../../db/schema/conversations';
 import { BehaviourService } from '../behaviour/service';
 import { ChannelService } from '../channel/service';
-import { ChatbotService } from '../chatbot/service';
+import { AgentService } from '../agent/service';
 import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
@@ -63,13 +63,13 @@ export abstract class ChatService {
     currentUserMessage,
     lastAssistantUtterance,
     orgId,
-    chatbotId,
+    agentId,
     conversationId,
   }: {
     currentUserMessage: string;
     lastAssistantUtterance: string;
     orgId: string;
-    chatbotId: string;
+    agentId: string;
     conversationId?: string;
   }) {
     const resolverPrompt = referenceResolverPrompt({
@@ -84,7 +84,7 @@ export abstract class ChatService {
     });
     await AiCostEventService.recordEvent({
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
       provider: 'openai',
       model: 'gpt-4.1-nano',
@@ -99,13 +99,13 @@ export abstract class ChatService {
     message,
     conversation,
     orgId,
-    chatbotId,
+    agentId,
     conversationId,
   }: {
     message: string;
     conversation?: typeof conversations.$inferSelect;
     orgId: string;
-    chatbotId: string;
+    agentId: string;
     conversationId?: string;
   }) {
     if (!conversation?.lastAssistantUtterance) return message;
@@ -114,31 +114,31 @@ export abstract class ChatService {
       lastAssistantUtterance: conversation.lastAssistantUtterance,
       currentUserMessage: message,
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
     });
   }
 
-  static async getSearchChunks(finalQuery: string, chatbotId: string) {
-    const chunks = await IndexingService.findRelevantContent(finalQuery, chatbotId);
+  static async getSearchChunks(finalQuery: string, agentId: string) {
+    const chunks = await IndexingService.findRelevantContent(finalQuery, agentId);
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
     };
   }
 
-  static async getChatbot({ chatbotId, orgId }: { chatbotId: string; orgId: string }) {
-    const chatbot = await ChatbotService.single({ id: chatbotId, orgId });
+  static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {
+    const agent = await AgentService.single({ id: agentId, orgId });
 
-    if (chatbot && chatbot.chatbotStatus === 'active') {
-      return chatbot;
+    if (agent && agent.agentStatus === 'active') {
+      return agent;
     }
 
-    throw new NotFoundError('Chatbot not found or inactive');
+    throw new NotFoundError('Agent not found or inactive');
   }
 
-  static async getBehaviour(chatbotId: string) {
-    const behaviour = await BehaviourService.singleByChatbot(chatbotId);
+  static async getBehaviour(agentId: string) {
+    const behaviour = await BehaviourService.singleByAgent(agentId);
 
     if (!behaviour) {
       throw new NotFoundError('Behaviour not found');
@@ -152,12 +152,12 @@ export abstract class ChatService {
   static async scoreSentiment({
     assistantMessage,
     orgId,
-    chatbotId,
+    agentId,
     conversationId,
   }: {
     assistantMessage: string;
     orgId: string;
-    chatbotId: string;
+    agentId: string;
     conversationId: string;
   }) {
     try {
@@ -169,7 +169,7 @@ export abstract class ChatService {
       });
       await AiCostEventService.recordEvent({
         orgId,
-        chatbotId,
+        agentId,
         conversationId,
         provider: 'openai',
         model: 'gpt-4.1-nano',
@@ -188,14 +188,14 @@ export abstract class ChatService {
   // ── Web (streaming) ───────────────────────────────────────────────────────
 
   static async send({
-    chatbotId,
+    agentId,
     channelId,
     message,
     conversationId,
     orgId,
     ip,
   }: {
-    chatbotId: string;
+    agentId: string;
     conversationId: string;
     message: string;
     channelId: string;
@@ -203,21 +203,21 @@ export abstract class ChatService {
     ip?: string;
   }) {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
-    await ChatService.getChatbot({ chatbotId, orgId });
+    await ChatService.getAgent({ agentId, orgId });
 
     const conversation = await ConversationService.single({ id: conversationId, orgId });
-    const behavior = await ChatService.getBehaviour(chatbotId);
+    const behavior = await ChatService.getBehaviour(agentId);
     const finalQuery = await ChatService.getFinalQuery({
       message,
       conversation,
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
-      chatbotId,
+      agentId,
       conversationId,
       orgId,
       knowledgeBase,
@@ -241,7 +241,7 @@ export abstract class ChatService {
         if (isNew) {
           await ConversationService.create({
             id: conversationId,
-            chatbotId,
+            agentId,
             channelId,
             ...conversationData,
           });
@@ -252,7 +252,7 @@ export abstract class ChatService {
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
         await AiCostEventService.recordEvent({
           orgId,
-          chatbotId,
+          agentId,
           conversationId,
           provider: 'openai',
           model: 'gpt-4.1-mini',
@@ -260,7 +260,7 @@ export abstract class ChatService {
           metadata: { operation: 'web-chat-response' },
         });
 
-        await handleLeadCapture(toolCalls ?? [], { chatbotId, conversationId, channelId, orgId });
+        await handleLeadCapture(toolCalls ?? [], { agentId, conversationId, channelId, orgId });
 
         // Sentiment scoring — paid plans only
         const plan = await SubscriptionService.getPlan(orgId);
@@ -268,7 +268,7 @@ export abstract class ChatService {
           ? await ChatService.scoreSentiment({
             assistantMessage,
             orgId,
-            chatbotId,
+            agentId,
             conversationId,
           })
           : null;
@@ -289,7 +289,7 @@ export abstract class ChatService {
             firstUserMessage: message,
             isNew,
             orgId,
-            chatbotId,
+            agentId,
             ip,
           });
         }
@@ -302,14 +302,14 @@ export abstract class ChatService {
   // ── WhatsApp — LLM call ───────────────────────────────────────────────────
 
   static async generateWhatsAppResponse({
-    chatbotId,
+    agentId,
     channelId,
     message,
     conversationId,
     orgId,
     ip,
   }: {
-    chatbotId: string;
+    agentId: string;
     channelId: string;
     message: string;
     conversationId?: string;
@@ -317,24 +317,24 @@ export abstract class ChatService {
     ip?: string;
   }) {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
-    await ChatService.getChatbot({ chatbotId, orgId });
+    await ChatService.getAgent({ agentId, orgId });
 
     const conversation = conversationId
       ? await ConversationService.single({ id: conversationId, orgId })
       : undefined;
 
-    const behavior = await ChatService.getBehaviour(chatbotId);
+    const behavior = await ChatService.getBehaviour(agentId);
     const finalQuery = await ChatService.getFinalQuery({
       message,
       conversation,
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, chatbotId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
-      chatbotId,
+      agentId,
       conversationId,
       orgId,
       knowledgeBase,
@@ -350,7 +350,7 @@ export abstract class ChatService {
     });
     await AiCostEventService.recordEvent({
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
       provider: 'openai',
       model: 'gpt-4.1-mini',
@@ -458,7 +458,7 @@ export abstract class ChatService {
 
     const { assistantMessage, chunks, finalQuery, toolCalls } =
       await ChatService.generateWhatsAppResponse({
-        chatbotId: channel.chatbotId,
+        agentId: channel.agentId,
         channelId,
         message,
         conversationId: conversation?.id,
@@ -496,7 +496,7 @@ export abstract class ChatService {
       conversationId = createId();
       await ConversationService.create({
         id: conversationId,
-        chatbotId: channel.chatbotId,
+        agentId: channel.agentId,
         channelId,
         externalId: senderPhone,
         ...conversationData,
@@ -509,7 +509,7 @@ export abstract class ChatService {
     await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
     await handleLeadCapture(toolCalls, {
-      chatbotId: channel.chatbotId,
+      agentId: channel.agentId,
       conversationId,
       channelId,
       orgId,
@@ -547,7 +547,7 @@ export abstract class ChatService {
     }
 
     return ChatService.send({
-      chatbotId: channel.chatbotId,
+      agentId: channel.agentId,
       conversationId,
       channelId,
       message,
@@ -568,14 +568,14 @@ async function enrichConversationAsync(
     firstUserMessage,
     isNew,
     orgId,
-    chatbotId,
+    agentId,
     ip,
   }: {
     conversationId: string;
     firstUserMessage: string;
     isNew: boolean;
     orgId: string;
-    chatbotId: string;
+    agentId: string;
     ip?: string;
   },
 ) {
@@ -604,7 +604,7 @@ async function enrichConversationAsync(
         });
         await AiCostEventService.recordEvent({
           orgId,
-          chatbotId,
+          agentId,
           conversationId,
           provider: 'openai',
           model: 'gpt-4.1-nano',

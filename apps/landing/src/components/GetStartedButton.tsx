@@ -1,4 +1,5 @@
 import { useAuth, useClerk } from '@clerk/clerk-react'
+import { usePostHog } from '@posthog/react'
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:4001'
 
@@ -10,9 +11,14 @@ interface Props {
 const GetStartedButton = ({ className, children }: Props) => {
     const { isSignedIn, isLoaded } = useAuth()
     const { redirectToSignIn } = useClerk()
+    const posthog = usePostHog()
 
     const handleClick = () => {
         if (!isLoaded) return
+
+        posthog?.capture('get_started_clicked', {
+            is_signed_in: isSignedIn,
+        })
 
         if (isSignedIn) {
             window.location.href = APP_URL

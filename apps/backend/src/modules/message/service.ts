@@ -17,7 +17,7 @@ export abstract class MessageService {
       where: {
         conversationId,
         conversation: {
-          chatbot: { orgId },
+          agent: { orgId },
         },
       },
     });

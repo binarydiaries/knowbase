@@ -16,7 +16,7 @@ export const UsageCharts = new Elysia({
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
@@ -25,27 +25,27 @@ export const UsageCharts = new Elysia({
     },
   )
   .get(
-    '/messages-by-chatbot',
+    '/messages-by-agent',
     async ({ query, orgId }) => {
-      return UsageChartsService.getMessagesByChatbot(
+      return UsageChartsService.getMessagesByAgent(
         orgId,
         query.startDate,
         query.endDate,
-        query.chatbotId,
+        query.agentId,
       );
     },
     {
-      query: 'MessagesByChatbotQuerySchema',
-      response: 'MessagesByChatbotResponseSchema',
+      query: 'MessagesByAgentQuerySchema',
+      response: 'MessagesByAgentResponseSchema',
     },
   )
   .get(
-    '/knowledge-by-chatbot',
+    '/knowledge-by-agent',
     async ({ query, orgId }) => {
-      return UsageChartsService.getKnowledgeByChatbot(orgId, query.chatbotId);
+      return UsageChartsService.getKnowledgeByAgent(orgId, query.agentId);
     },
     {
-      query: 'KnowledgeByChatbotQuerySchema',
-      response: 'KnowledgeByChatbotResponseSchema',
+      query: 'KnowledgeByAgentQuerySchema',
+      response: 'KnowledgeByAgentResponseSchema',
     },
   );

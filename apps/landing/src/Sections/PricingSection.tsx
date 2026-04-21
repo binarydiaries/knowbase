@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { usePlans } from '@clerk/clerk-react/experimental'
-import type { __experimental_BillingPlanResource as BillingPlanResource } from '@clerk/clerk-react'
 import GetStartedButton from '../components/GetStartedButton'
+import { usePostHog } from '@posthog/react'
 
 const PLAN_META: Record<string, { highlight: boolean }> = {
     free:    { highlight: false },
@@ -13,7 +13,9 @@ const PLAN_META: Record<string, { highlight: boolean }> = {
 const resolveSlug = (slug: string) =>
     (['free', 'starter', 'growth', 'pro'] as const).find((s) => slug.toLowerCase().includes(s)) ?? 'free'
 
-const formatPrice = (plan: BillingPlanResource) => {
+type BillingPlan = ReturnType<typeof usePlans>['data'] extends (infer T)[] | undefined ? T : never
+
+const formatPrice = (plan: BillingPlan) => {
     if (!plan.hasBaseFee || plan.fee.amount === 0) return '$0'
     return `${plan.fee.currency === 'USD' ? '$' : plan.fee.currency}${plan.fee.amountFormatted}`
 }
@@ -35,6 +37,7 @@ const PlanCardSkeleton = () => (
 
 const PricingSection = () => {
     const { data: plans, isLoading } = usePlans({ for: 'organization' })
+    const posthog = usePostHog()
 
     return (
         <section id="pricing" aria-labelledby="pricing-heading" className="px-6 pt-16">
@@ -111,15 +114,23 @@ const PricingSection = () => {
                                                     ))}
                                                 </ul>
 
-                                                <GetStartedButton
-                                                    className={`w-full py-2.5 rounded-xl text-sm transition ${
-                                                        meta.highlight
-                                                            ? 'bg-[#301B69] text-white shadow-md'
-                                                            : 'bg-white border border-[#301B69]/20 text-[#301B69]'
-                                                    }`}
-                                                >
-                                                    {isFree ? 'Get Started Free' : 'Get Started'}
-                                                </GetStartedButton>
+                                                <div onClick={() => posthog?.capture('pricing_plan_clicked', {
+                                                    plan_name: plan.name,
+                                                    plan_slug: slug,
+                                                    is_free: isFree,
+                                                    price: formatPrice(plan),
+                                                    is_highlighted: meta.highlight,
+                                                })}>
+                                                    <GetStartedButton
+                                                        className={`w-full py-2.5 rounded-xl text-sm transition ${
+                                                            meta.highlight
+                                                                ? 'bg-[#301B69] text-white shadow-md'
+                                                                : 'bg-white border border-[#301B69]/20 text-[#301B69]'
+                                                        }`}
+                                                    >
+                                                        {isFree ? 'Get Started Free' : 'Get Started'}
+                                                    </GetStartedButton>
+                                                </div>
                                             </article>
                                         </li>
                                     )

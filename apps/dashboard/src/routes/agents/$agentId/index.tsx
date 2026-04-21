@@ -21,9 +21,9 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
-import { CHATBOT_LIMIT_TOOLTIP } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import { AGENT_LIMIT_TOOLTIP } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
-import { getChatbotsById } from '@/services';
+import { getAgentsById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
@@ -31,44 +31,44 @@ import ActionsCard from '@/widgets/ActionsCard/ActionsCard.tsx';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
 import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
-import { ChatbotMenuActions } from '@/widgets/ChatbotMenuActions/ChatbotMenuActions.tsx';
-import { ChatbotPreview } from '@/widgets/ChatbotPreview/ChatbotPreview.tsx';
-import { ChatbotUseWidget } from '@/widgets/ChatbotUseWidget/ChatbotUseWidget.tsx';
+import { AgentMenuActions } from '@/widgets/AgentMenuActions/AgentMenuActions.tsx';
+import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
+import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 
-export const Route = createFileRoute('/chatbots/$chatbotId/')({
+export const Route = createFileRoute('/agents/$agentId/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { chatbotId } = Route.useParams();
+  const { agentId } = Route.useParams();
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);
   const behaviour = useBehaviour(
-    (state) => state.behaviourByChatbotId[chatbotId],
+    (state) => state.behaviourByAgentId[agentId],
   );
 
   const query = useQuery({
     queryFn: async () => {
-      return getChatbotsById({
+      return getAgentsById({
         path: {
-          id: chatbotId,
+          id: agentId,
         },
       });
     },
-    queryKey: ['chatbot', chatbotId],
+    queryKey: ['agent', agentId],
   });
 
   useEffect(() => {
-    if (query.data?.data.documents && chatbotId && query.data?.data.behaviour) {
-      setDocuments(chatbotId, query.data?.data.documents);
-      setChannels(chatbotId, query.data.data.channels);
-      setBehaviour(chatbotId, query?.data?.data?.behaviour);
+    if (query.data?.data.documents && agentId && query.data?.data.behaviour) {
+      setDocuments(agentId, query.data?.data.documents);
+      setChannels(agentId, query.data.data.channels);
+      setBehaviour(agentId, query?.data?.data?.behaviour);
     }
   }, [
     query.data?.data.documents,
-    chatbotId,
+    agentId,
     setDocuments,
     query.data?.data.channels,
     setChannels,
@@ -76,13 +76,13 @@ function RouteComponent() {
     setBehaviour,
   ]);
 
-  const chatbot = query.data?.data.chatbot;
+  const agent = query.data?.data.agent;
   const subscription = query.data?.data.subscription;
   const readOnly = !!subscription?.isOverLimit;
   const disableUnarchive =
-    (subscription?.activeChatbotCount ?? 0) >=
-      (subscription?.activeChatbotLimit ?? Number.MAX_SAFE_INTEGER) &&
-    chatbot?.chatbotStatus === 'archived';
+    (subscription?.activeAgentCount ?? 0) >=
+      (subscription?.activeAgentLimit ?? Number.MAX_SAFE_INTEGER) &&
+    agent?.agentStatus === 'archived';
 
   return (
     <div className="h-screen flex flex-col">
@@ -97,24 +97,24 @@ function RouteComponent() {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink asChild>
-                  <Link to={'/chatbots'}>Chatbots</Link>
+                  <Link to={'/agents'}>Agents</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>{chatbot?.name || chatbotId}</BreadcrumbPage>
+                <BreadcrumbPage>{agent?.name || agentId}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
         <div className="ml-auto px-3">
           <div className="flex items-center gap-2 text-sm">
-            <ChatbotUseWidget />
-            {chatbot && (
-              <ChatbotMenuActions
-                chatbotStatus={chatbot.chatbotStatus}
+            <AgentUseWidget />
+            {agent && (
+              <AgentMenuActions
+                agentStatus={agent.agentStatus}
                 disableUnarchive={disableUnarchive}
-                disableUnarchiveReason={CHATBOT_LIMIT_TOOLTIP}
+                disableUnarchiveReason={AGENT_LIMIT_TOOLTIP}
               />
             )}
           </div>
@@ -137,7 +137,7 @@ function RouteComponent() {
               Web Preview
             </Badge>
             <div className="h-full flex justify-center pb-5">
-              <ChatbotPreview />
+              <AgentPreview />
             </div>
           </div>
         </div>

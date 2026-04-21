@@ -9,30 +9,30 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { Loader2 } from 'lucide-react';
 
-export function ArchiveChatbotDialog({
+export function ArchiveAgentDialog({
   open,
   onOpenChange,
-  chatbotName,
+  agentName,
   currentStatus,
   isPending,
   onConfirm,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  chatbotName?: string;
+  agentName?: string;
   currentStatus: 'active' | 'archived';
   isPending: boolean;
   onConfirm: () => void;
 }) {
   const isArchiving = currentStatus === 'active';
-  const subject = chatbotName ? `"${chatbotName}"` : 'This chatbot';
+  const subject = agentName ? `"${agentName}"` : 'This agent';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            {isArchiving ? 'Archive chatbot?' : 'Unarchive chatbot?'}
+            {isArchiving ? 'Archive agent?' : 'Unarchive agent?'}
           </DialogTitle>
           <DialogDescription>
             {isArchiving

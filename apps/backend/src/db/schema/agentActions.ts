@@ -1,16 +1,16 @@
 import { boolean, index, jsonb, pgEnum, pgTable, text, unique, varchar } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 
 export const actionType = pgEnum('actionType', ['lead_generation']);
 
-export const chatbotActions = pgTable(
-  'chatbot_actions',
+export const agentActions = pgTable(
+  'agent_actions',
   {
     id: cuid2PrimaryKey,
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id, { onDelete: 'cascade' }),
+      .references(() => agents.id, { onDelete: 'cascade' }),
     actionType: actionType().notNull(),
     enabled: boolean().notNull().default(true),
     config: jsonb().$type<LeadGenerationConfig>().notNull().default({}),
@@ -18,8 +18,8 @@ export const chatbotActions = pgTable(
     ...timestamps,
   },
   (t) => [
-    index('chatbot_actions_chatbot_idx').on(t.chatbotId),
-    unique('chatbot_actions_chatbot_type_unique').on(t.chatbotId, t.actionType),
+    index('agent_actions_agent_idx').on(t.agentId),
+    unique('agent_actions_agent_type_unique').on(t.agentId, t.actionType),
   ],
 );
 

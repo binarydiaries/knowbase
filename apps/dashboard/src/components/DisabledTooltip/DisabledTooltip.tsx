@@ -5,10 +5,10 @@ import {
 } from '@knowbase/ui/components/tooltip';
 import type { PropsWithChildren } from 'react';
 
-export const CHATBOT_LIMIT_TOOLTIP =
-  'Workspace has reached its chatbot limit.';
-export const CHATBOT_LOCK_TOOLTIP =
-  'Workspace is over its chatbot limit.';
+export const AGENT_LIMIT_TOOLTIP =
+  'Workspace has reached its agent limit.';
+export const AGENT_LOCK_TOOLTIP =
+  'Workspace is over its agent limit.';
 export const KNOWLEDGE_SOURCE_LIMIT_TOOLTIP =
   'Workspace has reached its knowledge source limit.';
 export const TRAINING_LIMIT_TOOLTIP =

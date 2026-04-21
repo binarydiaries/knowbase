@@ -16,7 +16,7 @@ import {
 import { buildLeadCaptureTool } from './tools';
 
 type Behavior = Parameters<typeof buildBehaviorPrompt>[0];
-type LeadAction = Awaited<ReturnType<typeof ActionService.getEnabledByChatbot>>[number];
+type LeadAction = Awaited<ReturnType<typeof ActionService.getEnabledByAgent>>[number];
 
 export interface ChatContext {
   /** Vercel AI SDK tools object, or undefined when no actions are configured. */
@@ -30,14 +30,14 @@ export interface ChatContext {
 }
 
 export async function buildChatContext({
-  chatbotId,
+  agentId,
   conversationId,
   orgId,
   knowledgeBase,
   behavior,
   hasExistingConversation,
 }: {
-  chatbotId: string;
+  agentId: string;
   /** Pass undefined for brand-new WhatsApp conversations. */
   conversationId: string | undefined;
   orgId: string;
@@ -46,7 +46,7 @@ export async function buildChatContext({
   /** Whether a conversation record already exists (gates history loading). */
   hasExistingConversation: boolean;
 }): Promise<ChatContext> {
-  const enabledActions = await ActionService.getEnabledByChatbot(chatbotId);
+  const enabledActions = await ActionService.getEnabledByAgent(agentId);
   const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
 
   const tools = leadAction
@@ -67,7 +67,7 @@ export async function buildChatContext({
 
   // Load recent history only when actions are active — needed for multi-turn
   // lead data collection (e.g. name in one message, email in the next).
-  // Zero extra cost for chatbots that have no actions configured.
+  // Zero extra cost for agents that have no actions configured.
   const historyMessages =
     leadAction && conversationId && hasExistingConversation
       ? await MessageService.getMessages({ conversationId, orgId })

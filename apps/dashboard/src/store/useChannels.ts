@@ -2,31 +2,31 @@ import { create } from 'zustand/react';
 import type { ChannelSchema } from '@/services';
 
 interface IChannelsState {
-  channelsByChatbotId: Record<string, ChannelSchema[]>;
-  setChannels: (chatbotId: string, channels: ChannelSchema[]) => void;
-  updateChannel: (chatbotId: string, data: Partial<ChannelSchema>) => void;
+  channelsByAgentId: Record<string, ChannelSchema[]>;
+  setChannels: (agentId: string, channels: ChannelSchema[]) => void;
+  updateChannel: (agentId: string, data: Partial<ChannelSchema>) => void;
 }
 
 export const useChannels = create<IChannelsState>((set) => ({
-  channelsByChatbotId: {},
+  channelsByAgentId: {},
 
-  setChannels: (chatbotId, channels) =>
+  setChannels: (agentId, channels) =>
     set((state) => ({
-      channelsByChatbotId: {
-        ...state.channelsByChatbotId,
-        [chatbotId]: channels,
+      channelsByAgentId: {
+        ...state.channelsByAgentId,
+        [agentId]: channels,
       },
     })),
 
-  updateChannel: (chatbotId, data) =>
+  updateChannel: (agentId, data) =>
     set((state) => {
-      const channels = state.channelsByChatbotId[chatbotId];
+      const channels = state.channelsByAgentId[agentId];
       if (!channels) return state;
 
       return {
-        channelsByChatbotId: {
-          ...state.channelsByChatbotId,
-          [chatbotId]: channels.map((channel) =>
+        channelsByAgentId: {
+          ...state.channelsByAgentId,
+          [agentId]: channels.map((channel) =>
             channel.id === data.id
               ? {
                   ...channel,

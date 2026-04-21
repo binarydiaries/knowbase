@@ -14,14 +14,14 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { getChatbots } from '@/services';
+import { getAgents } from '@/services';
 import { type DateRange, getDateRange } from '../../utils/dateRange.ts';
 import { AnalyticsOverviewCards } from '../../widgets/AnalyticsOverviewCards.tsx';
 import { ConversationsDailyChart } from '../../widgets/ConversationsDailyChart.tsx';
 import { CountryDistributionChart } from '../../widgets/CountryDistributionChart.tsx';
 import { MessagesByChannelChart } from '../../widgets/MessagesByChannelChart.tsx';
 import { SentimentChart } from '../../widgets/SentimentChart.tsx';
-import { TopChatbotsCards } from '../../widgets/TopChatbotsCards.tsx';
+import { TopAgentsCards } from '../../widgets/TopAgentsCards.tsx';
 import { TopTopicsChart } from '../../widgets/TopTopicsChart.tsx';
 
 export const Route = createFileRoute('/analytics/')({
@@ -56,16 +56,16 @@ function AnalyticsUpgradePrompt() {
 }
 
 function RouteComponent() {
-  const [chatbotId, setChatbotId] = useState<string>('all');
+  const [agentId, setAgentId] = useState<string>('all');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
 
   const { startDate, endDate } = getDateRange(dateRange);
 
-  const { data: chatbotsData } = useQuery({
-    queryKey: ['chatbots'],
-    queryFn: () => getChatbots(),
+  const { data: agentsData } = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getAgents(),
   });
-  const chatbots = chatbotsData?.data?.chatbots ?? [];
+  const agents = agentsData?.data?.agents ?? [];
 
   const { isPaid: isPaidPlan, isLoading: subLoading } = useClerkPlan();
 
@@ -81,13 +81,13 @@ function RouteComponent() {
           <h1 className="text-sm font-medium">Analytics</h1>
           {isPaidPlan && (
             <div className="flex items-center gap-2 ml-auto">
-              <Select value={chatbotId} onValueChange={setChatbotId}>
+              <Select value={agentId} onValueChange={setAgentId}>
                 <SelectTrigger className="h-8 w-44 text-xs">
-                  <SelectValue placeholder="All Chatbots" />
+                  <SelectValue placeholder="All Agents" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Chatbots</SelectItem>
-                  {chatbots.map((bot) => (
+                  <SelectItem value="all">All Agents</SelectItem>
+                  {agents.map((bot) => (
                     <SelectItem key={bot.id} value={bot.id}>
                       {bot.name}
                     </SelectItem>
@@ -127,30 +127,30 @@ function RouteComponent() {
           <>
             {/* Conversations over time */}
             <ConversationsDailyChart
-              chatbotId={chatbotId}
+              agentId={agentId}
               startDate={startDate}
               endDate={endDate}
             />
 
-            {/* Channel breakdown + Top chatbots */}
+            {/* Channel breakdown + Top agents */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <MessagesByChannelChart
-                chatbotId={chatbotId}
+                agentId={agentId}
                 startDate={startDate}
                 endDate={endDate}
               />
-              <TopChatbotsCards startDate={startDate} endDate={endDate} />
+              <TopAgentsCards startDate={startDate} endDate={endDate} />
             </div>
 
             {/* Sentiment + Top topics */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SentimentChart
-                chatbotId={chatbotId}
+                agentId={agentId}
                 startDate={startDate}
                 endDate={endDate}
               />
               <TopTopicsChart
-                chatbotId={chatbotId}
+                agentId={agentId}
                 startDate={startDate}
                 endDate={endDate}
               />
@@ -158,7 +158,7 @@ function RouteComponent() {
 
             {/* Country distribution */}
             <CountryDistributionChart
-              chatbotId={chatbotId}
+              agentId={agentId}
               startDate={startDate}
               endDate={endDate}
             />

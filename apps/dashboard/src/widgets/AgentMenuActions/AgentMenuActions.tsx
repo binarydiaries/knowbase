@@ -11,49 +11,49 @@ import { useParams } from '@tanstack/react-router';
 import { Archive, ArchiveRestore, MoreHorizontal } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
-import { ArchiveChatbotDialog } from '@/components/ArchiveChatbotDialog/ArchiveChatbotDialog.tsx';
-import { patchChatbotsById } from '@/services';
+import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
+import { patchAgentsById } from '@/services';
 import {
-  CHATBOT_LIMIT_TOOLTIP,
+  AGENT_LIMIT_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
-export const ChatbotMenuActions = ({
-  chatbotStatus,
+export const AgentMenuActions = ({
+  agentStatus,
   disableUnarchive = false,
-  disableUnarchiveReason = CHATBOT_LIMIT_TOOLTIP,
+  disableUnarchiveReason = AGENT_LIMIT_TOOLTIP,
 }: {
-  chatbotStatus: 'active' | 'archived';
+  agentStatus: 'active' | 'archived';
   disableUnarchive?: boolean;
   disableUnarchiveReason?: string;
 }) => {
   const posthog = usePostHog();
-  const { chatbotId } = useParams({ strict: false });
+  const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const archiveMutation = useMutation({
     mutationFn: async () => {
-      if (!chatbotId) {
-        throw new Error('ChatbotId not available');
+      if (!agentId) {
+        throw new Error('agentId not available');
       }
 
-      return patchChatbotsById({
-        path: { id: chatbotId },
+      return patchAgentsById({
+        path: { id: agentId },
         body: {
-          chatbotStatus: chatbotStatus === 'archived' ? 'active' : 'archived',
+          agentStatus: agentStatus === 'archived' ? 'active' : 'archived',
         },
       });
     },
     onSuccess: () => {
-      if (chatbotStatus === 'active') {
-        posthog.capture('chatbot_archived', { chatbot_id: chatbotId });
+      if (agentStatus === 'active') {
+        posthog.capture('agent_archived', { agent_id: agentId });
       } else {
-        posthog.capture('chatbot_unarchived', { chatbot_id: chatbotId });
+        posthog.capture('agent_unarchived', { agent_id: agentId });
       }
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
-      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       setConfirmOpen(false);
     },
     onError: (error) => {
@@ -85,22 +85,22 @@ export const ChatbotMenuActions = ({
                 disabled={archiveMutation.isPending || disableUnarchive}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                {chatbotStatus === 'active' ? (
+                {agentStatus === 'active' ? (
                   <Archive className="h-4 w-4" />
                 ) : (
                   <ArchiveRestore className="h-4 w-4" />
                 )}
-                {chatbotStatus === 'active' ? 'Archive' : 'Unarchive'}
+                {agentStatus === 'active' ? 'Archive' : 'Unarchive'}
               </DropdownMenuItem>
             </div>
           </DisabledTooltip>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ArchiveChatbotDialog
+      <ArchiveAgentDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        currentStatus={chatbotStatus}
+        currentStatus={agentStatus}
         isPending={archiveMutation.isPending}
         onConfirm={() => archiveMutation.mutate()}
       />

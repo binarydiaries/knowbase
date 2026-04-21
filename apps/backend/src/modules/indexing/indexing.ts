@@ -3,7 +3,7 @@ import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { addIndexDocumentJob } from '../../queue/indexing/indexing.queue';
-import { ChatbotService } from '../chatbot/service';
+import { AgentService } from '../agent/service';
 import { DocumentService } from '../document/service';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageDailyService } from '../subscription/usage';
@@ -19,31 +19,31 @@ export const Indexing = new Elysia({
   .post(
     '',
     async ({ body, status, orgId }) => {
-      const chatbot = await ChatbotService.single({
-        id: body.chatbotId,
+      const agent = await AgentService.single({
+        id: body.agentId,
         orgId,
       });
 
-      if (!chatbot) {
+      if (!agent) {
         return status(404, {
           code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          message: 'Agent not found',
         });
       }
 
       const subscription = await SubscriptionService.getStatus(orgId);
       if (subscription.isOverLimit) {
         return status(403, {
-          code: 'CHATBOT_LOCKED',
+          code: 'AGENT_LOCKED',
           message: SubscriptionService.getLockedMessage(subscription),
           plan: subscription.plan,
-          activeChatbotLimit: subscription.activeChatbotLimit,
-          activeChatbotCount: subscription.activeChatbotCount,
+          activeAgentLimit: subscription.activeAgentLimit,
+          activeAgentCount: subscription.activeAgentCount,
         });
       }
 
       const documents = await DocumentService.list({
-        chatbotId: body.chatbotId,
+        agentId: body.agentId,
         orgId,
         filter: { status: ['ready'] },
       });
@@ -103,7 +103,7 @@ export const Indexing = new Elysia({
     '/status',
     async ({ query, orgId }) => {
       const documents = await DocumentService.list({
-        chatbotId: query.chatbotId,
+        agentId: query.agentId,
         orgId,
       });
 
@@ -123,7 +123,7 @@ export const Indexing = new Elysia({
     },
     {
       query: z.object({
-        chatbotId: z.string(),
+        agentId: z.string(),
       }),
       response: 'IndexingStatusResponse',
     },

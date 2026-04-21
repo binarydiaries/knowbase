@@ -18,16 +18,16 @@ import { useParams } from '@tanstack/react-router';
 import { useCopyToClipboard } from '@uidotdev/usehooks';
 import { useChannels } from '@/store/useChannels.ts';
 
-export const ChatbotUseWidget = () => {
+export const AgentUseWidget = () => {
   const [copiedText, copyToClipboard] = useCopyToClipboard();
   const { orgId } = useAuth();
 
-  const { chatbotId } = useParams({ strict: false });
-  if (!chatbotId) {
-    throw new Error('ChatbotId not available');
+  const { agentId } = useParams({ strict: false });
+  if (!agentId) {
+    throw new Error('agentId not available');
   }
   const channelWeb = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
+    state.channelsByAgentId[agentId]?.find(
       (channel) => channel.additional.type === 'web',
     ),
   );
@@ -44,14 +44,14 @@ window.KnowBaseChat = {
     <Dialog>
       <DialogTrigger>
         <Button size="sm" variant="outline">
-          Use Chatbot
+          Use Agent
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-160">
         <DialogHeader>
-          <DialogTitle>Use this chatbot</DialogTitle>
+          <DialogTitle>Use this agent</DialogTitle>
           <DialogDescription>
-            Add this chatbot to your product or connect it to a channel.
+            Add this agent to your product or connect it to a channel.
           </DialogDescription>
         </DialogHeader>
 

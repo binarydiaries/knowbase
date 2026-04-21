@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import type { LeadGenerationConfig } from '../../db/schema/chatbotActions';
+import type { LeadGenerationConfig } from '../../db/schema/agentActions';
 
 export function buildLeadCaptureTool(config: LeadGenerationConfig) {
   const fields = config.fields ?? {

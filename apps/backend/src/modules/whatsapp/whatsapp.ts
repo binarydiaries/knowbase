@@ -5,7 +5,7 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
@@ -97,21 +97,21 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       // Best-effort — return connection status even if Meta is slow
     }
 
-    // For each phone number, check which chatbot's channel has it bound
+    // For each phone number, check which agent's channel has it bound
     const enriched = await Promise.all(
       phoneNumbers.map(async (phone) => {
         const bound = await db
           .select({
             channelId: channels.id,
-            chatbotId: chatbots.id,
-            chatbotName: chatbots.name,
+            agentId: agents.id,
+            agentName: agents.name,
           })
           .from(channels)
-          .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+          .innerJoin(agents, eq(channels.agentId, agents.id))
           .where(
             and(
               eq(channels.type, 'whatsapp'),
-              eq(chatbots.orgId, orgId),
+              eq(agents.orgId, orgId),
               sql`${channels.config}->>'phoneNumberId' = ${phone.phoneNumberId}`,
             ),
           )
@@ -119,8 +119,8 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
 
         return {
           ...phone,
-          boundToChatbotId: bound[0]?.chatbotId ?? null,
-          chatbotName: bound[0]?.chatbotName ?? null,
+          boundToAgentId: bound[0]?.agentId ?? null,
+          agentName: bound[0]?.agentName ?? null,
         };
       }),
     );
@@ -205,8 +205,8 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     const orgWhatsAppChannels = await db
       .select({ id: channels.id })
       .from(channels)
-      .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
-      .where(and(eq(channels.type, 'whatsapp'), eq(chatbots.orgId, orgId)));
+      .innerJoin(agents, eq(channels.agentId, agents.id))
+      .where(and(eq(channels.type, 'whatsapp'), eq(agents.orgId, orgId)));
 
     for (const ch of orgWhatsAppChannels) {
       await ChannelService.update(ch.id, {
@@ -222,7 +222,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     return { success: true };
   })
 
-  // POST /whatsapp/bind — bind a phone number to a chatbot's WhatsApp channel
+  // POST /whatsapp/bind — bind a phone number to a agent's WhatsApp channel
   .post(
     '/whatsapp/bind',
     async ({ body, orgId, status }) => {
@@ -241,11 +241,11 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       const existing = await db
         .select({ id: channels.id })
         .from(channels)
-        .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+        .innerJoin(agents, eq(channels.agentId, agents.id))
         .where(
           and(
             eq(channels.type, 'whatsapp'),
-            eq(chatbots.orgId, orgId),
+            eq(agents.orgId, orgId),
             sql`${channels.config}->>'phoneNumberId' = ${phoneNumberId}`,
           ),
         )
@@ -254,7 +254,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       if (existing.length > 0 && existing[0].id !== channelId) {
         return status(400, {
           code: 'BAD_REQUEST',
-          message: 'This phone number is already assigned to another chatbot',
+          message: 'This phone number is already assigned to another agent',
         });
       }
 
@@ -339,11 +339,11 @@ async function processInboundMessage(body: unknown) {
 
         const result =
           await ChannelService.findByWhatsappPhoneNumberId(phoneNumberId);
-        if (!result?.enabled || !result.chatbot) continue;
+        if (!result?.enabled || !result.agent) continue;
 
         await ChatService.sendWhatsApp({
           channelId: result.id,
-          orgId: result.chatbot.orgId,
+          orgId: result.agent.orgId,
           senderPhone: msg.from,
           message: msg.text.body,
           messageId: msg.id,

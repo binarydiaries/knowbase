@@ -5,71 +5,72 @@ import { ChannelSchema } from '../channel/model';
 import { DocumentSchema } from '../document/model';
 import { SubscriptionStatusSchema } from '../subscription/model';
 
-const ChatbotStatus = z.enum(['active', 'archived']);
+const AgentStatus = z.enum(['active', 'archived']);
 
-const ChatbotSchema = z.object({
+const AgentSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
-  chatbotStatus: ChatbotStatus,
+  agentStatus: AgentStatus,
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
-const SmallChatbot = ChatbotSchema.pick({
+const SmallAgent = AgentSchema.pick({
   id: true,
   name: true,
   description: true,
-  chatbotStatus: true,
+  agentStatus: true,
   createdBy: true,
   createdAt: true,
   updatedAt: true,
 });
 
-const SmallChatbotWithLock = SmallChatbot.extend({
+const SmallAgentWithLock = SmallAgent.extend({
   locked: z.boolean(),
 });
 
-const ChatbotWithLock = ChatbotSchema.extend({
+const AgentWithLock = AgentSchema.extend({
   locked: z.boolean(),
 });
 
-const CreateChatbotBody = z.object({
+const CreateAgentBody = z.object({
   name: z.string(),
   description: z.string().optional(),
 });
 
-const OneChatbotResponse = z.object({
-  chatbot: ChatbotWithLock,
+const OneAgentResponse = z.object({
+  agent: AgentWithLock,
   documents: z.array(DocumentSchema),
   channels: z.array(ChannelSchema),
   behaviour: BehaviourSchema.optional(),
   subscription: SubscriptionStatusSchema,
 });
 
-const OneSmallChatbotResponse = z.object({
-  chatbot: SmallChatbot,
+const OneSmallAgentResponse = z.object({
+  agent: SmallAgent,
 });
 
-const ManyChatbotResponse = z.object({
-  chatbots: z.array(SmallChatbotWithLock),
+const ManyAgentResponse = z.object({
+  agents: z.array(SmallAgentWithLock),
   subscription: SubscriptionStatusSchema,
 });
 
-export const UpdateChatbotBody = ChatbotSchema.pick({
+export const UpdateAgentBody = AgentSchema.pick({
   name: true,
   description: true,
-  chatbotStatus: true,
+  agentStatus: true,
 }).partial();
-export const DeleteChatbotResponse = z.undefined();
 
-export const ChatbotModel = new Elysia().model({
-  ChatbotSchema,
-  CreateChatbotBody,
-  OneChatbotResponse,
-  ManyChatbotResponse,
-  UpdateChatbotBody,
-  DeleteChatbotResponse,
-  OneSmallChatbotResponse,
+export const DeleteAgentResponse = z.undefined();
+
+export const AgentModel = new Elysia().model({
+  AgentSchema,
+  CreateAgentBody,
+  OneAgentResponse,
+  ManyAgentResponse,
+  UpdateAgentBody,
+  DeleteAgentResponse,
+  OneSmallAgentResponse,
 });

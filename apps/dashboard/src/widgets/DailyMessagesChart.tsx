@@ -18,20 +18,20 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function DailyMessagesChart({ chatbotId, startDate, endDate }: Props) {
+export function DailyMessagesChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['usage-daily', chatbotId, startDate, endDate],
+    queryKey: ['usage-daily', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getUsageMessagesDaily({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

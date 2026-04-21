@@ -5,8 +5,8 @@ export const PlanNameSchema = z.enum(['free', 'starter', 'growth', 'pro']);
 
 export const SubscriptionStatusSchema = z.object({
   plan: PlanNameSchema,
-  activeChatbotLimit: z.number(),
-  activeChatbotCount: z.number(),
+  activeAgentLimit: z.number(),
+  activeAgentCount: z.number(),
   knowledgeSourceLimit: z.number(),
   knowledgeSourceCount: z.number(),
   messagesPerMonthLimit: z.number(),

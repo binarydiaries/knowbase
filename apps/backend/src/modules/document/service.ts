@@ -11,11 +11,11 @@ export abstract class DocumentService {
   }
 
   static async list({
-    chatbotId,
+    agentId,
     orgId,
     filter,
   }: {
-    chatbotId: string;
+    agentId: string;
     orgId: string;
     filter?: {
       status?: IDocument['status'][];
@@ -23,8 +23,8 @@ export abstract class DocumentService {
   }) {
     return db.query.documents.findMany({
       where: {
-        chatbotId,
-        chatbot: {
+        agentId,
+        agent: {
           orgId,
         },
         ...(filter?.status ? { status: { in: filter.status } } : {}),
@@ -36,7 +36,7 @@ export abstract class DocumentService {
     return db.query.documents.findFirst({
       where: {
         id,
-        chatbot: {
+        agent: {
           orgId,
         },
       },

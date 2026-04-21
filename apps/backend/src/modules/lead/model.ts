@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const LeadSchema = z.object({
   id: z.string(),
-  chatbotId: z.string(),
+  agentId: z.string(),
   conversationId: z.string().nullable(),
   channelId: z.string().nullable(),
   orgId: z.string(),
@@ -17,13 +17,13 @@ export const LeadSchema = z.object({
 });
 
 const LeadWithRelationsSchema = LeadSchema.extend({
-  chatbot: z.object({ id: z.string(), name: z.string() }).nullable(),
+  agent: z.object({ id: z.string(), name: z.string() }).nullable(),
   channel: z.object({ id: z.string(), type: z.string() }).nullable(),
   conversation: z.object({ id: z.string() }).nullable(),
 });
 
 const GetLeadsQuery = z.object({
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });

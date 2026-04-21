@@ -13,7 +13,7 @@ import {
   cuid2PrimaryKey,
   timestamps,
 } from '../../utils/columns.utils';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 
 export const documentStatus = pgEnum('status', [
   'ready',
@@ -34,18 +34,18 @@ export const documents = pgTable(
     status: documentStatus().notNull().default('ready'),
     lastIndexedVersion: integer(),
     lastTrainedAt: timestamp({ withTimezone: true }),
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id),
+      .references(() => agents.id),
     createdBy: clerkUserId,
     ...timestamps,
   },
   (table) => [
     // 🔥 Primary listing pattern
-    index('documents_chatbot_idx').on(table.chatbotId),
+    index('documents_agent_idx').on(table.agentId),
 
-    // 🔥 Chatbot + status filtering
-    index('documents_chatbot_status_idx').on(table.chatbotId, table.status),
+    // 🔥 Agent + status filtering
+    index('documents_agent_status_idx').on(table.agentId, table.status),
   ],
 );
 

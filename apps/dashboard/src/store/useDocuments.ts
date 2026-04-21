@@ -2,53 +2,53 @@ import { create } from 'zustand/react';
 import type { DocumentSchema } from '@/services';
 
 interface IDocumentsState {
-  documentsByChatbotId: Record<string, DocumentSchema[]>;
-  setDocuments: (chatbotId: string, documents: DocumentSchema[]) => void;
+  documentsByAgentId: Record<string, DocumentSchema[]>;
+  setDocuments: (agentId: string, documents: DocumentSchema[]) => void;
   addUpdateDocument: (
-    chatbotId: string,
+    agentId: string,
     document: Partial<DocumentSchema>,
   ) => void;
-  deleteDocument: (chatbotId: string, documentId: string) => void;
+  deleteDocument: (agentId: string, documentId: string) => void;
 }
 
 export const useDocuments = create<IDocumentsState>((set) => ({
-  documentsByChatbotId: {},
-  setDocuments: (chatbotId, documents) =>
+  documentsByAgentId: {},
+  setDocuments: (agentId, documents) =>
     set((state) => ({
-      documentsByChatbotId: {
-        ...state.documentsByChatbotId,
-        [chatbotId]: documents,
+      documentsByAgentId: {
+        ...state.documentsByAgentId,
+        [agentId]: documents,
       },
     })),
-  addUpdateDocument: (chatbotId, document) =>
+  addUpdateDocument: (agentId, document) =>
     set((state) => {
-      const docs = state.documentsByChatbotId[chatbotId] ?? [];
+      const docs = state.documentsByAgentId[agentId] ?? [];
       const index = docs.findIndex((d) => d.id === document.id);
 
       if (index === -1) {
         return {
-          documentsByChatbotId: {
-            ...state.documentsByChatbotId,
-            [chatbotId]: [document as DocumentSchema, ...docs],
+          documentsByAgentId: {
+            ...state.documentsByAgentId,
+            [agentId]: [document as DocumentSchema, ...docs],
           },
         };
       }
 
       return {
-        documentsByChatbotId: {
-          ...state.documentsByChatbotId,
-          [chatbotId]: docs.map((d) =>
+        documentsByAgentId: {
+          ...state.documentsByAgentId,
+          [agentId]: docs.map((d) =>
             d.id === document.id ? { ...d, ...document } : d,
           ),
         },
       };
     }),
-  deleteDocument: (chatbotId, documentId) =>
+  deleteDocument: (agentId, documentId) =>
     set((state) => ({
-      documentsByChatbotId: {
-        ...state.documentsByChatbotId,
-        [chatbotId]:
-          state.documentsByChatbotId[chatbotId]?.filter(
+      documentsByAgentId: {
+        ...state.documentsByAgentId,
+        [agentId]:
+          state.documentsByAgentId[agentId]?.filter(
             (document) => document.id !== documentId,
           ) ?? [],
       },

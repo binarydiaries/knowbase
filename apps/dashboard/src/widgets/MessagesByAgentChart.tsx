@@ -15,28 +15,28 @@ import {
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Cell, Pie, PieChart } from 'recharts';
-import { getUsageMessagesByChatbot } from '@/services';
+import { getUsageMessagesByAgent } from '@/services';
 import { CHART_COLORS } from '../utils/dateRange.ts';
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function MessagesByChatbotChart({
-  chatbotId,
+export function MessagesByAgentChart({
+  agentId,
   startDate,
   endDate,
 }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['usage-msgs-chatbot', chatbotId, startDate, endDate],
+    queryKey: ['usage-msgs-agent', agentId, startDate, endDate],
     queryFn: async () => {
-      const res = await getUsageMessagesByChatbot({
+      const res = await getUsageMessagesByAgent({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;
@@ -45,8 +45,8 @@ export function MessagesByChatbotChart({
 
   const chartConfig: ChartConfig = {};
   data?.data.forEach((item, i) => {
-    chartConfig[item.chatbotId] = {
-      label: item.chatbotName,
+    chartConfig[item.agentId] = {
+      label: item.agentName,
       color: CHART_COLORS[i % CHART_COLORS.length],
     };
   });
@@ -54,14 +54,14 @@ export function MessagesByChatbotChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Messages per Chatbot</CardTitle>
+        <CardTitle className="text-base">Messages per Agent</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-64 w-full" />
         ) : isError ? (
           <div className="flex h-64 items-center justify-center text-sm text-destructive">
-            Failed to load messages by chatbot
+            Failed to load messages by agent
           </div>
         ) : !data?.data.length ? (
           <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export function MessagesByChatbotChart({
               <Pie
                 data={data.data}
                 dataKey="count"
-                nameKey="chatbotName"
+                nameKey="agentName"
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -81,14 +81,14 @@ export function MessagesByChatbotChart({
               >
                 {data.data.map((entry, i) => (
                   <Cell
-                    key={entry.chatbotId}
+                    key={entry.agentId}
                     fill={CHART_COLORS[i % CHART_COLORS.length]}
                   />
                 ))}
               </Pie>
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
               <ChartLegend
-                content={<ChartLegendContent nameKey="chatbotName" />}
+                content={<ChartLegendContent nameKey="agentName" />}
               />
             </PieChart>
           </ChartContainer>

@@ -13,6 +13,7 @@ import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import { client } from '@/services/client.gen';
 import {
@@ -28,6 +29,7 @@ interface ConnectionResponse {
 }
 
 export function WhatsAppIntegrationCard() {
+  const posthog = usePostHog();
   const [accessToken, setAccessToken] = useState('');
   const [businessAccountId, setBusinessAccountId] = useState('');
   const { connected, phoneNumbers, setConnection, clearConnection } =
@@ -69,12 +71,16 @@ export function WhatsAppIntegrationCard() {
         businessAccountId: data.businessAccountId,
         phoneNumbers: data.phoneNumbers.map((p) => ({
           ...p,
-          boundToChatbotId: null,
-          chatbotName: null,
+          boundToAgentId: null,
+          agentName: null,
         })),
       });
       setAccessToken('');
       setBusinessAccountId('');
+      posthog.capture('whatsapp_connected', {
+        business_account_id: data.businessAccountId,
+        phone_numbers_count: data.phoneNumbers.length,
+      });
       toast.success('WhatsApp Business Account connected');
     },
     onError: (error) => {
@@ -91,6 +97,7 @@ export function WhatsAppIntegrationCard() {
     },
     onSuccess: () => {
       clearConnection();
+      posthog.capture('whatsapp_disconnected');
       toast.success('WhatsApp disconnected');
     },
     onError: (error) => {
@@ -207,7 +214,7 @@ export function WhatsAppIntegrationCard() {
               onClick={() => {
                 if (
                   window.confirm(
-                    'This will disable all WhatsApp channels across your chatbots. Continue?',
+                    'This will disable all WhatsApp channels across your agents. Continue?',
                   )
                 ) {
                   disconnectMutation.mutate();
@@ -227,8 +234,8 @@ function PhoneNumberRow({ phone }: { phone: WhatsAppPhoneNumber }) {
   return (
     <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
       <span className="font-medium">{phone.displayPhone}</span>
-      {phone.boundToChatbotId ? (
-        <Badge variant="secondary">{phone.chatbotName ?? 'Bound'}</Badge>
+      {phone.boundToAgentId ? (
+        <Badge variant="secondary">{phone.agentName ?? 'Bound'}</Badge>
       ) : (
         <span className="text-xs text-muted-foreground">Unassigned</span>
       )}

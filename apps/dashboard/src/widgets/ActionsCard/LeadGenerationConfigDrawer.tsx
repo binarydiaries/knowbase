@@ -13,8 +13,9 @@ import { Switch } from '@knowbase/ui/components/switch';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
+import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
-import { patchChatbotActionsById } from '@/services';
+import { patchAgentActionsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 
 type LeadFieldConfig = {
@@ -63,6 +64,7 @@ export function LeadGenerationConfigDrawer({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const posthog = usePostHog();
   const cfg = action.config;
   const [fields, setFields] = useState<NonNullable<LeadConfig['fields']>>(
     cfg.fields ?? DEFAULT_FIELDS,
@@ -76,7 +78,7 @@ export function LeadGenerationConfigDrawer({
 
   const saveMutation = useMutation({
     mutationFn: () =>
-      patchChatbotActionsById({
+      patchAgentActionsById({
         path: { id: action.id },
         body: {
           config: {
@@ -87,6 +89,12 @@ export function LeadGenerationConfigDrawer({
         },
       }),
     onSuccess: () => {
+      posthog.capture('lead_generation_configured', {
+        action_id: action.id,
+        fields_collected: Object.entries(fields)
+          .filter(([, v]) => v?.collect)
+          .map(([k]) => k),
+      });
       toast.success('Lead generation settings saved.');
       onSaved();
     },
@@ -121,7 +129,7 @@ export function LeadGenerationConfigDrawer({
         <SheetHeader className="px-6 py-4">
           <SheetTitle>Lead Generation</SheetTitle>
           <SheetDescription>
-            Configure which contact fields the chatbot collects.
+            Configure which contact fields the agent collects.
           </SheetDescription>
         </SheetHeader>
 
@@ -201,7 +209,7 @@ export function LeadGenerationConfigDrawer({
               maxLength={200}
             />
             <p className="text-xs text-muted-foreground">
-              Shown after the chatbot successfully captures a lead.
+              Shown after the agent successfully captures a lead.
             </p>
           </div>
         </div>

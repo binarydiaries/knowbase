@@ -13,7 +13,7 @@ export const Conversation = new Elysia({
     '',
     async ({ query, orgId }) => {
       return ConversationService.list({
-        chatbotId: query.chatbotId,
+        agentId: query.agentId,
         orgId,
         channelId: query.channelId,
         page: query.page,

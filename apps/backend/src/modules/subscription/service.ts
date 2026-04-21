@@ -208,6 +208,16 @@ export abstract class SubscriptionService {
     return `Your ${subscriptionStatus.plan} plan allows ${subscriptionStatus.messagesPerMonthLimit} assistant messages per month. This limit resets at 00:00 UTC on the first day of each month.`;
   }
 
+  static planHasLeadGeneration(plan: PlanName): boolean {
+    return plan !== 'free';
+  }
+
+  static async assertLeadGenerationAccess(orgId: string) {
+    const plan = await this.getPlan(orgId);
+    const allowed = this.planHasLeadGeneration(plan);
+    return { allowed, plan };
+  }
+
   static async assertChatbotLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
 

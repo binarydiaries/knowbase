@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
+import { SubscriptionService } from '../subscription/service';
 import { ChatbotService } from '../chatbot/service';
 import { ActionModel } from './model';
 import { ActionService } from './service';
@@ -29,6 +30,16 @@ export const Action = new Elysia({
   .post(
     '',
     async ({ body, orgId, userId, status }) => {
+      if (body.actionType === 'lead_generation') {
+        const access = await SubscriptionService.assertLeadGenerationAccess(orgId);
+        if (!access.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message: 'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
+          });
+        }
+      }
+
       const chatbot = await ChatbotService.single({ id: body.chatbotId, orgId });
       if (!chatbot) {
         return status(404, { code: 'NOT_FOUND', message: 'Chatbot not found' });
@@ -46,6 +57,7 @@ export const Action = new Elysia({
       body: 'CreateChatbotActionBody',
       response: {
         200: 'OneChatbotActionResponse',
+        403: 'LeadGenerationForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },
@@ -62,6 +74,18 @@ export const Action = new Elysia({
       if (!existing) {
         return status(404, { code: 'NOT_FOUND', message: 'Action not found' });
       }
+
+      // Block free plan from enabling lead generation
+      if (existing.actionType === 'lead_generation' && body.enabled === true) {
+        const access = await SubscriptionService.assertLeadGenerationAccess(orgId);
+        if (!access.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message: 'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
+          });
+        }
+      }
+
       const action = await ActionService.update(params.id, body);
       return { action };
     },
@@ -69,6 +93,7 @@ export const Action = new Elysia({
       body: 'UpdateChatbotActionBody',
       response: {
         200: 'OneChatbotActionResponse',
+        403: 'LeadGenerationForbiddenResponse',
       },
     },
   )

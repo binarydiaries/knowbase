@@ -82,6 +82,11 @@ export const IndexingForbiddenResponse = z.union([
 
 export const ChatForbiddenResponse = MessageLimitReachedResponse;
 
+export const LeadGenerationForbiddenResponse = z.object({
+  code: z.enum(['PLAN_LIMIT_REACHED']),
+  message: z.string(),
+});
+
 export const ErrorModel = new Elysia().model({
   NotFoundResponse,
   ChatbotLimitReachedResponse,
@@ -96,4 +101,5 @@ export const ErrorModel = new Elysia().model({
   DocumentWriteForbiddenResponse,
   IndexingForbiddenResponse,
   ChatForbiddenResponse,
+  LeadGenerationForbiddenResponse,
 });

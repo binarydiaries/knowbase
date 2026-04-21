@@ -10,7 +10,7 @@ import { Switch } from '@knowbase/ui/components/switch';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { UserRound } from 'lucide-react';
+import { LockIcon, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import {
   getChatbotActions,
@@ -18,6 +18,7 @@ import {
   patchChatbotActionsById,
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
+import { useClerkPlan } from '@/hooks/useClerkPlan';
 import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer';
 
 const ACTION_TYPES = [
@@ -34,6 +35,8 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   if (!chatbotId) throw new Error('ChatbotId not available');
   const queryClient = useQueryClient();
   const [configuringActionId, setConfiguringActionId] = useState<string | null>(null);
+  const { plan } = useClerkPlan();
+  const hasLeadGeneration = plan !== 'free';
 
   const actionsQuery = useQuery({
     queryKey: ['chatbot-actions', chatbotId],
@@ -91,24 +94,35 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             const action = getAction(actionType.id);
             const isEnabled = action?.enabled ?? false;
             const Icon = actionType.icon;
+            const isLocked = actionType.id === 'lead_generation' && !hasLeadGeneration;
 
             return (
               <div key={actionType.id}>
                 {index > 0 && <Separator />}
-                <div className="flex items-center justify-between px-6 py-4">
+                <div className={`flex items-center justify-between px-6 py-4 ${isLocked ? 'opacity-60' : ''}`}>
                   <div className="flex items-center gap-3">
                     <div className="rounded-md border p-2">
                       <Icon className="size-4 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{actionType.label}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{actionType.label}</p>
+                        {isLocked && (
+                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border rounded-full px-2 py-0.5">
+                            <LockIcon className="size-3" />
+                            Starter+
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">
-                        {actionType.description}
+                        {isLocked
+                          ? 'Upgrade to Starter or above to enable lead generation.'
+                          : actionType.description}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {isEnabled && (
+                    {isEnabled && !isLocked && (
                       <button
                         type="button"
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -120,7 +134,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                     )}
                     <Switch
                       checked={isEnabled}
-                      disabled={readOnly || toggleMutation.isPending}
+                      disabled={readOnly || isLocked || toggleMutation.isPending}
                       onCheckedChange={(checked) =>
                         toggleMutation.mutate({ type: actionType.id, enabled: checked })
                       }

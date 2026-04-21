@@ -5,6 +5,7 @@
  * blocks that previously appeared in both `send()` and `sendWhatsApp()`.
  */
 
+import { SubscriptionService } from '../subscription/service';
 import { LeadService } from '../lead/service';
 import { MessageService } from '../message/service';
 
@@ -50,6 +51,14 @@ export async function handleLeadCapture(
     orgId: string;
   },
 ) {
+  // Skip lead capture entirely for free plan — best-effort, never break chat
+  try {
+    const plan = await SubscriptionService.getPlan(ctx.orgId);
+    if (!SubscriptionService.planHasLeadGeneration(plan)) return;
+  } catch {
+    return;
+  }
+
   for (const toolCall of toolCalls) {
     if (toolCall.toolName !== 'capture_lead') continue;
 

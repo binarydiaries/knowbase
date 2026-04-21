@@ -34,9 +34,10 @@ import {
 } from '@knowbase/ui/components/table';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { AlertCircleIcon, ExternalLink } from 'lucide-react';
+import { AlertCircleIcon, ExternalLink, LockIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getChatbots, getLeads } from '@/services';
+import { useClerkPlan } from '@/hooks/useClerkPlan';
 
 export const Route = createFileRoute('/leads/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -61,6 +62,8 @@ function getPageNumbers(
 function RouteComponent() {
   const { page } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { plan, isLoading: planLoading } = useClerkPlan();
+  const hasLeadGeneration = plan !== 'free';
 
   const [selectedChatbotId, setSelectedChatbotId] = useState<string | undefined>(
     undefined,
@@ -137,8 +140,22 @@ function RouteComponent() {
       </header>
       <Separator />
 
+      {!planLoading && !hasLeadGeneration && (
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="flex flex-col items-center gap-3 text-center max-w-sm">
+            <div className="rounded-full border p-4">
+              <LockIcon className="size-6 text-muted-foreground" />
+            </div>
+            <h2 className="text-sm font-semibold">Lead Generation is a paid feature</h2>
+            <p className="text-xs text-muted-foreground">
+              Upgrade to the Starter plan or above to capture and view leads from your AI agents.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col flex-1 overflow-hidden">
-        {leadsQuery.isLoading && (
+        {hasLeadGeneration && leadsQuery.isLoading && (
           <div className="flex flex-col gap-2 p-6">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
@@ -146,7 +163,7 @@ function RouteComponent() {
           </div>
         )}
 
-        {leadsQuery.isError && (
+        {hasLeadGeneration && leadsQuery.isError && (
           <div className="flex flex-1 items-center justify-center p-6">
             <Alert variant="destructive" className="max-w-md">
               <AlertCircleIcon />
@@ -166,7 +183,7 @@ function RouteComponent() {
           </div>
         )}
 
-        {leadsQuery.isSuccess && leads.length === 0 && (
+        {hasLeadGeneration && leadsQuery.isSuccess && leads.length === 0 && (
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
               <p className="text-sm font-medium">No leads yet</p>
@@ -177,7 +194,7 @@ function RouteComponent() {
           </div>
         )}
 
-        {leadsQuery.isSuccess && leads.length > 0 && (
+        {hasLeadGeneration && leadsQuery.isSuccess && leads.length > 0 && (
           <div className="flex flex-col flex-1 overflow-hidden">
             <div className="overflow-auto flex-1">
               <Table>

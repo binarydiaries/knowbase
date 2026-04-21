@@ -19,9 +19,9 @@ const LeadGenerationConfigSchema = z.object({
   successMessage: z.string().max(200).optional(),
 });
 
-export const ChatbotActionSchema = z.object({
+export const AgentActionSchema = z.object({
   id: z.string(),
-  chatbotId: z.string(),
+  agentId: z.string(),
   actionType: z.enum(['lead_generation']),
   enabled: z.boolean(),
   config: LeadGenerationConfigSchema,
@@ -30,31 +30,31 @@ export const ChatbotActionSchema = z.object({
   updatedAt: z.date(),
 });
 
-export const CreateChatbotActionBody = z.object({
-  chatbotId: z.string(),
+export const CreateAgentActionBody = z.object({
+  agentId: z.string(),
   actionType: z.enum(['lead_generation']),
   config: LeadGenerationConfigSchema.optional().default({}),
 });
 
-export const UpdateChatbotActionBody = z.object({
+export const UpdateAgentActionBody = z.object({
   enabled: z.boolean().optional(),
   config: LeadGenerationConfigSchema.optional(),
 });
 
-export const GetChatbotActionsQuery = z.object({
-  chatbotId: z.string(),
+export const GetAgentActionsQuery = z.object({
+  agentId: z.string(),
 });
 
 export const ActionModel = new Elysia().model({
-  ChatbotActionSchema,
-  CreateChatbotActionBody,
-  UpdateChatbotActionBody,
-  GetChatbotActionsQuery,
-  ManyChatbotActionResponse: z.object({
-    actions: z.array(ChatbotActionSchema),
+  AgentActionSchema,
+  CreateAgentActionBody,
+  UpdateAgentActionBody,
+  GetAgentActionsQuery,
+  ManyAgentActionResponse: z.object({
+    actions: z.array(AgentActionSchema),
   }),
-  OneChatbotActionResponse: z.object({
-    action: ChatbotActionSchema,
+  OneAgentActionResponse: z.object({
+    action: AgentActionSchema,
   }),
   DeleteActionResponse: z.object({
     success: z.boolean(),

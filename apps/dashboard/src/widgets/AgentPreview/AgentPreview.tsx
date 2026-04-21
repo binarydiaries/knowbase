@@ -1,6 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
+import { Agent } from "@knowbase/ui/widgets/Agent/Agent";
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePostHog } from 'posthog-js/react';
@@ -9,22 +9,23 @@ import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 import type { ChannelSchema } from '@/services';
 
-interface IChatbotPreviewContentProps {
+interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
-  chatbotId: string;
+  agentId: string;
   orgId: string | null | undefined;
   onNewChat: () => void;
 }
 
-const ChatbotPreviewContent = ({
+const AgentPreviewContent = ({
   channelWeb,
-  chatbotId,
+  agentId,
   orgId,
   onNewChat,
-}: IChatbotPreviewContentProps) => {
+}: IAgentPreviewContentProps) => {
   const posthog = usePostHog();
   const initialMessageId = useId();
   const sendStartTimeRef = useRef<number>(0);
+  const firstTokenTimeRef = useRef<number>(0);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
 
@@ -56,18 +57,27 @@ const ChatbotPreviewContent = ({
       },
     }),
     onFinish({ isError }) {
+      const now = Date.now();
       const latency = sendStartTimeRef.current
-        ? (Date.now() - sendStartTimeRef.current) / 1000
+        ? (now - sendStartTimeRef.current) / 1000
         : undefined;
+      const timeToFirstToken =
+        sendStartTimeRef.current && firstTokenTimeRef.current
+          ? (firstTokenTimeRef.current - sendStartTimeRef.current) / 1000
+          : undefined;
       sendStartTimeRef.current = 0;
+      firstTokenTimeRef.current = 0;
 
       posthog.capture('$ai_generation', {
         $ai_trace_id: conversationId,
-        $ai_session_id: chatbotId,
+        $ai_session_id: agentId,
         $ai_provider: 'custom',
         $ai_stream: true,
         $ai_latency: latency,
+        $ai_time_to_first_token: timeToFirstToken,
         $ai_is_error: isError,
+        $ai_span_name: 'agent_preview_chat',
+        $ai_base_url: import.meta.env.VITE_API_BASE,
       });
     },
     onError(error) {
@@ -89,6 +99,13 @@ const ChatbotPreviewContent = ({
     },
   });
 
+  // Record time of first streaming token for $ai_time_to_first_token
+  useEffect(() => {
+    if (status === 'streaming' && sendStartTimeRef.current > 0 && firstTokenTimeRef.current === 0) {
+      firstTokenTimeRef.current = Date.now();
+    }
+  }, [status]);
+
   useEffect(() => {
     if (initialMessage) {
       setMessages((existing) => {
@@ -99,7 +116,7 @@ const ChatbotPreviewContent = ({
   }, [setMessages, initialMessage]);
 
   return (
-    <Chatbot
+    <Agent
       displayName={channelConfig?.displayName || ''}
       subTitle={channelConfig?.subtitle}
       inputPlaceholder={channelConfig?.inputPlaceholder}
@@ -122,17 +139,17 @@ const ChatbotPreviewContent = ({
   );
 };
 
-export const ChatbotPreview = () => {
-  const { chatbotId } = useParams({ strict: false });
+export const AgentPreview = () => {
+  const { agentId } = useParams({ strict: false });
   const { orgId } = useAuth();
   const [chatKey, setChatKey] = useState(0);
 
-  if (!chatbotId) {
-    throw new Error('ChatbotId not available');
+  if (!agentId) {
+    throw new Error('agentId not available');
   }
 
   const channelWeb = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
+    state.channelsByAgentId[agentId]?.find(
       (channel) => channel.additional.type === 'web',
     ),
   );
@@ -142,10 +159,10 @@ export const ChatbotPreview = () => {
   }
 
   return (
-    <ChatbotPreviewContent
+    <AgentPreviewContent
       key={chatKey}
       channelWeb={channelWeb}
-      chatbotId={chatbotId}
+      agentId={agentId}
       orgId={orgId}
       onNewChat={() => setChatKey((k) => k + 1)}
     />

@@ -55,7 +55,7 @@ export const DocumentSchema = z.object({
   title: z.string(),
   content: DocumentContent,
   status: DocumentStatus,
-  chatbotId: z.string(),
+  agentId: z.string(),
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -63,7 +63,7 @@ export const DocumentSchema = z.object({
 });
 
 const CreateDocumentBody = z.object({
-  chatbotId: z.string(),
+  agentId: z.string(),
   title: z.string(),
   content: DocumentContent,
 });
@@ -81,8 +81,8 @@ const ManyDocumentsResponse = z.object({
   documents: z.array(DocumentSchema),
 });
 
-export const ChatbotDocumentsParams = z.object({
-  chatbotId: z.string(),
+export const AgentDocumentsParams = z.object({
+  agentId: z.string(),
 });
 
 export const OneDocumentParams = z.object({
@@ -96,7 +96,7 @@ export const DocumentModel = new Elysia().model({
   OneDocumentResponse,
   ManyDocumentsResponse,
   OneDocumentParams,
-  ChatbotDocumentsParams,
+  AgentDocumentsParams,
   DocumentContentQna,
   DocumentContentText,
 });

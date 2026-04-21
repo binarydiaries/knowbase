@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const Conversation = z.object({
   id: z.string(),
-  chatbotId: z.string(),
+  agentId: z.string(),
   channelId: z.string(),
   lastUserQuestion: z.string(),
   lastAssistantUtterance: z.string(),
@@ -13,7 +13,7 @@ const Conversation = z.object({
 });
 
 const ListConversation = z.object({
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
   channelId: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),

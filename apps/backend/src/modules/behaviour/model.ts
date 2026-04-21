@@ -6,7 +6,7 @@ const BehaviourVerbosity = z.enum(['short', 'balanced', 'detailed']);
 
 export const BehaviourSchema = z.object({
   id: z.string(),
-  chatbotId: z.string(),
+  agentId: z.string(),
   systemPrompt: z.string(),
   tone: BehaviourTone,
   verbosity: BehaviourVerbosity,

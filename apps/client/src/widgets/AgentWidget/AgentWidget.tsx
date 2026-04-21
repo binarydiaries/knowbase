@@ -1,29 +1,41 @@
 import { useChat } from '@ai-sdk/react';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
+import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
+import { usePostHog } from '@posthog/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { baseUrl } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
-interface IChatbotWidgetProps {
+interface IAgentWidgetProps {
   channelSchema: ChannelSchema;
   orgId: string;
 }
 
-interface IChatbotWidgetContentProps extends IChatbotWidgetProps {
+interface IAgentWidgetContentProps extends IAgentWidgetProps {
   onNewChat: () => void;
 }
 
-const ChatbotWidgetContent = ({
+const AgentWidgetContent = ({
   channelSchema,
   orgId,
   onNewChat,
-}: IChatbotWidgetContentProps) => {
+}: IAgentWidgetContentProps) => {
+  const posthog = usePostHog();
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only event
+  useEffect(() => {
+    posthog?.capture('chat_widget_opened', {
+      channel_id: channelSchema.id,
+      org_id: orgId,
+      agent_id: channelSchema.agentId,
+      channel_name: channelConfig.displayName,
+    });
+  }, []);
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {
@@ -59,17 +71,31 @@ const ChatbotWidgetContent = ({
         setAlertMessage(
           'This assistant is temporarily unavailable right now. Please try again later.',
         );
+        posthog?.capture('chat_usage_limit_reached', {
+          channel_id: channelSchema.id,
+          org_id: orgId,
+          agent_id: channelSchema.agentId,
+        });
         return;
       }
 
       if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
-        setAlertMessage(chatError.message || 'Something went wrong. Please try again.');
+        setAlertMessage(
+          chatError.message || 'Something went wrong. Please try again.',
+        );
+        posthog?.capture('chat_error_occurred', {
+          channel_id: channelSchema.id,
+          org_id: orgId,
+          agent_id: channelSchema.agentId,
+          error_code: chatError.code,
+          error_message: chatError.message,
+        });
       }
     },
   });
 
   return (
-    <Chatbot
+    <Agent
       displayName={channelConfig.displayName}
       primaryColor={channelConfig.primaryColor}
       inputPlaceholder={channelConfig.inputPlaceholder}
@@ -83,20 +109,42 @@ const ChatbotWidgetContent = ({
         message: value.parts.find((v) => v?.type === 'text')?.text || '',
         type: value.role === 'user' ? 'user' : 'system',
       }))}
-      onSendMessage={(message) => sendMessage({ text: message })}
-      onNewChat={onNewChat}
+      onSendMessage={(message) => {
+        posthog?.capture('chat_message_sent', {
+          channel_id: channelSchema.id,
+          org_id: orgId,
+          agent_id: channelSchema.agentId,
+          message_count: messages.length,
+        });
+        sendMessage({ text: message });
+      }}
+      onNewChat={() => {
+        posthog?.capture('chat_new_session_started', {
+          channel_id: channelSchema.id,
+          org_id: orgId,
+          agent_id: channelSchema.agentId,
+          messages_in_previous_session: messages.length,
+        });
+        onNewChat();
+      }}
       onClose={() => {
+        posthog?.capture('chat_widget_closed', {
+          channel_id: channelSchema.id,
+          org_id: orgId,
+          agent_id: channelSchema.agentId,
+          message_count: messages.length,
+        });
         window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
       }}
     />
   );
 };
 
-export const ChatbotWidget = ({ channelSchema, orgId }: IChatbotWidgetProps) => {
+export const AgentWidget = ({ channelSchema, orgId }: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (
-    <ChatbotWidgetContent
+    <AgentWidgetContent
       key={chatKey}
       channelSchema={channelSchema}
       orgId={orgId}

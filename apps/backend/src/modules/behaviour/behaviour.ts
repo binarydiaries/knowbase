@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
-import { ChatbotService } from '../chatbot/service';
+import { AgentService } from '../agent/service';
 import { SubscriptionService } from '../subscription/service';
 import { BehaviourModel } from './model';
 import { BehaviourService } from './service';
@@ -28,7 +28,7 @@ export const Behaviour = new Elysia({
   .guard({
     response: {
       404: 'NotFoundResponse',
-      403: 'ChatbotLockedResponse',
+      403: 'AgentLockedResponse',
     },
   })
   .resolve(async ({ params, status, orgId }) => {
@@ -48,26 +48,26 @@ export const Behaviour = new Elysia({
   .patch(
     '/:id',
     async ({ params, body, behaviour, orgId, status }) => {
-      const chatbot = await ChatbotService.single({
-        id: behaviour.chatbotId,
+      const agent = await AgentService.single({
+        id: behaviour.agentId,
         orgId,
       });
 
-      if (!chatbot) {
+      if (!agent) {
         return status(404, {
           code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          message: 'Agent not found',
         });
       }
 
       const subscription = await SubscriptionService.getStatus(orgId);
       if (subscription.isOverLimit) {
         return status(403, {
-          code: 'CHATBOT_LOCKED',
+          code: 'AGENT_LOCKED',
           message: SubscriptionService.getLockedMessage(subscription),
           plan: subscription.plan,
-          activeChatbotLimit: subscription.activeChatbotLimit,
-          activeChatbotCount: subscription.activeChatbotCount,
+          activeAgentLimit: subscription.activeAgentLimit,
+          activeAgentCount: subscription.activeAgentCount,
         });
       }
 

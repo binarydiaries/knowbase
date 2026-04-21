@@ -6,7 +6,7 @@ export const aiCostEvents = pgTable(
   {
     id: cuid2PrimaryKey,
     ...clerkOrgIdColumn,
-    chatbotId: text(),
+    agentId: text(),
     conversationId: text(),
     provider: varchar({ length: 64 }).notNull(),
     model: varchar({ length: 128 }).notNull(),

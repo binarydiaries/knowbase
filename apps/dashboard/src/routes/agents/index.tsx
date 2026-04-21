@@ -41,18 +41,18 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import {
-  CHATBOT_LIMIT_TOOLTIP,
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LIMIT_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
-import { type ChatbotSchema, getChatbots, patchChatbotsById } from '@/services';
+import { type AgentSchema, getAgents, patchAgentsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
-import { ArchiveChatbotDialog } from '@/components/ArchiveChatbotDialog/ArchiveChatbotDialog.tsx';
-import { CreateChatbotDialog } from '@/widgets/CreateChatbotDialog/CreateChatbotDialog.tsx';
+import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
+import { CreateAgentDialog } from '@/widgets/CreateAgentDialog/CreateAgentDialog.tsx';
 
-export const Route = createFileRoute('/chatbots/')({
+export const Route = createFileRoute('/agents/')({
   component: RouteComponent,
 });
 
@@ -87,29 +87,29 @@ type ArchiveConfirm = {
 
 function RouteComponent() {
   const query = useQuery({
-    queryKey: ['chatbots'],
-    queryFn: () => getChatbots(),
+    queryKey: ['agents'],
+    queryFn: () => getAgents(),
   });
   const queryClient = useQueryClient();
-  const isChatbotAvailable =
-    !query.isLoading && query?.data?.data?.chatbots?.length;
+  const isAgentAvailable =
+    !query.isLoading && query?.data?.data?.agents?.length;
   const subscription = query.data?.data.subscription;
-  const hasReachedChatbotLimit =
-    (subscription?.activeChatbotCount ?? 0) >=
-    (subscription?.activeChatbotLimit ?? Number.MAX_SAFE_INTEGER);
+  const hasReachedAgentLimit =
+    (subscription?.activeAgentCount ?? 0) >=
+    (subscription?.activeAgentLimit ?? Number.MAX_SAFE_INTEGER);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingBot, setEditingBot] = useState<ChatbotSchema>();
+  const [editingBot, setEditingBot] = useState<AgentSchema>();
   const [archiveConfirm, setArchiveConfirm] = useState<ArchiveConfirm | null>(null);
 
-  const archiveChatbotMutation = useMutation({
+  const archiveAgentMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'active' | 'archived' }) => {
-      return patchChatbotsById({
+      return patchAgentsById({
         path: { id },
-        body: { chatbotStatus: status },
+        body: { agentStatus: status },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
       setArchiveConfirm(null);
     },
     onError: (error) => {
@@ -127,14 +127,14 @@ function RouteComponent() {
             orientation="vertical"
             className="mr-2 data-[orientation=vertical]:h-4"
           />
-          <h1 className="text-sm font-medium flex-1">Chatbots</h1>
-          <CreateChatbotDialog
+          <h1 className="text-sm font-medium flex-1">Agents</h1>
+          <CreateAgentDialog
             open={dialogOpen}
             setOpen={setDialogOpen}
-            chatbot={editingBot}
+            agent={editingBot}
             onClose={() => setEditingBot(undefined)}
-            disabled={hasReachedChatbotLimit}
-            disabledReason={CHATBOT_LIMIT_TOOLTIP}
+            disabled={hasReachedAgentLimit}
+            disabledReason={AGENT_LIMIT_TOOLTIP}
           />
         </div>
       </header>
@@ -157,7 +157,7 @@ function RouteComponent() {
           <div className="flex h-[300px] flex-col items-center justify-center gap-3 text-center">
             <AlertCircle className="h-8 w-8 text-muted-foreground" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Failed to load chatbots</p>
+              <p className="text-sm font-medium">Failed to load agents</p>
               <p className="text-xs text-muted-foreground">
                 Something went wrong. Please try again.
               </p>
@@ -168,18 +168,18 @@ function RouteComponent() {
           </div>
         )}
 
-        {/* Chatbot List */}
-        {query.isSuccess && isChatbotAvailable && (
+        {/* Agent List */}
+        {query.isSuccess && isAgentAvailable && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {query.data.data.chatbots.map((bot) => {
+            {query.data.data.agents.map((bot) => {
               const { Icon, bg, fg } = getBotAppearance(bot.id);
-              const isArchived = bot.chatbotStatus === 'archived';
+              const isArchived = bot.agentStatus === 'archived';
 
               return (
                 <Link
                   key={bot.id}
-                  to="/chatbots/$chatbotId"
-                  params={{ chatbotId: bot.id }}
+                  to="/agents/$agentId"
+                  params={{ agentId: bot.id }}
                   className="block"
                 >
                   <Card className={`rounded-xl border bg-background shadow-sm transition-all duration-150 hover:shadow-md ${isArchived ? 'opacity-50' : ''}`}>
@@ -229,7 +229,7 @@ function RouteComponent() {
                           <DropdownMenuContent align="end" className="w-40">
                             <DisabledTooltip
                               disabled={subscription?.isOverLimit}
-                              content={CHATBOT_LOCK_TOOLTIP}
+                              content={AGENT_LOCK_TOOLTIP}
                             >
                               <div>
                                 <DropdownMenuItem
@@ -248,8 +248,8 @@ function RouteComponent() {
                             </DisabledTooltip>
 
                             <DisabledTooltip
-                              disabled={bot.chatbotStatus === 'archived' && hasReachedChatbotLimit}
-                              content={CHATBOT_LIMIT_TOOLTIP}
+                              disabled={bot.agentStatus === 'archived' && hasReachedAgentLimit}
+                              content={AGENT_LIMIT_TOOLTIP}
                             >
                               <div>
                                 <DropdownMenuItem
@@ -259,23 +259,23 @@ function RouteComponent() {
                                       id: bot.id,
                                       name: bot.name,
                                       newStatus:
-                                        bot.chatbotStatus === 'archived'
+                                        bot.agentStatus === 'archived'
                                           ? 'active'
                                           : 'archived',
                                     });
                                   }}
                                   disabled={
-                                    (bot.chatbotStatus === 'archived' && hasReachedChatbotLimit) ||
-                                    archiveChatbotMutation.isPending
+                                    (bot.agentStatus === 'archived' && hasReachedAgentLimit) ||
+                                    archiveAgentMutation.isPending
                                   }
                                   className="flex items-center gap-2 cursor-pointer"
                                 >
-                                  {bot.chatbotStatus === 'archived' ? (
+                                  {bot.agentStatus === 'archived' ? (
                                     <ArchiveRestore className="h-4 w-4" />
                                   ) : (
                                     <Archive className="h-4 w-4" />
                                   )}
-                                  {bot.chatbotStatus === 'archived' ? 'Unarchive' : 'Archive'}
+                                  {bot.agentStatus === 'archived' ? 'Unarchive' : 'Archive'}
                                 </DropdownMenuItem>
                               </div>
                             </DisabledTooltip>
@@ -305,25 +305,25 @@ function RouteComponent() {
         )}
 
         {/* Empty state */}
-        {query.isSuccess && !isChatbotAvailable && (
+        {query.isSuccess && !isAgentAvailable && (
           <Empty className="md:py-5">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <MessageCircle />
               </EmptyMedia>
-              <EmptyTitle>No chatbots yet</EmptyTitle>
+              <EmptyTitle>No agents yet</EmptyTitle>
               <EmptyDescription>
-                Create your first chatbot to answer questions using your content.
+                Create your first agent to answer questions using your content.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="flex-row justify-center gap-2">
-              <CreateChatbotDialog
+              <CreateAgentDialog
                 open={dialogOpen}
                 setOpen={setDialogOpen}
-                chatbot={editingBot}
+                agent={editingBot}
                 onClose={() => setEditingBot(undefined)}
-                disabled={hasReachedChatbotLimit}
-                disabledReason={CHATBOT_LIMIT_TOOLTIP}
+                disabled={hasReachedAgentLimit}
+                disabledReason={AGENT_LIMIT_TOOLTIP}
               />
             </EmptyContent>
           </Empty>
@@ -331,15 +331,15 @@ function RouteComponent() {
       </div>
 
       {/* Archive confirmation dialog */}
-      <ArchiveChatbotDialog
+      <ArchiveAgentDialog
         open={!!archiveConfirm}
         onOpenChange={(open) => { if (!open) setArchiveConfirm(null); }}
-        chatbotName={archiveConfirm?.name}
+        agentName={archiveConfirm?.name}
         currentStatus={archiveConfirm?.newStatus === 'archived' ? 'active' : 'archived'}
-        isPending={archiveChatbotMutation.isPending}
+        isPending={archiveAgentMutation.isPending}
         onConfirm={() => {
           if (archiveConfirm) {
-            archiveChatbotMutation.mutate({
+            archiveAgentMutation.mutate({
               id: archiveConfirm.id,
               status: archiveConfirm.newStatus,
             });

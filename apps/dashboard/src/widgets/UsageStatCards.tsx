@@ -41,10 +41,10 @@ export function UsageStatCards() {
     subscription.messagesPerMonthLimit - messagesUsed,
   );
 
-  const agentsUsed = subscription.activeChatbotCount;
+  const agentsUsed = subscription.activeAgentCount;
   const agentsRemaining = Math.max(
     0,
-    subscription.activeChatbotLimit - agentsUsed,
+    subscription.activeAgentLimit - agentsUsed,
   );
 
   const knowledgeUsed = subscription.knowledgeSourceCount;

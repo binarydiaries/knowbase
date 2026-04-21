@@ -26,7 +26,7 @@ import { isAdminEmail } from '@/utils/adminAccess';
 import { NavUser } from '../NavUser/NavUser.tsx';
 
 const mainNav = [
-  { name: 'Chatbots', url: '/chatbots', icon: Bot },
+  { name: "Agents", url: "/agents", icon: Bot },
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
   { name: 'Integrations', url: '/integrations', icon: Plug },

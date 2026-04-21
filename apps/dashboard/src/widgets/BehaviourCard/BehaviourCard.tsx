@@ -14,7 +14,7 @@ import { usePostHog } from 'posthog-js/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
@@ -39,7 +39,7 @@ const behaviorVerbosity = [
   { label: 'Detailed', value: 'detailed' },
 ];
 
-export const chatbotBehaviourSchema = z.object({
+export const agentBehaviourSchema = z.object({
   systemPrompt: z
     .string()
     .min(20, 'System prompt is too short')
@@ -55,15 +55,15 @@ export const chatbotBehaviourSchema = z.object({
     .max(300, 'Guardrails are too long (max 300 characters)')
     .optional(), // textarea, optional unless you want it required
 });
-type BehaviourFormValues = z.infer<typeof chatbotBehaviourSchema>;
+type BehaviourFormValues = z.infer<typeof agentBehaviourSchema>;
 
 const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
-  const { chatbotId } = useParams({ strict: false });
-  if (!chatbotId) throw new Error('ChatbotId not available');
+  const { agentId } = useParams({ strict: false });
+  if (!agentId) throw new Error('agentId not available');
 
   const behaviour = useBehaviour(
-    (state) => state.behaviourByChatbotId[chatbotId],
+    (state) => state.behaviourByAgentId[agentId],
   );
 
   const patchBehaviour = useBehaviour((s) => s.updateBehaviour);
@@ -72,7 +72,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     handleSubmit,
     formState: { isDirty },
   } = useForm<BehaviourFormValues>({
-    resolver: zodResolver(chatbotBehaviourSchema),
+    resolver: zodResolver(agentBehaviourSchema),
     mode: 'all',
     defaultValues: {
       systemPrompt: behaviour.systemPrompt,
@@ -91,11 +91,11 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       });
 
       // 🔥 instant UI update
-      patchBehaviour(chatbotId, values);
+      patchBehaviour(agentId, values);
     },
     onSuccess: (_, values) => {
-      posthog.capture('chatbot_behaviour_saved', {
-        chatbot_id: chatbotId,
+      posthog.capture('agent_behaviour_saved', {
+        agent_id: agentId,
         tone: values.tone,
         verbosity: values.verbosity,
       });
@@ -113,7 +113,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className={'text-l'}>Behaviour</CardTitle>
-        <CardDescription>Chatbot behaviours</CardDescription>
+        <CardDescription>Agent behaviours</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSave)}>
         <CardContent className={'flex-col gap-5 flex'}>
@@ -166,7 +166,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             />
           </div>
           <div className="flex justify-end">
-            <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+            <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button
                 type="submit"
                 disabled={readOnly || !isDirty || saveBehaviourMutation.isPending}

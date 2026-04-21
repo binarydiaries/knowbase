@@ -5,7 +5,7 @@ import { conversations } from '../../db/schema/conversations';
 export abstract class ConversationService {
   static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.conversations.findFirst({
-      where: { id, chatbot: { orgId } },
+      where: { id, agent: { orgId } },
     });
   }
 
@@ -22,21 +22,21 @@ export abstract class ConversationService {
   }
 
   static async list({
-    chatbotId,
+    agentId,
     channelId,
     orgId,
     page,
     limit,
   }: {
-    chatbotId?: string;
+    agentId?: string;
     channelId?: string;
     orgId: string;
     page: number;
     limit: number;
   }) {
     const whereCondition = {
-      chatbot: { orgId },
-      chatbotId,
+      agent: { orgId },
+      agentId,
       channelId,
     };
 

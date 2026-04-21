@@ -7,8 +7,8 @@ import { AlertTriangle } from 'lucide-react';
 
 type SubscriptionStatus = {
   plan: 'free' | 'starter' | 'growth' | 'pro';
-  activeChatbotLimit: number;
-  activeChatbotCount: number;
+  activeAgentLimit: number;
+  activeAgentCount: number;
   isOverLimit: boolean;
 };
 
@@ -24,12 +24,12 @@ export function SubscriptionLimitBanner({
   return (
     <Alert>
       <AlertTriangle />
-      <AlertTitle>Chatbot editing is locked</AlertTitle>
+      <AlertTitle>Agent editing is locked</AlertTitle>
       <AlertDescription>
         Your {subscription.plan} plan allows up to{' '}
-        {subscription.activeChatbotLimit} active chatbot
-        {subscription.activeChatbotLimit === 1 ? '' : 's'}, and you currently
-        have {subscription.activeChatbotCount}. Archive active chatbots or
+        {subscription.activeAgentLimit} active agent
+        {subscription.activeAgentLimit === 1 ? '' : 's'}, and you currently
+        have {subscription.activeAgentCount}. Archive active agents or
         upgrade your subscription to unlock editing and unarchive actions.
       </AlertDescription>
     </Alert>

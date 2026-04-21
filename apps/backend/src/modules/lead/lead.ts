@@ -23,12 +23,12 @@ export const Lead = new Elysia({
         });
       }
 
-      const { chatbotId, page = 1, limit = 20 } = query;
+      const { agentId, page = 1, limit = 20 } = query;
       const offset = (page - 1) * limit;
 
       const [leads, total] = await Promise.all([
-        LeadService.list({ orgId, chatbotId, limit, offset }),
-        LeadService.count({ orgId, chatbotId }),
+        LeadService.list({ orgId, agentId, limit, offset }),
+        LeadService.count({ orgId, agentId }),
       ]);
 
       return { leads, total, page, limit };

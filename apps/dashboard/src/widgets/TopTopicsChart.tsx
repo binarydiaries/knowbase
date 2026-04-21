@@ -18,20 +18,20 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function TopTopicsChart({ chatbotId, startDate, endDate }: Props) {
+export function TopTopicsChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-top-topics', chatbotId, startDate, endDate],
+    queryKey: ['analytics-top-topics', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getAnalyticsTopTopics({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

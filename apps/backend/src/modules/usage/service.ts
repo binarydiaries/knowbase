@@ -1,6 +1,6 @@
 import { and, count, eq, gte, lt, sql } from 'drizzle-orm';
 import { db } from '../../db';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import { conversations } from '../../db/schema/conversations';
 import { documents } from '../../db/schema/documents';
 import { messages } from '../../db/schema/messages';
@@ -31,7 +31,7 @@ export abstract class UsageChartsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -43,13 +43,13 @@ export abstract class UsageChartsService {
       })
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           gte(messages.createdAt, start),
           lt(messages.createdAt, end),
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(sql`date_trunc('day', ${messages.createdAt})::date`)
@@ -69,53 +69,53 @@ export abstract class UsageChartsService {
     return { data };
   }
 
-  static async getMessagesByChatbot(
+  static async getMessagesByAgent(
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
 
     const rows = await db
       .select({
-        chatbotId: chatbots.id,
-        chatbotName: chatbots.name,
+        agentId: agents.id,
+        agentName: agents.name,
         count: count(),
       })
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           gte(messages.createdAt, start),
           lt(messages.createdAt, end),
-          chatbotId ? eq(chatbots.id, chatbotId) : undefined,
+          agentId ? eq(agents.id, agentId) : undefined,
         ),
       )
-      .groupBy(chatbots.id, chatbots.name);
+      .groupBy(agents.id, agents.name);
 
     return { data: rows };
   }
 
-  static async getKnowledgeByChatbot(orgId: string, chatbotId?: string) {
+  static async getKnowledgeByAgent(orgId: string, agentId?: string) {
     const rows = await db
       .select({
-        chatbotId: chatbots.id,
-        chatbotName: chatbots.name,
+        agentId: agents.id,
+        agentName: agents.name,
         count: count(),
       })
       .from(documents)
-      .innerJoin(chatbots, eq(documents.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(documents.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
-          chatbotId ? eq(chatbots.id, chatbotId) : undefined,
+          eq(agents.orgId, orgId),
+          agentId ? eq(agents.id, agentId) : undefined,
         ),
       )
-      .groupBy(chatbots.id, chatbots.name);
+      .groupBy(agents.id, agents.name);
 
     return { data: rows };
   }

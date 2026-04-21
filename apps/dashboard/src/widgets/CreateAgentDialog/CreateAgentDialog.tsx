@@ -17,15 +17,15 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-  CHATBOT_LIMIT_TOOLTIP,
+  AGENT_LIMIT_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import {
-  type ChatbotSchema,
-  patchChatbotsById,
-  postChatbots,
+  type AgentSchema,
+  patchAgentsById,
+  postAgents,
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -34,17 +34,17 @@ const schema = z.object({
   description: z.string().min(3).max(200).optional(),
 });
 
-export function CreateChatbotDialog({
+export function CreateAgentDialog({
   open,
   setOpen,
-  chatbot,
+  agent,
   onClose,
   disabled = false,
-  disabledReason = CHATBOT_LIMIT_TOOLTIP,
+  disabledReason = AGENT_LIMIT_TOOLTIP,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  chatbot?: ChatbotSchema;
+  agent?: AgentSchema;
   onClose?: () => void;
   disabled?: boolean;
   disabledReason?: string;
@@ -56,13 +56,13 @@ export function CreateChatbotDialog({
   });
 
   useEffect(() => {
-    if (chatbot) {
+    if (agent) {
       reset({
-        name: chatbot.name,
-        description: chatbot.description ?? '',
+        name: agent.name,
+        description: agent.description ?? '',
       });
     }
-  }, [chatbot, reset]);
+  }, [agent, reset]);
 
   const queryClient = useQueryClient();
 
@@ -74,29 +74,29 @@ export function CreateChatbotDialog({
       name: string;
       description: string;
     }) => {
-      if (chatbot) {
+      if (agent) {
         // ✨ EDIT
-        return patchChatbotsById({
-          path: { id: chatbot.id },
-          body: { name, description, chatbotStatus: chatbot?.chatbotStatus },
+        return patchAgentsById({
+          path: { id: agent.id },
+          body: { name, description, agentStatus: agent?.agentStatus },
         });
       }
 
       // ✨ CREATE
-      return postChatbots({ body: { name, description } });
+      return postAgents({ body: { name, description } });
     },
     onSuccess: (_, variables) => {
-      if (chatbot) {
-        posthog.capture('chatbot_updated', {
-          chatbot_id: chatbot.id,
-          chatbot_name: variables.name,
+      if (agent) {
+        posthog.capture('agent_updated', {
+          agent_id: agent.id,
+          agent_name: variables.name,
         });
       } else {
-        posthog.capture('chatbot_created', {
-          chatbot_name: variables.name,
+        posthog.capture('agent_created', {
+          agent_name: variables.name,
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['chatbots'] });
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
       reset();
       setOpen(false);
       onClose?.();
@@ -126,23 +126,23 @@ export function CreateChatbotDialog({
       {disabled ? (
         <DisabledTooltip content={disabledReason} disabled>
           <Button size="sm" disabled={disabled}>
-            Add Chatbot
+            Add Agent
           </Button>
         </DisabledTooltip>
       ) : (
         <DialogTrigger asChild>
-          <Button size="sm">Add Chatbot</Button>
+          <Button size="sm">Add Agent</Button>
         </DialogTrigger>
       )}
 
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
           <DialogTitle>
-            {chatbot ? 'Edit Chatbot' : 'Create Chatbot'}
+            {agent ? 'Edit Agent' : 'Create Agent'}
           </DialogTitle>
 
           <DialogDescription>
-            Give your chatbot a name. You can configure everything else later.
+            Give your agent a name. You can configure everything else later.
           </DialogDescription>
         </DialogHeader>
 
@@ -167,9 +167,9 @@ export function CreateChatbotDialog({
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {chatbot ? 'Updating…' : 'Creating…'}
+                {agent ? 'Updating…' : 'Creating…'}
               </>
-            ) : chatbot ? (
+            ) : agent ? (
               'Update'
             ) : (
               'Create'

@@ -45,7 +45,7 @@ interface ToolCall {
 export async function handleLeadCapture(
   toolCalls: ToolCall[],
   ctx: {
-    chatbotId: string;
+    agentId: string;
     conversationId: string;
     channelId: string;
     orgId: string;
@@ -70,7 +70,7 @@ export async function handleLeadCapture(
         company?: string;
       };
       await LeadService.create({
-        chatbotId: ctx.chatbotId,
+        agentId: ctx.agentId,
         conversationId: ctx.conversationId,
         channelId: ctx.channelId,
         orgId: ctx.orgId,

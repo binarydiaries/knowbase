@@ -133,7 +133,7 @@ ${recursiveChunk}
     return embedding;
   };
 
-  static findRelevantContent = async (userQuery: string, chatbotId: string) => {
+  static findRelevantContent = async (userQuery: string, agentId: string) => {
     const userQueryEmbedded = await this.generateEmbedding(userQuery);
     const similarity = sql<number>`1 - (${cosineDistance(
       embeddings.embedding,
@@ -149,7 +149,7 @@ ${recursiveChunk}
       })
       .from(embeddings)
       .innerJoin(documents, eq(embeddings.documentId, documents.id))
-      .where(and(gt(similarity, 0.5), eq(documents.chatbotId, chatbotId)))
+      .where(and(gt(similarity, 0.5), eq(documents.agentId, agentId)))
       .orderBy((t) => desc(t.similarity))
       .limit(3);
   };

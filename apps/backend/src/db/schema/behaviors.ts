@@ -4,7 +4,7 @@ import {
   cuid2PrimaryKey,
   timestamps,
 } from '../../utils/columns.utils';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 
 export const behaviorTone = pgEnum('tone', [
   'friendly',
@@ -22,9 +22,9 @@ export const behaviors = pgTable(
   'behavior',
   {
     id: cuid2PrimaryKey,
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id),
+      .references(() => agents.id),
     systemPrompt: text().notNull(),
     tone: behaviorTone().notNull().default('neutral'),
     verbosity: behaviorVerbosity().notNull().default('balanced'),
@@ -35,6 +35,6 @@ export const behaviors = pgTable(
   },
   (table) => [
     // 🔥 Enforce 1–1 relationship
-    uniqueIndex('behavior_chatbot_unique').on(table.chatbotId),
+    uniqueIndex('behavior_agent_unique').on(table.agentId),
   ],
 );

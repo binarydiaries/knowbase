@@ -13,7 +13,7 @@ const AnalyticsOverviewResponseSchema = z.object({
 const ConversationsDailyQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const ConversationsDailyResponseSchema = z.object({
@@ -29,7 +29,7 @@ const ConversationsDailyResponseSchema = z.object({
 const MessagesByChannelQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const MessagesByChannelResponseSchema = z.object({
@@ -41,17 +41,17 @@ const MessagesByChannelResponseSchema = z.object({
   ),
 });
 
-// Top chatbots
-const TopChatbotsQuerySchema = z.object({
+// Top agents
+const TopAgentsQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
 });
 
-const TopChatbotsResponseSchema = z.object({
+const TopAgentsResponseSchema = z.object({
   data: z.array(
     z.object({
-      chatbotId: z.string(),
-      chatbotName: z.string(),
+      agentId: z.string(),
+      agentName: z.string(),
       conversations: z.number(),
       messages: z.number(),
       avgConfidence: z.string().nullable(),
@@ -63,7 +63,7 @@ const TopChatbotsResponseSchema = z.object({
 const SentimentQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const SentimentResponseSchema = z.object({
@@ -79,7 +79,7 @@ const SentimentResponseSchema = z.object({
 const TopTopicsQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const TopTopicsResponseSchema = z.object({
@@ -95,7 +95,7 @@ const TopTopicsResponseSchema = z.object({
 const CountryDistributionQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const CountryDistributionResponseSchema = z.object({
@@ -113,8 +113,8 @@ export const AnalyticsModel = new Elysia().model({
   ConversationsDailyResponseSchema,
   MessagesByChannelQuerySchema,
   MessagesByChannelResponseSchema,
-  TopChatbotsQuerySchema,
-  TopChatbotsResponseSchema,
+  TopAgentsQuerySchema,
+  TopAgentsResponseSchema,
   SentimentQuerySchema,
   SentimentResponseSchema,
   TopTopicsQuerySchema,

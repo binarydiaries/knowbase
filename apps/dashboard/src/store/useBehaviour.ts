@@ -2,33 +2,33 @@ import { create } from 'zustand/react';
 import type { BehaviourSchema } from '@/services';
 
 interface IBehaviourState {
-  behaviourByChatbotId: Record<string, BehaviourSchema>;
-  setBehaviour: (chatbotId: string, behaviour: BehaviourSchema) => void;
+  behaviourByAgentId: Record<string, BehaviourSchema>;
+  setBehaviour: (agentId: string, behaviour: BehaviourSchema) => void;
   updateBehaviour: (
-    chatbotId: string,
+    agentId: string,
     behaviour: Partial<BehaviourSchema>,
   ) => void;
 }
 
 export const useBehaviour = create<IBehaviourState>((set) => ({
-  behaviourByChatbotId: {},
+  behaviourByAgentId: {},
 
-  setBehaviour: (chatbotId, behaviour) =>
+  setBehaviour: (agentId, behaviour) =>
     set((state) => ({
-      behaviourByChatbotId: {
-        ...state.behaviourByChatbotId,
-        [chatbotId]: behaviour,
+      behaviourByAgentId: {
+        ...state.behaviourByAgentId,
+        [agentId]: behaviour,
       },
     })),
 
-  updateBehaviour: (chatbotId, behaviour) =>
+  updateBehaviour: (agentId, behaviour) =>
     set((state) => {
-      const existing = state.behaviourByChatbotId[chatbotId];
+      const existing = state.behaviourByAgentId[agentId];
 
       return {
-        behaviourByChatbotId: {
-          ...state.behaviourByChatbotId,
-          [chatbotId]: {
+        behaviourByAgentId: {
+          ...state.behaviourByAgentId,
+          [agentId]: {
             ...(existing ?? {}),
             ...behaviour,
           },

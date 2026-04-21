@@ -2,31 +2,31 @@ import { eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { behaviors } from '../../db/schema/behaviors';
 import { channels } from '../../db/schema/channels';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
 import { CHANNEL_CONFIG_DEFAULTS } from '../channel/defaults';
 
-export abstract class ChatbotService {
-  static async create(data: typeof chatbots.$inferInsert) {
+export abstract class AgentService {
+  static async create(data: typeof agents.$inferInsert) {
     return await db.transaction(async (tx) => {
-      const [chatbot] = await tx.insert(chatbots).values(data).returning();
-      const chatbotId = chatbot.id;
+      const [agent] = await tx.insert(agents).values(data).returning();
+      const agentId = agent.id;
       await tx
         .insert(behaviors)
         .values({
-          chatbotId,
+          agentId,
           createdBy: data.createdBy,
           ...DEFAULT_BEHAVIOR,
         })
         .returning();
 
       await tx.insert(channels).values({
-        chatbotId,
+        agentId,
         type: 'web',
         enabled: true,
         config: {
           ...CHANNEL_CONFIG_DEFAULTS,
-          displayName: chatbot.name,
+          displayName: agent.name,
         },
         channelStatus: 'active',
         usage: {},
@@ -34,7 +34,7 @@ export abstract class ChatbotService {
       });
 
       await tx.insert(channels).values({
-        chatbotId,
+        agentId,
         type: 'whatsapp',
         enabled: false,
         config: {},
@@ -43,12 +43,12 @@ export abstract class ChatbotService {
         createdBy: data.createdBy,
       });
 
-      return chatbot;
+      return agent;
     });
   }
 
   static list({ orgId }: { orgId: string }) {
-    return db.query.chatbots.findMany({
+    return db.query.agents.findMany({
       where: {
         orgId,
       },
@@ -56,7 +56,7 @@ export abstract class ChatbotService {
   }
 
   static single({ id, orgId }: { id: string; orgId: string }) {
-    return db.query.chatbots.findFirst({
+    return db.query.agents.findFirst({
       where: {
         id,
         orgId,
@@ -65,7 +65,7 @@ export abstract class ChatbotService {
   }
 
   static singleWithRelations({ id, orgId }: { id: string; orgId: string }) {
-    return db.query.chatbots.findFirst({
+    return db.query.agents.findFirst({
       where: {
         id,
         orgId,
@@ -78,11 +78,11 @@ export abstract class ChatbotService {
     });
   }
 
-  static async update(id: string, data: Partial<typeof chatbots.$inferInsert>) {
+  static async update(id: string, data: Partial<typeof agents.$inferInsert>) {
     const rows = await db
-      .update(chatbots)
+      .update(agents)
       .set(data)
-      .where(eq(chatbots.id, id))
+      .where(eq(agents.id, id))
       .returning();
     return rows[0];
   }

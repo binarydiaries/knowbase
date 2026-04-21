@@ -3,7 +3,7 @@ import type { behaviors } from '../../db/schema/behaviors';
 type IBehaviourInsert = typeof behaviors.$inferInsert;
 export const DEFAULT_BEHAVIOR: Omit<
   IBehaviourInsert,
-  'chatbotId' | 'createdBy'
+  'agentId' | 'createdBy'
 > = {
   systemPrompt:
     'You are a helpful support assistant. Answer using the provided sources only.',

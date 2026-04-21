@@ -10,19 +10,19 @@ export abstract class LeadService {
 
   static list({
     orgId,
-    chatbotId,
+    agentId,
     limit = 20,
     offset = 0,
   }: {
     orgId: string;
-    chatbotId?: string;
+    agentId?: string;
     limit?: number;
     offset?: number;
   }) {
     return db.query.leads.findMany({
-      where: chatbotId ? { orgId, chatbotId } : { orgId },
+      where: agentId ? { orgId, agentId } : { orgId },
       with: {
-        chatbot: { columns: { id: true, name: true } },
+        agent: { columns: { id: true, name: true } },
         channel: { columns: { id: true, type: true } },
         conversation: { columns: { id: true } },
       },
@@ -32,9 +32,9 @@ export abstract class LeadService {
     });
   }
 
-  static async count({ orgId, chatbotId }: { orgId: string; chatbotId?: string }) {
+  static async count({ orgId, agentId }: { orgId: string; agentId?: string }) {
     const rows = await db.query.leads.findMany({
-      where: chatbotId ? { orgId, chatbotId } : { orgId },
+      where: agentId ? { orgId, agentId } : { orgId },
       columns: { id: true },
     });
     return rows.length;

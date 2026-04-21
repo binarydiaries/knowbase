@@ -3,8 +3,8 @@ import { create } from 'zustand/react';
 export interface WhatsAppPhoneNumber {
   phoneNumberId: string;
   displayPhone: string;
-  boundToChatbotId: string | null;
-  chatbotName: string | null;
+  boundToAgentId: string | null;
+  agentName: string | null;
 }
 
 interface IWhatsAppConnectionState {
@@ -17,8 +17,8 @@ interface IWhatsAppConnectionState {
   }) => void;
   updatePhoneBinding: (
     phoneNumberId: string,
-    boundToChatbotId: string | null,
-    chatbotName: string | null,
+    boundToAgentId: string | null,
+    agentName: string | null,
   ) => void;
   clearConnection: () => void;
 }
@@ -31,11 +31,11 @@ export const useWhatsAppConnection = create<IWhatsAppConnectionState>((set) => (
   setConnection: ({ businessAccountId, phoneNumbers }) =>
     set({ connected: true, businessAccountId, phoneNumbers }),
 
-  updatePhoneBinding: (phoneNumberId, boundToChatbotId, chatbotName) =>
+  updatePhoneBinding: (phoneNumberId, boundToAgentId, agentName) =>
     set((state) => ({
       phoneNumbers: state.phoneNumbers.map((p) =>
         p.phoneNumberId === phoneNumberId
-          ? { ...p, boundToChatbotId, chatbotName }
+          ? { ...p, boundToAgentId, agentName }
           : p,
       ),
     })),

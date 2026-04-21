@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
@@ -54,14 +54,14 @@ type ChannelFormValues = z.infer<typeof ChannelSchema>;
 const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
   // const [primaryColor, setPrimaryColor] = React.useState('#915964');
-  const { chatbotId } = useParams({ strict: false });
+  const { agentId } = useParams({ strict: false });
   // const initialMessageId = useId();
-  if (!chatbotId) {
-    throw new Error('ChatbotId not available');
+  if (!agentId) {
+    throw new Error('agentId not available');
   }
 
   const channelWeb = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
+    state.channelsByAgentId[agentId]?.find(
       (channel) => channel.additional.type === 'web',
     ),
   );
@@ -117,7 +117,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         },
       });
 
-      updateChannel(chatbotId, {
+      updateChannel(agentId, {
         id: channelWeb.id,
         additional: {
           ...channelWeb.additional,
@@ -127,8 +127,8 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       });
     },
     onSuccess: () => {
-      posthog.capture('chatbot_channel_saved', {
-        chatbot_id: chatbotId,
+      posthog.capture('agent_channel_saved', {
+        agent_id: agentId,
         channel_type: 'web',
       });
     },
@@ -149,7 +149,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className={'text-l'}>Channel</CardTitle>
-        <CardDescription>Chatbot Channel</CardDescription>
+        <CardDescription>Agent Channel</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSave)}>
         <CardContent className={'flex-col gap-5 flex'}>
@@ -188,7 +188,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             disabled={readOnly}
           />
           <div className="flex justify-end">
-            <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+            <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button
                 type="submit"
                 disabled={readOnly || !isDirty || saveChannelMutation.isPending}

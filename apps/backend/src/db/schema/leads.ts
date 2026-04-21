@@ -1,16 +1,16 @@
 import { index, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { channels } from './channels';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 import { conversations } from './conversations';
 
 export const leads = pgTable(
   'leads',
   {
     id: cuid2PrimaryKey,
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id, { onDelete: 'cascade' }),
+      .references(() => agents.id, { onDelete: 'cascade' }),
     conversationId: text().references(() => conversations.id, {
       onDelete: 'set null',
     }),
@@ -24,7 +24,7 @@ export const leads = pgTable(
     ...timestamps,
   },
   (t) => [
-    index('leads_chatbot_idx').on(t.chatbotId),
+    index('leads_agent_idx').on(t.agentId),
     index('leads_org_idx').on(t.orgId),
     index('leads_channel_idx').on(t.channelId),
   ],

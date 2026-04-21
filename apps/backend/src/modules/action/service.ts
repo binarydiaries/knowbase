@@ -1,28 +1,28 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { chatbotActions, type LeadGenerationConfig } from '../../db/schema/chatbotActions';
+import { agentActions, type LeadGenerationConfig } from '../../db/schema/agentActions';
 
 export abstract class ActionService {
-  static getEnabledByChatbot(chatbotId: string) {
-    return db.query.chatbotActions.findMany({
-      where: { chatbotId, enabled: true },
+  static getEnabledByAgent(agentId: string) {
+    return db.query.agentActions.findMany({
+      where: { agentId, enabled: true },
     });
   }
 
-  static getByChatbot(chatbotId: string) {
-    return db.query.chatbotActions.findMany({
-      where: { chatbotId },
+  static getByAgent(agentId: string) {
+    return db.query.agentActions.findMany({
+      where: { agentId },
     });
   }
 
   static single({ id, orgId }: { id: string; orgId: string }) {
-    return db.query.chatbotActions.findFirst({
-      where: { id, chatbot: { orgId } },
+    return db.query.agentActions.findFirst({
+      where: { id, agent: { orgId } },
     });
   }
 
-  static async create(data: typeof chatbotActions.$inferInsert) {
-    const rows = await db.insert(chatbotActions).values(data).returning();
+  static async create(data: typeof agentActions.$inferInsert) {
+    const rows = await db.insert(agentActions).values(data).returning();
     return rows[0];
   }
 
@@ -31,17 +31,17 @@ export abstract class ActionService {
     data: { enabled?: boolean; config?: LeadGenerationConfig },
   ) {
     const rows = await db
-      .update(chatbotActions)
+      .update(agentActions)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(chatbotActions.id, id))
+      .where(eq(agentActions.id, id))
       .returning();
     return rows[0];
   }
 
   static async delete(id: string) {
     const rows = await db
-      .delete(chatbotActions)
-      .where(eq(chatbotActions.id, id))
+      .delete(agentActions)
+      .where(eq(agentActions.id, id))
       .returning();
     return rows[0];
   }

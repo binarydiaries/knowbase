@@ -2,8 +2,8 @@ import { defineRelations } from 'drizzle-orm';
 import { aiCostEvents } from './aiCostEvents';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
-import { chatbotActions } from './chatbotActions';
-import { chatbots } from './chatbots';
+import { agentActions } from './agentActions';
+import { agents } from './agents';
 import { conversations } from './conversations';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
@@ -16,10 +16,10 @@ import { whatsappConnections } from './whatsappConnections';
 export const relations = defineRelations(
   {
     aiCostEvents,
-    chatbots,
+    agents,
     channels,
     behaviors,
-    chatbotActions,
+    agentActions,
     documents,
     conversations,
     messages,
@@ -30,50 +30,50 @@ export const relations = defineRelations(
     whatsappConnections,
   },
   (r) => ({
-    chatbots: {
+    agents: {
       channels: r.many.channels({
-        from: r.chatbots.id,
-        to: r.channels.chatbotId,
+        from: r.agents.id,
+        to: r.channels.agentId,
       }),
       behaviour: r.one.behaviors({
-        from: r.chatbots.id,
-        to: r.behaviors.chatbotId,
+        from: r.agents.id,
+        to: r.behaviors.agentId,
       }),
       documents: r.many.documents({
-        from: r.chatbots.id,
-        to: r.documents.chatbotId,
+        from: r.agents.id,
+        to: r.documents.agentId,
       }),
-      chatbotActions: r.many.chatbotActions({
-        from: r.chatbots.id,
-        to: r.chatbotActions.chatbotId,
+      agentActions: r.many.agentActions({
+        from: r.agents.id,
+        to: r.agentActions.agentId,
       }),
       leads: r.many.leads({
-        from: r.chatbots.id,
-        to: r.leads.chatbotId,
+        from: r.agents.id,
+        to: r.leads.agentId,
       }),
     },
     documents: {
-      chatbot: r.one.chatbots({
-        from: r.documents.chatbotId,
-        to: r.chatbots.id,
+      agent: r.one.agents({
+        from: r.documents.agentId,
+        to: r.agents.id,
       }),
     },
     behaviors: {
-      chatbot: r.one.chatbots({
-        from: r.behaviors.chatbotId,
-        to: r.chatbots.id,
+      agent: r.one.agents({
+        from: r.behaviors.agentId,
+        to: r.agents.id,
       }),
     },
     channels: {
-      chatbot: r.one.chatbots({
-        from: r.channels.chatbotId,
-        to: r.chatbots.id,
+      agent: r.one.agents({
+        from: r.channels.agentId,
+        to: r.agents.id,
       }),
     },
     conversations: {
-      chatbot: r.one.chatbots({
-        from: r.conversations.chatbotId,
-        to: r.chatbots.id,
+      agent: r.one.agents({
+        from: r.conversations.agentId,
+        to: r.agents.id,
       }),
       channel: r.one.channels({
         from: r.conversations.channelId,
@@ -92,16 +92,16 @@ export const relations = defineRelations(
         to: r.documents.id,
       }),
     },
-    chatbotActions: {
-      chatbot: r.one.chatbots({
-        from: r.chatbotActions.chatbotId,
-        to: r.chatbots.id,
+    agentActions: {
+      agent: r.one.agents({
+        from: r.agentActions.agentId,
+        to: r.agents.id,
       }),
     },
     leads: {
-      chatbot: r.one.chatbots({
-        from: r.leads.chatbotId,
-        to: r.chatbots.id,
+      agent: r.one.agents({
+        from: r.leads.agentId,
+        to: r.agents.id,
       }),
       conversation: r.one.conversations({
         from: r.leads.conversationId,

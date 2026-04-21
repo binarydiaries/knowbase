@@ -9,6 +9,7 @@ import { Toaster } from '@knowbase/ui/components/sonner';
 import { TooltipProvider } from '@knowbase/ui/components/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { client } from '@/services/client.gen.ts';
@@ -52,19 +53,21 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <SignedIn>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <RouterProvider router={router} />
-            </TooltipProvider>
-          </QueryClientProvider>
-          <Toaster />
-        </SignedIn>
-        <SignedOut>
-          <RedirectToSignIn />
-        </SignedOut>
-      </ClerkProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+          <SignedIn>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
+                <RouterProvider router={router} />
+              </TooltipProvider>
+            </QueryClientProvider>
+            <Toaster />
+          </SignedIn>
+          <SignedOut>
+            <RedirectToSignIn />
+          </SignedOut>
+        </ClerkProvider>
+      </ThemeProvider>
     </StrictMode>,
   );
 }

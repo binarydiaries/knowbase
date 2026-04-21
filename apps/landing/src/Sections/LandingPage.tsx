@@ -11,12 +11,14 @@ const LandingPage = () => {
     return (
         <div>
             <HeroSection />
-            <CoreValueSection />
-            <UseCasesSection />
-            <PlatformSection />
-            <HowItWorksSection />
-            <PricingSection />
-            <FAQSection />
+            <main>
+                <CoreValueSection />
+                <UseCasesSection />
+                <PlatformSection />
+                <HowItWorksSection />
+                <PricingSection />
+                <FAQSection />
+            </main>
             <Footer />
         </div>
     );

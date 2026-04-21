@@ -21,7 +21,7 @@ import {
   postDocuments,
 } from '@/services';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
@@ -45,11 +45,11 @@ export const TextContentWidget = ({
     (document?.content.type === 'text' && document?.content?.data) || '',
   );
   const [title, setTitle] = useState(document?.title);
-  const { chatbotId } = useParams({ strict: false });
+  const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
-  if (!chatbotId) {
-    throw new Error('Chatbot not found');
+  if (!agentId) {
+    throw new Error('Agent not found');
   }
 
   const { addUpdateDocument } = useDocuments();
@@ -84,7 +84,7 @@ export const TextContentWidget = ({
             type: 'text',
             data: content,
           },
-          chatbotId,
+          agentId,
         },
       });
 
@@ -94,13 +94,13 @@ export const TextContentWidget = ({
     },
     onSuccess: ({ document: savedDocument }) => {
       posthog.capture('knowledge_source_saved', {
-        chatbot_id: chatbotId,
+        agent_id: agentId,
         document_id: savedDocument.id,
         source_type: 'text',
         mode,
       });
-      addUpdateDocument(chatbotId, savedDocument);
-      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+      addUpdateDocument(agentId, savedDocument);
+      queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       onClose?.();
     },
     onError: (error) => {
@@ -117,7 +117,7 @@ export const TextContentWidget = ({
         <SheetDescription>
           {mode === 'edit'
             ? 'Update existing questions and answers'
-            : 'Add Text source to the chatbot'}
+            : 'Add Text source to the agent'}
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
@@ -137,7 +137,7 @@ export const TextContentWidget = ({
         </div>
       </div>
       <SheetFooter>
-        <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+        <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
           <Button
             onClick={handleSave}
             disabled={readOnly || saveTextMutation.isPending}

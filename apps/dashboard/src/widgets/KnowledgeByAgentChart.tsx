@@ -15,20 +15,20 @@ import {
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Cell, Pie, PieChart } from 'recharts';
-import { getUsageKnowledgeByChatbot } from '@/services';
+import { getUsageKnowledgeByAgent } from '@/services';
 import { CHART_COLORS } from '../utils/dateRange.ts';
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
 };
 
-export function KnowledgeByChatbotChart({ chatbotId }: Props) {
+export function KnowledgeByAgentChart({ agentId }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['usage-knowledge-chatbot', chatbotId],
+    queryKey: ['usage-knowledge-agent', agentId],
     queryFn: async () => {
-      const res = await getUsageKnowledgeByChatbot({
+      const res = await getUsageKnowledgeByAgent({
         query: {
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;
@@ -37,8 +37,8 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
 
   const chartConfig: ChartConfig = {};
   data?.data.forEach((item, i) => {
-    chartConfig[item.chatbotId] = {
-      label: item.chatbotName,
+    chartConfig[item.agentId] = {
+      label: item.agentName,
       color: CHART_COLORS[i % CHART_COLORS.length],
     };
   });
@@ -47,7 +47,7 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Knowledge Sources per Chatbot
+          Knowledge Sources per Agent
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -67,7 +67,7 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
               <Pie
                 data={data.data}
                 dataKey="count"
-                nameKey="chatbotName"
+                nameKey="agentName"
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -75,14 +75,14 @@ export function KnowledgeByChatbotChart({ chatbotId }: Props) {
               >
                 {data.data.map((entry, i) => (
                   <Cell
-                    key={entry.chatbotId}
+                    key={entry.agentId}
                     fill={CHART_COLORS[i % CHART_COLORS.length]}
                   />
                 ))}
               </Pie>
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
               <ChartLegend
-                content={<ChartLegendContent nameKey="chatbotName" />}
+                content={<ChartLegendContent nameKey="agentName" />}
               />
             </PieChart>
           </ChartContainer>

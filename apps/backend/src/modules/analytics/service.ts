@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gte, isNotNull, lt, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import { conversations } from '../../db/schema/conversations';
 import { messages } from '../../db/schema/messages';
 
@@ -35,10 +35,10 @@ export abstract class AnalyticsService {
         totalConversations: count(conversations.id),
         totalMessages: count(messages.id),
       })
-      .from(chatbots)
-      .leftJoin(conversations, eq(conversations.chatbotId, chatbots.id))
+      .from(agents)
+      .leftJoin(conversations, eq(conversations.agentId, agents.id))
       .leftJoin(messages, eq(messages.conversationId, conversations.id))
-      .where(eq(chatbots.orgId, orgId));
+      .where(eq(agents.orgId, orgId));
 
     // Query 2: avg confidence score from assistant messages
     const [conf] = await db
@@ -47,9 +47,9 @@ export abstract class AnalyticsService {
       })
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
-        and(eq(chatbots.orgId, orgId), eq(messages.role, 'assistant')),
+        and(eq(agents.orgId, orgId), eq(messages.role, 'assistant')),
       );
 
     const totalConversations = counts?.totalConversations ?? 0;
@@ -72,7 +72,7 @@ export abstract class AnalyticsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -83,13 +83,13 @@ export abstract class AnalyticsService {
         count: count(),
       })
       .from(conversations)
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           gte(conversations.createdAt, start),
           lt(conversations.createdAt, end),
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(sql`date_trunc('day', ${conversations.createdAt})::date`)
@@ -109,7 +109,7 @@ export abstract class AnalyticsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -122,13 +122,13 @@ export abstract class AnalyticsService {
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
       .innerJoin(channels, eq(conversations.channelId, channels.id))
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           gte(messages.createdAt, start),
           lt(messages.createdAt, end),
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(channels.type);
@@ -136,8 +136,8 @@ export abstract class AnalyticsService {
     return { data: rows };
   }
 
-  /** Top chatbots ranked by conversation count in date range */
-  static async getTopChatbots(
+  /** Top agents ranked by conversation count in date range */
+  static async getTopAgents(
     orgId: string,
     startDate: string,
     endDate: string,
@@ -145,27 +145,27 @@ export abstract class AnalyticsService {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
 
-    // Date filter in JOIN condition so chatbots with 0 conversations still appear
+    // Date filter in JOIN condition so agents with 0 conversations still appear
     const rows = await db
       .select({
-        chatbotId: chatbots.id,
-        chatbotName: chatbots.name,
+        agentId: agents.id,
+        agentName: agents.name,
         conversations: count(conversations.id),
         messages: count(messages.id),
         avgConfidence: sql<string | null>`avg((${messages.metadata}->>'confidenceScore')::numeric)`,
       })
-      .from(chatbots)
+      .from(agents)
       .leftJoin(
         conversations,
         and(
-          eq(conversations.chatbotId, chatbots.id),
+          eq(conversations.agentId, agents.id),
           gte(conversations.createdAt, start),
           lt(conversations.createdAt, end),
         ),
       )
       .leftJoin(messages, eq(messages.conversationId, conversations.id))
-      .where(eq(chatbots.orgId, orgId))
-      .groupBy(chatbots.id, chatbots.name)
+      .where(eq(agents.orgId, orgId))
+      .groupBy(agents.id, agents.name)
       .orderBy(desc(count(conversations.id)))
       .limit(10);
 
@@ -177,7 +177,7 @@ export abstract class AnalyticsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -189,15 +189,15 @@ export abstract class AnalyticsService {
       })
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           eq(messages.role, 'assistant'),
           gte(messages.createdAt, start),
           lt(messages.createdAt, end),
           sql`${messages.metadata}->'sentiment' is not null`,
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(sql`${messages.metadata}->'sentiment'->>'label'`);
@@ -210,7 +210,7 @@ export abstract class AnalyticsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -221,14 +221,14 @@ export abstract class AnalyticsService {
         count: count(),
       })
       .from(conversations)
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           isNotNull(conversations.topic),
           gte(conversations.createdAt, start),
           lt(conversations.createdAt, end),
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(conversations.topic)
@@ -245,7 +245,7 @@ export abstract class AnalyticsService {
     orgId: string,
     startDate: string,
     endDate: string,
-    chatbotId?: string,
+    agentId?: string,
   ) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
@@ -256,14 +256,14 @@ export abstract class AnalyticsService {
         count: count(),
       })
       .from(conversations)
-      .innerJoin(chatbots, eq(conversations.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(conversations.agentId, agents.id))
       .where(
         and(
-          eq(chatbots.orgId, orgId),
+          eq(agents.orgId, orgId),
           isNotNull(conversations.country),
           gte(conversations.createdAt, start),
           lt(conversations.createdAt, end),
-          chatbotId ? eq(conversations.chatbotId, chatbotId) : undefined,
+          agentId ? eq(conversations.agentId, agentId) : undefined,
         ),
       )
       .groupBy(conversations.country)

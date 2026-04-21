@@ -6,18 +6,18 @@ import {
   timestamps,
 } from '../../utils/columns.utils';
 
-export const chatbotStatus = pgEnum('chatbotStatus', ['active', 'archived']);
+export const agentStatus = pgEnum('agentStatus', ['active', 'archived']);
 
-export const chatbots = pgTable(
-  'chatbots',
+export const agents = pgTable(
+  'agents',
   {
     id: cuid2PrimaryKey,
     name: text().notNull(),
     description: text(),
-    chatbotStatus: chatbotStatus().notNull().default('active'),
+    agentStatus: agentStatus().notNull().default('active'),
     createdBy: clerkUserId,
     ...clerkOrgIdColumn,
     ...timestamps,
   },
-  (t) => [index('chatbots_org_idx').on(t.orgId)],
+  (t) => [index('agents_org_idx').on(t.orgId)],
 );

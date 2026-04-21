@@ -1,18 +1,18 @@
 import { Card, CardContent } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { getAnalyticsTopChatbots } from '@/services';
+import { getAnalyticsTopAgents } from '@/services';
 
 type Props = {
   startDate: string;
   endDate: string;
 };
 
-export function TopChatbotsCards({ startDate, endDate }: Props) {
+export function TopAgentsCards({ startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-top-chatbots', startDate, endDate],
+    queryKey: ['analytics-top-agents', startDate, endDate],
     queryFn: async () => {
-      const res = await getAnalyticsTopChatbots({
+      const res = await getAnalyticsTopAgents({
         query: { startDate, endDate } as never,
       });
       return res.data;
@@ -22,7 +22,7 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
   return (
     <Card>
       <div className="px-6 pb-2">
-        <h3 className="text-base font-semibold">Top Chatbots</h3>
+        <h3 className="text-base font-semibold">Top Agents</h3>
       </div>
       <CardContent className="space-y-3">
         {isLoading ? (
@@ -33,11 +33,11 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
           </>
         ) : isError ? (
           <div className="flex h-48 items-center justify-center text-sm text-destructive">
-            Failed to load chatbot rankings
+            Failed to load agent rankings
           </div>
         ) : !data?.data.length ? (
           <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-            No chatbot activity in this period
+            No agent activity in this period
           </div>
         ) : (
           data.data.map((bot, i) => {
@@ -46,7 +46,7 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
               : '—';
             return (
               <div
-                key={bot.chatbotId}
+                key={bot.agentId}
                 className="flex items-start gap-3 rounded-lg border p-3"
               >
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
@@ -54,7 +54,7 @@ export function TopChatbotsCards({ startDate, endDate }: Props) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
-                    {bot.chatbotName}
+                    {bot.agentName}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>{bot.conversations.toLocaleString()} convs</span>

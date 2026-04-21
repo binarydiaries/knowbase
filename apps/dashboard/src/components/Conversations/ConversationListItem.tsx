@@ -17,7 +17,7 @@ interface IConversationListItemProps {
   lastUserQuestion: string;
   lastAssistantUtterance: string;
   lastMessageAt: string;
-  chatbotName: string;
+  agentName: string;
   channelLabel: string;
   active: boolean;
 }
@@ -27,7 +27,7 @@ export function ConversationListItem({
   lastUserQuestion,
   lastAssistantUtterance,
   lastMessageAt,
-  chatbotName,
+  agentName,
   channelLabel,
   active,
 }: IConversationListItemProps) {
@@ -53,7 +53,7 @@ export function ConversationListItem({
           <ItemFooter>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="font-normal">
-                {chatbotName}
+                {agentName}
               </Badge>
               <Badge variant="secondary" className="font-normal">
                 {channelLabel}

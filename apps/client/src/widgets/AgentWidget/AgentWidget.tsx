@@ -1,25 +1,25 @@
 import { useChat } from '@ai-sdk/react';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
+import { Agent } from "@knowbase/ui/widgets/Agent/Agent";
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { useId, useState } from 'react';
 import { baseUrl } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
-interface IChatbotWidgetProps {
+interface IAgentWidgetProps {
   channelSchema: ChannelSchema;
   orgId: string;
 }
 
-interface IChatbotWidgetContentProps extends IChatbotWidgetProps {
+interface IAgentWidgetContentProps extends IAgentWidgetProps {
   onNewChat: () => void;
 }
 
-const ChatbotWidgetContent = ({
+const AgentWidgetContent = ({
   channelSchema,
   orgId,
   onNewChat,
-}: IChatbotWidgetContentProps) => {
+}: IAgentWidgetContentProps) => {
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
@@ -69,7 +69,7 @@ const ChatbotWidgetContent = ({
   });
 
   return (
-    <Chatbot
+    <Agent
       displayName={channelConfig.displayName}
       primaryColor={channelConfig.primaryColor}
       inputPlaceholder={channelConfig.inputPlaceholder}
@@ -92,11 +92,11 @@ const ChatbotWidgetContent = ({
   );
 };
 
-export const ChatbotWidget = ({ channelSchema, orgId }: IChatbotWidgetProps) => {
+export const AgentWidget = ({ channelSchema, orgId }: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (
-    <ChatbotWidgetContent
+    <AgentWidgetContent
       key={chatKey}
       channelSchema={channelSchema}
       orgId={orgId}

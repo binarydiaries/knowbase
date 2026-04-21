@@ -1,6 +1,6 @@
 export type ChannelSchema = {
   id: string;
-  chatbotId: string;
+  agentId: string;
   enabled: boolean;
   status: 'inactive' | 'active' | 'error';
   additional: {

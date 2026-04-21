@@ -1,15 +1,15 @@
 import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { channels } from './channels';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 
 export const conversations = pgTable(
   'conversations',
   {
     id: cuid2PrimaryKey,
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id),
+      .references(() => agents.id),
     channelId: text()
       .notNull()
       .references(() => channels.id),
@@ -22,12 +22,12 @@ export const conversations = pgTable(
     ...timestamps,
   },
   (table) => [
-    // 🔥 Fast lookup per chatbot
-    index('conversations_chatbot_idx').on(table.chatbotId),
+    // 🔥 Fast lookup per agent
+    index('conversations_agent_idx').on(table.agentId),
 
-    // 🔥 Critical: chatbot + ordering
-    index('conversations_chatbot_lastmsg_idx').on(
-      table.chatbotId,
+    // 🔥 Critical: agent + ordering
+    index('conversations_agent_lastmsg_idx').on(
+      table.agentId,
       table.lastMessageAt,
     ),
 

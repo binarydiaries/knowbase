@@ -11,7 +11,7 @@ import {
   cuid2PrimaryKey,
   timestamps,
 } from '../../utils/columns.utils';
-import { chatbots } from './chatbots';
+import { agents } from './agents';
 
 export const channelType = pgEnum('type', ['web', 'whatsapp', 'instagram']);
 export const channelStatus = pgEnum('channelStatus', [
@@ -24,9 +24,9 @@ export const channels = pgTable(
   'channels',
   {
     id: cuid2PrimaryKey,
-    chatbotId: text()
+    agentId: text()
       .notNull()
-      .references(() => chatbots.id),
+      .references(() => agents.id),
     type: channelType().notNull(),
     enabled: boolean().notNull().default(false),
     config: jsonb().$type<object>().notNull(),
@@ -36,7 +36,7 @@ export const channels = pgTable(
     ...timestamps,
   },
   (table) => [
-    // 🔥 Fast lookup by chatbot
-    index('channels_chatbot_idx').on(table.chatbotId),
+    // 🔥 Fast lookup by agent
+    index('channels_agent_idx').on(table.agentId),
   ],
 );

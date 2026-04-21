@@ -7,20 +7,20 @@ export const NotFoundResponse = z.object({
   message: z.string(),
 });
 
-export const ChatbotLimitReachedResponse = z.object({
-  code: z.enum(['CHATBOT_LIMIT_REACHED']),
+export const AgentLimitReachedResponse = z.object({
+  code: z.enum(['AGENT_LIMIT_REACHED']),
   message: z.string(),
   plan: PlanNameSchema,
-  activeChatbotLimit: z.number(),
-  activeChatbotCount: z.number(),
+  activeAgentLimit: z.number(),
+  activeAgentCount: z.number(),
 });
 
-export const ChatbotLockedResponse = z.object({
-  code: z.enum(['CHATBOT_LOCKED']),
+export const AgentLockedResponse = z.object({
+  code: z.enum(['AGENT_LOCKED']),
   message: z.string(),
   plan: PlanNameSchema,
-  activeChatbotLimit: z.number(),
-  activeChatbotCount: z.number(),
+  activeAgentLimit: z.number(),
+  activeAgentCount: z.number(),
 });
 
 export const KnowledgeSourceLimitReachedResponse = z.object({
@@ -65,18 +65,18 @@ export const KnowledgeSourceQnaTooManyPairsResponse = z.object({
   maxPairs: z.number(),
 });
 
-export const ChatbotRestrictedResponse = z.union([
-  ChatbotLimitReachedResponse,
-  ChatbotLockedResponse,
+export const AgentRestrictedResponse = z.union([
+  AgentLimitReachedResponse,
+  AgentLockedResponse,
 ]);
 
 export const DocumentWriteForbiddenResponse = z.union([
-  ChatbotLockedResponse,
+  AgentLockedResponse,
   KnowledgeSourceLimitReachedResponse,
 ]);
 
 export const IndexingForbiddenResponse = z.union([
-  ChatbotLockedResponse,
+  AgentLockedResponse,
   TrainingLimitReachedResponse,
 ]);
 
@@ -89,9 +89,9 @@ export const LeadGenerationForbiddenResponse = z.object({
 
 export const ErrorModel = new Elysia().model({
   NotFoundResponse,
-  ChatbotLimitReachedResponse,
-  ChatbotLockedResponse,
-  ChatbotRestrictedResponse,
+  AgentLimitReachedResponse,
+  AgentLockedResponse,
+  AgentRestrictedResponse,
   KnowledgeSourceLimitReachedResponse,
   TrainingLimitReachedResponse,
   MessageLimitReachedResponse,

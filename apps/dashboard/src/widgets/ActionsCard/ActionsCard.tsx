@@ -13,9 +13,9 @@ import { useParams } from '@tanstack/react-router';
 import { LockIcon, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import {
-  getChatbotActions,
-  postChatbotActions,
-  patchChatbotActionsById,
+  getAgentActions,
+  postAgentActions,
+  patchAgentActionsById,
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
@@ -31,16 +31,16 @@ const ACTION_TYPES = [
 ];
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const { chatbotId } = useParams({ strict: false });
-  if (!chatbotId) throw new Error('ChatbotId not available');
+  const { agentId } = useParams({ strict: false });
+  if (!agentId) throw new Error('agentId not available');
   const queryClient = useQueryClient();
   const [configuringActionId, setConfiguringActionId] = useState<string | null>(null);
   const { plan } = useClerkPlan();
   const hasLeadGeneration = plan !== 'free';
 
   const actionsQuery = useQuery({
-    queryKey: ['chatbot-actions', chatbotId],
-    queryFn: () => getChatbotActions({ query: { chatbotId } }),
+    queryKey: ['agent-actions', agentId],
+    queryFn: () => getAgentActions({ query: { agentId } }),
   });
 
   const actions = actionsQuery.data?.data.actions ?? [];
@@ -58,18 +58,18 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     }) => {
       const existing = getAction(type);
       if (existing) {
-        await patchChatbotActionsById({
+        await patchAgentActionsById({
           path: { id: existing.id },
           body: { enabled },
         });
       } else {
-        await postChatbotActions({
-          body: { chatbotId, actionType: type, config: {} },
+        await postAgentActions({
+          body: { agentId, actionType: type, config: {} },
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chatbot-actions', chatbotId] });
+      queryClient.invalidateQueries({ queryKey: ['agent-actions', agentId] });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -86,7 +86,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         <CardHeader>
           <CardTitle className="text-l">Actions</CardTitle>
           <CardDescription>
-            Let your chatbot take actions beyond answering questions.
+            Let your agent take actions beyond answering questions.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-0 p-0">
@@ -154,7 +154,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           onClose={() => setConfiguringActionId(null)}
           onSaved={() => {
             queryClient.invalidateQueries({
-              queryKey: ['chatbot-actions', chatbotId],
+              queryKey: ['agent-actions', agentId],
             });
             setConfiguringActionId(null);
           }}

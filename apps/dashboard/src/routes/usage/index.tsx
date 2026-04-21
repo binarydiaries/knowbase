@@ -10,11 +10,11 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { getChatbots } from '@/services';
+import { getAgents } from '@/services';
 import { type DateRange, getDateRange } from '../../utils/dateRange.ts';
 import { DailyMessagesChart } from '../../widgets/DailyMessagesChart.tsx';
-import { KnowledgeByChatbotChart } from '../../widgets/KnowledgeByChatbotChart.tsx';
-import { MessagesByChatbotChart } from '../../widgets/MessagesByChatbotChart.tsx';
+import { KnowledgeByAgentChart } from '../../widgets/KnowledgeByAgentChart.tsx';
+import { MessagesByAgentChart } from '../../widgets/MessagesByAgentChart.tsx';
 import { UsageStatCards } from '../../widgets/UsageStatCards.tsx';
 
 export const Route = createFileRoute('/usage/')({
@@ -22,16 +22,16 @@ export const Route = createFileRoute('/usage/')({
 });
 
 function RouteComponent() {
-  const [chatbotId, setChatbotId] = useState<string>('all');
+  const [agentId, setAgentId] = useState<string>('all');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
 
   const { startDate, endDate } = getDateRange(dateRange);
 
-  const { data: chatbotsData } = useQuery({
-    queryKey: ['chatbots'],
-    queryFn: () => getChatbots(),
+  const { data: agentsData } = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getAgents(),
   });
-  const chatbots = chatbotsData?.data?.chatbots ?? [];
+  const agents = agentsData?.data?.agents ?? [];
 
   return (
     <>
@@ -44,13 +44,13 @@ function RouteComponent() {
           />
           <h1 className="text-sm font-medium">Usage</h1>
           <div className="flex items-center gap-2 ml-auto">
-            <Select value={chatbotId} onValueChange={setChatbotId}>
+            <Select value={agentId} onValueChange={setAgentId}>
               <SelectTrigger className="h-8 w-44 text-xs">
-                <SelectValue placeholder="All Chatbots" />
+                <SelectValue placeholder="All Agents" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Chatbots</SelectItem>
-                {chatbots.map((bot) => (
+                <SelectItem value="all">All Agents</SelectItem>
+                {agents.map((bot) => (
                   <SelectItem key={bot.id} value={bot.id}>
                     {bot.name}
                   </SelectItem>
@@ -79,17 +79,17 @@ function RouteComponent() {
       <div className="p-6 space-y-6">
         <UsageStatCards />
         <DailyMessagesChart
-          chatbotId={chatbotId}
+          agentId={agentId}
           startDate={startDate}
           endDate={endDate}
         />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <MessagesByChatbotChart
-            chatbotId={chatbotId}
+          <MessagesByAgentChart
+            agentId={agentId}
             startDate={startDate}
             endDate={endDate}
           />
-          <KnowledgeByChatbotChart chatbotId={chatbotId} />
+          <KnowledgeByAgentChart agentId={agentId} />
         </div>
       </div>
     </>

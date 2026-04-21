@@ -12,7 +12,7 @@ export type UnauthorizedSchema = {
 export type MessagesDailyQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type MessagesDailyResponseSchema = {
@@ -22,28 +22,28 @@ export type MessagesDailyResponseSchema = {
     }>;
 };
 
-export type MessagesByChatbotQuerySchema = {
+export type MessagesByAgentQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
-export type MessagesByChatbotResponseSchema = {
+export type MessagesByAgentResponseSchema = {
     data: Array<{
-        chatbotId: string;
-        chatbotName: string;
+        agentId: string;
+        agentName: string;
         count: number;
     }>;
 };
 
-export type KnowledgeByChatbotQuerySchema = {
-    chatbotId?: string;
+export type KnowledgeByAgentQuerySchema = {
+    agentId?: string;
 };
 
-export type KnowledgeByChatbotResponseSchema = {
+export type KnowledgeByAgentResponseSchema = {
     data: Array<{
-        chatbotId: string;
-        chatbotName: string;
+        agentId: string;
+        agentName: string;
         count: number;
     }>;
 };
@@ -58,7 +58,7 @@ export type AnalyticsOverviewResponseSchema = {
 export type ConversationsDailyQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type ConversationsDailyResponseSchema = {
@@ -71,7 +71,7 @@ export type ConversationsDailyResponseSchema = {
 export type MessagesByChannelQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type MessagesByChannelResponseSchema = {
@@ -81,15 +81,15 @@ export type MessagesByChannelResponseSchema = {
     }>;
 };
 
-export type TopChatbotsQuerySchema = {
+export type TopAgentsQuerySchema = {
     startDate: string;
     endDate: string;
 };
 
-export type TopChatbotsResponseSchema = {
+export type TopAgentsResponseSchema = {
     data: Array<{
-        chatbotId: string;
-        chatbotName: string;
+        agentId: string;
+        agentName: string;
         conversations: number;
         messages: number;
         avgConfidence: string | null;
@@ -99,7 +99,7 @@ export type TopChatbotsResponseSchema = {
 export type SentimentQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type SentimentResponseSchema = {
@@ -112,7 +112,7 @@ export type SentimentResponseSchema = {
 export type TopTopicsQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type TopTopicsResponseSchema = {
@@ -125,7 +125,7 @@ export type TopTopicsResponseSchema = {
 export type CountryDistributionQuerySchema = {
     startDate: string;
     endDate: string;
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type CountryDistributionResponseSchema = {
@@ -150,7 +150,7 @@ export type ChatChannelQueryParamSchema = {
 export type ChatChannelResponseSchema = {
     channel: {
         id: string;
-        chatbotId: string;
+        agentId: string;
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
@@ -184,34 +184,34 @@ export type NotFoundResponse = {
     message: string;
 };
 
-export type ChatbotLimitReachedResponse = {
-    code: 'CHATBOT_LIMIT_REACHED';
+export type AgentLimitReachedResponse = {
+    code: 'AGENT_LIMIT_REACHED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 };
 
-export type ChatbotLockedResponse = {
-    code: 'CHATBOT_LOCKED';
+export type AgentLockedResponse = {
+    code: 'AGENT_LOCKED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 };
 
-export type ChatbotRestrictedResponse = {
-    code: 'CHATBOT_LIMIT_REACHED';
+export type AgentRestrictedResponse = {
+    code: 'AGENT_LIMIT_REACHED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 } | {
-    code: 'CHATBOT_LOCKED';
+    code: 'AGENT_LOCKED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 };
 
 export type KnowledgeSourceLimitReachedResponse = {
@@ -257,11 +257,11 @@ export type KnowledgeSourceQnaTooManyPairsResponse = {
 };
 
 export type DocumentWriteForbiddenResponse = {
-    code: 'CHATBOT_LOCKED';
+    code: 'AGENT_LOCKED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 } | {
     code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED';
     message: string;
@@ -271,11 +271,11 @@ export type DocumentWriteForbiddenResponse = {
 };
 
 export type IndexingForbiddenResponse = {
-    code: 'CHATBOT_LOCKED';
+    code: 'AGENT_LOCKED';
     message: string;
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
 } | {
     code: 'TRAINING_LIMIT_REACHED';
     message: string;
@@ -358,7 +358,7 @@ export type DocumentSchema = {
         }>;
     };
     status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
-    chatbotId: string;
+    agentId: string;
     createdBy: string;
     createdAt: string;
     updatedAt: string;
@@ -366,7 +366,7 @@ export type DocumentSchema = {
 };
 
 export type CreateDocumentBody = {
-    chatbotId: string;
+    agentId: string;
     title: string;
     content: {
         type: 'text';
@@ -409,7 +409,7 @@ export type OneDocumentResponse = {
             }>;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
-        chatbotId: string;
+        agentId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -432,7 +432,7 @@ export type ManyDocumentsResponse = {
             }>;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
-        chatbotId: string;
+        agentId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -444,8 +444,8 @@ export type OneDocumentParams = {
     id: string;
 };
 
-export type ChatbotDocumentsParams = {
-    chatbotId: string;
+export type AgentDocumentsParams = {
+    agentId: string;
 };
 
 export type DocumentContentQna = Array<{
@@ -455,27 +455,27 @@ export type DocumentContentQna = Array<{
 
 export type DocumentContentText = string;
 
-export type ChatbotSchema = {
+export type AgentSchema = {
     id: string;
     name: string;
     description: string | null;
-    chatbotStatus: 'active' | 'archived';
+    agentStatus: 'active' | 'archived';
     createdBy: string;
     createdAt: string;
     updatedAt: string;
 };
 
-export type CreateChatbotBody = {
+export type CreateAgentBody = {
     name: string;
     description?: string;
 };
 
-export type OneChatbotResponse = {
-    chatbot: {
+export type OneAgentResponse = {
+    agent: {
         id: string;
         name: string;
         description: string | null;
-        chatbotStatus: 'active' | 'archived';
+        agentStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -495,7 +495,7 @@ export type OneChatbotResponse = {
             }>;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
-        chatbotId: string;
+        agentId: string;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -503,7 +503,7 @@ export type OneChatbotResponse = {
     }>;
     channels: Array<{
         id: string;
-        chatbotId: string;
+        agentId: string;
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
@@ -532,7 +532,7 @@ export type OneChatbotResponse = {
     }>;
     behaviour?: {
         id: string;
-        chatbotId: string;
+        agentId: string;
         systemPrompt: string;
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
@@ -543,8 +543,8 @@ export type OneChatbotResponse = {
     };
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
-        activeChatbotLimit: number;
-        activeChatbotCount: number;
+        activeAgentLimit: number;
+        activeAgentCount: number;
         knowledgeSourceLimit: number;
         knowledgeSourceCount: number;
         messagesPerMonthLimit: number;
@@ -558,12 +558,12 @@ export type OneChatbotResponse = {
     };
 };
 
-export type ManyChatbotResponse = {
-    chatbots: Array<{
+export type ManyAgentResponse = {
+    agents: Array<{
         id: string;
         name: string;
         description: string | null;
-        chatbotStatus: 'active' | 'archived';
+        agentStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -571,8 +571,8 @@ export type ManyChatbotResponse = {
     }>;
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
-        activeChatbotLimit: number;
-        activeChatbotCount: number;
+        activeAgentLimit: number;
+        activeAgentCount: number;
         knowledgeSourceLimit: number;
         knowledgeSourceCount: number;
         messagesPerMonthLimit: number;
@@ -586,20 +586,20 @@ export type ManyChatbotResponse = {
     };
 };
 
-export type UpdateChatbotBody = {
+export type UpdateAgentBody = {
     name?: string;
     description?: string | null;
-    chatbotStatus?: 'active' | 'archived';
+    agentStatus?: 'active' | 'archived';
 };
 
-export type DeleteChatbotResponse = unknown;
+export type DeleteAgentResponse = unknown;
 
-export type OneSmallChatbotResponse = {
-    chatbot: {
+export type OneSmallAgentResponse = {
+    agent: {
         id: string;
         name: string;
         description: string | null;
-        chatbotStatus: 'active' | 'archived';
+        agentStatus: 'active' | 'archived';
         createdBy: string;
         createdAt: string;
         updatedAt: string;
@@ -607,7 +607,7 @@ export type OneSmallChatbotResponse = {
 };
 
 export type IndexingStartBody = {
-    chatbotId: string;
+    agentId: string;
 };
 
 export type IndexingStartResponse = {
@@ -625,7 +625,7 @@ export type IndexingStatusResponse = {
 };
 
 export type ListConversation = {
-    chatbotId?: string;
+    agentId?: string;
     channelId?: string;
     page: number;
     limit: number;
@@ -634,7 +634,7 @@ export type ListConversation = {
 export type ManyConversationResponse = {
     conversations: Array<{
         id: string;
-        chatbotId: string;
+        agentId: string;
         channelId: string;
         lastUserQuestion: string;
         lastAssistantUtterance: string;
@@ -659,7 +659,7 @@ export type UpdateBehaviourBody = {
 export type OneBehaviourResponse = {
     behaviour: {
         id: string;
-        chatbotId: string;
+        agentId: string;
         systemPrompt: string;
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
@@ -673,7 +673,7 @@ export type OneBehaviourResponse = {
 export type ManyBehaviourResponse = {
     behaviours: Array<{
         id: string;
-        chatbotId: string;
+        agentId: string;
         systemPrompt: string;
         tone: 'friendly' | 'professional' | 'neutral';
         verbosity: 'short' | 'balanced' | 'detailed';
@@ -686,7 +686,7 @@ export type ManyBehaviourResponse = {
 
 export type BehaviourSchema = {
     id: string;
-    chatbotId: string;
+    agentId: string;
     systemPrompt: string;
     tone: 'friendly' | 'professional' | 'neutral';
     verbosity: 'short' | 'balanced' | 'detailed';
@@ -698,7 +698,7 @@ export type BehaviourSchema = {
 
 export type ChannelSchema = {
     id: string;
-    chatbotId: string;
+    agentId: string;
     enabled: boolean;
     channelStatus: 'inactive' | 'active' | 'error';
     additional: {
@@ -727,13 +727,13 @@ export type ChannelSchema = {
 };
 
 export type ChannelListQuerySchema = {
-    chatbotId?: string;
+    agentId?: string;
 };
 
 export type ManyChannelResponse = {
     channels: Array<{
         id: string;
-        chatbotId: string;
+        agentId: string;
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
@@ -763,7 +763,7 @@ export type ManyChannelResponse = {
 };
 
 export type CreateChannelBodySchema = {
-    chatbotId: string;
+    agentId: string;
     enabled: boolean;
     channelStatus: 'inactive' | 'active' | 'error';
     additional: {
@@ -790,7 +790,7 @@ export type CreateChannelBodySchema = {
 };
 
 export type UpdateChannelBodySchema = {
-    chatbotId?: string;
+    agentId?: string;
     enabled?: boolean;
     channelStatus?: 'inactive' | 'active' | 'error';
     additional?: {
@@ -819,7 +819,7 @@ export type UpdateChannelBodySchema = {
 export type OneChannelResponse = {
     channel: {
         id: string;
-        chatbotId: string;
+        agentId: string;
         enabled: boolean;
         channelStatus: 'inactive' | 'active' | 'error';
         additional: {
@@ -852,8 +852,8 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
-    activeChatbotLimit: number;
-    activeChatbotCount: number;
+    activeAgentLimit: number;
+    activeAgentCount: number;
     knowledgeSourceLimit: number;
     knowledgeSourceCount: number;
     messagesPerMonthLimit: number;
@@ -891,55 +891,55 @@ export type GetUsageMessagesDailyResponses = {
 
 export type GetUsageMessagesDailyResponse = GetUsageMessagesDailyResponses[keyof GetUsageMessagesDailyResponses];
 
-export type GetUsageMessagesByChatbotData = {
+export type GetUsageMessagesByAgentData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/usage/messages-by-chatbot';
+    url: '/usage/messages-by-agent';
 };
 
-export type GetUsageMessagesByChatbotErrors = {
+export type GetUsageMessagesByAgentErrors = {
     /**
      * Response for status 401
      */
     401: UnauthorizedSchema;
 };
 
-export type GetUsageMessagesByChatbotError = GetUsageMessagesByChatbotErrors[keyof GetUsageMessagesByChatbotErrors];
+export type GetUsageMessagesByAgentError = GetUsageMessagesByAgentErrors[keyof GetUsageMessagesByAgentErrors];
 
-export type GetUsageMessagesByChatbotResponses = {
+export type GetUsageMessagesByAgentResponses = {
     /**
      * Response for status 200
      */
-    200: MessagesByChatbotResponseSchema;
+    200: MessagesByAgentResponseSchema;
 };
 
-export type GetUsageMessagesByChatbotResponse = GetUsageMessagesByChatbotResponses[keyof GetUsageMessagesByChatbotResponses];
+export type GetUsageMessagesByAgentResponse = GetUsageMessagesByAgentResponses[keyof GetUsageMessagesByAgentResponses];
 
-export type GetUsageKnowledgeByChatbotData = {
+export type GetUsageKnowledgeByAgentData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/usage/knowledge-by-chatbot';
+    url: '/usage/knowledge-by-agent';
 };
 
-export type GetUsageKnowledgeByChatbotErrors = {
+export type GetUsageKnowledgeByAgentErrors = {
     /**
      * Response for status 401
      */
     401: UnauthorizedSchema;
 };
 
-export type GetUsageKnowledgeByChatbotError = GetUsageKnowledgeByChatbotErrors[keyof GetUsageKnowledgeByChatbotErrors];
+export type GetUsageKnowledgeByAgentError = GetUsageKnowledgeByAgentErrors[keyof GetUsageKnowledgeByAgentErrors];
 
-export type GetUsageKnowledgeByChatbotResponses = {
+export type GetUsageKnowledgeByAgentResponses = {
     /**
      * Response for status 200
      */
-    200: KnowledgeByChatbotResponseSchema;
+    200: KnowledgeByAgentResponseSchema;
 };
 
-export type GetUsageKnowledgeByChatbotResponse = GetUsageKnowledgeByChatbotResponses[keyof GetUsageKnowledgeByChatbotResponses];
+export type GetUsageKnowledgeByAgentResponse = GetUsageKnowledgeByAgentResponses[keyof GetUsageKnowledgeByAgentResponses];
 
 export type GetAnalyticsOverviewData = {
     body?: never;
@@ -1016,30 +1016,30 @@ export type GetAnalyticsMessagesByChannelResponses = {
 
 export type GetAnalyticsMessagesByChannelResponse = GetAnalyticsMessagesByChannelResponses[keyof GetAnalyticsMessagesByChannelResponses];
 
-export type GetAnalyticsTopChatbotsData = {
+export type GetAnalyticsTopAgentsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/analytics/top-chatbots';
+    url: '/analytics/top-agents';
 };
 
-export type GetAnalyticsTopChatbotsErrors = {
+export type GetAnalyticsTopAgentsErrors = {
     /**
      * Response for status 401
      */
     401: UnauthorizedSchema;
 };
 
-export type GetAnalyticsTopChatbotsError = GetAnalyticsTopChatbotsErrors[keyof GetAnalyticsTopChatbotsErrors];
+export type GetAnalyticsTopAgentsError = GetAnalyticsTopAgentsErrors[keyof GetAnalyticsTopAgentsErrors];
 
-export type GetAnalyticsTopChatbotsResponses = {
+export type GetAnalyticsTopAgentsResponses = {
     /**
      * Response for status 200
      */
-    200: TopChatbotsResponseSchema;
+    200: TopAgentsResponseSchema;
 };
 
-export type GetAnalyticsTopChatbotsResponse = GetAnalyticsTopChatbotsResponses[keyof GetAnalyticsTopChatbotsResponses];
+export type GetAnalyticsTopAgentsResponse = GetAnalyticsTopAgentsResponses[keyof GetAnalyticsTopAgentsResponses];
 
 export type GetAnalyticsSentimentData = {
     body?: never;
@@ -1253,7 +1253,7 @@ export type DeleteDocumentsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1282,7 +1282,7 @@ export type GetDocumentsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1313,7 +1313,7 @@ export type PatchDocumentsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1331,39 +1331,39 @@ export type PatchDocumentsByIdResponses = {
 
 export type PatchDocumentsByIdResponse = PatchDocumentsByIdResponses[keyof PatchDocumentsByIdResponses];
 
-export type GetChatbotsData = {
+export type GetAgentsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/chatbots';
+    url: '/agents';
 };
 
-export type GetChatbotsErrors = {
+export type GetAgentsErrors = {
     /**
      * Response for status 401
      */
     401: UnauthorizedSchema;
 };
 
-export type GetChatbotsError = GetChatbotsErrors[keyof GetChatbotsErrors];
+export type GetAgentsError = GetAgentsErrors[keyof GetAgentsErrors];
 
-export type GetChatbotsResponses = {
+export type GetAgentsResponses = {
     /**
      * Response for status 200
      */
-    200: ManyChatbotResponse;
+    200: ManyAgentResponse;
 };
 
-export type GetChatbotsResponse = GetChatbotsResponses[keyof GetChatbotsResponses];
+export type GetAgentsResponse = GetAgentsResponses[keyof GetAgentsResponses];
 
-export type PostChatbotsData = {
-    body: CreateChatbotBody;
+export type PostAgentsData = {
+    body: CreateAgentBody;
     path?: never;
     query?: never;
-    url: '/chatbots';
+    url: '/agents';
 };
 
-export type PostChatbotsErrors = {
+export type PostAgentsErrors = {
     /**
      * Response for status 401
      */
@@ -1371,81 +1371,81 @@ export type PostChatbotsErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotRestrictedResponse;
+    403: AgentRestrictedResponse;
 };
 
-export type PostChatbotsError = PostChatbotsErrors[keyof PostChatbotsErrors];
+export type PostAgentsError = PostAgentsErrors[keyof PostAgentsErrors];
 
-export type PostChatbotsResponses = {
+export type PostAgentsResponses = {
     /**
      * Response for status 200
      */
-    200: OneSmallChatbotResponse;
+    200: OneSmallAgentResponse;
 };
 
-export type PostChatbotsResponse = PostChatbotsResponses[keyof PostChatbotsResponses];
+export type PostAgentsResponse = PostAgentsResponses[keyof PostAgentsResponses];
 
-export type GetChatbotsByIdData = {
+export type GetAgentsByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/chatbots/{id}';
+    url: '/agents/{id}';
 };
 
-export type GetChatbotsByIdErrors = {
+export type GetAgentsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
     404: NotFoundResponse;
 };
 
-export type GetChatbotsByIdError = GetChatbotsByIdErrors[keyof GetChatbotsByIdErrors];
+export type GetAgentsByIdError = GetAgentsByIdErrors[keyof GetAgentsByIdErrors];
 
-export type GetChatbotsByIdResponses = {
+export type GetAgentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: OneChatbotResponse;
+    200: OneAgentResponse;
 };
 
-export type GetChatbotsByIdResponse = GetChatbotsByIdResponses[keyof GetChatbotsByIdResponses];
+export type GetAgentsByIdResponse = GetAgentsByIdResponses[keyof GetAgentsByIdResponses];
 
-export type PatchChatbotsByIdData = {
-    body: UpdateChatbotBody;
+export type PatchAgentsByIdData = {
+    body: UpdateAgentBody;
     path: {
         id: string;
     };
     query?: never;
-    url: '/chatbots/{id}';
+    url: '/agents/{id}';
 };
 
-export type PatchChatbotsByIdErrors = {
+export type PatchAgentsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
     404: NotFoundResponse;
 };
 
-export type PatchChatbotsByIdError = PatchChatbotsByIdErrors[keyof PatchChatbotsByIdErrors];
+export type PatchAgentsByIdError = PatchAgentsByIdErrors[keyof PatchAgentsByIdErrors];
 
-export type PatchChatbotsByIdResponses = {
+export type PatchAgentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: OneSmallChatbotResponse;
+    200: OneSmallAgentResponse;
 };
 
-export type PatchChatbotsByIdResponse = PatchChatbotsByIdResponses[keyof PatchChatbotsByIdResponses];
+export type PatchAgentsByIdResponse = PatchAgentsByIdResponses[keyof PatchAgentsByIdResponses];
 
 export type PostIndexingData = {
     body: IndexingStartBody;
@@ -1488,7 +1488,7 @@ export type GetIndexingStatusData = {
     body?: never;
     path?: never;
     query: {
-        chatbotId: string;
+        agentId: string;
     };
     url: '/indexing/status';
 };
@@ -1515,7 +1515,7 @@ export type GetConversationsData = {
     body?: never;
     path?: never;
     query?: {
-        chatbotId?: string;
+        agentId?: string;
         channelId?: string;
         page?: number;
         limit?: number;
@@ -1579,7 +1579,7 @@ export type PatchBehaviourByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1601,7 +1601,7 @@ export type GetChannelsData = {
     body?: never;
     path?: never;
     query?: {
-        chatbotId?: string;
+        agentId?: string;
     };
     url: '/channels';
 };
@@ -1639,7 +1639,7 @@ export type PostChannelsErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1670,7 +1670,7 @@ export type GetChannelsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1701,7 +1701,7 @@ export type PatchChannelsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: ChatbotLockedResponse;
+    403: AgentLockedResponse;
     /**
      * Response for status 404
      */
@@ -1762,9 +1762,9 @@ export type LeadGenerationConfig = {
     successMessage?: string;
 };
 
-export type ChatbotActionSchema = {
+export type AgentActionSchema = {
     id: string;
-    chatbotId: string;
+    agentId: string;
     actionType: 'lead_generation';
     enabled: boolean;
     config: LeadGenerationConfig;
@@ -1773,62 +1773,62 @@ export type ChatbotActionSchema = {
     updatedAt: string;
 };
 
-export type GetChatbotActionsData = {
+export type GetAgentActionsData = {
     body?: never;
     path?: never;
     query: {
-        chatbotId: string;
+        agentId: string;
     };
-    url: '/chatbot-actions';
+    url: '/agent-actions';
 };
 
-export type GetChatbotActionsResponses = {
-    200: { actions: Array<ChatbotActionSchema> };
+export type GetAgentActionsResponses = {
+    200: { actions: Array<AgentActionSchema> };
 };
 
-export type PostChatbotActionsData = {
+export type PostAgentActionsData = {
     body: {
-        chatbotId: string;
+        agentId: string;
         actionType: 'lead_generation';
         config?: LeadGenerationConfig;
     };
     path?: never;
     query?: never;
-    url: '/chatbot-actions';
+    url: '/agent-actions';
 };
 
-export type PostChatbotActionsResponses = {
-    200: { action: ChatbotActionSchema };
+export type PostAgentActionsResponses = {
+    200: { action: AgentActionSchema };
 };
 
-export type PatchChatbotActionsById = {
+export type PatchAgentActionsById = {
     path: { id: string };
     body: {
         enabled?: boolean;
         config?: LeadGenerationConfig;
     };
     query?: never;
-    url: '/chatbot-actions/{id}';
+    url: '/agent-actions/{id}';
 };
 
-export type PatchChatbotActionsByIdResponses = {
-    200: { action: ChatbotActionSchema };
+export type PatchAgentActionsByIdResponses = {
+    200: { action: AgentActionSchema };
 };
 
-export type DeleteChatbotActionsByIdData = {
+export type DeleteAgentActionsByIdData = {
     path: { id: string };
     body?: never;
     query?: never;
-    url: '/chatbot-actions/{id}';
+    url: '/agent-actions/{id}';
 };
 
-export type DeleteChatbotActionsByIdResponses = {
+export type DeleteAgentActionsByIdResponses = {
     200: { success: boolean };
 };
 
 export type LeadWithRelations = {
     id: string;
-    chatbotId: string;
+    agentId: string;
     conversationId: string | null;
     channelId: string | null;
     orgId: string;
@@ -1839,7 +1839,7 @@ export type LeadWithRelations = {
     customFields: Record<string, string>;
     createdAt: string;
     updatedAt: string;
-    chatbot: { id: string; name: string } | null;
+    agent: { id: string; name: string } | null;
     channel: { id: string; type: string } | null;
     conversation: { id: string } | null;
 };
@@ -1848,7 +1848,7 @@ export type GetLeadsData = {
     body?: never;
     path?: never;
     query?: {
-        chatbotId?: string;
+        agentId?: string;
         page?: number;
         limit?: number;
     };

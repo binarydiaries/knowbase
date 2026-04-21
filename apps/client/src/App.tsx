@@ -2,7 +2,7 @@ import { Spinner } from '@knowbase/ui/components/spinner';
 import { useQuery } from '@tanstack/react-query';
 import { useQueryParams } from '@/hooks/useQueryParams.ts';
 import { getChannel } from '@/services/chat.ts';
-import { ChatbotWidget } from '@/widgets/ChatbotWidget/ChatbotWidget.tsx';
+import { AgentWidget } from '@/widgets/AgentWidget/AgentWidget.tsx';
 
 function App() {
   const { params } = useQueryParams();
@@ -19,7 +19,7 @@ function App() {
   return (
     <>
       {query.data?.channel && (
-        <ChatbotWidget
+        <AgentWidget
           channelSchema={query.data?.channel}
           orgId={orgId || ''}
         />

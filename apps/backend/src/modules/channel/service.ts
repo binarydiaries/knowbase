@@ -1,27 +1,27 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
-import { chatbots } from '../../db/schema/chatbots';
+import { agents } from '../../db/schema/agents';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {
   static async list({
-    chatbotId,
+    agentId,
     orgId,
   }: {
-    chatbotId?: string;
+    agentId?: string;
     orgId: string;
   }) {
     return db.query.channels.findMany({
-      where: chatbotId
-        ? { chatbotId, chatbot: { orgId } }
-        : { chatbot: { orgId } },
+      where: agentId
+        ? { agentId, agent: { orgId } }
+        : { agent: { orgId } },
     });
   }
 
   static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.channels.findFirst({
-      where: { id, chatbot: { orgId } },
+      where: { id, agent: { orgId } },
     });
   }
 
@@ -41,9 +41,9 @@ export abstract class ChannelService {
 
   static async findByWhatsappPhoneNumberId(phoneNumberId: string) {
     const rows = await db
-      .select({ channel: channels, chatbot: chatbots })
+      .select({ channel: channels, agent: agents })
       .from(channels)
-      .innerJoin(chatbots, eq(channels.chatbotId, chatbots.id))
+      .innerJoin(agents, eq(channels.agentId, agents.id))
       .where(
         and(
           eq(channels.type, 'whatsapp'),
@@ -53,7 +53,7 @@ export abstract class ChannelService {
       .limit(1);
 
     if (!rows[0]) return null;
-    return { ...rows[0].channel, chatbot: rows[0].chatbot };
+    return { ...rows[0].channel, agent: rows[0].agent };
   }
 
   static transformChannel(

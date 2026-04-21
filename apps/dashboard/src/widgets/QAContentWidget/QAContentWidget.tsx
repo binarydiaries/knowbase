@@ -22,7 +22,7 @@ import {
   postDocuments,
 } from '@/services';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
@@ -52,11 +52,11 @@ export const QAContentWidget = ({
     ],
   );
   const [title, setTitle] = useState(document?.title);
-  const { chatbotId } = useParams({ strict: false });
+  const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
-  if (!chatbotId) {
-    throw new Error('Chatbot not found');
+  if (!agentId) {
+    throw new Error('Agent not found');
   }
 
   const handleSave = () => {
@@ -86,7 +86,7 @@ export const QAContentWidget = ({
 
       const { data } = await postDocuments({
         body: {
-          chatbotId: chatbotId || '',
+          agentId: agentId || '',
           title: title || '',
           content: {
             type: 'qna',
@@ -100,8 +100,8 @@ export const QAContentWidget = ({
       };
     },
     onSuccess: ({ document }) => {
-      addUpdateDocument(chatbotId, document);
-      queryClient.invalidateQueries({ queryKey: ['chatbot', chatbotId] });
+      addUpdateDocument(agentId, document);
+      queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       onClose?.();
     },
     onError: (error) => {
@@ -136,7 +136,7 @@ export const QAContentWidget = ({
         <SheetDescription>
           {mode === 'edit'
             ? 'Update existing questions and answers'
-            : 'Add Q&A source to the chatbot'}
+            : 'Add Q&A source to the agent'}
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
@@ -152,7 +152,7 @@ export const QAContentWidget = ({
         </div>
         <div className=" flex flex-row  justify-between">
           <Label htmlFor="sheet-demo-username">Questions & Answer</Label>
-          <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
             <Button variant="outline" onClick={addQuestion} disabled={readOnly}>
               + Add Question
             </Button>
@@ -174,7 +174,7 @@ export const QAContentWidget = ({
                     {qaList.length > 1 && (
                       <DisabledTooltip
                         disabled={readOnly}
-                        content={CHATBOT_LOCK_TOOLTIP}
+                        content={AGENT_LOCK_TOOLTIP}
                       >
                         <Button
                           variant="ghost"
@@ -214,7 +214,7 @@ export const QAContentWidget = ({
         ))}
       </div>
       <SheetFooter>
-        <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+        <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
           <Button
             onClick={handleSave}
             disabled={readOnly || saveQnAMutation.isPending}

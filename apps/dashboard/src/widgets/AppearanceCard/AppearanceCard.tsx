@@ -24,7 +24,7 @@ const AppearanceCard = () => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
-        <CardDescription>Customize how your chatbot looks</CardDescription>
+        <CardDescription>Customize how your agent looks</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">

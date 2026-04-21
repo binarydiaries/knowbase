@@ -36,7 +36,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { AlertCircleIcon, ExternalLink, LockIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { getChatbots, getLeads } from '@/services';
+import { getAgents, getLeads } from '@/services';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 
 export const Route = createFileRoute('/leads/')({
@@ -65,21 +65,21 @@ function RouteComponent() {
   const { plan, isLoading: planLoading } = useClerkPlan();
   const hasLeadGeneration = plan !== 'free';
 
-  const [selectedChatbotId, setSelectedChatbotId] = useState<string | undefined>(
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(
     undefined,
   );
 
-  const chatbotsQuery = useQuery({
-    queryKey: ['chatbots'],
-    queryFn: () => getChatbots(),
+  const agentsQuery = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getAgents(),
   });
 
   const leadsQuery = useQuery({
-    queryKey: ['leads', selectedChatbotId, page],
+    queryKey: ['leads', selectedAgentId, page],
     queryFn: () =>
       getLeads({
         query: {
-          chatbotId: selectedChatbotId,
+          agentId: selectedAgentId,
           page,
           limit: PAGE_SIZE,
         },
@@ -91,7 +91,7 @@ function RouteComponent() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers = useMemo(() => getPageNumbers(page, totalPages), [page, totalPages]);
 
-  const chatbots = chatbotsQuery.data?.data.chatbots ?? [];
+  const agents = agentsQuery.data?.data.agents ?? [];
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString('en-US', {
@@ -118,18 +118,18 @@ function RouteComponent() {
         </div>
         <div className="ml-auto px-4">
           <Select
-            value={selectedChatbotId ?? 'all'}
+            value={selectedAgentId ?? 'all'}
             onValueChange={(v) => {
-              setSelectedChatbotId(v === 'all' ? undefined : v);
+              setSelectedAgentId(v === 'all' ? undefined : v);
               navigate({ search: { page: 1 } });
             }}
           >
             <SelectTrigger className="w-48 h-8 text-xs">
-              <SelectValue placeholder="All chatbots" />
+              <SelectValue placeholder="All agents" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All chatbots</SelectItem>
-              {chatbots.map((c) => (
+              <SelectItem value="all">All agents</SelectItem>
+              {agents.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name}
                 </SelectItem>
@@ -188,7 +188,7 @@ function RouteComponent() {
             <div className="text-center">
               <p className="text-sm font-medium">No leads yet</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Leads will appear here once your chatbot captures contact information.
+                Leads will appear here once your agent captures contact information.
               </p>
             </div>
           </div>
@@ -204,7 +204,7 @@ function RouteComponent() {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Chatbot</TableHead>
+                    <TableHead>Agent</TableHead>
                     <TableHead>Channel</TableHead>
                     <TableHead>Captured At</TableHead>
                     <TableHead>Conversation</TableHead>
@@ -226,13 +226,13 @@ function RouteComponent() {
                         {lead.company ?? <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell>
-                        {lead.chatbot ? (
+                        {lead.agent ? (
                           <Link
-                            to="/chatbots/$chatbotId"
-                            params={{ chatbotId: lead.chatbot.id }}
+                            to="/agents/$agentId"
+                            params={{ agentId: lead.agent.id }}
                             className="text-sm hover:underline"
                           >
-                            {lead.chatbot.name}
+                            {lead.agent.name}
                           </Link>
                         ) : (
                           <span className="text-muted-foreground">—</span>

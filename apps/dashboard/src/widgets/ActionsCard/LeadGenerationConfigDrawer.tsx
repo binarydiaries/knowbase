@@ -14,7 +14,7 @@ import { Textarea } from '@knowbase/ui/components/textarea';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { patchChatbotActionsById } from '@/services';
+import { patchAgentActionsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 
 type LeadFieldConfig = {
@@ -76,7 +76,7 @@ export function LeadGenerationConfigDrawer({
 
   const saveMutation = useMutation({
     mutationFn: () =>
-      patchChatbotActionsById({
+      patchAgentActionsById({
         path: { id: action.id },
         body: {
           config: {
@@ -121,7 +121,7 @@ export function LeadGenerationConfigDrawer({
         <SheetHeader className="px-6 py-4">
           <SheetTitle>Lead Generation</SheetTitle>
           <SheetDescription>
-            Configure which contact fields the chatbot collects.
+            Configure which contact fields the agent collects.
           </SheetDescription>
         </SheetHeader>
 
@@ -201,7 +201,7 @@ export function LeadGenerationConfigDrawer({
               maxLength={200}
             />
             <p className="text-xs text-muted-foreground">
-              Shown after the chatbot successfully captures a lead.
+              Shown after the agent successfully captures a lead.
             </p>
           </div>
         </div>

@@ -25,20 +25,20 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
-export function SentimentChart({ chatbotId, startDate, endDate }: Props) {
+export function SentimentChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-sentiment', chatbotId, startDate, endDate],
+    queryKey: ['analytics-sentiment', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getAnalyticsSentiment({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

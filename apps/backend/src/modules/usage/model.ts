@@ -6,45 +6,45 @@ const DailyPoint = z.object({
   count: z.number(),
 });
 
-const ChatbotCount = z.object({
-  chatbotId: z.string(),
-  chatbotName: z.string(),
+const AgentCount = z.object({
+  agentId: z.string(),
+  agentName: z.string(),
   count: z.number(),
 });
 
 export const MessagesDailyQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 export const MessagesDailyResponseSchema = z.object({
   data: z.array(DailyPoint),
 });
 
-export const MessagesByChatbotQuerySchema = z.object({
+export const MessagesByAgentQuerySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
-  chatbotId: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
-export const MessagesByChatbotResponseSchema = z.object({
-  data: z.array(ChatbotCount),
+export const MessagesByAgentResponseSchema = z.object({
+  data: z.array(AgentCount),
 });
 
-export const KnowledgeByChatbotQuerySchema = z.object({
-  chatbotId: z.string().optional(),
+export const KnowledgeByAgentQuerySchema = z.object({
+  agentId: z.string().optional(),
 });
 
-export const KnowledgeByChatbotResponseSchema = z.object({
-  data: z.array(ChatbotCount),
+export const KnowledgeByAgentResponseSchema = z.object({
+  data: z.array(AgentCount),
 });
 
 export const UsageChartsModel = new Elysia().model({
   MessagesDailyQuerySchema,
   MessagesDailyResponseSchema,
-  MessagesByChatbotQuerySchema,
-  MessagesByChatbotResponseSchema,
-  KnowledgeByChatbotQuerySchema,
-  KnowledgeByChatbotResponseSchema,
+  MessagesByAgentQuerySchema,
+  MessagesByAgentResponseSchema,
+  KnowledgeByAgentQuerySchema,
+  KnowledgeByAgentResponseSchema,
 });

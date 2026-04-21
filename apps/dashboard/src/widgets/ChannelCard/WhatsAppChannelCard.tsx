@@ -19,7 +19,7 @@ import { Link, useParams } from '@tanstack/react-router';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
-  CHATBOT_LOCK_TOOLTIP,
+  AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import type { ChannelSchema } from '@/services';
@@ -38,12 +38,12 @@ interface ConnectionResponse {
 
 const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
-  const { chatbotId } = useParams({ strict: false });
+  const { agentId } = useParams({ strict: false });
 
-  if (!chatbotId) throw new Error('ChatbotId not available');
+  if (!agentId) throw new Error('agentId not available');
 
   const channelWhatsApp = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
+    state.channelsByAgentId[agentId]?.find(
       (c) => c.additional.type === 'whatsapp',
     ),
   );
@@ -87,9 +87,9 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       ? channelWhatsApp.additional.config.displayPhone
       : undefined;
 
-  // Numbers not bound to any other chatbot (available to assign to this one)
+  // Numbers not bound to any other agent (available to assign to this one)
   const availableNumbers = phoneNumbers.filter(
-    (p) => !p.boundToChatbotId || p.boundToChatbotId === chatbotId,
+    (p) => !p.boundToAgentId || p.boundToAgentId === agentId,
   );
 
   const assignMutation = useMutation({
@@ -105,7 +105,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (!channelWhatsApp) {
         const createRes = await postChannels({
           body: {
-            chatbotId,
+            agentId,
             enabled: false,
             channelStatus: 'inactive',
             additional: { type: 'whatsapp', config: {} },
@@ -136,20 +136,20 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       const { channel: updatedChannel, wasCreated } = result;
       if (wasCreated) {
         const current =
-          useChannels.getState().channelsByChatbotId[chatbotId] ?? [];
-        setChannels(chatbotId, [...current, updatedChannel]);
+          useChannels.getState().channelsByAgentId[agentId] ?? [];
+        setChannels(agentId, [...current, updatedChannel]);
       } else {
-        updateChannel(chatbotId, updatedChannel);
+        updateChannel(agentId, updatedChannel);
       }
       const phone = phoneNumbers.find(
         (p) => p.phoneNumberId === selectedPhoneNumberId,
       );
       if (phone) {
-        updatePhoneBinding(phone.phoneNumberId, chatbotId, null);
+        updatePhoneBinding(phone.phoneNumberId, agentId, null);
       }
       setSelectedPhoneNumberId('');
-      posthog.capture('chatbot_channel_connected', {
-        chatbot_id: chatbotId,
+      posthog.capture('agent_channel_connected', {
+        agent_id: agentId,
         channel_type: 'whatsapp',
       });
       toast.success('Phone number assigned');
@@ -170,14 +170,14 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
     onSuccess: (updatedChannel) => {
       if (!updatedChannel) return;
-      updateChannel(chatbotId, updatedChannel);
+      updateChannel(agentId, updatedChannel);
       // Find and unbind the phone in the store
-      const phone = phoneNumbers.find((p) => p.boundToChatbotId === chatbotId);
+      const phone = phoneNumbers.find((p) => p.boundToAgentId === agentId);
       if (phone) {
         updatePhoneBinding(phone.phoneNumberId, null, null);
       }
-      posthog.capture('chatbot_channel_disconnected', {
-        chatbot_id: chatbotId,
+      posthog.capture('agent_channel_disconnected', {
+        agent_id: agentId,
         channel_type: 'whatsapp',
       });
       toast.success('Phone number unassigned');
@@ -222,7 +222,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           <CardDescription>{displayPhone}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-end">
-          <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
             <Button
               variant="outline"
               size="sm"
@@ -269,7 +269,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             ))}
           </SelectContent>
         </Select>
-        <DisabledTooltip disabled={readOnly} content={CHATBOT_LOCK_TOOLTIP}>
+        <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
           <Button
             size="sm"
             disabled={

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DocumentSchema } from '../document/model';
 
 const IndexingStartBody = z.object({
-  chatbotId: z.string(),
+  agentId: z.string(),
 });
 
 const IndexingStartResponse = z.object({

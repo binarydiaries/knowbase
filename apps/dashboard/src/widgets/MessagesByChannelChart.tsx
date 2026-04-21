@@ -28,24 +28,24 @@ function capitalizeChannel(type: string): string {
 }
 
 type Props = {
-  chatbotId: string;
+  agentId: string;
   startDate: string;
   endDate: string;
 };
 
 export function MessagesByChannelChart({
-  chatbotId,
+  agentId,
   startDate,
   endDate,
 }: Props) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics-msgs-channel', chatbotId, startDate, endDate],
+    queryKey: ['analytics-msgs-channel', agentId, startDate, endDate],
     queryFn: async () => {
       const res = await getAnalyticsMessagesByChannel({
         query: {
           startDate,
           endDate,
-          ...(chatbotId !== 'all' && { chatbotId }),
+          ...(agentId !== 'all' && { agentId }),
         } as never,
       });
       return res.data;

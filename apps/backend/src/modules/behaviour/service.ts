@@ -5,19 +5,19 @@ import { behaviors } from '../../db/schema/behaviors';
 export abstract class BehaviourService {
   static single({ id, orgId }: { id: string; orgId: string }) {
     return db.query.behaviors.findFirst({
-      where: { id, chatbot: { orgId } },
+      where: { id, agent: { orgId } },
     });
   }
 
-  static singleByChatbot(chatbotId: string) {
+  static singleByAgent(agentId: string) {
     return db.query.behaviors.findFirst({
-      where: { chatbotId },
+      where: { agentId },
     });
   }
 
   static list({ orgId }: { orgId: string }) {
     return db.query.behaviors.findMany({
-      where: { chatbot: { orgId } },
+      where: { agent: { orgId } },
     });
   }
 

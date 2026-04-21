@@ -1,6 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
-import { Chatbot } from '@knowbase/ui/widgets/Chatbot/Chatbot';
+import { Agent } from "@knowbase/ui/widgets/Agent/Agent";
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePostHog } from 'posthog-js/react';
@@ -9,19 +9,19 @@ import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 import type { ChannelSchema } from '@/services';
 
-interface IChatbotPreviewContentProps {
+interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
-  chatbotId: string;
+  agentId: string;
   orgId: string | null | undefined;
   onNewChat: () => void;
 }
 
-const ChatbotPreviewContent = ({
+const AgentPreviewContent = ({
   channelWeb,
-  chatbotId,
+  agentId,
   orgId,
   onNewChat,
-}: IChatbotPreviewContentProps) => {
+}: IAgentPreviewContentProps) => {
   const posthog = usePostHog();
   const initialMessageId = useId();
   const sendStartTimeRef = useRef<number>(0);
@@ -63,7 +63,7 @@ const ChatbotPreviewContent = ({
 
       posthog.capture('$ai_generation', {
         $ai_trace_id: conversationId,
-        $ai_session_id: chatbotId,
+        $ai_session_id: agentId,
         $ai_provider: 'custom',
         $ai_stream: true,
         $ai_latency: latency,
@@ -99,7 +99,7 @@ const ChatbotPreviewContent = ({
   }, [setMessages, initialMessage]);
 
   return (
-    <Chatbot
+    <Agent
       displayName={channelConfig?.displayName || ''}
       subTitle={channelConfig?.subtitle}
       inputPlaceholder={channelConfig?.inputPlaceholder}
@@ -122,17 +122,17 @@ const ChatbotPreviewContent = ({
   );
 };
 
-export const ChatbotPreview = () => {
-  const { chatbotId } = useParams({ strict: false });
+export const AgentPreview = () => {
+  const { agentId } = useParams({ strict: false });
   const { orgId } = useAuth();
   const [chatKey, setChatKey] = useState(0);
 
-  if (!chatbotId) {
-    throw new Error('ChatbotId not available');
+  if (!agentId) {
+    throw new Error('agentId not available');
   }
 
   const channelWeb = useChannels((state) =>
-    state.channelsByChatbotId[chatbotId]?.find(
+    state.channelsByAgentId[agentId]?.find(
       (channel) => channel.additional.type === 'web',
     ),
   );
@@ -142,10 +142,10 @@ export const ChatbotPreview = () => {
   }
 
   return (
-    <ChatbotPreviewContent
+    <AgentPreviewContent
       key={chatKey}
       channelWeb={channelWeb}
-      chatbotId={chatbotId}
+      agentId={agentId}
       orgId={orgId}
       onNewChat={() => setChatKey((k) => k + 1)}
     />

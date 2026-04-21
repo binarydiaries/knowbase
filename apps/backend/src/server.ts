@@ -9,7 +9,7 @@ import { Analytics } from './modules/analytics/analytics';
 import { UsageCharts } from './modules/usage/usage';
 import { Channel } from './modules/channel/channel';
 import { Chat } from './modules/chat/chat';
-import { Chatbot } from './modules/chatbot/chatbot';
+import { Agent } from './modules/agent/agent';
 import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
 import { Indexing } from './modules/indexing/indexing';
@@ -51,7 +51,7 @@ const app = new Elysia()
   .use(Chat)
   .use(message)
   .use(Document)
-  .use(Chatbot)
+  .use(Agent)
   .use(Indexing)
   .use(Conversation)
   .use(Behaviour)

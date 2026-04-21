@@ -101,7 +101,7 @@ export abstract class AiCostEventService {
 
   static async recordEvent({
     orgId,
-    chatbotId,
+    agentId,
     conversationId,
     provider,
     model,
@@ -109,7 +109,7 @@ export abstract class AiCostEventService {
     metadata,
   }: {
     orgId: string;
-    chatbotId?: string;
+    agentId?: string;
     conversationId?: string;
     provider: string;
     model: string;
@@ -120,7 +120,7 @@ export abstract class AiCostEventService {
 
     await db.insert(aiCostEvents).values({
       orgId,
-      chatbotId,
+      agentId,
       conversationId,
       provider,
       model: parsed.normalizedModel,

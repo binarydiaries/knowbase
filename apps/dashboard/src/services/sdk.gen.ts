@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteChatbotActionsByIdData, DeleteChatbotActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopChatbotsData, GetAnalyticsTopChatbotsErrors, GetAnalyticsTopChatbotsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatbotActionsData, GetChatbotActionsResponses, GetChatbotsByIdData, GetChatbotsByIdErrors, GetChatbotsByIdResponses, GetChatbotsData, GetChatbotsErrors, GetChatbotsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByChatbotData, GetUsageKnowledgeByChatbotErrors, GetUsageKnowledgeByChatbotResponses, GetUsageMessagesByChatbotData, GetUsageMessagesByChatbotErrors, GetUsageMessagesByChatbotResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchChatbotActionsById as PatchChatbotActionsByIdData, PatchChatbotActionsByIdResponses, PatchChatbotsByIdData, PatchChatbotsByIdErrors, PatchChatbotsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostChatbotActionsData, PostChatbotActionsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatbotsData, PostChatbotsErrors, PostChatbotsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
+import type { DeleteAgentActionsByIdData, DeleteAgentActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopAgentsData, GetAnalyticsTopAgentsErrors, GetAnalyticsTopAgentsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetAgentActionsData, GetAgentActionsResponses, GetAgentsByIdData, GetAgentsByIdErrors, GetAgentsByIdResponses, GetAgentsData, GetAgentsErrors, GetAgentsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByAgentData, GetUsageKnowledgeByAgentErrors, GetUsageKnowledgeByAgentResponses, GetUsageMessagesByAgentData, GetUsageMessagesByAgentErrors, GetUsageMessagesByAgentResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchAgentActionsById as PatchAgentActionsByIdData, PatchAgentActionsByIdResponses, PatchAgentsByIdData, PatchAgentsByIdErrors, PatchAgentsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostAgentActionsData, PostAgentActionsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostAgentsData, PostAgentsErrors, PostAgentsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -24,15 +24,15 @@ export const getUsageMessagesDaily = <ThrowOnError extends boolean = true>(optio
     ...options
 });
 
-export const getUsageMessagesByChatbot = <ThrowOnError extends boolean = true>(options?: Options<GetUsageMessagesByChatbotData, ThrowOnError>) => (options?.client ?? client).get<GetUsageMessagesByChatbotResponses, GetUsageMessagesByChatbotErrors, ThrowOnError>({
+export const getUsageMessagesByAgent = <ThrowOnError extends boolean = true>(options?: Options<GetUsageMessagesByAgentData, ThrowOnError>) => (options?.client ?? client).get<GetUsageMessagesByAgentResponses, GetUsageMessagesByAgentErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/usage/messages-by-chatbot',
+    url: '/usage/messages-by-agent',
     ...options
 });
 
-export const getUsageKnowledgeByChatbot = <ThrowOnError extends boolean = true>(options?: Options<GetUsageKnowledgeByChatbotData, ThrowOnError>) => (options?.client ?? client).get<GetUsageKnowledgeByChatbotResponses, GetUsageKnowledgeByChatbotErrors, ThrowOnError>({
+export const getUsageKnowledgeByAgent = <ThrowOnError extends boolean = true>(options?: Options<GetUsageKnowledgeByAgentData, ThrowOnError>) => (options?.client ?? client).get<GetUsageKnowledgeByAgentResponses, GetUsageKnowledgeByAgentErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/usage/knowledge-by-chatbot',
+    url: '/usage/knowledge-by-agent',
     ...options
 });
 
@@ -54,9 +54,9 @@ export const getAnalyticsMessagesByChannel = <ThrowOnError extends boolean = tru
     ...options
 });
 
-export const getAnalyticsTopChatbots = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsTopChatbotsData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsTopChatbotsResponses, GetAnalyticsTopChatbotsErrors, ThrowOnError>({
+export const getAnalyticsTopAgents = <ThrowOnError extends boolean = true>(options?: Options<GetAnalyticsTopAgentsData, ThrowOnError>) => (options?.client ?? client).get<GetAnalyticsTopAgentsResponses, GetAnalyticsTopAgentsErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/analytics/top-chatbots',
+    url: '/analytics/top-agents',
     ...options
 });
 
@@ -138,15 +138,15 @@ export const patchDocumentsById = <ThrowOnError extends boolean = true>(options:
     }
 });
 
-export const getChatbots = <ThrowOnError extends boolean = true>(options?: Options<GetChatbotsData, ThrowOnError>) => (options?.client ?? client).get<GetChatbotsResponses, GetChatbotsErrors, ThrowOnError>({
+export const getAgents = <ThrowOnError extends boolean = true>(options?: Options<GetAgentsData, ThrowOnError>) => (options?.client ?? client).get<GetAgentsResponses, GetAgentsErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbots',
+    url: '/agents',
     ...options
 });
 
-export const postChatbots = <ThrowOnError extends boolean = true>(options: Options<PostChatbotsData, ThrowOnError>) => (options.client ?? client).post<PostChatbotsResponses, PostChatbotsErrors, ThrowOnError>({
+export const postAgents = <ThrowOnError extends boolean = true>(options: Options<PostAgentsData, ThrowOnError>) => (options.client ?? client).post<PostAgentsResponses, PostAgentsErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbots',
+    url: '/agents',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -154,15 +154,15 @@ export const postChatbots = <ThrowOnError extends boolean = true>(options: Optio
     }
 });
 
-export const getChatbotsById = <ThrowOnError extends boolean = true>(options: Options<GetChatbotsByIdData, ThrowOnError>) => (options.client ?? client).get<GetChatbotsByIdResponses, GetChatbotsByIdErrors, ThrowOnError>({
+export const getAgentsById = <ThrowOnError extends boolean = true>(options: Options<GetAgentsByIdData, ThrowOnError>) => (options.client ?? client).get<GetAgentsByIdResponses, GetAgentsByIdErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbots/{id}',
+    url: '/agents/{id}',
     ...options
 });
 
-export const patchChatbotsById = <ThrowOnError extends boolean = true>(options: Options<PatchChatbotsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchChatbotsByIdResponses, PatchChatbotsByIdErrors, ThrowOnError>({
+export const patchAgentsById = <ThrowOnError extends boolean = true>(options: Options<PatchAgentsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentsByIdResponses, PatchAgentsByIdErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbots/{id}',
+    url: '/agents/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -246,15 +246,15 @@ export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(opti
     ...options
 });
 
-export const getChatbotActions = <ThrowOnError extends boolean = true>(options: Options<GetChatbotActionsData, ThrowOnError>) => (options.client ?? client).get<GetChatbotActionsResponses, unknown, ThrowOnError>({
+export const getAgentActions = <ThrowOnError extends boolean = true>(options: Options<GetAgentActionsData, ThrowOnError>) => (options.client ?? client).get<GetAgentActionsResponses, unknown, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbot-actions',
+    url: '/agent-actions',
     ...options
 });
 
-export const postChatbotActions = <ThrowOnError extends boolean = true>(options: Options<PostChatbotActionsData, ThrowOnError>) => (options.client ?? client).post<PostChatbotActionsResponses, unknown, ThrowOnError>({
+export const postAgentActions = <ThrowOnError extends boolean = true>(options: Options<PostAgentActionsData, ThrowOnError>) => (options.client ?? client).post<PostAgentActionsResponses, unknown, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbot-actions',
+    url: '/agent-actions',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -262,9 +262,9 @@ export const postChatbotActions = <ThrowOnError extends boolean = true>(options:
     }
 });
 
-export const patchChatbotActionsById = <ThrowOnError extends boolean = true>(options: Options<PatchChatbotActionsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchChatbotActionsByIdResponses, unknown, ThrowOnError>({
+export const patchAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<PatchAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentActionsByIdResponses, unknown, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbot-actions/{id}',
+    url: '/agent-actions/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -272,9 +272,9 @@ export const patchChatbotActionsById = <ThrowOnError extends boolean = true>(opt
     }
 });
 
-export const deleteChatbotActionsById = <ThrowOnError extends boolean = true>(options: Options<DeleteChatbotActionsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteChatbotActionsByIdResponses, unknown, ThrowOnError>({
+export const deleteAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<DeleteAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteAgentActionsByIdResponses, unknown, ThrowOnError>({
     responseType: 'json',
-    url: '/chatbot-actions/{id}',
+    url: '/agent-actions/{id}',
     ...options
 });
 

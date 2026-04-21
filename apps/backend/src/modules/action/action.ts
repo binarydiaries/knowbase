@@ -2,12 +2,12 @@ import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { SubscriptionService } from '../subscription/service';
-import { ChatbotService } from '../chatbot/service';
+import { AgentService } from '../agent/service';
 import { ActionModel } from './model';
 import { ActionService } from './service';
 
 export const Action = new Elysia({
-  prefix: '/chatbot-actions',
+  prefix: '/agent-actions',
   tags: ['Actions'],
 })
   .use(AuthGuard)
@@ -16,14 +16,14 @@ export const Action = new Elysia({
   .get(
     '',
     async ({ query, orgId }) => {
-      const { chatbotId } = query;
-      const actions = await ActionService.getByChatbot(chatbotId);
+      const { agentId } = query;
+      const actions = await ActionService.getByAgent(agentId);
       return { actions };
     },
     {
-      query: 'GetChatbotActionsQuery',
+      query: 'GetAgentActionsQuery',
       response: {
-        200: 'ManyChatbotActionResponse',
+        200: 'ManyAgentActionResponse',
       },
     },
   )
@@ -40,13 +40,13 @@ export const Action = new Elysia({
         }
       }
 
-      const chatbot = await ChatbotService.single({ id: body.chatbotId, orgId });
-      if (!chatbot) {
-        return status(404, { code: 'NOT_FOUND', message: 'Chatbot not found' });
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
       }
 
       const action = await ActionService.create({
-        chatbotId: body.chatbotId,
+        agentId: body.agentId,
         actionType: body.actionType,
         config: body.config ?? {},
         createdBy: userId,
@@ -54,9 +54,9 @@ export const Action = new Elysia({
       return { action };
     },
     {
-      body: 'CreateChatbotActionBody',
+      body: 'CreateAgentActionBody',
       response: {
-        200: 'OneChatbotActionResponse',
+        200: 'OneAgentActionResponse',
         403: 'LeadGenerationForbiddenResponse',
         404: 'NotFoundResponse',
       },
@@ -90,9 +90,9 @@ export const Action = new Elysia({
       return { action };
     },
     {
-      body: 'UpdateChatbotActionBody',
+      body: 'UpdateAgentActionBody',
       response: {
-        200: 'OneChatbotActionResponse',
+        200: 'OneAgentActionResponse',
         403: 'LeadGenerationForbiddenResponse',
       },
     },

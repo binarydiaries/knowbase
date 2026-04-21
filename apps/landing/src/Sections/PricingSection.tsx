@@ -1,6 +1,5 @@
 import { Check } from 'lucide-react'
 import { usePlans } from '@clerk/clerk-react/experimental'
-import type { __experimental_BillingPlanResource as BillingPlanResource } from '@clerk/clerk-react'
 import GetStartedButton from '../components/GetStartedButton'
 import { usePostHog } from '@posthog/react'
 
@@ -14,7 +13,9 @@ const PLAN_META: Record<string, { highlight: boolean }> = {
 const resolveSlug = (slug: string) =>
     (['free', 'starter', 'growth', 'pro'] as const).find((s) => slug.toLowerCase().includes(s)) ?? 'free'
 
-const formatPrice = (plan: BillingPlanResource) => {
+type BillingPlan = ReturnType<typeof usePlans>['data'] extends (infer T)[] | undefined ? T : never
+
+const formatPrice = (plan: BillingPlan) => {
     if (!plan.hasBaseFee || plan.fee.amount === 0) return '$0'
     return `${plan.fee.currency === 'USD' ? '$' : plan.fee.currency}${plan.fee.amountFormatted}`
 }

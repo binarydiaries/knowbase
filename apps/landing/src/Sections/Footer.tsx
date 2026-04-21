@@ -10,15 +10,6 @@ const socialLinks = [
 ];
 
 const Footer = () => {
-    const scrollToSection = (id: string) => {
-        const el = document.getElementById(id);
-        if (el) {
-            const offset = 80;
-            const top = el.offsetTop - offset;
-            window.scrollTo({ top, behavior: "smooth" });
-        }
-    };
-
     return (
         <footer className="px-6" aria-label="Site footer">
             <div className="w-full mx-auto">
@@ -43,31 +34,11 @@ const Footer = () => {
                             <nav aria-label="Quick links">
                                 <h2 className="text-sm font-semibold text-[#301B69] mb-4">Quick Links</h2>
                                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
-                                    <li>
-                                        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-[#301B69]">
-                                            Home
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={() => scrollToSection("features")} className="hover:text-[#301B69]">
-                                            Features
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={() => scrollToSection("how-it-works")} className="hover:text-[#301B69]">
-                                            How it Works
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={() => scrollToSection("pricing")} className="hover:text-[#301B69]">
-                                            Pricing
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={() => scrollToSection("faq")} className="hover:text-[#301B69]">
-                                            FAQ
-                                        </button>
-                                    </li>
+                                    <li><a href="#" className="hover:text-[#301B69]">Home</a></li>
+                                    <li><a href="#features" className="hover:text-[#301B69]">Features</a></li>
+                                    <li><a href="#how-it-works" className="hover:text-[#301B69]">How it Works</a></li>
+                                    <li><a href="#pricing" className="hover:text-[#301B69]">Pricing</a></li>
+                                    <li><a href="#faq" className="hover:text-[#301B69]">FAQ</a></li>
                                 </ul>
                             </nav>
 
@@ -76,9 +47,9 @@ const Footer = () => {
                                 <h2 className="text-sm font-semibold text-[#301B69] mb-4">Support</h2>
                                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                                     <li>
-                                        <button onClick={() => scrollToSection("faq")} className="hover:text-[#301B69]">
+                                        <a href="#faq" className="hover:text-[#301B69]">
                                             Help Center
-                                        </button>
+                                        </a>
                                     </li>
                                     <li><a href="/docs/getting-started" className="hover:text-[#301B69]">Getting Started</a></li>
                                     <li><a href="/contact" className="hover:text-[#301B69]">Contact Support</a></li>

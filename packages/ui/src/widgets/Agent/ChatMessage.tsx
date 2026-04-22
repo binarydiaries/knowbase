@@ -29,11 +29,9 @@ export const ChatMessage = ({
       <div
         className={cn(
           'max-w-3/4 flex flex-col rounded-2xl p-4 gap-1 group relative',
-          type === 'system' ? '' : 'text-white',
+          type === 'system' ? 'bg-muted text-foreground' : 'text-white',
         )}
-        style={{
-          backgroundColor: type === 'system' ? '#F0F0F0' : primaryColor,
-        }}
+        style={type === 'user' ? { backgroundColor: primaryColor } : undefined}
       >
         {type === 'system' && (
           <div className="flex items-center justify-between gap-2">

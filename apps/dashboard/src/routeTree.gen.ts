@@ -21,6 +21,7 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
 import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
+import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,11 @@ const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
   path: '/admin/costs/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
+  id: '/admin/queue/',
+  path: '/admin/queue/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
+  '/admin/queue/': typeof AdminQueueIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
   '/admin/costs': typeof AdminCostsIndexRoute
+  '/admin/queue': typeof AdminQueueIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
+  '/admin/queue/': typeof AdminQueueIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
+    | '/admin/queue/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesByTo: FileRoutesByTo
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/usage'
     | '/admin/costs'
+    | '/admin/queue'
     | '/agents/$agentId'
     | '/conversations/{-$conversationId}'
   id:
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
+    | '/admin/queue/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesById: FileRoutesById
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
+  AdminQueueIndexRoute: typeof AdminQueueIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/queue/': {
+      id: '/admin/queue/'
+      path: '/admin/queue'
+      fullPath: '/admin/queue/'
+      preLoaderRoute: typeof AdminQueueIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,
   AdminCostsIndexRoute: AdminCostsIndexRoute,
+  AdminQueueIndexRoute: AdminQueueIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:
     ConversationsChar123ConversationIdChar125IndexRoute,

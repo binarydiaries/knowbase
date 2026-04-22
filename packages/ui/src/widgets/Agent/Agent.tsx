@@ -55,7 +55,7 @@ export const Agent = ({
   return (
     <div
       className={cn(
-        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden flex flex-col',
+        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] dark:shadow-none border border-border rounded-3xl overflow-hidden flex flex-col',
         className,
       )}
       {...otherProps}

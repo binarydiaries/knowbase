@@ -55,7 +55,7 @@ export const Agent = ({
   return (
     <div
       className={cn(
-        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden flex flex-col',
+        'w-100 shadow-[0_0_15px_rgba(0,0,0,0.15)] dark:shadow-none border border-border rounded-3xl overflow-hidden flex flex-col',
         className,
       )}
       {...otherProps}
@@ -128,7 +128,7 @@ export const Agent = ({
 
             {isLoading && (
               <div className="flex">
-                <div className="rounded-2xl px-4 py-2 bg-[#F0F0F0]">
+                <div className="rounded-2xl px-4 py-2 bg-muted">
                   <Ellipsis />
                 </div>
               </div>

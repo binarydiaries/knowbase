@@ -18,11 +18,16 @@ import { Link } from '@tanstack/react-router';
 import {
   BadgeCheck,
   Building,
+  Check,
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  Monitor,
+  Moon,
   Sparkles,
+  Sun,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { usePostHog } from 'posthog-js/react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 
@@ -31,6 +36,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const { user } = useUser();
   const { isPaid, planLabel } = useClerkPlan();
+  const { theme, setTheme } = useTheme();
 
   return (
     <SidebarMenu>
@@ -102,6 +108,24 @@ export function NavUser() {
                   <Building />
                   Organization
                 </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun />
+                Light
+                {theme === 'light' && <Check className="ml-auto size-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon />
+                Dark
+                {theme === 'dark' && <Check className="ml-auto size-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                <Monitor />
+                System
+                {theme === 'system' && <Check className="ml-auto size-4" />}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

@@ -12,9 +12,11 @@ import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, LockIcon } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { useClerkPlan } from '@/hooks/useClerkPlan.ts';
 import { client } from '@/services/client.gen';
 import {
   useWhatsAppConnection,
@@ -34,6 +36,7 @@ export function WhatsAppIntegrationCard() {
   const [businessAccountId, setBusinessAccountId] = useState('');
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
+  const { isPaid, isLoading: planLoading } = useClerkPlan();
 
   // Fetch connection status on mount
   const { isLoading } = useQuery({
@@ -128,7 +131,7 @@ export function WhatsAppIntegrationCard() {
             </CardDescription>
           </div>
         </div>
-        {connected && (
+        {isPaid && connected && (
           <Badge
             variant="outline"
             className="shrink-0 text-green-600 border-green-300 bg-green-50"
@@ -139,7 +142,21 @@ export function WhatsAppIntegrationCard() {
         )}
       </CardHeader>
 
-      {!connected && !isLoading && (
+      {!planLoading && !isPaid && (
+        <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
+          <div className="rounded-full border p-3">
+            <LockIcon className="size-5 text-muted-foreground" />
+          </div>
+          <p className="text-xs text-muted-foreground max-w-xs">
+            WhatsApp Business integration is available on paid plans. Upgrade to connect your account.
+          </p>
+          <Button size="sm" asChild>
+            <Link to="/subscriptions">Upgrade Plan</Link>
+          </Button>
+        </CardContent>
+      )}
+
+      {isPaid && !connected && !isLoading && (
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="space-y-1.5">
@@ -185,7 +202,7 @@ export function WhatsAppIntegrationCard() {
         </CardContent>
       )}
 
-      {connected && (
+      {isPaid && connected && (
         <CardContent className="space-y-4">
           <Separator />
           <div className="space-y-2">

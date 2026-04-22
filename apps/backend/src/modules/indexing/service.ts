@@ -159,18 +159,38 @@ export abstract class IndexingService {
       embeddings.embedding,
       userQueryEmbedded,
     )})`;
-    return db
-      .select({
-        similarity,
-        content: embeddings.content,
-        documentId: embeddings.documentId,
-        documentVersion: embeddings.documentVersion,
-        chunkIndex: embeddings.chunkIndex,
-      })
+
+    const select = {
+      similarity,
+      content: embeddings.content,
+      documentId: embeddings.documentId,
+      documentVersion: embeddings.documentVersion,
+      chunkIndex: embeddings.chunkIndex,
+    };
+
+    const agentFilter = eq(documents.agentId, agentId);
+
+    // Primary search — covers precise and moderately specific queries.
+    const primary = await db
+      .select(select)
       .from(embeddings)
       .innerJoin(documents, eq(embeddings.documentId, documents.id))
-      .where(and(gt(similarity, 0.5), eq(documents.agentId, agentId)))
+      .where(and(gt(similarity, 0.35), agentFilter))
       .orderBy((t) => desc(t.similarity))
       .limit(5);
+
+    if (primary.length > 0) return primary;
+
+    // Fallback — broad/vague queries (e.g. "tell me about policy") often score
+    // below the primary threshold even when highly relevant content exists.
+    // Return the closest available chunks so the LLM can still attempt an
+    // answer rather than always firing the fallback message.
+    return db
+      .select(select)
+      .from(embeddings)
+      .innerJoin(documents, eq(embeddings.documentId, documents.id))
+      .where(and(gt(similarity, 0.2), agentFilter))
+      .orderBy((t) => desc(t.similarity))
+      .limit(3);
   };
 }

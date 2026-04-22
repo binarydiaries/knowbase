@@ -128,7 +128,7 @@ export const Agent = ({
 
             {isLoading && (
               <div className="flex">
-                <div className="rounded-2xl px-4 py-2 bg-[#F0F0F0]">
+                <div className="rounded-2xl px-4 py-2 bg-muted">
                   <Ellipsis />
                 </div>
               </div>

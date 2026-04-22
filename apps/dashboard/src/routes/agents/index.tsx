@@ -46,7 +46,7 @@ import {
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
-import { type AgentSchema, getAgents, patchAgentsById } from '@/services';
+import { type AgentSchema, getAgents, getAgentsById, patchAgentsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
 import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
@@ -181,6 +181,12 @@ function RouteComponent() {
                   to="/agents/$agentId"
                   params={{ agentId: bot.id }}
                   className="block"
+                  onMouseEnter={() => {
+                    queryClient.prefetchQuery({
+                      queryKey: ['agent', bot.id],
+                      queryFn: () => getAgentsById({ path: { id: bot.id } }),
+                    });
+                  }}
                 >
                   <Card className={`rounded-xl border bg-background shadow-sm transition-all duration-150 hover:shadow-md ${isArchived ? 'opacity-50' : ''}`}>
                     <CardContent>

@@ -1,11 +1,13 @@
 import './index.css';
 import {
+  ClerkLoading,
   ClerkProvider,
   RedirectToSignIn,
   SignedIn,
   SignedOut,
 } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
+import { Loader2 } from 'lucide-react';
 import { Toaster } from '@knowbase/ui/components/sonner';
 import { TooltipProvider } from '@knowbase/ui/components/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -54,6 +56,11 @@ function AppWithTheme() {
       publishableKey={PUBLISHABLE_KEY}
       appearance={{ baseTheme: resolvedTheme === 'dark' ? dark : undefined }}
     >
+      <ClerkLoading>
+        <div className="flex h-screen w-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </ClerkLoading>
       <SignedIn>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>

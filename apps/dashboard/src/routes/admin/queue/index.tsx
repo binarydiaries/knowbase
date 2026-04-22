@@ -22,7 +22,7 @@ type JobState = 'waiting' | 'active' | 'delayed' | 'failed' | 'completed' | stri
 type QueueJob = {
   id: string;
   name: string;
-  data: { documentId: string; orgId: string; version: number };
+  data: Record<string, unknown>;
   state: JobState;
   attemptsMade: number;
   timestamp: number;
@@ -248,9 +248,9 @@ function RouteComponent() {
                           return (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.id}</TableCell>
-                              <TableCell className="font-mono text-xs max-w-[160px] truncate">{job.data.documentId}</TableCell>
-                              <TableCell className="font-mono text-xs max-w-[140px] truncate">{job.data.orgId}</TableCell>
-                              <TableCell className="text-right">{job.data.version}</TableCell>
+                              <TableCell className="font-mono text-xs max-w-[160px] truncate">{String(job.data.documentId ?? '—')}</TableCell>
+                              <TableCell className="font-mono text-xs max-w-[140px] truncate">{String(job.data.orgId ?? '—')}</TableCell>
+                              <TableCell className="text-right">{job.data.version != null ? String(job.data.version) : '—'}</TableCell>
                               <TableCell>
                                 <Badge variant={badge.variant}>{badge.label}</Badge>
                               </TableCell>

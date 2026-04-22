@@ -17,6 +17,16 @@ const splitter = new MarkdownHeaderTextSplitter([
   ['###', 'h3'],
 ]);
 
+// Sentence-level separators give the splitter natural break points before it
+// falls back to splitting mid-word. Order matters: prefer coarser breaks first.
+const RECURSIVE_SEPARATORS = ['\n\n', '\n', '. ', '! ', '? ', '; ', ' ', ''];
+
+// 800 chars gives enough context for a meaningful embedding while staying well
+// under the token limit for text-embedding-3-small. 100-char overlap preserves
+// continuity across adjacent chunks without duplicating too much content.
+const CHUNK_SIZE = 800;
+const CHUNK_OVERLAP = 100;
+
 export abstract class IndexingService {
   static embedDocument = async (document: typeof documents.$inferSelect) => {
     const documentContent = {
@@ -27,7 +37,7 @@ export abstract class IndexingService {
     let generatedEmbeddings: { embedding: number[]; content: string }[] = [];
 
     if (documentContent.type === 'qna') {
-      const chunks = await IndexingService.chunkLargeQnA({
+      const chunks = await IndexingService.chunkQnA({
         title: document.title,
         questions: documentContent.data,
       });
@@ -53,7 +63,7 @@ export abstract class IndexingService {
     }
   };
 
-  static async chunkLargeQnA({
+  static async chunkQnA({
     title,
     questions,
   }: {
@@ -61,18 +71,20 @@ export abstract class IndexingService {
     questions: z.infer<typeof DocumentContentQna>;
   }) {
     const chunkPromises = questions.map(async (question) => {
-      const recursiveChunks = await IndexingService.generateRecursiveChunks(
-        question.answer,
-      );
+      // Skip recursive splitting for short answers — they read better as a
+      // single chunk and produce a more precise embedding.
+      const answerChunks =
+        question.answer.length <= CHUNK_SIZE
+          ? [question.answer]
+          : await IndexingService.splitIntoChunks(question.answer);
 
-      return recursiveChunks.map((chunk, index) => {
-        return `
-Title: ${title}
+      return answerChunks.map((chunk, index) => {
+        const partSuffix =
+          answerChunks.length > 1
+            ? ` (part ${index + 1}/${answerChunks.length})`
+            : '';
 
-Question: ${question.question}
-Answer (part ${index + 1}/${recursiveChunks.length}):
-${chunk}
-        `.trim();
+        return `Title: ${title}\n\nQuestion: ${question.question}\nAnswer${partSuffix}:\n${chunk}`.trim();
       });
     });
 
@@ -87,31 +99,37 @@ ${chunk}
     content: string;
   }) {
     const documentChunks = splitter.splitText(content);
-    const documentChunkPromise = documentChunks.map(async (doc) => {
+
+    const chunkPromises = documentChunks.map(async (doc) => {
       const headerString = Object.values(doc.metadata).join(' → ');
       const header = title + (headerString ? ` - ${headerString}` : '');
 
-      const recursiveChunks = await IndexingService.generateRecursiveChunks(
+      const recursiveChunks = await IndexingService.splitIntoChunks(
         doc.pageContent,
       );
 
-      return recursiveChunks.map((recursiveChunk, index) => {
-        return `${header} (part ${index + 1}/${recursiveChunks.length})
+      return recursiveChunks.map((chunk, index) => {
+        // Only append the part marker when the section was actually split —
+        // "(part 1/1)" is noise and slightly degrades embedding quality.
+        const partSuffix =
+          recursiveChunks.length > 1
+            ? ` (part ${index + 1}/${recursiveChunks.length})`
+            : '';
 
-${recursiveChunk}
-      `.trim();
+        return `${header}${partSuffix}\n\n${chunk}`.trim();
       });
     });
 
-    return (await Promise.all(documentChunkPromise)).flat();
+    return (await Promise.all(chunkPromises)).flat();
   }
 
-  static generateRecursiveChunks = async (input: string): Promise<string[]> => {
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 400,
-      chunkOverlap: 50,
+  static splitIntoChunks = async (input: string): Promise<string[]> => {
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: CHUNK_SIZE,
+      chunkOverlap: CHUNK_OVERLAP,
+      separators: RECURSIVE_SEPARATORS,
     });
-    return await splitter.splitText(input);
+    return textSplitter.splitText(input);
   };
 
   static generateEmbeddings = async (
@@ -125,7 +143,9 @@ ${recursiveChunk}
   };
 
   static generateEmbedding = async (value: string): Promise<number[]> => {
-    const input = value.replaceAll('\\n', ' ');
+    // Normalise whitespace the same way as at index time so that query
+    // vectors sit in the same space as document chunk vectors.
+    const input = value.replaceAll('\n', ' ').trim();
     const { embedding } = await embed({
       model,
       value: input,
@@ -151,6 +171,6 @@ ${recursiveChunk}
       .innerJoin(documents, eq(embeddings.documentId, documents.id))
       .where(and(gt(similarity, 0.5), eq(documents.agentId, agentId)))
       .orderBy((t) => desc(t.similarity))
-      .limit(3);
+      .limit(5);
   };
 }

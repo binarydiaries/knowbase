@@ -21,6 +21,7 @@ export class MarkdownHeaderTextSplitter {
 
     let currentLines: string[] = [];
     const headerContext: Record<number, string> = {};
+    let inCodeBlock = false;
 
     const flush = () => {
       const content = currentLines.join('\n').trim();
@@ -35,7 +36,7 @@ export class MarkdownHeaderTextSplitter {
 
       documents.push({
         pageContent: content
-          .replace(/\n?---\n?/g, '') // remove separators
+          .replace(/\n?---\n?/g, '') // remove thematic breaks
           .trim(),
         metadata,
       });
@@ -44,6 +45,19 @@ export class MarkdownHeaderTextSplitter {
     };
 
     for (const line of lines) {
+      // Toggle code-fence tracking so that `#` inside code blocks
+      // is never misidentified as a markdown header.
+      if (line.trimStart().startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        currentLines.push(line);
+        continue;
+      }
+
+      if (inCodeBlock) {
+        currentLines.push(line);
+        continue;
+      }
+
       const match = line.match(/^(#{1,6})\s+(.*)$/);
 
       if (match) {
@@ -55,7 +69,7 @@ export class MarkdownHeaderTextSplitter {
         if (tracked) {
           flush();
 
-          // Clear deeper headers (LangChain behavior)
+          // Clear deeper headers (LangChain behaviour)
           Object.keys(headerContext)
             .map(Number)
             .filter((l) => l >= level)

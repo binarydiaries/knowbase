@@ -1,4 +1,4 @@
-import type { Editor } from '@tiptap/react';
+import { type Editor, useEditorState } from '@tiptap/react';
 import {
   Bold,
   Code,
@@ -30,14 +30,30 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ editor }: EditorToolbarProps) {
+  const state = useEditorState({
+    editor,
+    selector: (ctx) => ({
+      isBold: ctx.editor?.isActive('bold') ?? false,
+      isItalic: ctx.editor?.isActive('italic') ?? false,
+      isUnderline: ctx.editor?.isActive('underline') ?? false,
+      isStrike: ctx.editor?.isActive('strike') ?? false,
+      isCode: ctx.editor?.isActive('code') ?? false,
+      isBulletList: ctx.editor?.isActive('bulletList') ?? false,
+      isOrderedList: ctx.editor?.isActive('orderedList') ?? false,
+      isBlockquote: ctx.editor?.isActive('blockquote') ?? false,
+      isCodeBlock: ctx.editor?.isActive('codeBlock') ?? false,
+      isLink: ctx.editor?.isActive('link') ?? false,
+      isH1: ctx.editor?.isActive('heading', { level: 1 }) ?? false,
+      isH2: ctx.editor?.isActive('heading', { level: 2 }) ?? false,
+      isH3: ctx.editor?.isActive('heading', { level: 3 }) ?? false,
+      canUndo: ctx.editor?.can().undo() ?? false,
+      canRedo: ctx.editor?.can().redo() ?? false,
+    }),
+  });
+
   if (!editor) return null;
 
-  const getBlockType = () => {
-    if (editor.isActive('heading', { level: 1 })) return 'h1';
-    if (editor.isActive('heading', { level: 2 })) return 'h2';
-    if (editor.isActive('heading', { level: 3 })) return 'h3';
-    return 'paragraph';
-  };
+  const blockType = state.isH1 ? 'h1' : state.isH2 ? 'h2' : state.isH3 ? 'h3' : 'paragraph';
 
   const setBlockType = (value: string) => {
     switch (value) {
@@ -75,7 +91,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         size="icon"
         className="h-8 w-8"
         onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
+        disabled={!state.canUndo}
         title="Undo"
       >
         <Undo className="h-4 w-4" />
@@ -86,7 +102,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         size="icon"
         className="h-8 w-8"
         onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
+        disabled={!state.canRedo}
         title="Redo"
       >
         <Redo className="h-4 w-4" />
@@ -95,7 +111,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
 
       {/* Block type */}
-      <Select value={getBlockType()} onValueChange={setBlockType}>
+      <Select value={blockType} onValueChange={setBlockType}>
         <SelectTrigger className="h-8 w-[130px] text-sm">
           <SelectValue />
         </SelectTrigger>
@@ -114,7 +130,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       {/* Inline formatting */}
       <Toggle
         size="sm"
-        pressed={editor.isActive('bold')}
+        pressed={state.isBold}
         onPressedChange={() => editor.chain().focus().toggleBold().run()}
         title="Bold"
       >
@@ -122,7 +138,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('italic')}
+        pressed={state.isItalic}
         onPressedChange={() => editor.chain().focus().toggleItalic().run()}
         title="Italic"
       >
@@ -130,7 +146,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('underline')}
+        pressed={state.isUnderline}
         onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
         title="Underline"
       >
@@ -138,7 +154,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('strike')}
+        pressed={state.isStrike}
         onPressedChange={() => editor.chain().focus().toggleStrike().run()}
         title="Strikethrough"
       >
@@ -146,7 +162,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('code')}
+        pressed={state.isCode}
         onPressedChange={() => editor.chain().focus().toggleCode().run()}
         title="Inline code"
       >
@@ -158,7 +174,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       {/* Lists */}
       <Toggle
         size="sm"
-        pressed={editor.isActive('bulletList')}
+        pressed={state.isBulletList}
         onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
         title="Bullet list"
       >
@@ -166,7 +182,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('orderedList')}
+        pressed={state.isOrderedList}
         onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
         title="Ordered list"
       >
@@ -178,7 +194,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       {/* Blockquote & code block */}
       <Toggle
         size="sm"
-        pressed={editor.isActive('blockquote')}
+        pressed={state.isBlockquote}
         onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
         title="Blockquote"
       >
@@ -186,7 +202,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive('codeBlock')}
+        pressed={state.isCodeBlock}
         onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
         title="Code block"
       >
@@ -198,7 +214,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       {/* Link */}
       <Toggle
         size="sm"
-        pressed={editor.isActive('link')}
+        pressed={state.isLink}
         onPressedChange={setLink}
         title="Link"
       >

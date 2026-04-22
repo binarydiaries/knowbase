@@ -97,6 +97,7 @@ function RouteComponent() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
+  const [fastPoll, setFastPoll] = useState(false);
 
   const apiBase = import.meta.env.VITE_API_BASE as string;
 
@@ -114,11 +115,13 @@ function RouteComponent() {
     return res.json();
   }
 
+  const pollInterval = fastPoll ? 2_000 : 10_000;
+
   const countsQuery = useQuery<QueueCounts>({
     queryKey: ['admin-queue-counts'],
     queryFn: () => authFetch('/admin/queue/counts'),
     enabled: canAccessAdmin,
-    refetchInterval: 10_000,
+    refetchInterval: pollInterval,
   });
 
   const jobsQuery = useQuery<QueueJobsResponse>({
@@ -129,7 +132,7 @@ function RouteComponent() {
       return authFetch(`/admin/queue/jobs?${params}`);
     },
     enabled: canAccessAdmin,
-    refetchInterval: 10_000,
+    refetchInterval: pollInterval,
   });
 
   const retryMutation = useMutation({
@@ -143,6 +146,9 @@ function RouteComponent() {
   const executeMutation = useMutation({
     mutationFn: (jobId: string) => authFetch(`/admin/queue/jobs/${jobId}/execute`, { method: 'POST' }),
     onSuccess: () => {
+      // Poll every 2 s for 30 s to catch the async moveToCompleted update
+      setFastPoll(true);
+      setTimeout(() => setFastPoll(false), 30_000);
       queryClient.invalidateQueries({ queryKey: ['admin-queue-jobs'] });
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
     },

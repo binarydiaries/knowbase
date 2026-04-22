@@ -21,10 +21,12 @@ import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 export const AgentMenuActions = ({
   agentStatus,
+  agentName,
   disableUnarchive = false,
   disableUnarchiveReason = AGENT_LIMIT_TOOLTIP,
 }: {
   agentStatus: 'active' | 'archived';
+  agentName?: string;
   disableUnarchive?: boolean;
   disableUnarchiveReason?: string;
 }) => {
@@ -100,6 +102,7 @@ export const AgentMenuActions = ({
       <ArchiveAgentDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
+        agentName={agentName}
         currentStatus={agentStatus}
         isPending={archiveMutation.isPending}
         onConfirm={() => archiveMutation.mutate()}

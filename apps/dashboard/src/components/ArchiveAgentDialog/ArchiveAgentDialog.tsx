@@ -7,7 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@knowbase/ui/components/dialog';
+import { Input } from '@knowbase/ui/components/input';
+import { Label } from '@knowbase/ui/components/label';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function ArchiveAgentDialog({
   open,
@@ -26,6 +29,13 @@ export function ArchiveAgentDialog({
 }) {
   const isArchiving = currentStatus === 'active';
   const subject = agentName ? `"${agentName}"` : 'This agent';
+  const [confirmInput, setConfirmInput] = useState('');
+
+  useEffect(() => {
+    if (!open) setConfirmInput('');
+  }, [open]);
+
+  const canConfirm = !isArchiving || !agentName || confirmInput.trim() === agentName;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,6 +50,19 @@ export function ArchiveAgentDialog({
               : `${subject} will be restored and made active again.`}
           </DialogDescription>
         </DialogHeader>
+        {isArchiving && agentName && (
+          <div className="space-y-1.5">
+            <Label>
+              Type <strong>{agentName}</strong> to confirm
+            </Label>
+            <Input
+              value={confirmInput}
+              onChange={(e) => setConfirmInput(e.target.value)}
+              placeholder={agentName}
+              autoFocus
+            />
+          </div>
+        )}
         <DialogFooter>
           <Button
             variant="outline"
@@ -51,7 +74,7 @@ export function ArchiveAgentDialog({
           <Button
             variant={isArchiving ? 'destructive' : 'default'}
             onClick={onConfirm}
-            disabled={isPending}
+            disabled={isPending || !canConfirm}
           >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

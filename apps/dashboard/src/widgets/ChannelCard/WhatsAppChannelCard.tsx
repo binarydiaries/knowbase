@@ -7,6 +7,14 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@knowbase/ui/components/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -16,7 +24,7 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { LockIcon } from 'lucide-react';
+import { Loader2, LockIcon } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
@@ -57,6 +65,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] =
     useState<string>('');
+  const [unassignConfirmOpen, setUnassignConfirmOpen] = useState(false);
 
   // Fetch connection status if not already in store
   useQuery({
@@ -183,6 +192,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         agent_id: agentId,
         channel_type: 'whatsapp',
       });
+      setUnassignConfirmOpen(false);
       toast.success('Phone number unassigned');
     },
     onError: (error) => {
@@ -235,30 +245,63 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   // State 2: WABA connected, number assigned
   if (isAssigned) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-l flex items-center gap-2">
-            WhatsApp Channel
-            <span className="size-2 rounded-full bg-green-500 inline-block" />
-            <span className="text-sm font-normal text-muted-foreground">
-              Active
-            </span>
-          </CardTitle>
-          <CardDescription>{displayPhone}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-end">
-          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={readOnly || unassignMutation.isPending}
-              onClick={() => unassignMutation.mutate()}
-            >
-              {unassignMutation.isPending ? 'Unassigning…' : 'Unassign'}
-            </Button>
-          </DisabledTooltip>
-        </CardContent>
-      </Card>
+      <>
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-l flex items-center gap-2">
+              WhatsApp Channel
+              <span className="size-2 rounded-full bg-green-500 inline-block" />
+              <span className="text-sm font-normal text-muted-foreground">
+                Active
+              </span>
+            </CardTitle>
+            <CardDescription>{displayPhone}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-end">
+            <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={readOnly || unassignMutation.isPending}
+                onClick={() => setUnassignConfirmOpen(true)}
+              >
+                Unassign
+              </Button>
+            </DisabledTooltip>
+          </CardContent>
+        </Card>
+        <Dialog open={unassignConfirmOpen} onOpenChange={setUnassignConfirmOpen}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Unassign phone number?</DialogTitle>
+              <DialogDescription>
+                The number <strong>{displayPhone}</strong> will be unassigned
+                from this agent. You can reassign it later.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setUnassignConfirmOpen(false)}
+                disabled={unassignMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => unassignMutation.mutate()}
+                disabled={unassignMutation.isPending}
+              >
+                {unassignMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Unassign'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

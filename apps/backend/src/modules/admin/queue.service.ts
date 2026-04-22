@@ -69,10 +69,18 @@ export abstract class AdminQueueService {
     const job = await indexingQueue.getJob(jobId);
     if (!job) throw new Error(`Job ${jobId} not found`);
 
-    const { documentId, orgId, version } = job.data;
+    const raw = job.data as unknown as Record<string, unknown>;
+    const documentId = String(raw.documentId ?? raw.document ?? '');
+    const orgId = String(raw.orgId ?? '');
+    const version = raw.version != null ? Number(raw.version) : null;
+
+    if (!documentId || !orgId) throw new Error(`Job ${jobId} has no documentId/orgId`);
 
     const document = await DocumentService.single({ id: documentId, orgId });
     if (!document) throw new Error(`Document ${documentId} not found`);
+
+    // Remove from queue first so the worker doesn't also pick it up.
+    await job.remove();
 
     await DocumentService.update(documentId, { status: 'indexing' });
 
@@ -81,7 +89,7 @@ export abstract class AdminQueueService {
       .then(() =>
         DocumentService.update(documentId, {
           status: 'indexed',
-          lastIndexedVersion: version,
+          lastIndexedVersion: version ?? document.version,
           lastTrainedAt: new Date(),
         }),
       )

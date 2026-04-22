@@ -14,6 +14,7 @@ import {
   Gauge,
   LifeBuoy,
   LineChart,
+  ListOrdered,
   MessageCircle,
   Plug,
   Shield,
@@ -44,7 +45,10 @@ const footerNav = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
   const adminNav = isAdminEmail(user?.primaryEmailAddress?.emailAddress)
-    ? [{ name: 'Admin Costs', url: '/admin/costs', icon: Shield }]
+    ? [
+        { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
+        { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
+      ]
     : [];
 
   return (

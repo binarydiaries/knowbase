@@ -18,6 +18,7 @@ import { Subscription } from './modules/subscription/subscription';
 import { Action } from './modules/action/action';
 import { Lead } from './modules/lead/lead';
 import { Admin } from './modules/admin/admin';
+import { AdminQueue } from './modules/admin/queue';
 
 const app = new Elysia()
   .use(
@@ -61,6 +62,7 @@ const app = new Elysia()
   .use(Action)
   .use(Lead)
   .use(Admin)
+  .use(AdminQueue)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

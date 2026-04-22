@@ -45,7 +45,8 @@ export const TextContentWidget = ({
   const [content, setContent] = useState(
     (document?.content.type === 'text' && document?.content?.data) || '',
   );
-  const [title, setTitle] = useState(document?.title);
+  const [title, setTitle] = useState(document?.title ?? '');
+  const [submitted, setSubmitted] = useState(false);
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
@@ -55,7 +56,14 @@ export const TextContentWidget = ({
 
   const { addUpdateDocument } = useDocuments();
 
+  const contentText = content.replace(/<[^>]*>/g, '').trim();
+  const titleError = submitted && !title.trim() ? 'Title is required' : null;
+  const contentError = submitted && !contentText ? 'Content is required' : null;
+  const isValid = !!title.trim() && !!contentText;
+
   const handleSave = () => {
+    setSubmitted(true);
+    if (!isValid) return;
     saveTextMutation.mutate();
   };
   const saveTextMutation = useMutation({
@@ -134,10 +142,16 @@ export const TextContentWidget = ({
             onChange={(e) => setTitle(e.target.value)}
             disabled={readOnly}
           />
+          {titleError && (
+            <p className="text-sm text-destructive">{titleError}</p>
+          )}
         </div>
         <div className="grid gap-3">
           <Label>Content</Label>
           <RichEditor value={content} onChange={setContent} readOnly={readOnly} />
+          {contentError && (
+            <p className="text-sm text-destructive">{contentError}</p>
+          )}
         </div>
       </div>
       <SheetFooter>

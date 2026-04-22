@@ -218,6 +218,20 @@ export abstract class SubscriptionService {
     return { allowed, plan };
   }
 
+  static planHasPaidChannels(plan: PlanName): boolean {
+    return plan !== 'free';
+  }
+
+  static async assertPaidChannelAccess(orgId: string) {
+    const plan = await this.getPlan(orgId);
+    const allowed = this.planHasPaidChannels(plan);
+    return { allowed, plan };
+  }
+
+  static getPaidChannelMessage(plan: PlanName): string {
+    return `Your ${plan} plan does not include WhatsApp or Instagram channels. Upgrade your subscription to access these channels.`;
+  }
+
   static async assertAgentLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
 

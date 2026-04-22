@@ -20,8 +20,8 @@ import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
-import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
+import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -79,14 +79,14 @@ const AgentsAgentIdIndexRoute = AgentsAgentIdIndexRouteImport.update({
   path: '/agents/$agentId/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
-  id: '/admin/costs/',
-  path: '/admin/costs/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
   id: '/admin/queue/',
   path: '/admin/queue/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
+  id: '/admin/costs/',
+  path: '/admin/costs/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -279,18 +279,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentsAgentIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/costs/': {
-      id: '/admin/costs/'
-      path: '/admin/costs'
-      fullPath: '/admin/costs/'
-      preLoaderRoute: typeof AdminCostsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/queue/': {
       id: '/admin/queue/'
       path: '/admin/queue'
       fullPath: '/admin/queue/'
       preLoaderRoute: typeof AdminQueueIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/costs/': {
+      id: '/admin/costs/'
+      path: '/admin/costs'
+      fullPath: '/admin/costs/'
+      preLoaderRoute: typeof AdminCostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

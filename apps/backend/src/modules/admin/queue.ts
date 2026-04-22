@@ -8,7 +8,11 @@ const QueueJobStatusSchema = z.enum(['waiting', 'active', 'delayed', 'failed', '
 const QueueJobSchema = z.object({
   id: z.string(),
   name: z.string(),
-  data: z.any(),
+  data: z.object({
+    documentId: z.string(),
+    orgId: z.string(),
+    version: z.number().nullable(),
+  }),
   state: z.string(),
   attemptsMade: z.number(),
   timestamp: z.number(),

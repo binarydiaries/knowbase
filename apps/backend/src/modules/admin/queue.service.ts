@@ -22,13 +22,19 @@ export abstract class AdminQueueService {
 
     const jobs = await indexingQueue.getJobs(types, start, end, false);
 
-    const jobsWithState = await Promise.all(
+    return Promise.all(
       jobs.map(async (job) => {
         const state = await job.getState();
+        // BullMQ jobs in Redis may have legacy data shapes; normalise before returning.
+        const raw = job.data as unknown as Record<string, unknown>;
         return {
           id: job.id ?? '',
           name: job.name,
-          data: job.data,
+          data: {
+            documentId: String(raw.documentId ?? raw.document ?? ''),
+            orgId: String(raw.orgId ?? ''),
+            version: raw.version != null ? Number(raw.version) : null,
+          },
           state,
           attemptsMade: job.attemptsMade,
           timestamp: job.timestamp,
@@ -38,8 +44,6 @@ export abstract class AdminQueueService {
         };
       }),
     );
-
-    return jobsWithState;
   }
 
   static async retryJob(jobId: string) {

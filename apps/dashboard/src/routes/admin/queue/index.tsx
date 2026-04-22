@@ -14,16 +14,15 @@ import {
 } from '@knowbase/ui/components/table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { isAdminEmail } from '@/utils/adminAccess';
-
-type JobState = 'waiting' | 'active' | 'delayed' | 'failed' | 'completed' | string;
 
 type QueueJob = {
   id: string;
   name: string;
-  data: Record<string, unknown>;
-  state: JobState;
+  data: { documentId: string; orgId: string; version: number | null };
+  state: string;
   attemptsMade: number;
   timestamp: number;
   processedOn: number | null;
@@ -58,6 +57,8 @@ const STATE_BADGE: Record<string, { variant: 'default' | 'secondary' | 'destruct
   completed: { variant: 'secondary', label: 'Completed' },
 };
 
+const PAGE_SIZE = 25;
+
 function formatTs(ts: number | null) {
   if (!ts) return '—';
   return new Date(ts).toLocaleString();
@@ -88,6 +89,7 @@ function RouteComponent() {
   const canAccessAdmin = isAdminEmail(email);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
 
   const apiBase = import.meta.env.VITE_API_BASE as string;
 
@@ -113,9 +115,9 @@ function RouteComponent() {
   });
 
   const jobsQuery = useQuery<QueueJob[]>({
-    queryKey: ['admin-queue-jobs', statusFilter],
+    queryKey: ['admin-queue-jobs', statusFilter, page],
     queryFn: () => {
-      const params = new URLSearchParams({ limit: '100' });
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(page) });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       return authFetch(`/admin/queue/jobs?${params}`);
     },
@@ -139,8 +141,15 @@ function RouteComponent() {
     },
   });
 
+  function handleFilterChange(f: StatusFilter) {
+    setStatusFilter(f);
+    setPage(1);
+  }
+
   const counts = countsQuery.data;
   const jobs = jobsQuery.data ?? [];
+  const hasNextPage = jobs.length === PAGE_SIZE;
+  const hasPrevPage = page > 1;
 
   return (
     <>
@@ -193,7 +202,7 @@ function RouteComponent() {
                   key={f.value}
                   variant={statusFilter === f.value ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter(f.value)}
+                  onClick={() => handleFilterChange(f.value)}
                 >
                   {f.label}
                   {counts && f.value !== 'all' ? (
@@ -207,13 +216,34 @@ function RouteComponent() {
 
             {/* Jobs table */}
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>
                   Jobs
                   {jobsQuery.isFetching && (
                     <span className="ml-2 text-xs font-normal text-muted-foreground">Loading…</span>
                   )}
                 </CardTitle>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Page {page}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={!hasPrevPage || jobsQuery.isFetching}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    <ChevronLeft className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={!hasNextPage || jobsQuery.isFetching}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 {jobsQuery.error ? (
@@ -243,14 +273,19 @@ function RouteComponent() {
                           const badge = STATE_BADGE[job.state] ?? { variant: 'outline' as const, label: job.state };
                           const canRetry = job.state === 'failed' || job.state === 'delayed';
                           const canExecute = job.state !== 'active' && job.state !== 'completed';
-                          const isActing =
-                            retryMutation.isPending || executeMutation.isPending;
+                          const isActing = retryMutation.isPending || executeMutation.isPending;
                           return (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.id}</TableCell>
-                              <TableCell className="font-mono text-xs max-w-[160px] truncate">{String(job.data.documentId ?? '—')}</TableCell>
-                              <TableCell className="font-mono text-xs max-w-[140px] truncate">{String(job.data.orgId ?? '—')}</TableCell>
-                              <TableCell className="text-right">{job.data.version != null ? String(job.data.version) : '—'}</TableCell>
+                              <TableCell className="font-mono text-xs max-w-[160px] truncate">
+                                {job.data.documentId || '—'}
+                              </TableCell>
+                              <TableCell className="font-mono text-xs max-w-[140px] truncate">
+                                {job.data.orgId || '—'}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {job.data.version ?? '—'}
+                              </TableCell>
                               <TableCell>
                                 <Badge variant={badge.variant}>{badge.label}</Badge>
                               </TableCell>

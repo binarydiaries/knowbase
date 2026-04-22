@@ -51,7 +51,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
     }),
   });
 
-  if (!editor) return null;
+  if (!editor || !state) return null;
 
   const blockType = state.isH1 ? 'h1' : state.isH2 ? 'h2' : state.isH3 ? 'h3' : 'paragraph';
 

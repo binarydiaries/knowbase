@@ -24,7 +24,7 @@ const QueueJobSchema = z.object({
 const QueueListQuerySchema = z.object({
   status: QueueJobStatusSchema.optional(),
   page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(200).default(50),
+  limit: z.coerce.number().min(1).max(200).default(25),
 });
 
 const QueueCountsSchema = z.object({
@@ -43,7 +43,12 @@ const QueueActionResponseSchema = z.object({
 
 const QueueModel = new Elysia().model({
   QueueListQuerySchema,
-  QueueListResponseSchema: z.array(QueueJobSchema),
+  QueueListResponseSchema: z.object({
+    jobs: z.array(QueueJobSchema),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+  }),
   QueueCountsResponseSchema: QueueCountsSchema,
   QueueActionResponseSchema,
 });

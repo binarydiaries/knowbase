@@ -30,6 +30,13 @@ type QueueJob = {
   failedReason: string | null;
 };
 
+type QueueJobsResponse = {
+  jobs: QueueJob[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 type QueueCounts = {
   waiting: number;
   active: number;
@@ -114,7 +121,7 @@ function RouteComponent() {
     refetchInterval: 10_000,
   });
 
-  const jobsQuery = useQuery<QueueJob[]>({
+  const jobsQuery = useQuery<QueueJobsResponse>({
     queryKey: ['admin-queue-jobs', statusFilter, page],
     queryFn: () => {
       const params = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(page) });
@@ -147,9 +154,12 @@ function RouteComponent() {
   }
 
   const counts = countsQuery.data;
-  const jobs = jobsQuery.data ?? [];
-  const hasNextPage = jobs.length === PAGE_SIZE;
-  const hasPrevPage = page > 1;
+  const response = jobsQuery.data;
+  const jobs = response?.jobs ?? [];
+  const total = response?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
 
   return (
     <>
@@ -224,12 +234,16 @@ function RouteComponent() {
                   )}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Page {page}</span>
+                  <span>
+                    {total > 0
+                      ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`
+                      : '0 jobs'}
+                  </span>
                   <Button
                     variant="outline"
                     size="icon"
                     className="h-7 w-7"
-                    disabled={!hasPrevPage || jobsQuery.isFetching}
+                    disabled={!hasPrev || jobsQuery.isFetching}
                     onClick={() => setPage((p) => p - 1)}
                   >
                     <ChevronLeft className="size-4" />
@@ -238,7 +252,7 @@ function RouteComponent() {
                     variant="outline"
                     size="icon"
                     className="h-7 w-7"
-                    disabled={!hasNextPage || jobsQuery.isFetching}
+                    disabled={!hasNext || jobsQuery.isFetching}
                     onClick={() => setPage((p) => p + 1)}
                   >
                     <ChevronRight className="size-4" />

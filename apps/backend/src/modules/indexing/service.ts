@@ -91,6 +91,21 @@ export abstract class IndexingService {
     return (await Promise.all(chunkPromises)).flat();
   }
 
+  // Promotes numbered top-level sections (e.g. "1. Information We Collect")
+  // to ## markdown headers so the splitter treats them as section boundaries
+  // and includes the section title in each chunk's context label.
+  //
+  // Rules to avoid false positives:
+  //   - no leading whitespace  →  excludes indented ordered list items
+  //   - first char uppercase   →  excludes prose starting mid-sentence
+  //   - title at least 4 chars →  excludes "1. A" edge cases
+  static preprocessContent(content: string): string {
+    return content.replace(
+      /^(\d{1,2})\.\s+([A-Z][^\n]{3,})$/gm,
+      '## $1. $2',
+    );
+  }
+
   static async chunkText({
     title,
     content,
@@ -98,7 +113,9 @@ export abstract class IndexingService {
     title: string;
     content: string;
   }) {
-    const documentChunks = splitter.splitText(content);
+    const documentChunks = splitter.splitText(
+      IndexingService.preprocessContent(content),
+    );
 
     const chunkPromises = documentChunks.map(async (doc) => {
       const headerString = Object.values(doc.metadata).join(' → ');

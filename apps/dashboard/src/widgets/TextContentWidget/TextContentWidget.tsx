@@ -133,7 +133,7 @@ export const TextContentWidget = ({
         </div>
         <div className="grid gap-3">
           <Label htmlFor="sheet-demo-username">Content</Label>
-          <RichEditor value={content} onChange={readOnly ? () => {} : setContent} />
+          <RichEditor value={content} onChange={setContent} readOnly={readOnly} />
         </div>
       </div>
       <SheetFooter>

@@ -86,7 +86,7 @@ export const Channel = new Elysia({
   .guard({
     response: {
       404: 'NotFoundResponse',
-      403: 'AgentLockedResponse',
+      403: 'ChannelWriteForbiddenResponse',
     },
   })
   .resolve(async ({ params, status, orgId }) => {

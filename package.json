@@ -5,6 +5,8 @@
     "build": "turbo run build",
     "build:dashboard": "turbo run build --filter=dashboard",
     "build:landing": "turbo run build --filter=landing",
+    "build:client": "turbo run build --filter=client",
+    "build:embed": "turbo run build --filter=client",
     "dev": "turbo run dev",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",

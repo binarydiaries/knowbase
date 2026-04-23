@@ -40,7 +40,7 @@ const app = new Elysia()
       },
       documentation: {
         info: {
-          title: 'Knowbase Documentation',
+          title: 'Agenvik Documentation',
           version: '1.0.0',
         },
       },

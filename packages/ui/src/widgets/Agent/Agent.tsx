@@ -169,7 +169,7 @@ export const Agent = ({
           </Button>
         </div>
         <p className="text-xs text-center text-slate-300">
-          Powered by <strong>Knowbase</strong>
+          Powered by <strong>Agenvik</strong>
         </p>
       </div>
     </div>

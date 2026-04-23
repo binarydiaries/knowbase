@@ -62,7 +62,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="/">
                 <Bubbles />
-                <span className="text-base font-semibold">Knowbase.ai</span>
+                <span className="text-base font-semibold">Agenvik</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

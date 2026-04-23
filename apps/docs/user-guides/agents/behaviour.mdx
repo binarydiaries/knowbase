@@ -1,0 +1,81 @@
+---
+title: "Behaviour"
+description: "Configure the instructions, tone, verbosity, fallback message, and guardrails for an Agent."
+---
+
+**Behaviour** controls how an Agent responds when it uses your Knowledge Sources.
+
+## What you will learn
+
+- What each Behaviour field does
+- How to write useful instructions
+- How to create safer fallback and guardrail behavior
+
+## Open Behaviour
+
+Open an Agent and scroll to the **Behaviour** card.
+
+<Frame>
+  <img src="/images/placeholders/behaviour-settings.png" alt="Behaviour settings placeholder" />
+</Frame>
+
+## System Prompt
+
+Use the **System Prompt** to describe the Agent's role and goal. Keep it specific.
+
+Good prompts usually include:
+
+- The business or team the Agent represents
+- The topics it should help with
+- The kind of answer it should give
+- When it should ask a follow-up question
+- When it should direct the visitor to support
+
+## Tone
+
+Choose the tone that matches the audience:
+
+- **Friendly** for approachable customer support
+- **Professional** for sales, business, or account workflows
+- **Neutral** for factual help center experiences
+
+## Verbosity
+
+Choose the response length:
+
+- **Short** for quick FAQ answers
+- **Balanced** for most support experiences
+- **Detailed** for setup, troubleshooting, or technical explanations
+
+## Fallback Message
+
+The **Fallback Message** is shown when the Agent cannot answer confidently. Use a helpful message that sets expectations and offers a next step.
+
+Example:
+
+```text
+I do not have enough information to answer that yet. Please contact our support team and include what you were trying to do.
+```
+
+## Guardrails
+
+Use **Guardrails** to define boundaries. For example, tell the Agent not to make pricing promises, not to answer outside your product scope, or to ask for a human handoff when sensitive information is involved.
+
+## Save and test
+
+Click **Save**, then test the Agent in the **Web Preview** with real customer-style questions.
+
+<Frame>
+  <img src="/images/placeholders/agent-preview.png" alt="Agent preview placeholder" />
+</Frame>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Web Channel" icon="message-square" href="/user-guides/agents/web-channel">
+    Configure the visible web chat experience.
+  </Card>
+  <Card title="Best practices" icon="sparkles" href="/user-guides/quick-start/best-practices">
+    Learn how to refine instructions and source content.
+  </Card>
+</CardGroup>

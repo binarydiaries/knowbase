@@ -1,0 +1,69 @@
+---
+title: "Troubleshooting widget"
+description: "Fix common Agenvik web widget installation and launch issues."
+---
+
+Use this guide when the widget does not appear, does not open, or does not create conversations.
+
+<Note>
+  Public APIs are not available yet. Troubleshooting here focuses on the dashboard-provided web widget snippet.
+</Note>
+
+## What you will learn
+
+- How to check whether the snippet was installed
+- How to verify Agent and Channel setup
+- How to isolate website and dashboard issues
+
+## Widget does not appear
+
+Check that:
+
+- The snippet is present on the published page
+- Your CMS or tag manager published the latest changes
+- The script is not blocked by consent or security settings
+- The Agent and Channel are still configured in Agenvik
+
+<Frame>
+  <img src="/images/placeholders/widget-not-visible.png" alt="Widget not visible troubleshooting placeholder" />
+</Frame>
+
+## Widget appears but answers poorly
+
+Check that:
+
+- Knowledge Sources are saved and trained
+- Behaviour instructions match the Agent's job
+- Fallback message explains what to do next
+- Test questions are covered by source content
+
+<Frame>
+  <img src="/images/placeholders/train-agent-dialog.png" alt="Training troubleshooting placeholder" />
+</Frame>
+
+## Test conversations do not appear
+
+Check **Conversations** after sending a test message. If the thread is missing, confirm that you tested the live site and the correct Agent.
+
+<Frame>
+  <img src="/images/placeholders/conversation-inbox.png" alt="Conversation troubleshooting placeholder" />
+</Frame>
+
+## Lead capture does not work
+
+Check that **Lead Generation** is available on your plan, enabled on the Agent, and configured. Then test with a message that naturally asks for follow-up.
+
+<Frame>
+  <img src="/images/placeholders/actions-card.png" alt="Lead Generation troubleshooting placeholder" />
+</Frame>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Contact support" icon="life-ring" href="/help-and-support/contact-support">
+    Share your Agent, page URL, and what you expected to happen.
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/help-and-support/troubleshooting">
+    Review dashboard-level troubleshooting.
+  </Card>
+</CardGroup>

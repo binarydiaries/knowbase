@@ -1,103 +1,108 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "docs",
+  "name": "Agenvik",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#301B69",
+    "light": "#8B5CF6",
+    "dark": "#1F1147"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "User Guide",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "user-guides/quick-start/build-your-first-agent",
+              "user-guides/quick-start/best-practices"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Agent Management",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "user-guides/agents/overview",
+              "user-guides/agents/knowledge-sources",
+              "user-guides/agents/behaviour",
+              "user-guides/agents/web-channel",
+              "user-guides/agents/whatsapp-channel",
+              "user-guides/agents/actions-lead-generation",
+              "user-guides/agents/archive-restore"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Inbox",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "user-guides/inbox/conversations",
+              "user-guides/inbox/leads"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Analytics & Usage",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "user-guides/analytics/overview",
+              "user-guides/analytics/usage"
+            ]
+          },
+          {
+            "group": "Workspace",
+            "pages": [
+              "user-guides/workspace/integrations",
+              "user-guides/workspace/account",
+              "user-guides/workspace/subscriptions-limits"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Developer Guide",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Web Widget",
             "pages": [
-              "api-reference/introduction"
+              "developer-guide/overview",
+              "developer-guide/install-web-widget",
+              "developer-guide/embed-options",
+              "developer-guide/configure-before-launch",
+              "developer-guide/troubleshooting-widget"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Help & Support",
+        "groups": [
           {
-            "group": "Endpoint examples",
+            "group": "Support",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "help-and-support/overview",
+              "help-and-support/faqs",
+              "help-and-support/troubleshooting",
+              "help-and-support/contact-support"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/TextLogoColorLight.svg",
+    "dark": "/logo/TextLogoColorDark.svg"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:hello@avenvik.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://app-stage.agenvik.com/"
     }
   },
   "contextual": {
@@ -107,7 +112,6 @@
       "chatgpt",
       "claude",
       "perplexity",
-      "mcp",
       "cursor",
       "vscode"
     ]

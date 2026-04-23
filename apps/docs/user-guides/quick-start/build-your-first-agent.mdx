@@ -1,0 +1,109 @@
+---
+title: "Build your first agent"
+description: "Create, train, test, and prepare your first Agenvik agent."
+---
+
+This guide takes you through the first setup flow: create an Agent, add Knowledge Sources, train it, tune Behaviour, and prepare a Channel.
+
+## What you will learn
+
+- How to create a new Agent from the dashboard
+- How to add Text and Q&A Knowledge Sources
+- How to start training and test the result
+- How to prepare the Web Channel for launch
+
+## Before you start
+
+Sign in to the Agenvik dashboard and open **Agents** from the sidebar. If your workspace has reached its active agent limit, archive an unused agent or review your subscription before creating another one.
+
+<Frame>
+  <img src="/images/placeholders/agents-list.png" alt="Agenvik agents list placeholder" />
+</Frame>
+
+## Step 1: Create an Agent
+
+1. Open **Agents**.
+2. Click the create button in the page header.
+3. Enter a clear agent name, such as `Sales Support Agent` or `Product FAQ Agent`.
+4. Save the Agent.
+
+<Frame>
+  <img src="/images/placeholders/create-agent-dialog.png" alt="Create agent dialog placeholder" />
+</Frame>
+
+Use one Agent per distinct use case. This keeps knowledge, behaviour, leads, and analytics easier to understand later.
+
+## Step 2: Add Knowledge Sources
+
+Open the Agent and find **Knowledge Sources**. Agenvik currently supports:
+
+- **Text**: free-form content, policies, instructions, product notes, or FAQs written as rich text.
+- **Q&A**: structured question-and-answer pairs for exact responses and common customer questions.
+
+Click **Add**, choose the source type, add a title, and save the content.
+
+<Frame>
+  <img src="/images/placeholders/knowledge-sources-empty.png" alt="Empty knowledge sources placeholder" />
+</Frame>
+
+<Frame>
+  <img src="/images/placeholders/add-text-source.png" alt="Add text source placeholder" />
+</Frame>
+
+<Frame>
+  <img src="/images/placeholders/add-qa-source.png" alt="Add Q&A source placeholder" />
+</Frame>
+
+## Step 3: Train the Agent
+
+After at least one Knowledge Source is ready, click **Train**. Agenvik queues ready sources and indexes them for the Agent.
+
+<Frame>
+  <img src="/images/placeholders/train-agent-dialog.png" alt="Train agent dialog placeholder" />
+</Frame>
+
+Training uses your plan's daily training limit. If the button is disabled, check whether the Agent is locked, whether any sources are ready, or whether today's training runs are already used.
+
+## Step 4: Tune Behaviour
+
+Use **Behaviour** to define how the Agent should answer.
+
+- **System Prompt**: the Agent's role and core instructions
+- **Tone**: friendly, professional, or neutral
+- **Verbosity**: short, balanced, or detailed
+- **Fallback Message**: what the Agent says when it cannot answer
+- **Guardrails**: boundaries for topics, claims, or escalation rules
+
+<Frame>
+  <img src="/images/placeholders/behaviour-settings.png" alt="Behaviour settings placeholder" />
+</Frame>
+
+## Step 5: Configure the Web Channel
+
+Use **Channel** to control the web chat experience. Set the display name, subtitle, welcome message, input placeholder, and primary color.
+
+<Frame>
+  <img src="/images/placeholders/web-channel-settings.png" alt="Web channel settings placeholder" />
+</Frame>
+
+The preview on the right side of the Agent page helps you check the greeting, color, and input text before launch.
+
+## Step 6: Review the Agent
+
+Before you share the Agent, ask test questions that reflect real visitors:
+
+- A simple question directly covered by a Knowledge Source
+- A question with multiple possible meanings
+- A question outside your business scope
+- A lead-intent question, if Lead Generation is enabled
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Improve answer quality" icon="sparkles" href="/user-guides/quick-start/best-practices">
+    Learn practical ways to improve knowledge, behaviour, and testing.
+  </Card>
+  <Card title="Install the web widget" icon="code" href="/developer-guide/install-web-widget">
+    Add the Agent to your website once it is ready for visitors.
+  </Card>
+</CardGroup>

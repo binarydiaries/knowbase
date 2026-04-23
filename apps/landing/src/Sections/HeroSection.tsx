@@ -17,12 +17,8 @@ const HeroSection = () => {
 
       <header className="relative z-20 max-w-6xl mx-auto px-6 pt-6">
         <div className="flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl">
-          <a
-            href="/"
-            aria-label="Agenvik home"
-            className="font-semibold text-[#301B69]"
-          >
-            Agenvik
+          <a href="/" aria-label="Agenvik home">
+            <img src="/TextLogo.svg" alt="Agenvik" className="h-7 w-auto" />
           </a>
 
           <nav

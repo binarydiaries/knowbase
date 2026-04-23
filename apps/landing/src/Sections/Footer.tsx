@@ -36,16 +36,8 @@ const Footer = () => {
             <div className="grid md:grid-cols-5 gap-10">
               {/* Logo */}
               <div className="col-span-1">
-                <a
-                  href="/"
-                  aria-label="Agenvik home"
-                  className="flex items-center gap-2 text-[#301B69] font-semibold text-lg"
-                >
-                  <div
-                    className="w-6 h-6 rounded-full bg-[#301B69]"
-                    aria-hidden="true"
-                  />
-                  Agenvik
+                <a href="/" aria-label="Agenvik home">
+                  <img src="/TextLogo.svg" alt="Agenvik" className="h-7 w-auto" />
                 </a>
               </div>
 

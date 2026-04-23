@@ -11,7 +11,6 @@ import {
 } from '@knowbase/ui/components/sidebar';
 import {
   Bot,
-  Bubbles,
   Gauge,
   LifeBuoy,
   LineChart,

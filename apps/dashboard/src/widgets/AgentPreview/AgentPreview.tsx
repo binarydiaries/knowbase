@@ -1,13 +1,13 @@
 import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
-import { Agent } from "@knowbase/ui/widgets/Agent/Agent";
+import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePostHog } from 'posthog-js/react';
 import { useEffect, useId, useRef, useState } from 'react';
+import type { ChannelSchema } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
-import type { ChannelSchema } from '@/services';
 
 interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
@@ -39,7 +39,13 @@ const AgentPreviewContent = ({
       }
     : undefined;
 
-  const { messages, setMessages, sendMessage, status, id: conversationId } = useChat({
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    status,
+    id: conversationId,
+  } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: `${import.meta.env.VITE_API_BASE}/chat`,
@@ -94,14 +100,20 @@ const AgentPreviewContent = ({
       }
 
       if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
-        setAlertMessage(chatError.message || 'Something went wrong. Please try again.');
+        setAlertMessage(
+          chatError.message || 'Something went wrong. Please try again.',
+        );
       }
     },
   });
 
   // Record time of first streaming token for $ai_time_to_first_token
   useEffect(() => {
-    if (status === 'streaming' && sendStartTimeRef.current > 0 && firstTokenTimeRef.current === 0) {
+    if (
+      status === 'streaming' &&
+      sendStartTimeRef.current > 0 &&
+      firstTokenTimeRef.current === 0
+    ) {
       firstTokenTimeRef.current = Date.now();
     }
   }, [status]);
@@ -135,6 +147,7 @@ const AgentPreviewContent = ({
         sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
       }}
       onNewChat={onNewChat}
+      brandLink={import.meta.env.VITE_APP_URL}
     />
   );
 };

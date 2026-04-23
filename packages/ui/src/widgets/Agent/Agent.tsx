@@ -1,5 +1,5 @@
-import { Button } from '@knowbase/ui/components/button';
 import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
+import { Button } from '@knowbase/ui/components/button';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
 import { Ellipsis, MessageSquarePlus, SendHorizonal, X } from 'lucide-react';
@@ -19,6 +19,7 @@ interface IAgentProps extends ComponentProps<'div'> {
   subTitle?: string;
   inputPlaceholder?: string;
   primaryColor: string;
+  brandLink: string;
 }
 
 export const Agent = ({
@@ -34,13 +35,16 @@ export const Agent = ({
   subTitle,
   inputPlaceholder,
   primaryColor,
+  brandLink,
   ...otherProps
 }: IAgentProps) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages && isLoading) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isLoading]);
 
   const submitForm = () => {
@@ -168,9 +172,14 @@ export const Agent = ({
             <SendHorizonal className="size-6" />
           </Button>
         </div>
-        <p className="text-xs text-center text-slate-300">
+        <a
+          className="text-xs text-center text-slate-300"
+          href={brandLink}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Powered by <strong>Agenvik</strong>
-        </p>
+        </a>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
@@ -44,7 +45,8 @@ export const TextContentWidget = ({
   const [content, setContent] = useState(
     (document?.content.type === 'text' && document?.content?.data) || '',
   );
-  const [title, setTitle] = useState(document?.title);
+  const [title, setTitle] = useState(document?.title ?? '');
+  const [submitted, setSubmitted] = useState(false);
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
@@ -54,7 +56,14 @@ export const TextContentWidget = ({
 
   const { addUpdateDocument } = useDocuments();
 
+  const contentText = content.replace(/<[^>]*>/g, '').trim();
+  const titleError = submitted && !title.trim() ? 'Title is required' : null;
+  const contentError = submitted && !contentText ? 'Content is required' : null;
+  const isValid = !!title.trim() && !!contentText;
+
   const handleSave = () => {
+    setSubmitted(true);
+    if (!isValid) return;
     saveTextMutation.mutate();
   };
   const saveTextMutation = useMutation({
@@ -101,6 +110,9 @@ export const TextContentWidget = ({
       });
       addUpdateDocument(agentId, savedDocument);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
+      toast.success(
+        mode === 'edit' ? 'Text source updated' : 'Text source added',
+      );
       onClose?.();
     },
     onError: (error) => {
@@ -116,24 +128,30 @@ export const TextContentWidget = ({
         </SheetTitle>
         <SheetDescription>
           {mode === 'edit'
-            ? 'Update existing questions and answers'
-            : 'Add Text source to the agent'}
+            ? 'Update the title and content of this text source.'
+            : 'Add free-form text your agent will use when answering questions.'}
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
         <div className="grid gap-3">
-          <Label htmlFor="sheet-demo-name">Title</Label>
+          <Label htmlFor="text-title">Title</Label>
           <Input
-            id="sheet-demo-name"
+            id="text-title"
             placeholder="Enter a title for this text source..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={readOnly}
           />
+          {titleError && (
+            <p className="text-sm text-destructive">{titleError}</p>
+          )}
         </div>
         <div className="grid gap-3">
-          <Label htmlFor="sheet-demo-username">Content</Label>
+          <Label>Content</Label>
           <RichEditor value={content} onChange={setContent} readOnly={readOnly} />
+          {contentError && (
+            <p className="text-sm text-destructive">{contentError}</p>
+          )}
         </div>
       </div>
       <SheetFooter>
@@ -143,11 +161,14 @@ export const TextContentWidget = ({
             disabled={readOnly || saveTextMutation.isPending}
             type="submit"
           >
+            {saveTextMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             {mode === 'edit' ? 'Update changes' : 'Save changes'}
           </Button>
         </DisabledTooltip>
         <SheetClose asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">Cancel</Button>
         </SheetClose>
       </SheetFooter>
     </SheetContent>

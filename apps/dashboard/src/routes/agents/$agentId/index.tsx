@@ -113,6 +113,7 @@ function RouteComponent() {
             {agent && (
               <AgentMenuActions
                 agentStatus={agent.agentStatus}
+                agentName={agent.name}
                 disableUnarchive={disableUnarchive}
                 disableUnarchiveReason={AGENT_LIMIT_TOOLTIP}
               />

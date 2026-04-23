@@ -30,6 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@knowbase/ui/components/dialog';
+import { Input } from '@knowbase/ui/components/input';
+import { Label } from '@knowbase/ui/components/label';
 import { Sheet } from '@knowbase/ui/components/sheet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
@@ -79,7 +81,8 @@ export const DocumentsWidget = ({
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
 
   if (!agentId) {
     throw new Error('agentId not available');
@@ -177,6 +180,10 @@ export const DocumentsWidget = ({
       });
     }
   }, [addUpdateDocument, agentId, indexStatusQuery?.data?.data]);
+
+  useEffect(() => {
+    if (!deleteConfirmDoc) setDeleteConfirmInput('');
+  }, [deleteConfirmDoc]);
 
   const isDocumentsAvailable = !!documents?.length;
   return (
@@ -296,7 +303,7 @@ export const DocumentsWidget = ({
               }}
               onDelete={(e) => {
                 e.stopPropagation();
-                setDeleteConfirmId(doc.id);
+                setDeleteConfirmDoc({ id: doc.id, title: doc.title });
               }}
               readOnly={readOnly}
               disabledReason={AGENT_LOCK_TOOLTIP}
@@ -419,8 +426,8 @@ export const DocumentsWidget = ({
         )}
       </Sheet>
       <Dialog
-        open={!!deleteConfirmId}
-        onOpenChange={(open) => { if (!open) setDeleteConfirmId(null); }}
+        open={!!deleteConfirmDoc}
+        onOpenChange={(open) => { if (!open) setDeleteConfirmDoc(null); }}
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -429,21 +436,35 @@ export const DocumentsWidget = ({
               This knowledge source will be permanently deleted. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>
+              Type <strong>{deleteConfirmDoc?.title}</strong> to confirm
+            </Label>
+            <Input
+              value={deleteConfirmInput}
+              onChange={(e) => setDeleteConfirmInput(e.target.value)}
+              placeholder={deleteConfirmDoc?.title}
+              autoFocus
+            />
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setDeleteConfirmId(null)}
+              onClick={() => setDeleteConfirmDoc(null)}
               disabled={deleteDocumentMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              disabled={deleteDocumentMutation.isPending}
+              disabled={
+                deleteDocumentMutation.isPending ||
+                deleteConfirmInput.trim() !== deleteConfirmDoc?.title
+              }
               onClick={() => {
-                if (deleteConfirmId) {
-                  deleteDocumentMutation.mutate(deleteConfirmId);
-                  setDeleteConfirmId(null);
+                if (deleteConfirmDoc) {
+                  deleteDocumentMutation.mutate(deleteConfirmDoc.id);
+                  setDeleteConfirmDoc(null);
                 }
               }}
             >

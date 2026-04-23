@@ -2,6 +2,7 @@ import { type Job, Worker } from 'bullmq';
 import { DocumentService } from '../../modules/document/service';
 import { IndexingService } from '../../modules/indexing/service';
 import { connection } from '../connection';
+import { addEmailJob } from '../email/email.queue';
 import { indexingQueue } from './indexing.queue';
 import type { IIndexDocumentJob } from './indexing.types';
 
@@ -28,20 +29,23 @@ export const indexingWorker = new Worker(
 );
 
 indexingWorker.on('completed', async (job) => {
-  const { documentId, version } = job.data;
+  const { documentId, version, userId, documentTitle } = job.data;
   await DocumentService.update(documentId, {
     status: 'indexed',
     lastIndexedVersion: version,
     lastTrainedAt: new Date(),
   });
+  if (userId) {
+    await addEmailJob({ type: 'document-indexed', documentId, userId, documentTitle }).catch(() => {});
+  }
 });
 
 indexingWorker.on('failed', async (job) => {
   if (job?.data) {
-    const { documentId } = job.data;
-
-    await DocumentService.update(documentId, {
-      status: 'failed',
-    });
+    const { documentId, userId, documentTitle } = job.data;
+    await DocumentService.update(documentId, { status: 'failed' });
+    if (userId) {
+      await addEmailJob({ type: 'document-failed', documentId, userId, documentTitle }).catch(() => {});
+    }
   }
 });

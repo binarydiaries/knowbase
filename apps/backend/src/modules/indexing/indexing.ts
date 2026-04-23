@@ -80,6 +80,8 @@ export const Indexing = new Elysia({
             orgId,
             documentId: doc.id,
             version: doc.version,
+            userId: doc.createdBy ?? '',
+            documentTitle: doc.title,
           });
         }),
       );

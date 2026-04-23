@@ -9,7 +9,7 @@ COPY . .
 RUN bun install --frozen-lockfile
 
 # Build
-RUN turbo run build --filter=embed
+RUN bun run build:embed
 
 
 FROM nginx:alpine

@@ -87,6 +87,11 @@ export const LeadGenerationForbiddenResponse = z.object({
   message: z.string(),
 });
 
+export const ChannelWriteForbiddenResponse = z.union([
+  AgentLockedResponse,
+  LeadGenerationForbiddenResponse,
+]);
+
 export const ErrorModel = new Elysia().model({
   NotFoundResponse,
   AgentLimitReachedResponse,
@@ -102,4 +107,5 @@ export const ErrorModel = new Elysia().model({
   IndexingForbiddenResponse,
   ChatForbiddenResponse,
   LeadGenerationForbiddenResponse,
+  ChannelWriteForbiddenResponse,
 });

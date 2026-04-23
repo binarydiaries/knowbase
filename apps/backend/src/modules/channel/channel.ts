@@ -39,6 +39,16 @@ export const Channel = new Elysia({
         });
       }
 
+      if (body.additional.type !== 'web') {
+        const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+        if (!channelAccess.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          });
+        }
+      }
+
       const channel = await ChannelService.create({
         ...body,
         type: body.additional.type,
@@ -54,7 +64,7 @@ export const Channel = new Elysia({
       body: 'CreateChannelBodySchema',
       response: {
         200: 'OneChannelResponse',
-        403: 'AgentLockedResponse',
+        403: 'ChannelWriteForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },
@@ -76,7 +86,7 @@ export const Channel = new Elysia({
   .guard({
     response: {
       404: 'NotFoundResponse',
-      403: 'AgentLockedResponse',
+      403: 'ChannelWriteForbiddenResponse',
     },
   })
   .resolve(async ({ params, status, orgId }) => {
@@ -130,6 +140,17 @@ export const Channel = new Elysia({
         });
       }
 
+      const effectiveType = body?.additional?.type ?? channel.type;
+      if (effectiveType !== 'web') {
+        const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+        if (!channelAccess.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          });
+        }
+      }
+
       const updatedChannel = await ChannelService.update(params.id, {
         ...body,
         type: body?.additional?.type || channel.type,
@@ -146,7 +167,7 @@ export const Channel = new Elysia({
       body: 'UpdateChannelBodySchema',
       response: {
         200: 'OneChannelResponse',
-        403: 'AgentLockedResponse',
+        403: 'ChannelWriteForbiddenResponse',
       },
     },
   );

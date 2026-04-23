@@ -16,12 +16,14 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import { LockIcon } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
   AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import { useClerkPlan } from '@/hooks/useClerkPlan.ts';
 import type { ChannelSchema } from '@/services';
 import { postChannels } from '@/services';
 import { client } from '@/services/client.gen';
@@ -39,6 +41,7 @@ interface ConnectionResponse {
 const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
+  const { isPaid, isLoading: planLoading } = useClerkPlan();
 
   if (!agentId) throw new Error('agentId not available');
 
@@ -186,6 +189,28 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       toast.error(getErrorMessage(error));
     },
   });
+
+  // Free-plan gate
+  if (!planLoading && !isPaid) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-l flex items-center gap-2">
+            WhatsApp Channel
+            <LockIcon className="size-4 text-muted-foreground" />
+          </CardTitle>
+          <CardDescription>
+            WhatsApp is available on paid plans.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-end">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/subscriptions">Upgrade Plan</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // State 1: No WABA connected at org level
   if (!connected) {

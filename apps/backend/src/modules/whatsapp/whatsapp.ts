@@ -9,6 +9,7 @@ import { agents } from '../../db/schema/agents';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
+import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from './connectionService';
 
 const BadRequestResponse = z.object({
@@ -136,6 +137,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/whatsapp/connect',
     async ({ body, orgId, status }) => {
+      const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+      if (!channelAccess.allowed) {
+        return status(403, {
+          code: 'PLAN_LIMIT_REACHED',
+          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+        });
+      }
+
       const { accessToken, businessAccountId } = body;
 
       // 1. Verify credentials by fetching phone numbers (fails fast on bad token)
@@ -226,6 +235,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/whatsapp/bind',
     async ({ body, orgId, status }) => {
+      const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+      if (!channelAccess.allowed) {
+        return status(403, {
+          code: 'PLAN_LIMIT_REACHED',
+          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+        });
+      }
+
       const { channelId, phoneNumberId, displayPhone } = body;
 
       // Validate channel belongs to org and is whatsapp type

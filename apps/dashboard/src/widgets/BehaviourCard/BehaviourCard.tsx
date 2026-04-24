@@ -44,8 +44,8 @@ export const agentBehaviourSchema = z.object({
     .string()
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
-  tone: z.enum(toneValues),
-  verbosity: z.enum(verbosityValues),
+  tone: z.enum(toneValues, { error: 'Please select a valid tone' }),
+  verbosity: z.enum(verbosityValues, { error: 'Please select a valid verbosity' }),
   fallbackMessage: z
     .string()
     .min(5, 'Fallback message is too short')

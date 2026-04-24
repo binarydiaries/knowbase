@@ -1,5 +1,5 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
-import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
   SheetClose,
@@ -15,7 +15,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import {
   type DocumentSchema,
   patchDocumentsById,
@@ -35,6 +37,15 @@ type ITextContentWidgetProps = {
   readOnly?: boolean;
 };
 
+const schema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  content: z.string().refine(
+    (val) => val.replace(/<[^>]*>/g, '').trim().length > 0,
+    'Content is required',
+  ),
+});
+type FormValues = z.infer<typeof schema>;
+
 export const TextContentWidget = ({
   mode = 'add',
   document,
@@ -42,11 +53,6 @@ export const TextContentWidget = ({
   readOnly = false,
 }: ITextContentWidgetProps) => {
   const posthog = usePostHog();
-  const [content, setContent] = useState(
-    (document?.content.type === 'text' && document?.content?.data) || '',
-  );
-  const [title, setTitle] = useState(document?.title ?? '');
-  const [submitted, setSubmitted] = useState(false);
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
@@ -56,50 +62,33 @@ export const TextContentWidget = ({
 
   const { addUpdateDocument } = useDocuments();
 
-  const contentText = content.replace(/<[^>]*>/g, '').trim();
-  const titleError = submitted && !title.trim() ? 'Title is required' : null;
-  const contentError = submitted && !contentText ? 'Content is required' : null;
-  const isValid = !!title.trim() && !!contentText;
+  const { control, handleSubmit } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: document?.title ?? '',
+      content:
+        (document?.content.type === 'text' && document.content.data) || '',
+    },
+  });
 
-  const handleSave = () => {
-    setSubmitted(true);
-    if (!isValid) return;
-    saveTextMutation.mutate();
-  };
   const saveTextMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ title, content }: FormValues) => {
       if (mode === 'edit') {
         const { data } = await patchDocumentsById({
-          path: {
-            id: document?.id || '',
-          },
-          body: {
-            title,
-            content: {
-              type: 'text',
-              data: content,
-            },
-          },
+          path: { id: document?.id || '' },
+          body: { title, content: { type: 'text', data: content } },
         });
-        return {
-          document: data.document,
-        };
+        return { document: data.document };
       }
 
       const { data } = await postDocuments({
         body: {
-          title: title || '',
-          content: {
-            type: 'text',
-            data: content,
-          },
+          title,
+          content: { type: 'text', data: content },
           agentId,
         },
       });
-
-      return {
-        document: data.document,
-      };
+      return { document: data.document };
     },
     onSuccess: ({ document: savedDocument }) => {
       posthog.capture('knowledge_source_saved', {
@@ -133,31 +122,39 @@ export const TextContentWidget = ({
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
-        <div className="grid gap-3">
-          <Label htmlFor="text-title">Title</Label>
-          <Input
-            id="text-title"
-            placeholder="Enter a title for this text source..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={readOnly}
-          />
-          {titleError && (
-            <p className="text-sm text-destructive">{titleError}</p>
-          )}
-        </div>
+        <FormInput
+          name="title"
+          control={control}
+          label="Title"
+          placeholder="Enter a title for this text source..."
+          disabled={readOnly}
+        />
         <div className="grid gap-3">
           <Label>Content</Label>
-          <RichEditor value={content} onChange={setContent} readOnly={readOnly} />
-          {contentError && (
-            <p className="text-sm text-destructive">{contentError}</p>
-          )}
+          <Controller
+            control={control}
+            name="content"
+            render={({ field, fieldState }) => (
+              <>
+                <RichEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  readOnly={readOnly}
+                />
+                {fieldState.error && (
+                  <p className="text-sm text-destructive">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
         </div>
       </div>
       <SheetFooter>
         <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
           <Button
-            onClick={handleSave}
+            onClick={handleSubmit((values) => saveTextMutation.mutate(values))}
             disabled={readOnly || saveTextMutation.isPending}
             type="submit"
           >

@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import {
@@ -7,15 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
-import { Input } from '@knowbase/ui/components/input';
-import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink, LockIcon } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Link } from '@tanstack/react-router';
+import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { useClerkPlan } from '@/hooks/useClerkPlan.ts';
 import { client } from '@/services/client.gen';
 import {
@@ -30,15 +31,23 @@ interface ConnectionResponse {
   phoneNumbers: WhatsAppPhoneNumber[];
 }
 
+const schema = z.object({
+  businessAccountId: z.string().min(1, 'Business Account ID is required'),
+  accessToken: z.string().min(1, 'Access Token is required'),
+});
+type FormValues = z.infer<typeof schema>;
+
 export function WhatsAppIntegrationCard() {
   const posthog = usePostHog();
-  const [accessToken, setAccessToken] = useState('');
-  const [businessAccountId, setBusinessAccountId] = useState('');
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
   const { isPaid, isLoading: planLoading } = useClerkPlan();
 
-  // Fetch connection status on mount
+  const { control, handleSubmit, reset } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { businessAccountId: '', accessToken: '' },
+  });
+
   const { isLoading } = useQuery({
     queryKey: ['whatsapp-connection'],
     queryFn: async () => {
@@ -58,7 +67,7 @@ export function WhatsAppIntegrationCard() {
   });
 
   const connectMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ accessToken, businessAccountId }: FormValues) => {
       const res = await client.post({
         url: '/whatsapp/connect',
         body: { accessToken, businessAccountId },
@@ -78,8 +87,7 @@ export function WhatsAppIntegrationCard() {
           agentName: null,
         })),
       });
-      setAccessToken('');
-      setBusinessAccountId('');
+      reset();
       posthog.capture('whatsapp_connected', {
         business_account_id: data.businessAccountId,
         phone_numbers_count: data.phoneNumbers.length,
@@ -159,25 +167,19 @@ export function WhatsAppIntegrationCard() {
       {isPaid && !connected && !isLoading && (
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="wa-waba-id">Business Account ID</Label>
-              <Input
-                id="wa-waba-id"
-                placeholder="1234567890"
-                value={businessAccountId}
-                onChange={(e) => setBusinessAccountId(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="wa-token">Access Token</Label>
-              <Input
-                id="wa-token"
-                type="password"
-                placeholder="EAAxxxxxxxx…"
-                value={accessToken}
-                onChange={(e) => setAccessToken(e.target.value)}
-              />
-            </div>
+            <FormInput
+              name="businessAccountId"
+              control={control}
+              label="Business Account ID"
+              placeholder="1234567890"
+            />
+            <FormInput
+              name="accessToken"
+              control={control}
+              label="Access Token"
+              type="password"
+              placeholder="EAAxxxxxxxx…"
+            />
           </div>
           <div className="flex items-center justify-between">
             <a
@@ -191,10 +193,8 @@ export function WhatsAppIntegrationCard() {
             </a>
             <Button
               size="sm"
-              disabled={
-                !accessToken || !businessAccountId || connectMutation.isPending
-              }
-              onClick={() => connectMutation.mutate()}
+              disabled={connectMutation.isPending}
+              onClick={handleSubmit((values) => connectMutation.mutate(values))}
             >
               {connectMutation.isPending ? 'Connecting…' : 'Connect'}
             </Button>

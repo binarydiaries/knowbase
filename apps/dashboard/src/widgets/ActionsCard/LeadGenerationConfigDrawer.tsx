@@ -1,5 +1,5 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
-import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
   Sheet,
@@ -10,11 +10,14 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { Switch } from '@knowbase/ui/components/switch';
-import { Textarea } from '@knowbase/ui/components/textarea';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { usePostHog } from 'posthog-js/react';
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
+import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchAgentActionsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 
@@ -46,12 +49,35 @@ const FIELD_LABELS: Record<keyof NonNullable<LeadConfig['fields']>, string> = {
   company: 'Company',
 };
 
-const DEFAULT_FIELDS: NonNullable<LeadConfig['fields']> = {
+const DEFAULT_FIELDS = {
   name: { collect: true, required: true },
   email: { collect: true, required: true },
   phone: { collect: false, required: false },
   company: { collect: false, required: false },
 };
+
+const fieldConfigSchema = z.object({
+  collect: z.boolean(),
+  required: z.boolean(),
+});
+
+const schema = z.object({
+  fields: z.object({
+    name: fieldConfigSchema,
+    email: fieldConfigSchema,
+    phone: fieldConfigSchema,
+    company: fieldConfigSchema,
+  }),
+  triggerInstructions: z
+    .string()
+    .max(300, 'Must be at most 300 characters')
+    .optional(),
+  successMessage: z
+    .string()
+    .min(1, 'Success message is required')
+    .max(200, 'Must be at most 200 characters'),
+});
+type FormValues = z.infer<typeof schema>;
 
 export function LeadGenerationConfigDrawer({
   action,
@@ -66,18 +92,28 @@ export function LeadGenerationConfigDrawer({
 }) {
   const posthog = usePostHog();
   const cfg = action.config;
-  const [fields, setFields] = useState<NonNullable<LeadConfig['fields']>>(
-    cfg.fields ?? DEFAULT_FIELDS,
-  );
-  const [triggerInstructions, setTriggerInstructions] = useState(
-    cfg.triggerInstructions ?? '',
-  );
-  const [successMessage, setSuccessMessage] = useState(
-    cfg.successMessage ?? "Thanks! We'll be in touch.",
-  );
+
+  const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      fields: cfg.fields ?? DEFAULT_FIELDS,
+      triggerInstructions: cfg.triggerInstructions ?? '',
+      successMessage: cfg.successMessage ?? "Thanks! We'll be in touch.",
+    },
+  });
+
+  useEffect(() => {
+    reset({
+      fields: action.config.fields ?? DEFAULT_FIELDS,
+      triggerInstructions: action.config.triggerInstructions ?? '',
+      successMessage: action.config.successMessage ?? "Thanks! We'll be in touch.",
+    });
+  }, [action.id, reset]);
+
+  const fieldsValues = watch('fields');
 
   const saveMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ fields, triggerInstructions, successMessage }: FormValues) =>
       patchAgentActionsById({
         path: { id: action.id },
         body: {
@@ -88,10 +124,10 @@ export function LeadGenerationConfigDrawer({
           },
         },
       }),
-    onSuccess: () => {
+    onSuccess: (_, values) => {
       posthog.capture('lead_generation_configured', {
         action_id: action.id,
-        fields_collected: Object.entries(fields)
+        fields_collected: Object.entries(values.fields)
           .filter(([, v]) => v?.collect)
           .map(([k]) => k),
       });
@@ -102,26 +138,6 @@ export function LeadGenerationConfigDrawer({
       toast.error(getErrorMessage(error));
     },
   });
-
-  const setFieldCollect = (
-    key: keyof NonNullable<LeadConfig['fields']>,
-    collect: boolean,
-  ) => {
-    setFields((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], collect, required: collect ? (prev[key]?.required ?? false) : false },
-    }));
-  };
-
-  const setFieldRequired = (
-    key: keyof NonNullable<LeadConfig['fields']>,
-    required: boolean,
-  ) => {
-    setFields((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], required },
-    }));
-  };
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -140,9 +156,7 @@ export function LeadGenerationConfigDrawer({
             <div className="rounded-lg border divide-y">
               {(Object.keys(FIELD_LABELS) as (keyof NonNullable<LeadConfig['fields']>)[]).map(
                 (key) => {
-                  const fieldCfg = fields[key];
-                  const isCollected = fieldCfg?.collect ?? false;
-                  const isRequired = fieldCfg?.required ?? false;
+                  const isCollected = fieldsValues[key]?.collect ?? false;
 
                   return (
                     <div key={key} className="flex items-center justify-between px-4 py-3">
@@ -150,11 +164,17 @@ export function LeadGenerationConfigDrawer({
                         <span className="text-sm font-medium">{FIELD_LABELS[key]}</span>
                         {isCollected && (
                           <div className="flex items-center gap-2 mt-1">
-                            <Switch
-                              id={`${key}-required`}
-                              checked={isRequired}
-                              onCheckedChange={(v) => setFieldRequired(key, v)}
-                              className="scale-75 origin-left"
+                            <Controller
+                              control={control}
+                              name={`fields.${key}.required`}
+                              render={({ field }) => (
+                                <Switch
+                                  id={`${key}-required`}
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="scale-75 origin-left"
+                                />
+                              )}
                             />
                             <label
                               htmlFor={`${key}-required`}
@@ -165,10 +185,21 @@ export function LeadGenerationConfigDrawer({
                           </div>
                         )}
                       </div>
-                      <Switch
-                        id={`${key}-collect`}
-                        checked={isCollected}
-                        onCheckedChange={(v) => setFieldCollect(key, v)}
+                      <Controller
+                        control={control}
+                        name={`fields.${key}.collect`}
+                        render={({ field }) => (
+                          <Switch
+                            id={`${key}-collect`}
+                            checked={field.value}
+                            onCheckedChange={(v) => {
+                              field.onChange(v);
+                              if (!v) {
+                                setValue(`fields.${key}.required`, false);
+                              }
+                            }}
+                          />
+                        )}
                       />
                     </div>
                   );
@@ -178,47 +209,33 @@ export function LeadGenerationConfigDrawer({
           </div>
 
           {/* Trigger instructions */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="triggerInstructions" className="text-sm font-medium">
-              Trigger instructions{' '}
-              <span className="text-muted-foreground font-normal">(optional)</span>
-            </Label>
-            <Textarea
-              id="triggerInstructions"
-              placeholder="e.g. Only capture lead if user explicitly asks to be contacted."
-              value={triggerInstructions}
-              onChange={(e) => setTriggerInstructions(e.target.value)}
-              maxLength={300}
-              rows={3}
-            />
-            <p className="text-xs text-muted-foreground">
-              Helps the AI decide when to trigger lead capture.
-            </p>
-          </div>
+          <FormTextarea
+            name="triggerInstructions"
+            control={control}
+            label="Trigger instructions (optional)"
+            placeholder="e.g. Only capture lead if user explicitly asks to be contacted."
+            maxLength={300}
+            rows={3}
+          />
 
           {/* Success message */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="successMessage" className="text-sm font-medium">
-              Success message
-            </Label>
-            <Input
-              id="successMessage"
-              placeholder="Thanks! We'll be in touch."
-              value={successMessage}
-              onChange={(e) => setSuccessMessage(e.target.value)}
-              maxLength={200}
-            />
-            <p className="text-xs text-muted-foreground">
-              Shown after the agent successfully captures a lead.
-            </p>
-          </div>
+          <FormInput
+            name="successMessage"
+            control={control}
+            label="Success message"
+            placeholder="Thanks! We'll be in touch."
+            maxLength={200}
+          />
         </div>
 
         <SheetFooter className="px-6 py-4 border-t mt-auto">
           <Button variant="outline" onClick={onClose} disabled={saveMutation.isPending}>
             Cancel
           </Button>
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          <Button
+            onClick={handleSubmit((values) => saveMutation.mutate(values))}
+            disabled={saveMutation.isPending}
+          >
             {saveMutation.isPending ? 'Saving…' : 'Save'}
           </Button>
         </SheetFooter>

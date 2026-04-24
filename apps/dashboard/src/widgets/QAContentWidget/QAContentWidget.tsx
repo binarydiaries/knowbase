@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
 import { Input } from '@knowbase/ui/components/input';
@@ -15,8 +16,10 @@ import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2, Trash2 } from 'lucide-react';
-import { useState } from 'react';
 import { usePostHog } from 'posthog-js/react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import {
   type DocumentSchema,
   patchDocumentsById,
@@ -29,12 +32,6 @@ import {
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
-type QA = {
-  id: string;
-  question: string;
-  answer: string;
-};
-
 type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: DocumentSchema;
@@ -42,17 +39,27 @@ type IQAContentWidgetProps = {
   readOnly?: boolean;
 };
 
-function makeQA(question = '', answer = ''): QA {
-  return { id: crypto.randomUUID(), question, answer };
-}
+const qaItemSchema = z.object({
+  question: z.string().min(1, 'Question is required'),
+  answer: z.string().min(1, 'Answer is required'),
+});
 
-function initQaList(document: DocumentSchema | undefined): QA[] {
+const schema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  qaList: z.array(qaItemSchema),
+});
+type FormValues = z.infer<typeof schema>;
+
+function initQaList(
+  document: DocumentSchema | undefined,
+): { question: string; answer: string }[] {
   if (document?.content.type === 'qna' && document.content.data.length > 0) {
-    return document.content.data.map((qa) =>
-      makeQA(qa.question, qa.answer),
-    );
+    return document.content.data.map((qa) => ({
+      question: qa.question,
+      answer: qa.answer,
+    }));
   }
-  return [makeQA()];
+  return [{ question: '', answer: '' }];
 }
 
 export const QAContentWidget = ({
@@ -63,9 +70,6 @@ export const QAContentWidget = ({
 }: IQAContentWidgetProps) => {
   const posthog = usePostHog();
   const { addUpdateDocument } = useDocuments();
-  const [qaList, setQaList] = useState<QA[]>(() => initQaList(document));
-  const [title, setTitle] = useState(document?.title ?? '');
-  const [submitted, setSubmitted] = useState(false);
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
@@ -73,23 +77,21 @@ export const QAContentWidget = ({
     throw new Error('Agent not found');
   }
 
-  const titleError = submitted && !title.trim() ? 'Title is required' : null;
-  const qaErrors = qaList.map((qa) => ({
-    question: submitted && !qa.question.trim() ? 'Question is required' : null,
-    answer: submitted && !qa.answer.trim() ? 'Answer is required' : null,
-  }));
-  const isValid =
-    !!title.trim() &&
-    qaList.every((qa) => qa.question.trim() && qa.answer.trim());
+  const { control, handleSubmit } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: document?.title ?? '',
+      qaList: initQaList(document),
+    },
+  });
 
-  const handleSave = () => {
-    setSubmitted(true);
-    if (!isValid) return;
-    saveQnAMutation.mutate();
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'qaList',
+  });
 
   const saveQnAMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ title, qaList }: FormValues) => {
       const data_payload = qaList.map(({ question, answer }) => ({
         question,
         answer,
@@ -98,10 +100,7 @@ export const QAContentWidget = ({
       if (mode === 'edit') {
         const { data } = await patchDocumentsById({
           path: { id: document?.id || '' },
-          body: {
-            title,
-            content: { type: 'qna', data: data_payload },
-          },
+          body: { title, content: { type: 'qna', data: data_payload } },
         });
         return { document: data.document };
       }
@@ -134,20 +133,6 @@ export const QAContentWidget = ({
     },
   });
 
-  const addQuestion = () => {
-    setQaList((prev) => [...prev, makeQA()]);
-  };
-
-  const updateQA = (id: string, field: 'question' | 'answer', value: string) => {
-    setQaList((prev) =>
-      prev.map((qa) => (qa.id === id ? { ...qa, [field]: value } : qa)),
-    );
-  };
-
-  const deleteQuestion = (id: string) => {
-    setQaList((prev) => prev.filter((qa) => qa.id !== id));
-  };
-
   return (
     <SheetContent className="sm:max-w-175 overflow-auto">
       <SheetHeader>
@@ -161,35 +146,33 @@ export const QAContentWidget = ({
         </SheetDescription>
       </SheetHeader>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
-        <div className="grid gap-3">
-          <Label htmlFor="qa-title">Title</Label>
-          <Input
-            id="qa-title"
-            placeholder="Enter a title for this Q&A group"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={readOnly}
-          />
-          {titleError && (
-            <p className="text-sm text-destructive">{titleError}</p>
-          )}
-        </div>
+        <FormInput
+          name="title"
+          control={control}
+          label="Title"
+          placeholder="Enter a title for this Q&A group"
+          disabled={readOnly}
+        />
         <div className="flex flex-row justify-between items-center">
           <Label>Questions & Answers</Label>
           <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-            <Button variant="outline" onClick={addQuestion} disabled={readOnly}>
+            <Button
+              variant="outline"
+              onClick={() => append({ question: '', answer: '' })}
+              disabled={readOnly}
+            >
               + Add Question
             </Button>
           </DisabledTooltip>
         </div>
-        {qaList.map((qa, index) => (
-          <Card key={qa.id}>
+        {fields.map((field, index) => (
+          <Card key={field.id}>
             <CardContent className="space-y-4">
               <div className="flex flex-row justify-between items-center">
                 <p className="text-sm text-muted-foreground">
                   Question {index + 1}
                 </p>
-                {qaList.length > 1 && (
+                {fields.length > 1 && (
                   <DisabledTooltip
                     disabled={readOnly}
                     content={AGENT_LOCK_TOOLTIP}
@@ -198,7 +181,7 @@ export const QAContentWidget = ({
                       variant="ghost"
                       size="icon"
                       disabled={readOnly}
-                      onClick={() => deleteQuestion(qa.id)}
+                      onClick={() => remove(index)}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -206,32 +189,42 @@ export const QAContentWidget = ({
                   </DisabledTooltip>
                 )}
               </div>
-              <div className="space-y-1">
-                <Input
-                  placeholder="Enter question..."
-                  value={qa.question}
-                  onChange={(e) => updateQA(qa.id, 'question', e.target.value)}
-                  disabled={readOnly}
-                />
-                {qaErrors[index]?.question && (
-                  <p className="text-sm text-destructive">
-                    {qaErrors[index].question}
-                  </p>
+              <Controller
+                control={control}
+                name={`qaList.${index}.question`}
+                render={({ field: f, fieldState }) => (
+                  <div className="space-y-1">
+                    <Input
+                      placeholder="Enter question..."
+                      {...f}
+                      disabled={readOnly}
+                    />
+                    {fieldState.error && (
+                      <p className="text-sm text-destructive">
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
-              <div className="space-y-1">
-                <Textarea
-                  placeholder="Enter the answer..."
-                  value={qa.answer}
-                  onChange={(e) => updateQA(qa.id, 'answer', e.target.value)}
-                  disabled={readOnly}
-                />
-                {qaErrors[index]?.answer && (
-                  <p className="text-sm text-destructive">
-                    {qaErrors[index].answer}
-                  </p>
+              />
+              <Controller
+                control={control}
+                name={`qaList.${index}.answer`}
+                render={({ field: f, fieldState }) => (
+                  <div className="space-y-1">
+                    <Textarea
+                      placeholder="Enter the answer..."
+                      {...f}
+                      disabled={readOnly}
+                    />
+                    {fieldState.error && (
+                      <p className="text-sm text-destructive">
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
+              />
             </CardContent>
           </Card>
         ))}
@@ -239,7 +232,7 @@ export const QAContentWidget = ({
       <SheetFooter>
         <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
           <Button
-            onClick={handleSave}
+            onClick={handleSubmit((values) => saveQnAMutation.mutate(values))}
             disabled={readOnly || saveQnAMutation.isPending}
             type="submit"
           >

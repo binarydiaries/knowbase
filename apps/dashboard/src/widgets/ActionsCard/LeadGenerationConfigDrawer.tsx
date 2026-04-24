@@ -157,7 +157,6 @@ export function LeadGenerationConfigDrawer({
               {(Object.keys(FIELD_LABELS) as (keyof NonNullable<LeadConfig['fields']>)[]).map(
                 (key) => {
                   const isCollected = fieldsValues[key]?.collect ?? false;
-                  const isRequired = fieldsValues[key]?.required ?? false;
 
                   return (
                     <div key={key} className="flex items-center justify-between px-4 py-3">

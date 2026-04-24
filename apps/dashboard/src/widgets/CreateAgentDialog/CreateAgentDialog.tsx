@@ -30,8 +30,15 @@ import {
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const schema = z.object({
-  name: z.string().min(3).max(20),
-  description: z.string().min(3).max(200).optional(),
+  name: z
+    .string()
+    .min(3, 'Name must be at least 3 characters')
+    .max(20, 'Name must be at most 20 characters'),
+  description: z
+    .string()
+    .min(3, 'Description must be at least 3 characters')
+    .max(200, 'Description must be at most 200 characters')
+    .optional(),
 });
 
 export function CreateAgentDialog({

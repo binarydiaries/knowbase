@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
-import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
   SheetClose,
@@ -12,14 +11,14 @@ import {
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
 import { toast } from '@knowbase/ui/components/sonner';
-import { Textarea } from '@knowbase/ui/components/textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2, Trash2 } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
+import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import {
   type DocumentSchema,
   patchDocumentsById,
@@ -189,41 +188,19 @@ export const QAContentWidget = ({
                   </DisabledTooltip>
                 )}
               </div>
-              <Controller
+              <FormInput
+                name={`qaList.${index}.question` as `qaList.${number}.question`}
                 control={control}
-                name={`qaList.${index}.question`}
-                render={({ field: f, fieldState }) => (
-                  <div className="space-y-1">
-                    <Input
-                      placeholder="Enter question..."
-                      {...f}
-                      disabled={readOnly}
-                    />
-                    {fieldState.error && (
-                      <p className="text-sm text-destructive">
-                        {fieldState.error.message}
-                      </p>
-                    )}
-                  </div>
-                )}
+                label="Question"
+                placeholder="Enter question..."
+                disabled={readOnly}
               />
-              <Controller
+              <FormTextarea
+                name={`qaList.${index}.answer` as `qaList.${number}.answer`}
                 control={control}
-                name={`qaList.${index}.answer`}
-                render={({ field: f, fieldState }) => (
-                  <div className="space-y-1">
-                    <Textarea
-                      placeholder="Enter the answer..."
-                      {...f}
-                      disabled={readOnly}
-                    />
-                    {fieldState.error && (
-                      <p className="text-sm text-destructive">
-                        {fieldState.error.message}
-                      </p>
-                    )}
-                  </div>
-                )}
+                label="Answer"
+                placeholder="Enter the answer..."
+                disabled={readOnly}
               />
             </CardContent>
           </Card>

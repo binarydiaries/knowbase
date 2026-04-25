@@ -9,7 +9,7 @@ import { setupMessageListener } from './listener';
   const config = getConfig();
 
   if (!config.channelId) {
-    console.warn('KnowBase: channelId missing');
+    console.warn('Agenvik: channelId missing');
     return;
   }
 

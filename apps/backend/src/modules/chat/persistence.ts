@@ -5,9 +5,10 @@
  * blocks that previously appeared in both `send()` and `sendWhatsApp()`.
  */
 
-import { SubscriptionService } from '../subscription/service';
+import { addEmailJob } from '../../queue/email/email.queue';
 import { LeadService } from '../lead/service';
 import { MessageService } from '../message/service';
+import { SubscriptionService } from '../subscription/service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,7 +70,7 @@ export async function handleLeadCapture(
         phone?: string;
         company?: string;
       };
-      await LeadService.create({
+      const lead = await LeadService.create({
         agentId: ctx.agentId,
         conversationId: ctx.conversationId,
         channelId: ctx.channelId,
@@ -79,6 +80,12 @@ export async function handleLeadCapture(
         phone: input.phone ?? null,
         company: input.company ?? null,
       });
+      await addEmailJob({
+        type: 'lead-notification',
+        leadId: lead.id,
+        agentId: ctx.agentId,
+        orgId: ctx.orgId,
+      }).catch(() => {});
     } catch {
       // Best-effort — never break the chat
     }

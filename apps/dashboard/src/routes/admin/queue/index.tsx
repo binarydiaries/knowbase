@@ -18,6 +18,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { isAdminEmail } from '@/utils/adminAccess';
+import { getErrorMessage } from '@/utils/errorHelper';
 
 type QueueJob = {
   id: string;
@@ -143,8 +144,8 @@ function RouteComponent() {
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
       toast.success('Job retried');
     },
-    onError: () => {
-      toast.error('Failed to retry job');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to retry job'));
     },
   });
 
@@ -158,8 +159,8 @@ function RouteComponent() {
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
       toast.success('Job execution started');
     },
-    onError: () => {
-      toast.error('Failed to execute job');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to execute job'));
     },
   });
 

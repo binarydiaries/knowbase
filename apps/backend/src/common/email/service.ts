@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? 'KnowBase <notifications@knowbase.app>';
+const from = process.env.EMAIL_FROM ?? 'Agenvik <notifications@agenvik.com>';
 
 let resend: Resend | null = null;
 
@@ -80,7 +80,7 @@ function wrap(content: string): string {
 <body style="font-family:sans-serif;color:#111;max-width:560px;margin:0 auto;padding:24px">
 ${content}
 <hr style="border:none;border-top:1px solid #eee;margin-top:32px"/>
-<p style="font-size:12px;color:#888">KnowBase · You received this because you own an agent on KnowBase.</p>
+<p style="font-size:12px;color:#888">Agenvik · You received this because you own an agent on Agenvik.</p>
 </body>
 </html>`;
 }

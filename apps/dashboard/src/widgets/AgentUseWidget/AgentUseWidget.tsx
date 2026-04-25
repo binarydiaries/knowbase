@@ -33,7 +33,7 @@ export const AgentUseWidget = () => {
   );
   const embedUrl = `${import.meta.env.VITE_EMBED_BASE}/embed.js`;
   const embedCode = `<script>
-window.KnowBaseChat = {
+window.AgenVikChat = {
   orgId: "${orgId}",
   channelId: "${channelWeb?.id || ''}",
 };

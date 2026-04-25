@@ -37,7 +37,13 @@ const inboxNav = [
   { name: 'Leads', url: '/leads', icon: UserRound },
 ];
 
-const footerNav = [{ name: 'Help & Support', url: '/', icon: LifeBuoy }];
+const footerNav = [
+  {
+    name: 'Help & Support',
+    url: 'https://docs.agenvik.com/help-and-support/overview',
+    icon: LifeBuoy,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();

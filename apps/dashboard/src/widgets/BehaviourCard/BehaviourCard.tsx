@@ -99,6 +99,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         tone: values.tone,
         verbosity: values.verbosity,
       });
+      toast.success('Behaviour saved');
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

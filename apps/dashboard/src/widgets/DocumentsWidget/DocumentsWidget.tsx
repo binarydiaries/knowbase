@@ -137,6 +137,7 @@ export const DocumentsWidget = ({
       });
       deleteDocument(agentId, documentId);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
+      toast.success('Knowledge source deleted');
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -156,6 +157,7 @@ export const DocumentsWidget = ({
         agent_id: agentId,
         documents_count: documents.filter((d) => d.status === 'ready').length,
       });
+      toast.success('Training started');
       setIsPollingActive(true);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       setIsTrainDialogOpen(false);

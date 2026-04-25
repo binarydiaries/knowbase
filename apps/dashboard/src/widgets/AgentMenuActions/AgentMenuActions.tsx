@@ -51,8 +51,10 @@ export const AgentMenuActions = ({
     onSuccess: () => {
       if (agentStatus === 'active') {
         posthog.capture('agent_archived', { agent_id: agentId });
+        toast.success('Agent archived');
       } else {
         posthog.capture('agent_unarchived', { agent_id: agentId });
+        toast.success('Agent unarchived');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });

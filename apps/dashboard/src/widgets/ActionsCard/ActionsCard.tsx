@@ -76,6 +76,8 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         enabled: variables.enabled,
         agent_id: agentId,
       });
+      const actionLabel = ACTION_TYPES.find((a) => a.id === variables.type)?.label ?? 'Action';
+      toast.success(`${actionLabel} ${variables.enabled ? 'enabled' : 'disabled'}`);
       queryClient.invalidateQueries({ queryKey: ['agent-actions', agentId] });
     },
     onError: (error) => {

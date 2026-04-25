@@ -22,16 +22,19 @@ import {
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
-import {
-  type AgentSchema,
-  patchAgentsById,
-  postAgents,
-} from '@/services';
+import { type AgentSchema, patchAgentsById, postAgents } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const schema = z.object({
-  name: z.string().min(3).max(20),
-  description: z.string().min(3).max(200).optional(),
+  name: z
+    .string()
+    .min(3, 'Name must be at least 3 characters')
+    .max(30, 'Name must be at most 30 characters'),
+  description: z
+    .string()
+    .min(3, 'Description must be at least 3 characters')
+    .max(200, 'Description must be at most 200 characters')
+    .optional(),
 });
 
 export function CreateAgentDialog({
@@ -91,10 +94,12 @@ export function CreateAgentDialog({
           agent_id: agent.id,
           agent_name: variables.name,
         });
+        toast.success('Agent updated');
       } else {
         posthog.capture('agent_created', {
           agent_name: variables.name,
         });
+        toast.success('Agent created');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });
       reset();
@@ -137,9 +142,7 @@ export function CreateAgentDialog({
 
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>
-            {agent ? 'Edit Agent' : 'Create Agent'}
-          </DialogTitle>
+          <DialogTitle>{agent ? 'Edit Agent' : 'Create Agent'}</DialogTitle>
 
           <DialogDescription>
             Give your agent a name. You can configure everything else later.

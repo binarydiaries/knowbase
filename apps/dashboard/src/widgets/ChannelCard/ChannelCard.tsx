@@ -131,6 +131,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         agent_id: agentId,
         channel_type: 'web',
       });
+      toast.success('Channel settings saved');
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

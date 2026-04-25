@@ -1,3 +1,4 @@
+import { useUser } from '@clerk/clerk-react';
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +11,6 @@ import {
 } from '@knowbase/ui/components/sidebar';
 import {
   Bot,
-  Bubbles,
   Gauge,
   LifeBuoy,
   LineChart,
@@ -20,14 +20,13 @@ import {
   Shield,
   UserRound,
 } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
 import { isAdminEmail } from '@/utils/adminAccess';
 import { NavUser } from '../NavUser/NavUser.tsx';
 
 const mainNav = [
-  { name: "Agents", url: "/agents", icon: Bot },
+  { name: 'Agents', url: '/agents', icon: Bot },
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
   { name: 'Integrations', url: '/integrations', icon: Plug },
@@ -38,9 +37,7 @@ const inboxNav = [
   { name: 'Leads', url: '/leads', icon: UserRound },
 ];
 
-const footerNav = [
-  { name: 'Help & Support', url: '/', icon: LifeBuoy },
-];
+const footerNav = [{ name: 'Help & Support', url: '/', icon: LifeBuoy }];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
@@ -61,8 +58,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/">
-                <Bubbles />
-                <span className="text-base font-semibold">Knowbase.ai</span>
+                <img
+                  src="/TextLogoLight.svg"
+                  alt="Agenvik"
+                  className="size-25 mt-2 block dark:hidden"
+                />
+
+                <img
+                  src="/TextLogoDark.svg"
+                  alt="Agenvik"
+                  className="size-25 mt-2 hidden dark:block"
+                />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

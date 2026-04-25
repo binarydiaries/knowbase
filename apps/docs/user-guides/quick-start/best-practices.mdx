@@ -1,0 +1,100 @@
+---
+title: "Best practices"
+description: "Improve agent quality with better knowledge, behaviour, testing, and monitoring habits."
+---
+
+Use this page as a checklist when an Agent is not answering the way you expect, or when you want to prepare a polished launch.
+
+## What you will learn
+
+- How to make Knowledge Sources easier for the Agent to use
+- How to write Behaviour settings that create consistent answers
+- How to test before launch
+- How to use Conversations and Analytics after launch
+
+## Make Knowledge Sources specific
+
+Agents work best when your source content is explicit. Avoid vague statements that require guessing.
+
+<Frame>
+  <img src="/images/product-ss/add-text-source.png" alt="Well structured text source placeholder" />
+</Frame>
+
+Strong source content usually includes:
+
+- Clear product names, plan names, and feature names
+- Exact steps customers should follow
+- Known limitations and eligibility rules
+- Links written as plain visible URLs when the Agent should share them
+- Separate sections for pricing, support, setup, and troubleshooting
+
+## Use Q&A for critical answers
+
+Use **Q&A** when a question needs a precise, repeatable answer. This is useful for refunds, pricing rules, handoff rules, business hours, and compliance-sensitive responses.
+
+<Frame>
+  <img src="/images/product-ss/add-qa-source.png" alt="Q&A source best practice placeholder" />
+</Frame>
+
+Keep each Q&A focused. If one answer covers several topics, split it into multiple entries.
+
+## Write Behaviour like an operating guide
+
+The **System Prompt** should explain the Agent's job, audience, and boundaries. The **Guardrails** field should cover things the Agent must avoid or escalate.
+
+<Frame>
+  <img src="/images/product-ss/behaviour-settings.png" alt="Behaviour best practices placeholder" />
+</Frame>
+
+A strong Behaviour setup includes:
+
+- Who the Agent helps
+- What the Agent can answer
+- When the Agent should say it does not know
+- How it should ask for missing context
+- When it should collect a lead or direct the visitor to support
+
+## Choose tone and verbosity intentionally
+
+Use **Friendly** for conversational support, **Professional** for sales or B2B workflows, and **Neutral** for factual help centers. Use **Short** for fast FAQ answers, **Balanced** for general support, and **Detailed** for technical or process-heavy guidance.
+
+## Test with real customer questions
+
+Before launch, test the Agent with questions from actual conversations, support tickets, sales calls, or website search terms.
+
+<Frame>
+  <img src="/images/product-ss/agent-preview.png" alt="Agent preview testing placeholder" />
+</Frame>
+
+Test for:
+
+- Accuracy: the answer matches your source content
+- Completeness: the visitor gets the next step
+- Boundaries: the Agent avoids unsupported claims
+- Tone: the response fits your brand
+- Recovery: the fallback message is helpful
+
+## Monitor after launch
+
+Use **Conversations** to inspect individual threads and **Analytics** to find patterns across many interactions.
+
+<Frame>
+  <img src="/images/product-ss/conversation-inbox.png" alt="Conversation review placeholder" />
+</Frame>
+
+<Frame>
+  <img src="/images/product-ss/analytics-dashboard.png" alt="Analytics dashboard placeholder" />
+</Frame>
+
+Turn repeated weak answers into better Text sources, Q&A entries, or Behaviour instructions.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Knowledge Sources" icon="folder" href="/user-guides/agents/knowledge-sources">
+    Learn how to add, edit, delete, and train sources.
+  </Card>
+  <Card title="Conversations" icon="message-circle" href="/user-guides/inbox/conversations">
+    Review live conversations and identify content gaps.
+  </Card>
+</CardGroup>

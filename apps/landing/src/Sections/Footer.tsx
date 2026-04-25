@@ -1,20 +1,20 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { usePostHog } from '@posthog/react';
+import { Mail } from 'lucide-react';
 import {
   FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaYoutube,
   FaInstagram,
-} from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { usePostHog } from "@posthog/react";
+  FaLinkedin,
+  FaTwitter,
+  FaYoutube,
+} from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const socialLinks = [
-  { Icon: FaFacebook, label: "Facebook", href: "#" },
-  { Icon: FaTwitter, label: "Twitter / X", href: "#" },
-  { Icon: FaLinkedin, label: "LinkedIn", href: "#" },
-  { Icon: FaYoutube, label: "YouTube", href: "#" },
-  { Icon: FaInstagram, label: "Instagram", href: "#" },
+  { Icon: FaFacebook, label: 'Facebook', href: '#' },
+  { Icon: FaTwitter, label: 'Twitter / X', href: '#' },
+  { Icon: FaLinkedin, label: 'LinkedIn', href: '#' },
+  { Icon: FaYoutube, label: 'YouTube', href: '#' },
+  { Icon: FaInstagram, label: 'Instagram', href: '#' },
 ];
 
 const Footer = () => {
@@ -36,16 +36,12 @@ const Footer = () => {
             <div className="grid md:grid-cols-5 gap-10">
               {/* Logo */}
               <div className="col-span-1">
-                <a
-                  href="/"
-                  aria-label="Agenvik home"
-                  className="flex items-center gap-2 text-[#301B69] font-semibold text-lg"
-                >
-                  <div
-                    className="w-6 h-6 rounded-full bg-[#301B69]"
-                    aria-hidden="true"
+                <a href="/" aria-label="Agenvik home">
+                  <img
+                    src="/TextLogo.svg"
+                    alt="Agenvik"
+                    className="h-7 w-auto"
                   />
-                  Agenvik
                 </a>
               </div>
 
@@ -60,9 +56,9 @@ const Footer = () => {
                       href="#"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Home",
-                          section: "quick_links",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Home',
+                          section: 'quick_links',
                         })
                       }
                     >
@@ -74,9 +70,9 @@ const Footer = () => {
                       href="#features"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Features",
-                          section: "quick_links",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Features',
+                          section: 'quick_links',
                         })
                       }
                     >
@@ -88,9 +84,9 @@ const Footer = () => {
                       href="#how-it-works"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "How it Works",
-                          section: "quick_links",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'How it Works',
+                          section: 'quick_links',
                         })
                       }
                     >
@@ -102,9 +98,9 @@ const Footer = () => {
                       href="#pricing"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Pricing",
-                          section: "quick_links",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Pricing',
+                          section: 'quick_links',
                         })
                       }
                     >
@@ -116,9 +112,9 @@ const Footer = () => {
                       href="#faq"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "FAQ",
-                          section: "quick_links",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'FAQ',
+                          section: 'quick_links',
                         })
                       }
                     >
@@ -136,72 +132,44 @@ const Footer = () => {
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
                     <a
-                      href="#faq"
+                      href="https://docs.agenvik.com/"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Help Center",
-                          section: "support",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Help Center',
+                          section: 'support',
                         })
                       }
                     >
-                      Help Center
+                      User guide
                     </a>
                   </li>
                   <li>
                     <a
-                      href="/docs/getting-started"
+                      href="https://docs.agenvik.com/developer-guide/overview"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Getting Started",
-                          section: "support",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Getting Started',
+                          section: 'support',
                         })
                       }
                     >
-                      Getting Started
+                      Developer Guide
                     </a>
                   </li>
                   <li>
                     <a
-                      href="/contact"
+                      href="https://docs.agenvik.com/help-and-support/overview"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Contact Support",
-                          section: "support",
+                        posthog?.capture('footer_nav_link_clicked', {
+                          label: 'Contact Support',
+                          section: 'support',
                         })
                       }
                     >
-                      Contact Support
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/community"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Community Forums",
-                          section: "support",
-                        })
-                      }
-                    >
-                      Community Forums
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/docs"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture("footer_nav_link_clicked", {
-                          label: "Documentation",
-                          section: "support",
-                        })
-                      }
-                    >
-                      Documentation
+                      Help & Support
                     </a>
                   </li>
                 </ul>
@@ -216,43 +184,43 @@ const Footer = () => {
                   <li className="flex items-center gap-2">
                     <Mail size={14} aria-hidden="true" />
                     <a
-                      href="mailto:contact@agenvik.com"
+                      href="mailto:hello@agenvik.com"
                       className="hover:text-[#301B69]"
                       onClick={() =>
-                        posthog?.capture("footer_contact_clicked", {
-                          type: "email",
+                        posthog?.capture('footer_contact_clicked', {
+                          type: 'email',
                         })
                       }
                     >
-                      contact@agenvik.com
+                      hello@agenvik.com
                     </a>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Phone size={14} aria-hidden="true" />
-                    <a
-                      href="tel:+14146875892"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture("footer_contact_clicked", {
-                          type: "phone",
-                        })
-                      }
-                    >
-                      (414) 687-5892
-                    </a>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <MapPin
-                      size={14}
-                      className="mt-1 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span>
-                      794 McAllister St
-                      <br />
-                      San Francisco, CA 94102
-                    </span>
-                  </li>
+                  {/*<li className="flex items-center gap-2">*/}
+                  {/*  <Phone size={14} aria-hidden="true" />*/}
+                  {/*  <a*/}
+                  {/*    href="tel:+14146875892"*/}
+                  {/*    className="hover:text-[#301B69]"*/}
+                  {/*    onClick={() =>*/}
+                  {/*      posthog?.capture('footer_contact_clicked', {*/}
+                  {/*        type: 'phone',*/}
+                  {/*      })*/}
+                  {/*    }*/}
+                  {/*  >*/}
+                  {/*    (414) 687-5892*/}
+                  {/*  </a>*/}
+                  {/*</li>*/}
+                  {/*<li className="flex items-start gap-2">*/}
+                  {/*  <MapPin*/}
+                  {/*    size={14}*/}
+                  {/*    className="mt-1 flex-shrink-0"*/}
+                  {/*    aria-hidden="true"*/}
+                  {/*  />*/}
+                  {/*  <span>*/}
+                  {/*    Kuberpuram*/}
+                  {/*    <br />*/}
+                  {/*    San Francisco, CA 94102*/}
+                  {/*  </span>*/}
+                  {/*</li>*/}
                 </ul>
               </address>
 
@@ -269,7 +237,7 @@ const Footer = () => {
                         aria-label={`Agenvik on ${label}`}
                         className="w-9 h-9 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-md hover:opacity-90 transition"
                         onClick={() =>
-                          posthog?.capture("footer_social_clicked", {
+                          posthog?.capture('footer_social_clicked', {
                             platform: label,
                             href,
                           })
@@ -286,11 +254,11 @@ const Footer = () => {
             <div className="mt-12 border-t border-[#301B69]/10" />
 
             <p className="text-center text-sm text-[#301B69]/70 mt-6">
-              © 2026 Agenvik. All rights reserved. ·{" "}
+              © 2026 Agenvik. All rights reserved. ·{' '}
               <Link to="/privacy-policy" className="hover:text-[#301B69]">
                 Privacy Policy
               </Link>
-              {" · "}
+              {' · '}
               <Link to="/terms" className="hover:text-[#301B69]">
                 Terms & Conditions
               </Link>

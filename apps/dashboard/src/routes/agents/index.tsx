@@ -21,6 +21,7 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import type { LucideIcon } from 'lucide-react';
 import {
   AlertCircle,
   Archive,
@@ -38,18 +39,22 @@ import {
   Wand2,
   Zap,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
+import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
 import {
   AGENT_LIMIT_TOOLTIP,
   AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { SubscriptionLimitBanner } from '@/components/SubscriptionLimitBanner/SubscriptionLimitBanner.tsx';
-import { type AgentSchema, getAgents, getAgentsById, patchAgentsById } from '@/services';
-import { getErrorMessage } from '@/utils/errorHelper.ts';
+import {
+  type AgentSchema,
+  getAgents,
+  getAgentsById,
+  patchAgentsById,
+} from '@/services';
 import { timeAgo } from '@/utils/datetimeHelper.ts';
-import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { CreateAgentDialog } from '@/widgets/CreateAgentDialog/CreateAgentDialog.tsx';
 
 export const Route = createFileRoute('/agents/')({
@@ -59,14 +64,14 @@ export const Route = createFileRoute('/agents/')({
 type BotAppearance = { Icon: LucideIcon; bg: string; fg: string };
 
 const APPEARANCES: BotAppearance[] = [
-  { Icon: Sparkles,      bg: 'bg-violet-100',  fg: 'text-violet-600'  },
-  { Icon: Zap,           bg: 'bg-amber-100',   fg: 'text-amber-600'   },
-  { Icon: Brain,         bg: 'bg-blue-100',    fg: 'text-blue-600'    },
+  { Icon: Sparkles, bg: 'bg-violet-100', fg: 'text-violet-600' },
+  { Icon: Zap, bg: 'bg-amber-100', fg: 'text-amber-600' },
+  { Icon: Brain, bg: 'bg-blue-100', fg: 'text-blue-600' },
   { Icon: MessageSquare, bg: 'bg-emerald-100', fg: 'text-emerald-600' },
-  { Icon: Star,          bg: 'bg-rose-100',    fg: 'text-rose-600'    },
-  { Icon: Cpu,           bg: 'bg-cyan-100',    fg: 'text-cyan-600'    },
-  { Icon: Wand2,         bg: 'bg-indigo-100',  fg: 'text-indigo-600'  },
-  { Icon: Bot,           bg: 'bg-orange-100',  fg: 'text-orange-600'  },
+  { Icon: Star, bg: 'bg-rose-100', fg: 'text-rose-600' },
+  { Icon: Cpu, bg: 'bg-cyan-100', fg: 'text-cyan-600' },
+  { Icon: Wand2, bg: 'bg-indigo-100', fg: 'text-indigo-600' },
+  { Icon: Bot, bg: 'bg-orange-100', fg: 'text-orange-600' },
 ];
 
 function hashId(id: string): number {
@@ -92,24 +97,33 @@ function RouteComponent() {
   });
   const queryClient = useQueryClient();
   const isAgentAvailable =
-    !query.isLoading && query?.data?.data?.agents?.length;
+    !query.isLoading && !!query?.data?.data?.agents?.length;
   const subscription = query.data?.data.subscription;
   const hasReachedAgentLimit =
     (subscription?.activeAgentCount ?? 0) >=
     (subscription?.activeAgentLimit ?? Number.MAX_SAFE_INTEGER);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<AgentSchema>();
-  const [archiveConfirm, setArchiveConfirm] = useState<ArchiveConfirm | null>(null);
+  const [archiveConfirm, setArchiveConfirm] = useState<ArchiveConfirm | null>(
+    null,
+  );
 
   const archiveAgentMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: 'active' | 'archived' }) => {
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: 'active' | 'archived';
+    }) => {
       return patchAgentsById({
         path: { id },
         body: { agentStatus: status },
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
+      toast.success(variables.status === 'archived' ? 'Agent archived' : 'Agent unarchived');
       setArchiveConfirm(null);
     },
     onError: (error) => {
@@ -188,13 +202,19 @@ function RouteComponent() {
                     });
                   }}
                 >
-                  <Card className={`rounded-xl border bg-background shadow-sm transition-all duration-150 hover:shadow-md ${isArchived ? 'opacity-50' : ''}`}>
+                  <Card
+                    className={`rounded-xl border bg-background shadow-sm transition-all duration-150 hover:shadow-md ${isArchived ? 'opacity-50' : ''}`}
+                  >
                     <CardContent>
                       {/* Top row */}
                       <div className="flex items-start gap-3">
                         {/* Icon */}
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${isArchived ? 'bg-muted' : bg}`}>
-                          <Icon className={`h-6 w-6 ${isArchived ? 'text-muted-foreground' : fg}`} />
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${isArchived ? 'bg-muted' : bg}`}
+                        >
+                          <Icon
+                            className={`h-6 w-6 ${isArchived ? 'text-muted-foreground' : fg}`}
+                          />
                         </div>
 
                         {/* Title + badges */}
@@ -254,7 +274,10 @@ function RouteComponent() {
                             </DisabledTooltip>
 
                             <DisabledTooltip
-                              disabled={bot.agentStatus === 'archived' && hasReachedAgentLimit}
+                              disabled={
+                                bot.agentStatus === 'archived' &&
+                                hasReachedAgentLimit
+                              }
                               content={AGENT_LIMIT_TOOLTIP}
                             >
                               <div>
@@ -271,7 +294,8 @@ function RouteComponent() {
                                     });
                                   }}
                                   disabled={
-                                    (bot.agentStatus === 'archived' && hasReachedAgentLimit) ||
+                                    (bot.agentStatus === 'archived' &&
+                                      hasReachedAgentLimit) ||
                                     archiveAgentMutation.isPending
                                   }
                                   className="flex items-center gap-2 cursor-pointer"
@@ -281,7 +305,9 @@ function RouteComponent() {
                                   ) : (
                                     <Archive className="h-4 w-4" />
                                   )}
-                                  {bot.agentStatus === 'archived' ? 'Unarchive' : 'Archive'}
+                                  {bot.agentStatus === 'archived'
+                                    ? 'Unarchive'
+                                    : 'Archive'}
                                 </DropdownMenuItem>
                               </div>
                             </DisabledTooltip>
@@ -295,12 +321,16 @@ function RouteComponent() {
                           {bot.description}
                         </p>
                       ) : (
-                        <p className="mt-2 text-xs text-muted-foreground/40 italic">No description</p>
+                        <p className="mt-2 text-xs text-muted-foreground/40 italic">
+                          No description
+                        </p>
                       )}
 
                       {/* Footer */}
                       <div className="mt-4 flex items-center justify-end">
-                        <span className="text-[11px] text-muted-foreground">Updated {timeAgo(bot.updatedAt)}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          Updated {timeAgo(bot.updatedAt)}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -339,9 +369,13 @@ function RouteComponent() {
       {/* Archive confirmation dialog */}
       <ArchiveAgentDialog
         open={!!archiveConfirm}
-        onOpenChange={(open) => { if (!open) setArchiveConfirm(null); }}
+        onOpenChange={(open) => {
+          if (!open) setArchiveConfirm(null);
+        }}
         agentName={archiveConfirm?.name}
-        currentStatus={archiveConfirm?.newStatus === 'archived' ? 'active' : 'archived'}
+        currentStatus={
+          archiveConfirm?.newStatus === 'archived' ? 'active' : 'archived'
+        }
         isPending={archiveAgentMutation.isPending}
         onConfirm={() => {
           if (archiveConfirm) {

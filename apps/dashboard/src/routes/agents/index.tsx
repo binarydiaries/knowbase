@@ -121,8 +121,9 @@ function RouteComponent() {
         body: { agentStatus: status },
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
+      toast.success(variables.status === 'archived' ? 'Agent archived' : 'Agent unarchived');
       setArchiveConfirm(null);
     },
     onError: (error) => {

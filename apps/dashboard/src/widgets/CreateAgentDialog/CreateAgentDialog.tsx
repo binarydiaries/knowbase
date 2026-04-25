@@ -94,10 +94,12 @@ export function CreateAgentDialog({
           agent_id: agent.id,
           agent_name: variables.name,
         });
+        toast.success('Agent updated');
       } else {
         posthog.capture('agent_created', {
           agent_name: variables.name,
         });
+        toast.success('Agent created');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });
       reset();

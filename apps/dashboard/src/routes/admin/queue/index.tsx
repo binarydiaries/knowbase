@@ -12,11 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { isAdminEmail } from '@/utils/adminAccess';
+import { getErrorMessage } from '@/utils/errorHelper';
 
 type QueueJob = {
   id: string;
@@ -140,6 +142,10 @@ function RouteComponent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-queue-jobs'] });
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
+      toast.success('Job retried');
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to retry job'));
     },
   });
 
@@ -151,6 +157,10 @@ function RouteComponent() {
       setTimeout(() => setFastPoll(false), 30_000);
       queryClient.invalidateQueries({ queryKey: ['admin-queue-jobs'] });
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
+      toast.success('Job execution started');
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to execute job'));
     },
   });
 

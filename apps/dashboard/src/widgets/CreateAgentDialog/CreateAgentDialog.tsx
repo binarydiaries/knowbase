@@ -22,18 +22,14 @@ import {
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
-import {
-  type AgentSchema,
-  patchAgentsById,
-  postAgents,
-} from '@/services';
+import { type AgentSchema, patchAgentsById, postAgents } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const schema = z.object({
   name: z
     .string()
     .min(3, 'Name must be at least 3 characters')
-    .max(20, 'Name must be at most 20 characters'),
+    .max(30, 'Name must be at most 30 characters'),
   description: z
     .string()
     .min(3, 'Description must be at least 3 characters')
@@ -146,9 +142,7 @@ export function CreateAgentDialog({
 
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>
-            {agent ? 'Edit Agent' : 'Create Agent'}
-          </DialogTitle>
+          <DialogTitle>{agent ? 'Edit Agent' : 'Create Agent'}</DialogTitle>
 
           <DialogDescription>
             Give your agent a name. You can configure everything else later.

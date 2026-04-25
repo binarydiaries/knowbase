@@ -1,5 +1,5 @@
-import GetStartedButton from "../components/GetStartedButton";
-import { usePostHog } from "@posthog/react";
+import { usePostHog } from '@posthog/react';
+import GetStartedButton from '../components/GetStartedButton';
 
 const HeroSection = () => {
   const posthog = usePostHog();
@@ -29,9 +29,9 @@ const HeroSection = () => {
               href="#features"
               className="hover:opacity-80"
               onClick={() =>
-                posthog?.capture("nav_link_clicked", {
-                  label: "Features",
-                  href: "#features",
+                posthog?.capture('nav_link_clicked', {
+                  label: 'Features',
+                  href: '#features',
                 })
               }
             >
@@ -41,9 +41,9 @@ const HeroSection = () => {
               href="#how-it-works"
               className="hover:opacity-80"
               onClick={() =>
-                posthog?.capture("nav_link_clicked", {
-                  label: "How it Works",
-                  href: "#how-it-works",
+                posthog?.capture('nav_link_clicked', {
+                  label: 'How it Works',
+                  href: '#how-it-works',
                 })
               }
             >
@@ -53,9 +53,9 @@ const HeroSection = () => {
               href="#pricing"
               className="hover:opacity-80"
               onClick={() =>
-                posthog?.capture("nav_link_clicked", {
-                  label: "Pricing",
-                  href: "#pricing",
+                posthog?.capture('nav_link_clicked', {
+                  label: 'Pricing',
+                  href: '#pricing',
                 })
               }
             >
@@ -65,9 +65,9 @@ const HeroSection = () => {
               href="#faq"
               className="hover:opacity-80"
               onClick={() =>
-                posthog?.capture("nav_link_clicked", {
-                  label: "FAQ",
-                  href: "#faq",
+                posthog?.capture('nav_link_clicked', {
+                  label: 'FAQ',
+                  href: '#faq',
                 })
               }
             >
@@ -101,9 +101,9 @@ const HeroSection = () => {
             Get Started →
           </GetStartedButton>
           <a
-            href="/contact"
+            href="mailto:hello@agenvik.com"
             className="px-6 py-3 text-[#301B69] bg-white rounded-xl"
-            onClick={() => posthog?.capture("contact_us_clicked")}
+            onClick={() => posthog?.capture('contact_us_clicked')}
           >
             Contact Us
           </a>

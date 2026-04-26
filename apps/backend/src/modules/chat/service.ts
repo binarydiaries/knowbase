@@ -161,34 +161,34 @@ export abstract class ChatService {
     return {};
   }
 
-  static async extractAndMergeLeadEntities({
+  static getStoredEntities(
+    conversation: typeof conversations.$inferSelect | null | undefined,
+  ): Record<string, string> {
+    return (conversation?.entities as Record<string, string>) ?? {};
+  }
+
+  static async extractAndSaveLeadEntities({
     message,
     conversation,
     conversationId,
   }: {
     message: string;
     conversation: typeof conversations.$inferSelect | null | undefined;
-    agentId: string;
-    orgId: string;
-    conversationId?: string;
-  }): Promise<Record<string, string>> {
+    conversationId: string;
+  }): Promise<void> {
     const lastAssistantUtterance = conversation?.lastAssistantUtterance;
-    const existing = (conversation?.entities as Record<string, string>) ?? {};
-
-    if (!lastAssistantUtterance) return existing;
+    if (!lastAssistantUtterance) return;
 
     const extracted = ChatService.extractLeadFieldsHeuristically(message, lastAssistantUtterance);
-    if (!Object.keys(extracted).length) return existing;
+    if (!Object.keys(extracted).length) return;
 
+    const existing = (conversation?.entities as Record<string, string>) ?? {};
     const merged = { ...existing, ...extracted };
-    if (conversationId) {
-      try {
-        await ConversationService.update(conversationId, { entities: merged });
-      } catch (error) {
-        console.error('[entity-extraction] failed to save:', error);
-      }
+    try {
+      await ConversationService.update(conversationId, { entities: merged });
+    } catch (error) {
+      console.error('[entity-extraction] failed to save:', error);
     }
-    return merged;
   }
 
   static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {
@@ -286,9 +286,10 @@ export abstract class ChatService {
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
 
-    const entities = leadAction
-      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
-      : undefined;
+    // Load entities saved from PREVIOUS turns only — extracting from the
+    // current message here would cause the model to say "I already have X"
+    // in the same turn the user just provided it.
+    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
@@ -323,6 +324,11 @@ export abstract class ChatService {
           });
         } else {
           await ConversationService.update(conversationId, conversationData);
+        }
+
+        // Extract entities from this turn's user message and save for next turn
+        if (leadAction && conversationId) {
+          void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
         }
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
@@ -412,9 +418,7 @@ export abstract class ChatService {
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
 
-    const entities = leadAction
-      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
-      : undefined;
+    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
@@ -599,6 +603,9 @@ export abstract class ChatService {
       channelId,
       orgId,
     });
+
+    // Extract entities from this turn's message and save for next turn
+    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
 
     await persistMessages({
       conversationId,

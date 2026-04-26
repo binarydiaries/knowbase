@@ -1,11 +1,8 @@
 import { Field, FieldError, FieldLabel } from '@knowbase/ui/components/field';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@knowbase/ui/components/select';
+  NativeSelect,
+  NativeSelectOption,
+} from '@knowbase/ui/components/native-select';
 import {
   type FieldValues,
   type UseControllerProps,
@@ -22,7 +19,6 @@ interface IFormSelectProps<T extends FieldValues>
   label: string;
   placeholder?: string;
   options: Option[];
-  disabled?: boolean;
 }
 
 export const FormSelect = <T extends FieldValues>({
@@ -31,7 +27,6 @@ export const FormSelect = <T extends FieldValues>({
   name,
   options,
   placeholder = 'Select an option',
-  disabled = false,
 }: IFormSelectProps<T>) => {
   const { field, fieldState } = useController({
     control,
@@ -42,27 +37,14 @@ export const FormSelect = <T extends FieldValues>({
     <Field data-invalid={fieldState.error?.message}>
       <FieldLabel>{label}</FieldLabel>
 
-      <Select
-        value={field.value}
-        onValueChange={field.onChange}
-        disabled={disabled}
-      >
-        <SelectTrigger
-          aria-invalid={!!fieldState.error?.message}
-          disabled={disabled}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
+      <NativeSelect {...field}>
+        <NativeSelectOption value="">{placeholder}</NativeSelectOption>
+        {options.map((option) => (
+          <NativeSelectOption value={option.value} key={option.value}>
+            {option.label}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
       <FieldError>{fieldState.error?.message}</FieldError>
     </Field>
   );

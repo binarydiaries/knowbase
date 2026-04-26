@@ -1,4 +1,4 @@
-import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 import { channels } from './channels';
 import { agents } from './agents';
@@ -19,6 +19,7 @@ export const conversations = pgTable(
     country: text(),
     topic: text(),
     externalId: text(),
+    entities: jsonb('entities').$type<Record<string, string>>(),
     ...timestamps,
   },
   (table) => [

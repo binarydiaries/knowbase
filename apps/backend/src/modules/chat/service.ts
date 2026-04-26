@@ -15,6 +15,7 @@ import { AiCostEventService } from '../admin/costEvent.service';
 import { referenceResolverPrompt } from './prompts';
 import { buildChatContext } from './context';
 import { handleLeadCapture, persistMessages } from './persistence';
+import { ActionService } from '../action/service';
 
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
@@ -127,6 +128,69 @@ export abstract class ChatService {
     };
   }
 
+  static extractLeadFieldsHeuristically(
+    message: string,
+    lastAssistantUtterance: string,
+  ): Record<string, string> {
+    const clean = message.trim();
+
+    // Skip questions or unusually long messages — not a data-entry reply
+    if (clean.endsWith('?') || clean.length > 80) return {};
+
+    // Email
+    const emailMatch = clean.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) return { email: emailMatch[0] };
+
+    // Phone: 7–15 digits, optional +/spaces/dashes
+    const digitsOnly = clean.replace(/[\s\-\(\)\.]/g, '');
+    if (/^\+?[\d]{7,15}$/.test(digitsOnly)) return { phone: clean };
+
+    // Explicit name prefix ("Name: Keshav" / "my name is Keshav")
+    const namedPrefix = clean.match(/^(?:my )?name(?:\s+is)?\s*[:\-]?\s*(.+)$/i);
+    if (namedPrefix) return { name: namedPrefix[1].trim() };
+
+    // Context-based: map the reply to whatever the assistant just asked for
+    const lower = lastAssistantUtterance.toLowerCase();
+    if (/\bname\b/.test(lower) && !/\bcompany\b|\bemail\b|\bphone\b/.test(lower)) {
+      return { name: clean };
+    }
+    if (/\bcompany\b|\borganization\b|\borganisation\b/.test(lower)) {
+      return { company: clean };
+    }
+
+    return {};
+  }
+
+  static async extractAndMergeLeadEntities({
+    message,
+    conversation,
+    conversationId,
+  }: {
+    message: string;
+    conversation: typeof conversations.$inferSelect | null | undefined;
+    agentId: string;
+    orgId: string;
+    conversationId?: string;
+  }): Promise<Record<string, string>> {
+    const lastAssistantUtterance = conversation?.lastAssistantUtterance;
+    const existing = (conversation?.entities as Record<string, string>) ?? {};
+
+    if (!lastAssistantUtterance) return existing;
+
+    const extracted = ChatService.extractLeadFieldsHeuristically(message, lastAssistantUtterance);
+    if (!Object.keys(extracted).length) return existing;
+
+    const merged = { ...existing, ...extracted };
+    if (conversationId) {
+      try {
+        await ConversationService.update(conversationId, { entities: merged });
+      } catch (error) {
+        console.error('[entity-extraction] failed to save:', error);
+      }
+    }
+    return merged;
+  }
+
   static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {
     const agent = await AgentService.single({ id: agentId, orgId });
 
@@ -216,6 +280,13 @@ export abstract class ChatService {
     });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
 
+    const enabledActions = await ActionService.getEnabledByAgent(agentId);
+    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+
+    const entities = leadAction
+      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
+      : undefined;
+
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
       conversationId,
@@ -223,13 +294,15 @@ export abstract class ChatService {
       knowledgeBase,
       behavior,
       hasExistingConversation: !!conversation,
+      leadAction,
+      entities,
     });
 
     const result = streamText({
       system: systemPrompt,
       model,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 2 } : {}),
+      ...(tools ? { tools, maxSteps: 1 } : {}),
       onFinish: async ({ text: assistantMessage, toolCalls, usage }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
@@ -333,6 +406,13 @@ export abstract class ChatService {
     });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
 
+    const enabledActions = await ActionService.getEnabledByAgent(agentId);
+    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+
+    const entities = leadAction
+      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
+      : undefined;
+
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
       conversationId,
@@ -340,13 +420,15 @@ export abstract class ChatService {
       knowledgeBase,
       behavior,
       hasExistingConversation: !!conversation,
+      leadAction,
+      entities,
     });
 
     const result = await generateText({
       model,
       system: systemPrompt,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 2 } : {}),
+      ...(tools ? { tools, maxSteps: 1 } : {}),
     });
     await AiCostEventService.recordEvent({
       orgId,

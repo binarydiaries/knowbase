@@ -33,7 +33,8 @@ export function buildLeadCaptureTool(config: LeadGenerationConfig) {
 
   return tool({
     description:
-      `Capture the user's contact information when they express interest in being contacted, want a follow-up, ask to speak to someone, or request more information.${triggerInstruction} Collect each required field through natural conversation before calling this tool.`,
+      `Capture the user's contact information. Call this tool only after all required fields have been collected through conversation — check prior messages for values already provided and do not re-ask for them.${triggerInstruction}`,
     inputSchema: z.object(schemaShape),
+    execute: async (_input) => ({ captured: true }),
   });
 }

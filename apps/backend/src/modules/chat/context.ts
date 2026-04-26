@@ -5,11 +5,12 @@
  * `send()` (web) and `generateWhatsAppResponse()` (WhatsApp).
  */
 
-import { ActionService } from '../action/service';
+import type { ActionService } from '../action/service';
 import { MessageService } from '../message/service';
 import {
   buildActionsPrompt,
   buildBehaviorPrompt,
+  buildDataEntryAwarenessRule,
   buildKnowledgeBasePrompt,
   buildPlatformRules,
 } from './prompts';
@@ -36,6 +37,8 @@ export async function buildChatContext({
   knowledgeBase,
   behavior,
   hasExistingConversation,
+  leadAction,
+  entities,
 }: {
   agentId: string;
   /** Pass undefined for brand-new WhatsApp conversations. */
@@ -45,10 +48,11 @@ export async function buildChatContext({
   behavior: Behavior;
   /** Whether a conversation record already exists (gates history loading). */
   hasExistingConversation: boolean;
+  /** Pre-fetched lead_generation action (if enabled). */
+  leadAction: LeadAction | undefined;
+  /** Lead fields already collected in prior turns. */
+  entities?: Record<string, string>;
 }): Promise<ChatContext> {
-  const enabledActions = await ActionService.getEnabledByAgent(agentId);
-  const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
-
   const tools = leadAction
     ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
     : undefined;
@@ -56,23 +60,23 @@ export async function buildChatContext({
   const successMessage = leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
 
   const systemPromptParts = [
-    buildPlatformRules(),
+    buildPlatformRules({ hasLeadCollection: !!tools }),
     buildBehaviorPrompt(behavior),
     buildKnowledgeBasePrompt(knowledgeBase),
   ];
   if (tools) {
-    systemPromptParts.push(buildActionsPrompt(successMessage));
+    systemPromptParts.push(buildDataEntryAwarenessRule());
+    systemPromptParts.push(buildActionsPrompt(successMessage, entities));
   }
   const systemPrompt = systemPromptParts.join('\n');
 
-  // Load recent history only when actions are active — needed for multi-turn
-  // lead data collection (e.g. name in one message, email in the next).
-  // Zero extra cost for agents that have no actions configured.
+  // Load recent history for conversational context. Entities now own field
+  // state, so 10 messages (5 turns) is enough without inflating the prompt.
   const historyMessages =
     leadAction && conversationId && hasExistingConversation
       ? await MessageService.getMessages({ conversationId, orgId })
       : [];
-  const priorMessages = historyMessages.slice(-6).map((m) => ({
+  const priorMessages = historyMessages.slice(-10).map((m) => ({
     role: m.role as 'user' | 'assistant',
     content: m.content,
   }));

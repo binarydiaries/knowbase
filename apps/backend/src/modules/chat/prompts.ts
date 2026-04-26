@@ -99,7 +99,8 @@ ${collectedSection}
 Lead collection rules:
 - Only start collecting lead info when the user's intent clearly calls for it (e.g. asks for pricing, a demo, or follow-up).
 - Ask for missing required fields one at a time, in natural conversation.
-- When ALL required fields are collected: FIRST output exactly "${successMessage}", THEN call the \`capture_lead\` tool in the same response.
+- When ALL required fields are collected, call the \`capture_lead\` tool.
+- After the tool call, output ONLY the tool result's message field verbatim — no other text.
 - Do not call the tool more than once per conversation.
 `;
 }

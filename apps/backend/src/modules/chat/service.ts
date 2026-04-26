@@ -269,7 +269,10 @@ export abstract class ChatService {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getAgent({ agentId, orgId });
 
-    const conversation = await ConversationService.single({ id: conversationId, orgId });
+    const rawConversation = await ConversationService.single({ id: conversationId, orgId });
+    // Discard if the stored record belongs to a different channel (can happen
+    // when the same client-generated ID is reused across agents in the same org).
+    const conversation = rawConversation?.channelId === channelId ? rawConversation : undefined;
     const behavior = await ChatService.getBehaviour(agentId);
     const finalQuery = await ChatService.getFinalQuery({
       message,
@@ -302,7 +305,7 @@ export abstract class ChatService {
       system: systemPrompt,
       model,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 1 } : {}),
+      ...(tools ? { tools, maxSteps: 2 } : {}),
       onFinish: async ({ text: assistantMessage, toolCalls, usage }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
@@ -428,7 +431,7 @@ export abstract class ChatService {
       model,
       system: systemPrompt,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 1 } : {}),
+      ...(tools ? { tools, maxSteps: 2 } : {}),
     });
     await AiCostEventService.recordEvent({
       orgId,

@@ -35,6 +35,6 @@ export function buildLeadCaptureTool(config: LeadGenerationConfig) {
     description:
       `Capture the user's contact information. Call this tool only after all required fields have been collected through conversation — check prior messages for values already provided and do not re-ask for them.${triggerInstruction}`,
     inputSchema: z.object(schemaShape),
-    execute: async (_input) => ({ message: config.successMessage ?? "Thanks! We'll be in touch." }),
+    execute: async (_input) => ({ captured: true }),
   });
 }

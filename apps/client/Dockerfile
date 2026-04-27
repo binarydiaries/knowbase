@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy everything FIRST (important for workspaces)
 COPY . .
-COPY ./apps/client/.env.ci ./apps/client/.env
 
 # Install ALL workspace deps properly
 RUN bun install --frozen-lockfile

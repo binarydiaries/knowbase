@@ -39,6 +39,7 @@ export async function buildChatContext({
   hasExistingConversation,
   leadAction,
   entities,
+  currentDataEntry,
 }: {
   agentId: string;
   /** Pass undefined for brand-new WhatsApp conversations. */
@@ -52,6 +53,8 @@ export async function buildChatContext({
   leadAction: LeadAction | undefined;
   /** Lead fields already collected in prior turns. */
   entities?: Record<string, string>;
+  /** Field(s) the user is providing RIGHT NOW in this turn (heuristically detected). */
+  currentDataEntry?: Record<string, string>;
 }): Promise<ChatContext> {
   const tools = leadAction
     ? { capture_lead: buildLeadCaptureTool(leadAction.config) }
@@ -66,7 +69,7 @@ export async function buildChatContext({
   ];
   if (tools) {
     systemPromptParts.push(buildDataEntryAwarenessRule());
-    systemPromptParts.push(buildActionsPrompt(successMessage, entities));
+    systemPromptParts.push(buildActionsPrompt(successMessage, entities, currentDataEntry));
   }
   const systemPrompt = systemPromptParts.join('\n');
 

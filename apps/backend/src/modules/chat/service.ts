@@ -111,6 +111,14 @@ export abstract class ChatService {
   }) {
     if (!conversation?.lastAssistantUtterance) return message;
 
+    // Data-entry responses (name, email, phone, company) have no references
+    // to resolve. Skipping the resolver avoids nano-model mishandling and
+    // saves a round-trip.
+    const isDataEntry = Object.keys(
+      ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance),
+    ).length > 0;
+    if (isDataEntry) return message;
+
     return ChatService.resolveReferences({
       lastAssistantUtterance: conversation.lastAssistantUtterance,
       currentUserMessage: message,
@@ -291,6 +299,13 @@ export abstract class ChatService {
     // in the same turn the user just provided it.
     const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
 
+    // Detect if the current message is a data-entry response so we can inject
+    // an explicit "user just provided X: Y" hint — more reliable than relying
+    // on the model to infer it from conversation history.
+    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
+      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
+      : undefined;
+
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
       conversationId,
@@ -300,6 +315,7 @@ export abstract class ChatService {
       hasExistingConversation: !!conversation,
       leadAction,
       entities,
+      currentDataEntry,
     });
 
     const result = streamText({
@@ -420,6 +436,10 @@ export abstract class ChatService {
 
     const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
 
+    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
+      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
+      : undefined;
+
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
       agentId,
       conversationId,
@@ -429,6 +449,7 @@ export abstract class ChatService {
       hasExistingConversation: !!conversation,
       leadAction,
       entities,
+      currentDataEntry,
     });
 
     const result = await generateText({

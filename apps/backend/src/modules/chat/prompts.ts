@@ -85,7 +85,11 @@ ${knowledgeBase}
 `;
 }
 
-export function buildActionsPrompt(successMessage: string, collectedFields?: Record<string, string>) {
+export function buildActionsPrompt(
+  successMessage: string,
+  collectedFields?: Record<string, string>,
+  currentDataEntry?: Record<string, string>,
+) {
   const collected = collectedFields
     ? Object.entries(collectedFields).filter(([, v]) => v)
     : [];
@@ -93,9 +97,14 @@ export function buildActionsPrompt(successMessage: string, collectedFields?: Rec
     ? `\nAlready collected — do NOT ask for these again:\n${collected.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\n`
     : '';
 
+  const current = currentDataEntry ? Object.entries(currentDataEntry).filter(([, v]) => v) : [];
+  const currentSection = current.length > 0
+    ? `\nThe user's current message is providing:\n${current.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\nAccept this immediately. Do NOT ask for it again. Continue to the next missing required field.\n`
+    : '';
+
   return `
 You have access to a \`capture_lead\` tool to collect contact information.
-${collectedSection}
+${collectedSection}${currentSection}
 Lead collection rules:
 - Only start collecting lead info when the user's intent clearly calls for it (e.g. asks for pricing, a demo, or follow-up).
 - Ask for missing required fields one at a time, in natural conversation.

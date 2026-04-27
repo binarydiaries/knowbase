@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy everything FIRST (important for workspaces)
 COPY . .
-#COPY ./apps/dashboard/.env.ci ./apps/dashboard/.env
 
 # Install ALL workspace deps properly
 RUN bun install --frozen-lockfile

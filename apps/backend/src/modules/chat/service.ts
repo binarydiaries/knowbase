@@ -318,11 +318,29 @@ export abstract class ChatService {
       currentDataEntry,
     });
 
+    const successMessage = leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
+
     const result = streamText({
       system: systemPrompt,
       model,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
       ...(tools ? { tools, maxSteps: 2 } : {}),
+      prepareStep: ({ stepNumber, steps }) => {
+        // Step 2 runs after a tool call. If capture_lead was called in step 1,
+        // replace the full system prompt with a single focused instruction so
+        // the model doesn't get confused by KB-only rules and outputs nothing.
+        if (stepNumber > 0) {
+          const prevToolCalls = steps.flatMap((s) => s.toolCalls ?? []);
+          const capturedLead = prevToolCalls.some((tc) => tc.toolName === 'capture_lead');
+          if (capturedLead) {
+            return {
+              system: `Output exactly the following message and nothing else: "${successMessage}"`,
+              toolChoice: 'none' as const,
+            };
+          }
+        }
+        return undefined;
+      },
       onFinish: async ({ text: assistantMessage, toolCalls, usage }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
@@ -452,11 +470,26 @@ export abstract class ChatService {
       currentDataEntry,
     });
 
+    const waSuccessMessage = leadAction?.config?.successMessage ?? "Thanks! We'll be in touch.";
+
     const result = await generateText({
       model,
       system: systemPrompt,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
       ...(tools ? { tools, maxSteps: 2 } : {}),
+      prepareStep: ({ stepNumber, steps }) => {
+        if (stepNumber > 0) {
+          const prevToolCalls = steps.flatMap((s) => s.toolCalls ?? []);
+          const capturedLead = prevToolCalls.some((tc) => tc.toolName === 'capture_lead');
+          if (capturedLead) {
+            return {
+              system: `Output exactly the following message and nothing else: "${waSuccessMessage}"`,
+              toolChoice: 'none' as const,
+            };
+          }
+        }
+        return undefined;
+      },
     });
     await AiCostEventService.recordEvent({
       orgId,

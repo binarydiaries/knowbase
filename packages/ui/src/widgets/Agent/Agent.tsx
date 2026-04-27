@@ -40,12 +40,23 @@ export const Agent = ({
 }: IAgentProps) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Scroll to bottom whenever messages change or loading state changes.
+  // Previously only scrolled while isLoading was true, missing the final
+  // scroll when the response finishes and isLoading flips to false.
   useEffect(() => {
-    if (messages && isLoading) {
+    if (messages && messages.length > 0) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
+
+  // Restore focus to the input after the response finishes streaming.
+  useEffect(() => {
+    if (!isLoading && !inputDisabled) {
+      inputRef.current?.focus();
+    }
+  }, [isLoading, inputDisabled]);
 
   const submitForm = () => {
     if (input.trim() && !isLoading && !inputDisabled) {
@@ -149,6 +160,7 @@ export const Agent = ({
         ) : null}
         <div className="relative">
           <Textarea
+            ref={inputRef}
             className="min-h-12 rounded-2xl pr-14 py-3 resize-none placeholder:truncate"
             placeholder={inputPlaceholder || 'Type your message...'}
             value={input}

@@ -9,6 +9,7 @@ COPY bun.lock bun.lock
 RUN bun install
 
 COPY ./src ./src
+COPY .env.ci .env
 
 ENV NODE_ENV=production
 

@@ -28,12 +28,12 @@ import { useBehaviour } from '@/store/useBehaviour.ts';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
 import ActionsCard from '@/widgets/ActionsCard/ActionsCard.tsx';
-import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
-import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
-import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
 import { AgentMenuActions } from '@/widgets/AgentMenuActions/AgentMenuActions.tsx';
 import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
 import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
+import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
+import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
+import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 
 export const Route = createFileRoute('/agents/$agentId/')({
@@ -45,9 +45,7 @@ function RouteComponent() {
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);
-  const behaviour = useBehaviour(
-    (state) => state.behaviourByAgentId[agentId],
-  );
+  const behaviour = useBehaviour((state) => state.behaviourByAgentId[agentId]);
 
   const query = useQuery({
     queryFn: async () => {
@@ -133,11 +131,11 @@ function RouteComponent() {
             <WhatsAppChannelCard readOnly={readOnly} />
             <ActionsCard readOnly={readOnly} />
           </div>
-          <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex">
+          <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex overflow-hidden">
             <Badge variant="secondary" className="rounded-l-none">
               Web Preview
             </Badge>
-            <div className="h-full flex justify-center pb-5">
+            <div className="h-full flex justify-center pb-5 max-h-175">
               <AgentPreview />
             </div>
           </div>

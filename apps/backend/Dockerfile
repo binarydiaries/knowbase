@@ -13,7 +13,7 @@ COPY ./src ./src
 ENV NODE_ENV=production
 
 # ✅ RUN MIGRATIONS HERE (FAILS BUILD IF ERROR)
-RUN bun run migrate
+RUN bun run db:migrate
 
 RUN bun build \
 	--compile \

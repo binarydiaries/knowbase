@@ -9,9 +9,11 @@ COPY bun.lock bun.lock
 RUN bun install
 
 COPY ./src ./src
-COPY .env.ci .env
 
 ENV NODE_ENV=production
+
+# ✅ RUN MIGRATIONS HERE (FAILS BUILD IF ERROR)
+RUN bun run migrate
 
 RUN bun build \
 	--compile \

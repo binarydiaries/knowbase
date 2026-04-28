@@ -51,17 +51,22 @@ export const ChatMessage = ({
           components={{
             p: (props) => <p {...props} className="text-sm" />,
             ol: (props) => (
-              <ol {...props} className="list-decimal pl-6 space-y-2" />
+              <ol {...props} className="list-decimal pl-6 space-y-1 text-sm" />
             ),
             ul: (props) => (
-              <ul {...props} className="list-disc pl-6 space-y-2" />
+              <ul {...props} className="list-disc pl-6 space-y-1 text-sm" />
             ),
+            li: (props) => <li {...props} className="text-sm" />,
+            h1: (props) => <h1 {...props} className="text-sm font-semibold" />,
+            h2: (props) => <h2 {...props} className="text-sm font-semibold" />,
+            h3: (props) => <h3 {...props} className="text-sm font-semibold" />,
+            strong: (props) => <strong {...props} className="text-sm font-semibold" />,
             a: ({ href, children }) => (
               <a
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="text-sm underline"
               >
                 {children}
               </a>

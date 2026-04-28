@@ -2,6 +2,11 @@ FROM oven/bun AS build
 
 WORKDIR /app
 
+# ✅ ADD THIS
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+RUN echo "DATABASE_URL=$DATABASE_URL"
+
 # Cache packages installation
 COPY package.json package.json
 COPY bun.lock bun.lock

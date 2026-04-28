@@ -111,6 +111,14 @@ export abstract class ChatService {
   }) {
     if (!conversation?.lastAssistantUtterance) return message;
 
+    // Data-entry responses (name, email, phone, company) have no references
+    // to resolve. Skipping the resolver avoids nano-model mishandling and
+    // saves a round-trip.
+    const isDataEntry = Object.keys(
+      ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance),
+    ).length > 0;
+    if (isDataEntry) return message;
+
     return ChatService.resolveReferences({
       lastAssistantUtterance: conversation.lastAssistantUtterance,
       currentUserMessage: message,
@@ -161,34 +169,34 @@ export abstract class ChatService {
     return {};
   }
 
-  static async extractAndMergeLeadEntities({
+  static getStoredEntities(
+    conversation: typeof conversations.$inferSelect | null | undefined,
+  ): Record<string, string> {
+    return (conversation?.entities as Record<string, string>) ?? {};
+  }
+
+  static async extractAndSaveLeadEntities({
     message,
     conversation,
     conversationId,
   }: {
     message: string;
     conversation: typeof conversations.$inferSelect | null | undefined;
-    agentId: string;
-    orgId: string;
-    conversationId?: string;
-  }): Promise<Record<string, string>> {
+    conversationId: string;
+  }): Promise<void> {
     const lastAssistantUtterance = conversation?.lastAssistantUtterance;
-    const existing = (conversation?.entities as Record<string, string>) ?? {};
-
-    if (!lastAssistantUtterance) return existing;
+    if (!lastAssistantUtterance) return;
 
     const extracted = ChatService.extractLeadFieldsHeuristically(message, lastAssistantUtterance);
-    if (!Object.keys(extracted).length) return existing;
+    if (!Object.keys(extracted).length) return;
 
+    const existing = (conversation?.entities as Record<string, string>) ?? {};
     const merged = { ...existing, ...extracted };
-    if (conversationId) {
-      try {
-        await ConversationService.update(conversationId, { entities: merged });
-      } catch (error) {
-        console.error('[entity-extraction] failed to save:', error);
-      }
+    try {
+      await ConversationService.update(conversationId, { entities: merged });
+    } catch (error) {
+      console.error('[entity-extraction] failed to save:', error);
     }
-    return merged;
   }
 
   static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {
@@ -269,7 +277,10 @@ export abstract class ChatService {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getAgent({ agentId, orgId });
 
-    const conversation = await ConversationService.single({ id: conversationId, orgId });
+    const rawConversation = await ConversationService.single({ id: conversationId, orgId });
+    // Discard if the stored record belongs to a different channel (can happen
+    // when the same client-generated ID is reused across agents in the same org).
+    const conversation = rawConversation?.channelId === channelId ? rawConversation : undefined;
     const behavior = await ChatService.getBehaviour(agentId);
     const finalQuery = await ChatService.getFinalQuery({
       message,
@@ -283,8 +294,16 @@ export abstract class ChatService {
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
 
-    const entities = leadAction
-      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
+    // Load entities saved from PREVIOUS turns only — extracting from the
+    // current message here would cause the model to say "I already have X"
+    // in the same turn the user just provided it.
+    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
+
+    // Detect if the current message is a data-entry response so we can inject
+    // an explicit "user just provided X: Y" hint — more reliable than relying
+    // on the model to infer it from conversation history.
+    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
+      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
       : undefined;
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
@@ -296,6 +315,7 @@ export abstract class ChatService {
       hasExistingConversation: !!conversation,
       leadAction,
       entities,
+      currentDataEntry,
     });
 
     const result = streamText({
@@ -320,6 +340,11 @@ export abstract class ChatService {
           });
         } else {
           await ConversationService.update(conversationId, conversationData);
+        }
+
+        // Extract entities from this turn's user message and save for next turn
+        if (leadAction && conversationId) {
+          void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
         }
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
@@ -409,8 +434,10 @@ export abstract class ChatService {
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
 
-    const entities = leadAction
-      ? await ChatService.extractAndMergeLeadEntities({ message, conversation, agentId, orgId, conversationId })
+    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
+
+    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
+      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
       : undefined;
 
     const { tools, systemPrompt, priorMessages } = await buildChatContext({
@@ -422,6 +449,7 @@ export abstract class ChatService {
       hasExistingConversation: !!conversation,
       leadAction,
       entities,
+      currentDataEntry,
     });
 
     const result = await generateText({
@@ -596,6 +624,9 @@ export abstract class ChatService {
       channelId,
       orgId,
     });
+
+    // Extract entities from this turn's message and save for next turn
+    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
 
     await persistMessages({
       conversationId,

@@ -9,4 +9,7 @@ export default defineConfig({
     // biome-ignore lint/style/noNonNullAssertion: Will fix it later
     url: process.env.DATABASE_URL!,
   },
+  migrations: {
+    schema: 'public',
+  },
 });

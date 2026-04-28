@@ -1,8 +1,7 @@
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
-import type { Plugin } from 'vite';
+import { defineConfig, loadEnv, type PluginOption } from 'vite';
 
 /**
  * Blocks crawlers on non-production builds:
@@ -11,8 +10,9 @@ import type { Plugin } from 'vite';
  *
  * Set VITE_ENV=production in your production build to enable indexing.
  */
-function seoBlockPlugin(): Plugin {
-  const isProduction = process.env.VITE_ENV === 'production';
+function seoBlockPlugin(mode: string): PluginOption {
+  const env = loadEnv(mode, process.cwd(), '');
+  const isProduction = env.VITE_ENV === 'production';
 
   return {
     name: 'seo-block',
@@ -39,11 +39,11 @@ function seoBlockPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
-    seoBlockPlugin(),
+    seoBlockPlugin(mode),
   ],
-});
+}));

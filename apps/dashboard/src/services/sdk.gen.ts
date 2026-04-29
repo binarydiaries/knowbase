@@ -246,6 +246,26 @@ export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(opti
     ...options
 });
 
+export const postSubscriptionsCheckout = <ThrowOnError extends boolean = true>(options: Options<PostSubscriptionsCheckoutData, ThrowOnError>) => (options.client ?? client).post<PostSubscriptionsCheckoutResponses, PostSubscriptionsCheckoutErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/subscriptions/checkout',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    }
+});
+
+export const postSubscriptionsCancel = <ThrowOnError extends boolean = true>(options?: Options<PostSubscriptionsCancelData, ThrowOnError>) => (options?.client ?? client).post<PostSubscriptionsCancelResponses, PostSubscriptionsCancelErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/subscriptions/cancel',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers),
+    }
+});
+
 export const getAgentActions = <ThrowOnError extends boolean = true>(options: Options<GetAgentActionsData, ThrowOnError>) => (options.client ?? client).get<GetAgentActionsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/agent-actions',

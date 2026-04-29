@@ -19,7 +19,23 @@ export const SubscriptionStatusSchema = z.object({
   hasReachedTrainingRunsPerDayLimit: z.boolean(),
 });
 
+export const CheckoutBodySchema = z.object({
+  plan: z.enum(['starter', 'growth', 'pro']),
+});
+
+export const CheckoutResponseSchema = z.object({
+  subscriptionId: z.string(),
+  keyId: z.string(),
+});
+
+export const CancelResponseSchema = z.object({
+  success: z.boolean(),
+});
+
 export const SubscriptionModel = new Elysia().model({
   PlanNameSchema,
   SubscriptionStatusSchema,
+  CheckoutBodySchema,
+  CheckoutResponseSchema,
+  CancelResponseSchema,
 });

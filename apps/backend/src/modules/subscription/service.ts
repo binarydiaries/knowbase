@@ -1,8 +1,8 @@
 import { and, count, eq } from 'drizzle-orm';
-import { clerkClient } from 'elysia-clerk';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
+import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 export const PLAN_LIMITS = {
@@ -58,40 +58,10 @@ function normalizePlanName(value: unknown): PlanName | null {
 
 export abstract class SubscriptionService {
   static async getPlan(orgId: string): Promise<PlanName> {
-    try {
-      const subscription =
-        await clerkClient.billing.getOrganizationBillingSubscription(orgId);
-
-      for (const item of subscription.subscriptionItems) {
-        const plan =
-          normalizePlanName(item.plan?.slug) ??
-          normalizePlanName(item.plan?.name) ??
-          normalizePlanName(item.planId);
-
-        if (plan) {
-          return plan;
-        }
-      }
-    } catch {
-      // Fall back to the default plan if billing is unavailable or no active
-      // subscription can be resolved for the organization.
-    }
-
-    try {
-      const plans = await clerkClient.billing.getPlanList({ payerType: 'org' });
-      const defaultPlan = plans.data.find((plan) => plan.isDefault);
-      const plan =
-        normalizePlanName(defaultPlan?.slug) ??
-        normalizePlanName(defaultPlan?.name);
-
-      if (plan) {
-        return plan;
-      }
-    } catch {
-      // If billing plan lookup also fails, keep the default free tier.
-    }
-
-    return 'free';
+    const record = await db.query.orgSubscriptions.findFirst({
+      where: eq(orgSubscriptions.orgId, orgId),
+    });
+    return normalizePlanName(record?.plan) ?? 'free';
   }
 
   static getLimits(plan: PlanName) {

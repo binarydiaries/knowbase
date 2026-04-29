@@ -1863,3 +1863,48 @@ export type GetLeadsResponses = {
         limit: number;
     };
 };
+
+export type PostSubscriptionsCheckoutData = {
+    body: {
+        plan: 'starter' | 'growth' | 'pro';
+    };
+    path?: never;
+    query?: never;
+    url: '/subscriptions/checkout';
+};
+
+export type PostSubscriptionsCheckoutErrors = {
+    401: UnauthorizedSchema;
+};
+
+export type PostSubscriptionsCheckoutError = PostSubscriptionsCheckoutErrors[keyof PostSubscriptionsCheckoutErrors];
+
+export type PostSubscriptionsCheckoutResponses = {
+    200: {
+        subscriptionId: string;
+        keyId: string;
+    };
+};
+
+export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
+
+export type PostSubscriptionsCancelData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/cancel';
+};
+
+export type PostSubscriptionsCancelErrors = {
+    401: UnauthorizedSchema;
+};
+
+export type PostSubscriptionsCancelError = PostSubscriptionsCancelErrors[keyof PostSubscriptionsCancelErrors];
+
+export type PostSubscriptionsCancelResponses = {
+    200: {
+        success: boolean;
+    };
+};
+
+export type PostSubscriptionsCancelResponse = PostSubscriptionsCancelResponses[keyof PostSubscriptionsCancelResponses];

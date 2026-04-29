@@ -184,6 +184,9 @@ export const Agent = ({
             <SendHorizonal className="size-6" />
           </Button>
         </div>
+        <p className="text-xs text-center text-slate-400">
+          AI can make mistakes. Verify important information.
+        </p>
         <a
           className="text-xs text-center text-slate-300"
           href={brandLink}

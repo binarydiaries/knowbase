@@ -158,6 +158,9 @@ export const Agent = ({
             <AlertDescription>{alertMessage}</AlertDescription>
           </Alert>
         ) : null}
+        <div className="rounded-xl bg-muted px-4 py-2.5 text-xs text-muted-foreground">
+          AI can make mistakes. Please verify responses.
+        </div>
         <div className="relative">
           <Textarea
             ref={inputRef}
@@ -184,9 +187,6 @@ export const Agent = ({
             <SendHorizonal className="size-6" />
           </Button>
         </div>
-        <p className="text-xs text-center text-slate-400">
-          AI can make mistakes. Verify important information.
-        </p>
         <a
           className="text-xs text-center text-slate-300"
           href={brandLink}

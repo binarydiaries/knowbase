@@ -1,0 +1,65 @@
+export type PaidPlan = 'starter' | 'growth' | 'pro';
+
+export const PLANS = [
+  {
+    name: 'Free',
+    slug: 'free' as const,
+    price: '₹0',
+    period: 'forever',
+    highlight: false,
+    features: [
+      '1 active agent',
+      '10 knowledge sources',
+      '100 messages / month',
+      '3 training runs / day',
+    ],
+  },
+  {
+    name: 'Starter',
+    slug: 'starter' as PaidPlan,
+    price: '₹499',
+    period: '/month',
+    highlight: false,
+    features: [
+      '3 active agents',
+      '250 knowledge sources',
+      '500 messages / month',
+      '10 training runs / day',
+      'WhatsApp & Instagram channels',
+      'Lead generation',
+    ],
+  },
+  {
+    name: 'Growth',
+    slug: 'growth' as PaidPlan,
+    price: '₹1,499',
+    period: '/month',
+    highlight: true,
+    features: [
+      '10 active agents',
+      '1,000 knowledge sources',
+      '2,000 messages / month',
+      '20 training runs / day',
+      'WhatsApp & Instagram channels',
+      'Lead generation',
+      'Analytics',
+    ],
+  },
+  {
+    name: 'Pro',
+    slug: 'pro' as PaidPlan,
+    price: '₹3,999',
+    period: '/month',
+    highlight: false,
+    features: [
+      '30 active agents',
+      '5,000 knowledge sources',
+      '8,000 messages / month',
+      '40 training runs / day',
+      'WhatsApp & Instagram channels',
+      'Lead generation',
+      'Analytics',
+      'Priority support',
+    ],
+  },
+];

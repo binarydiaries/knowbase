@@ -114,11 +114,16 @@ function RouteComponent() {
       }
 
       const res = await postSubscriptionsCheckout({ body: { plan } });
-      const { subscriptionId, keyId } = res.data;
+      const { provider, subscriptionId, clientToken } = res.data;
+
+      if (provider !== 'razorpay') {
+        alert(`Unsupported payment provider: ${provider}`);
+        return;
+      }
 
       await new Promise<void>((resolve, reject) => {
         const rzp = new (window as any).Razorpay({
-          key: keyId,
+          key: clientToken,
           subscription_id: subscriptionId,
           name: 'Agenvik',
           description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,

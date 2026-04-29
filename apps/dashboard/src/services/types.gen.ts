@@ -1881,8 +1881,9 @@ export type PostSubscriptionsCheckoutError = PostSubscriptionsCheckoutErrors[key
 
 export type PostSubscriptionsCheckoutResponses = {
     200: {
+        provider: string;
         subscriptionId: string;
-        keyId: string;
+        clientToken: string;
     };
 };
 

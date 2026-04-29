@@ -24,8 +24,9 @@ export const CheckoutBodySchema = z.object({
 });
 
 export const CheckoutResponseSchema = z.object({
+  provider: z.string(),
   subscriptionId: z.string(),
-  keyId: z.string(),
+  clientToken: z.string(),
 });
 
 export const CancelResponseSchema = z.object({

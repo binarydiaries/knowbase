@@ -1,31 +1,29 @@
-import { eq } from 'drizzle-orm';
 import { Elysia } from 'elysia';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { SubscriptionModel } from './model';
 import { SubscriptionService } from './service';
-import {
-  cancelRazorpaySubscription,
-  createRazorpaySubscription,
-  getRazorpayPlanId,
-  verifyRazorpayWebhook,
-} from './razorpay';
+import { getDefaultProvider, getProvider } from './providers';
 
 type OrgSubscriptionUpdate = {
   plan?: string;
   status: string;
-  razorpaySubscriptionId?: string;
+  provider?: string;
+  providerSubscriptionId?: string;
   currentPeriodEnd?: Date | null;
 };
 
 async function upsertOrgSubscription(orgId: string, data: OrgSubscriptionUpdate) {
+  const defined = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined),
+  );
   await db
     .insert(orgSubscriptions)
     .values({ orgId, ...data })
     .onConflictDoUpdate({
       target: orgSubscriptions.orgId,
-      set: { ...data, updatedAt: new Date() },
+      set: { ...defined, updatedAt: new Date() },
     });
 }
 
@@ -34,74 +32,38 @@ export const Subscription = new Elysia({
   tags: ['Subscription'],
 })
   .use(SubscriptionModel)
-  // PUBLIC — no auth, Razorpay calls this directly
+  // PUBLIC — no auth, payment providers call this directly
   .post(
-    '/webhook',
-    async ({ request, set }) => {
-      const rawBody = await request.text();
-      const signature = request.headers.get('x-razorpay-signature') ?? '';
-
-      if (!verifyRazorpayWebhook(rawBody, signature)) {
-        set.status = 400;
-        return { error: 'Invalid signature' };
-      }
-
-      let payload: Record<string, unknown>;
+    '/webhook/:provider',
+    async ({ params, request, set }) => {
+      let provider;
       try {
-        payload = JSON.parse(rawBody);
+        provider = getProvider(params.provider);
       } catch {
         set.status = 400;
-        return { error: 'Invalid JSON' };
+        return { error: 'Unknown provider' };
       }
 
-      const event = payload.event as string;
-      const subscription = (payload as any)?.payload?.subscription?.entity;
-      if (!subscription) return { received: true };
+      const rawBody = await request.text();
+      const signature = request.headers.get(provider.signatureHeader) ?? '';
 
-      const orgId: string = subscription.notes?.orgId;
-      const planName: string = subscription.notes?.plan;
-      const razorpaySubscriptionId: string = subscription.id;
-
-      if (!orgId) return { received: true };
-
-      const currentPeriodEnd = subscription.current_end
-        ? new Date(subscription.current_end * 1000)
-        : null;
-
-      switch (event) {
-        case 'subscription.activated':
-        case 'subscription.charged':
-          await upsertOrgSubscription(orgId, {
-            plan: planName ?? 'free',
-            status: 'active',
-            razorpaySubscriptionId,
-            currentPeriodEnd,
-          });
-          break;
-
-        case 'subscription.cancelled':
-        case 'subscription.completed':
-          await upsertOrgSubscription(orgId, {
-            plan: 'free',
-            status: event === 'subscription.cancelled' ? 'cancelled' : 'completed',
-            currentPeriodEnd,
-          });
-          break;
-
-        case 'subscription.halted':
-          await upsertOrgSubscription(orgId, {
-            status: 'halted',
-            razorpaySubscriptionId,
-          });
-          break;
-
-        case 'subscription.paused':
-          await upsertOrgSubscription(orgId, {
-            status: 'paused',
-            razorpaySubscriptionId,
-          });
-          break;
+      let event;
+      try {
+        event = provider.parseWebhook(rawBody, signature);
+      } catch (err: any) {
+        set.status = 400;
+        return { error: err.message ?? 'Webhook verification failed' };
       }
+
+      if (!event) return { received: true };
+
+      await upsertOrgSubscription(event.orgId, {
+        plan: event.plan,
+        status: event.status,
+        provider: params.provider,
+        providerSubscriptionId: event.subscriptionId,
+        currentPeriodEnd: event.currentPeriodEnd ?? null,
+      });
 
       return { received: true };
     },
@@ -118,32 +80,23 @@ export const Subscription = new Elysia({
   )
   .post(
     '/checkout',
-    async ({ body, orgId, set }) => {
+    async ({ body, orgId }) => {
       const { plan } = body;
+      const provider = getDefaultProvider();
 
-      let planId: string;
-      try {
-        planId = getRazorpayPlanId(plan);
-      } catch {
-        set.status = 503;
-        return { error: `Razorpay plan ID for ${plan} is not configured` };
-      }
-
-      const subscription = await createRazorpaySubscription({
-        planId,
-        orgId,
-        planName: plan,
-      });
+      const result = await provider.createSubscription({ plan, orgId });
 
       await upsertOrgSubscription(orgId, {
         plan,
-        status: subscription.status as string,
-        razorpaySubscriptionId: subscription.id,
+        status: 'created',
+        provider: provider.name,
+        providerSubscriptionId: result.subscriptionId,
       });
 
       return {
-        subscriptionId: subscription.id,
-        keyId: process.env.RAZORPAY_KEY_ID ?? '',
+        provider: provider.name,
+        subscriptionId: result.subscriptionId,
+        clientToken: result.clientToken,
       };
     },
     {
@@ -157,15 +110,16 @@ export const Subscription = new Elysia({
     '/cancel',
     async ({ orgId, set }) => {
       const record = await db.query.orgSubscriptions.findFirst({
-        where: eq(orgSubscriptions.orgId, orgId),
+        where: { orgId },
       });
 
-      if (!record?.razorpaySubscriptionId) {
+      if (!record?.providerSubscriptionId) {
         set.status = 404;
         return { success: false };
       }
 
-      await cancelRazorpaySubscription(record.razorpaySubscriptionId);
+      const provider = getProvider(record.provider ?? 'razorpay');
+      await provider.cancelSubscription(record.providerSubscriptionId);
 
       await upsertOrgSubscription(orgId, {
         plan: 'free',

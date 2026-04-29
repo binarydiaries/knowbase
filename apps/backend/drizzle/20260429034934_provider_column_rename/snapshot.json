@@ -1,0 +1,2777 @@
+{
+  "id": "39efd0ac-8e8a-4e98-8c26-12ddf3533d2b",
+  "prevIds": [
+    "8487753a-bed5-4e68-be3e-278f1c7068ba"
+  ],
+  "version": "8",
+  "dialect": "postgres",
+  "ddl": [
+    {
+      "values": [
+        "lead_generation"
+      ],
+      "name": "actionType",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "active",
+        "archived"
+      ],
+      "name": "agentStatus",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "friendly",
+        "professional",
+        "neutral"
+      ],
+      "name": "tone",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "short",
+        "balanced",
+        "detailed"
+      ],
+      "name": "verbosity",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "inactive",
+        "active",
+        "error"
+      ],
+      "name": "channelStatus",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "web",
+        "whatsapp",
+        "instagram"
+      ],
+      "name": "type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "ready",
+        "queue",
+        "indexing",
+        "indexed",
+        "failed"
+      ],
+      "name": "status",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "user",
+        "assistant"
+      ],
+      "name": "role",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "agent_actions",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "agents",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ai_cost_events",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "behavior",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "channels",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "conversations",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "documents",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "embeddings",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "leads",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "messages",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "org_subscriptions",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "org_usage_daily",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "org_usage_monthly",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "whatsapp_connections",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "actionType",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actionType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "name": "enabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "name": "config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdBy",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "agentStatus",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'active'",
+      "generated": null,
+      "identity": null,
+      "name": "agentStatus",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdBy",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "conversationId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "provider",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "model",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "inputTokens",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "outputTokens",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "cachedInputTokens",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "totalTokens",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "numeric(12,6)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "costUsd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "metadata",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "occurredAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "systemPrompt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "tone",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'neutral'",
+      "generated": null,
+      "identity": null,
+      "name": "tone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "verbosity",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'balanced'",
+      "generated": null,
+      "identity": null,
+      "name": "verbosity",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "fallbackMessage",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "guardrails",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdBy",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "enabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "channelStatus",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'inactive'",
+      "generated": null,
+      "identity": null,
+      "name": "channelStatus",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "usage",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdBy",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "channelId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastUserQuestion",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastAssistantUtterance",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastMessageAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "country",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "topic",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "externalId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "entities",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "contentSerialized",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "1",
+      "generated": null,
+      "identity": null,
+      "name": "version",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'ready'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastIndexedVersion",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastTrainedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdBy",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "documentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "documentVersion",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "chunkIndex",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "content",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "vector(1536)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "embedding",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "agentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "conversationId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "channelId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "phone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "company",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "name": "customFields",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "conversationId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "content",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "metadata",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "systemMetadata",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'free'",
+      "generated": null,
+      "identity": null,
+      "name": "plan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "providerSubscriptionId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "providerCustomerId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'razorpay'",
+      "generated": null,
+      "identity": null,
+      "name": "provider",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'free'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "currentPeriodEnd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "dateKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "trainingRuns",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "monthKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "assistantMessages",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "accessToken",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "businessAccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "agent_actions_agent_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "agents_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "agents"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ai_cost_events_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "occurredAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ai_cost_events_org_occurred_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "model",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ai_cost_events_model_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ai_cost_events"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "behavior_agent_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "channels_agent_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "conversations_agent_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "lastMessageAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "conversations_agent_lastmsg_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "channelId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "externalId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "conversations_channel_external_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "documents_agent_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "documents_agent_status_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "embedding",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": {
+            "name": "vector_cosine_ops",
+            "default": false
+          }
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "hnsw",
+      "concurrently": false,
+      "name": "embeddingIndex",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "agentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "leads_agent_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "leads_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "channelId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "leads_channel_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "conversationId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "createdAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "messages_conversation_created_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_org_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "providerSubscriptionId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_provider_sub_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "dateKey",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_usage_daily_org_day_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_usage_daily_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_usage_daily"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "monthKey",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_usage_monthly_org_month_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_usage_monthly_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_usage_monthly"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "wa_connections_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "whatsapp_connections"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "agent_actions_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "behavior_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "behavior"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "channels_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "channels"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "conversations_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "channelId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "channels",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "conversations_channelId_channels_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "conversations"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "documents_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "documents"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "documentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "documents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "embeddings_documentId_documents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "embeddings"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "agentId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "agents",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "leads_agentId_agents_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "conversationId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "conversations",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "leads_conversationId_conversations_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "channelId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "channels",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "leads_channelId_channels_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "leads"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "conversationId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "conversations",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "messages_conversationId_conversations_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "messages"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "agent_actions_pkey",
+      "schema": "public",
+      "table": "agent_actions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "agents_pkey",
+      "schema": "public",
+      "table": "agents",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "ai_cost_events_pkey",
+      "schema": "public",
+      "table": "ai_cost_events",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "behavior_pkey",
+      "schema": "public",
+      "table": "behavior",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "channels_pkey",
+      "schema": "public",
+      "table": "channels",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "conversations_pkey",
+      "schema": "public",
+      "table": "conversations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "documents_pkey",
+      "schema": "public",
+      "table": "documents",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "embeddings_pkey",
+      "schema": "public",
+      "table": "embeddings",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "leads_pkey",
+      "schema": "public",
+      "table": "leads",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "messages_pkey",
+      "schema": "public",
+      "table": "messages",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "org_subscriptions_pkey",
+      "schema": "public",
+      "table": "org_subscriptions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "org_usage_daily_pkey",
+      "schema": "public",
+      "table": "org_usage_daily",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "org_usage_monthly_pkey",
+      "schema": "public",
+      "table": "org_usage_monthly",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "whatsapp_connections_pkey",
+      "schema": "public",
+      "table": "whatsapp_connections",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "agentId",
+        "actionType"
+      ],
+      "nullsNotDistinct": false,
+      "name": "agent_actions_agent_type_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "agent_actions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "orgId"
+      ],
+      "nullsNotDistinct": false,
+      "name": "whatsapp_connections_orgId_key",
+      "schema": "public",
+      "table": "whatsapp_connections",
+      "entityType": "uniques"
+    }
+  ],
+  "renames": []
+}

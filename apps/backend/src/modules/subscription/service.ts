@@ -59,7 +59,7 @@ function normalizePlanName(value: unknown): PlanName | null {
 export abstract class SubscriptionService {
   static async getPlan(orgId: string): Promise<PlanName> {
     const record = await db.query.orgSubscriptions.findFirst({
-      where: eq(orgSubscriptions.orgId, orgId),
+      where: { orgId },
     });
     return normalizePlanName(record?.plan) ?? 'free';
   }

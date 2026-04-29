@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
 import { Behaviour } from './modules/behaviour/behaviour';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
+import { Slack } from './modules/slack/slack';
 import { Analytics } from './modules/analytics/analytics';
 import { UsageCharts } from './modules/usage/usage';
 import { Channel } from './modules/channel/channel';
@@ -59,6 +60,7 @@ const app = new Elysia()
   .use(Channel)
   .use(Subscription)
   .use(WhatsApp)
+  .use(Slack)
   .use(Action)
   .use(Lead)
   .use(Admin)

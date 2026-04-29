@@ -84,6 +84,13 @@ export const Subscription = new Elysia({
       const { plan } = body;
       const provider = getDefaultProvider();
 
+      // Cancel any active subscription before creating a new one (upgrade / downgrade)
+      const existing = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+      if (existing?.providerSubscriptionId && ['active', 'authenticated', 'created'].includes(existing.status)) {
+        const existingProvider = getProvider(existing.provider ?? 'razorpay');
+        await existingProvider.cancelSubscription(existing.providerSubscriptionId);
+      }
+
       const result = await provider.createSubscription({ plan, orgId });
 
       await upsertOrgSubscription(orgId, {
@@ -119,11 +126,12 @@ export const Subscription = new Elysia({
       }
 
       const provider = getProvider(record.provider ?? 'razorpay');
-      await provider.cancelSubscription(record.providerSubscriptionId);
+      // Cancel at period end so the user keeps access until they've paid for
+      await provider.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: true });
 
+      // Mark as pending — plan stays as-is until the webhook fires subscription.cancelled
       await upsertOrgSubscription(orgId, {
-        plan: 'free',
-        status: 'cancelled',
+        status: 'pending_cancellation',
       });
 
       return { success: true };

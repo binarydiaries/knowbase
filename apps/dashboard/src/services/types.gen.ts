@@ -852,6 +852,7 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
+    subscriptionStatus: string | null;
     activeAgentLimit: number;
     activeAgentCount: number;
     knowledgeSourceLimit: number;

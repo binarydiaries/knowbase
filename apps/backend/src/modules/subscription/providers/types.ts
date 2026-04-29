@@ -17,7 +17,7 @@ export interface PaymentProvider {
   readonly name: string;
   readonly signatureHeader: string;
   createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
-  cancelSubscription(subscriptionId: string): Promise<void>;
+  cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
   /** Throws on invalid signature. Returns null for unknown/ignored events. */
   parseWebhook(rawBody: string, signature: string): WebhookEvent | null;
 }

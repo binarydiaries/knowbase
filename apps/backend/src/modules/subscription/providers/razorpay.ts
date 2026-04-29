@@ -40,8 +40,8 @@ export class RazorpayProvider implements PaymentProvider {
     };
   }
 
-  async cancelSubscription(subscriptionId: string): Promise<void> {
-    await this.getClient().subscriptions.cancel(subscriptionId);
+  async cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void> {
+    await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
   }
 
   parseWebhook(rawBody: string, signature: string): WebhookEvent | null {

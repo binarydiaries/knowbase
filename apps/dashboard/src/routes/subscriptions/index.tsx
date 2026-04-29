@@ -97,7 +97,7 @@ function loadRazorpayScript(): Promise<boolean> {
 function RouteComponent() {
   const posthog = usePostHog();
   const queryClient = useQueryClient();
-  const { plan: currentPlan, isPaid } = useClerkPlan();
+  const { plan: currentPlan, isPaid, isPendingCancellation } = useClerkPlan();
   const [loadingPlan, setLoadingPlan] = useState<PaidPlan | 'cancel' | null>(null);
 
   useEffect(() => {
@@ -149,7 +149,7 @@ function RouteComponent() {
   }
 
   async function handleCancel() {
-    if (!confirm('Are you sure you want to cancel your subscription? Your plan will revert to Free.')) return;
+    if (!confirm('Are you sure you want to cancel? You\'ll keep access until the end of your billing period.')) return;
     setLoadingPlan('cancel');
     try {
       await postSubscriptionsCancel();
@@ -216,9 +216,14 @@ function RouteComponent() {
                 </ul>
 
                 {isCurrent ? (
-                  <Button variant="outline" disabled className="w-full">
-                    Current Plan
-                  </Button>
+                  <div className="flex flex-col gap-1">
+                    <Button variant="outline" disabled className="w-full">
+                      Current Plan
+                    </Button>
+                    {isPendingCancellation && (
+                      <p className="text-xs text-muted-foreground text-center">Cancels at period end</p>
+                    )}
+                  </div>
                 ) : isPaidPlan ? (
                   <Button
                     className="w-full"
@@ -231,7 +236,7 @@ function RouteComponent() {
                     ) : (
                       <>
                         <Sparkles className="size-4" />
-                        Subscribe
+                        {isPaid ? 'Switch Plan' : 'Subscribe'}
                       </>
                     )}
                   </Button>
@@ -241,11 +246,11 @@ function RouteComponent() {
           })}
         </div>
 
-        {isPaid && (
+        {isPaid && !isPendingCancellation && (
           <div className="mt-8 max-w-sm">
             <Separator className="mb-6" />
             <p className="text-sm text-muted-foreground mb-3">
-              Want to cancel your subscription? Your plan will revert to Free at the end of the billing period.
+              You'll keep access until the end of your current billing period.
             </p>
             <Button
               variant="destructive"

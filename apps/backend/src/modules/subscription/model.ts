@@ -5,6 +5,7 @@ export const PlanNameSchema = z.enum(['free', 'starter', 'growth', 'pro']);
 
 export const SubscriptionStatusSchema = z.object({
   plan: PlanNameSchema,
+  subscriptionStatus: z.string().nullable(),
   activeAgentLimit: z.number(),
   activeAgentCount: z.number(),
   knowledgeSourceLimit: z.number(),

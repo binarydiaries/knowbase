@@ -57,10 +57,12 @@ function normalizePlanName(value: unknown): PlanName | null {
 }
 
 export abstract class SubscriptionService {
+  static async getRecord(orgId: string) {
+    return db.query.orgSubscriptions.findFirst({ where: { orgId } });
+  }
+
   static async getPlan(orgId: string): Promise<PlanName> {
-    const record = await db.query.orgSubscriptions.findFirst({
-      where: { orgId },
-    });
+    const record = await this.getRecord(orgId);
     return normalizePlanName(record?.plan) ?? 'free';
   }
 
@@ -69,7 +71,9 @@ export abstract class SubscriptionService {
   }
 
   static async getStatus(orgId: string) {
-    const plan = await this.getPlan(orgId);
+    const record = await this.getRecord(orgId);
+    const plan = normalizePlanName(record?.plan) ?? 'free';
+    const subscriptionStatus = record?.status ?? null;
     const limits = this.getLimits(plan);
     const activeAgentLimit = limits.agents;
     const knowledgeSourceLimit = limits.knowledgeSources;
@@ -96,6 +100,7 @@ export abstract class SubscriptionService {
 
     return {
       plan,
+      subscriptionStatus,
       activeAgentLimit,
       activeAgentCount,
       knowledgeSourceLimit,

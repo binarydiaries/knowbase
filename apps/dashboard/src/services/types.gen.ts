@@ -853,6 +853,8 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
+    scheduledPlan: string | null;
+    scheduledPlanAt: string | null;
     activeAgentLimit: number;
     activeAgentCount: number;
     knowledgeSourceLimit: number;
@@ -1885,8 +1887,47 @@ export type PostSubscriptionsCheckoutResponses = {
         provider: string;
         subscriptionId: string;
         clientToken: string;
+        scheduledFor: string | null;
     };
 };
+
+export type PostSubscriptionsResumeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/resume';
+};
+
+export type PostSubscriptionsResumeErrors = {
+    401: UnauthorizedSchema;
+};
+
+export type PostSubscriptionsResumeError = PostSubscriptionsResumeErrors[keyof PostSubscriptionsResumeErrors];
+
+export type PostSubscriptionsResumeResponses = {
+    200: { success: boolean };
+};
+
+export type PostSubscriptionsResumeResponse = PostSubscriptionsResumeResponses[keyof PostSubscriptionsResumeResponses];
+
+export type PostSubscriptionsCancelScheduledChangeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/cancel-scheduled-change';
+};
+
+export type PostSubscriptionsCancelScheduledChangeErrors = {
+    401: UnauthorizedSchema;
+};
+
+export type PostSubscriptionsCancelScheduledChangeError = PostSubscriptionsCancelScheduledChangeErrors[keyof PostSubscriptionsCancelScheduledChangeErrors];
+
+export type PostSubscriptionsCancelScheduledChangeResponses = {
+    200: { success: boolean };
+};
+
+export type PostSubscriptionsCancelScheduledChangeResponse = PostSubscriptionsCancelScheduledChangeResponses[keyof PostSubscriptionsCancelScheduledChangeResponses];
 
 export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
 

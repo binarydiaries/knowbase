@@ -4,10 +4,15 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePostHog } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
-import { Check, Sparkles, Loader2 } from 'lucide-react';
+import { Check, Sparkles, Loader2, AlertTriangle, Clock } from 'lucide-react';
 import { Button } from '@knowbase/ui/components/button';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { postSubscriptionsCheckout, postSubscriptionsCancel } from '@/services';
+import {
+  postSubscriptionsCheckout,
+  postSubscriptionsCancel,
+  postSubscriptionsResume,
+  postSubscriptionsCancelScheduledChange,
+} from '@/services';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
@@ -94,18 +99,36 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function RouteComponent() {
   const posthog = usePostHog();
   const queryClient = useQueryClient();
-  const { plan: currentPlan, isPaid, isPendingCancellation } = useClerkPlan();
-  const [loadingPlan, setLoadingPlan] = useState<PaidPlan | 'cancel' | null>(null);
+  const {
+    plan: currentPlan,
+    isPaid,
+    isPendingCancellation,
+    isHalted,
+    scheduledPlan,
+    scheduledPlanAt,
+  } = useClerkPlan();
+
+  const [loadingAction, setLoadingAction] = useState<PaidPlan | 'cancel' | 'resume' | 'cancel-scheduled' | null>(null);
+
+  const hasScheduledChange = !!scheduledPlan;
 
   useEffect(() => {
     posthog.capture('subscription_page_viewed');
   }, [posthog]);
 
+  function invalidate() {
+    queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+  }
+
   async function handleSubscribe(plan: PaidPlan) {
-    setLoadingPlan(plan);
+    setLoadingAction(plan);
     try {
       const loaded = await loadRazorpayScript();
       if (!loaded) {
@@ -114,7 +137,7 @@ function RouteComponent() {
       }
 
       const res = await postSubscriptionsCheckout({ body: { plan } });
-      const { provider, subscriptionId, clientToken } = res.data;
+      const { provider, subscriptionId, clientToken, scheduledFor } = res.data;
 
       if (provider !== 'razorpay') {
         alert(`Unsupported payment provider: ${provider}`);
@@ -126,11 +149,13 @@ function RouteComponent() {
           key: clientToken,
           subscription_id: subscriptionId,
           name: 'Agenvik',
-          description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
+          description: scheduledFor
+            ? `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan — starts ${formatDate(new Date(scheduledFor))}`
+            : `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
           theme: { color: '#301B69' },
           handler: () => {
-            queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
-            posthog.capture('subscription_checkout_completed', { plan });
+            invalidate();
+            posthog.capture('subscription_checkout_completed', { plan, scheduledFor });
             resolve();
           },
           modal: {
@@ -144,57 +169,132 @@ function RouteComponent() {
         console.error('Checkout error:', err);
       }
     } finally {
-      setLoadingPlan(null);
+      setLoadingAction(null);
     }
   }
 
   async function handleCancel() {
-    if (!confirm('Are you sure you want to cancel? You\'ll keep access until the end of your billing period.')) return;
-    setLoadingPlan('cancel');
+    if (!confirm("Are you sure you want to cancel? You'll keep full access until the end of your current billing period.")) return;
+    setLoadingAction('cancel');
     try {
       await postSubscriptionsCancel();
-      queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+      invalidate();
       posthog.capture('subscription_cancelled');
     } catch (err) {
       console.error('Cancel error:', err);
     } finally {
-      setLoadingPlan(null);
+      setLoadingAction(null);
     }
   }
+
+  async function handleResume() {
+    if (!confirm('Resume your subscription? Your plan will continue as normal after the current billing period.')) return;
+    setLoadingAction('resume');
+    try {
+      await postSubscriptionsResume();
+      invalidate();
+      posthog.capture('subscription_resumed');
+    } catch (err) {
+      console.error('Resume error:', err);
+    } finally {
+      setLoadingAction(null);
+    }
+  }
+
+  async function handleCancelScheduledChange() {
+    if (!confirm('Cancel the scheduled plan change? Your current plan will remain active.')) return;
+    setLoadingAction('cancel-scheduled');
+    try {
+      await postSubscriptionsCancelScheduledChange();
+      invalidate();
+      posthog.capture('subscription_scheduled_change_cancelled');
+    } catch (err) {
+      console.error('Cancel scheduled change error:', err);
+    } finally {
+      setLoadingAction(null);
+    }
+  }
+
+  const isBusy = loadingAction !== null;
 
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
+          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
           <h1 className="text-sm font-medium flex-1">Subscriptions</h1>
         </div>
       </header>
       <Separator />
-      <div className="p-6">
+
+      <div className="p-6 space-y-6">
+        {/* Payment failed banner */}
+        {isHalted && (
+          <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm max-w-6xl">
+            <AlertTriangle className="size-4 text-destructive mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-destructive">Payment failed</p>
+              <p className="text-muted-foreground mt-0.5">
+                We couldn't collect payment for your subscription. Please re-subscribe to restore access, or contact support.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Scheduled change banner */}
+        {hasScheduledChange && scheduledPlanAt && (
+          <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm max-w-6xl">
+            <Clock className="size-4 text-blue-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-blue-800">
+                Plan switch scheduled for {formatDate(scheduledPlanAt)}
+              </p>
+              <p className="text-blue-700 mt-0.5">
+                You're switching to <span className="font-semibold capitalize">{scheduledPlan}</span> on {formatDate(scheduledPlanAt)}.
+                Your current plan stays active until then — no double billing.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isBusy}
+              onClick={handleCancelScheduledChange}
+              className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100"
+            >
+              {loadingAction === 'cancel-scheduled' ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                'Keep current plan'
+              )}
+            </Button>
+          </div>
+        )}
+
+        {/* Plan cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-w-6xl">
           {PLANS.map((plan) => {
             const isCurrent = currentPlan === plan.slug;
+            const isScheduledTarget = scheduledPlan === plan.slug;
             const isPaidPlan = plan.slug !== 'free';
 
             return (
               <div
                 key={plan.slug}
                 className={`rounded-2xl border p-6 flex flex-col gap-4 ${
-                  plan.highlight
-                    ? 'border-primary shadow-md'
-                    : 'border-border'
+                  plan.highlight ? 'border-primary shadow-md' : 'border-border'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="text-lg font-semibold">{plan.name}</h2>
-                  {plan.highlight && (
+                  {plan.highlight && !isScheduledTarget && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
                       Most Popular
+                    </span>
+                  )}
+                  {isScheduledTarget && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">
+                      Scheduled
                     </span>
                   )}
                 </div>
@@ -220,18 +320,26 @@ function RouteComponent() {
                     <Button variant="outline" disabled className="w-full">
                       Current Plan
                     </Button>
-                    {isPendingCancellation && (
-                      <p className="text-xs text-muted-foreground text-center">Cancels at period end</p>
+                    {isPendingCancellation && !hasScheduledChange && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        Cancels {scheduledPlanAt ? `on ${formatDate(scheduledPlanAt)}` : 'at period end'}
+                      </p>
                     )}
                   </div>
+                ) : isScheduledTarget ? (
+                  <Button variant="outline" disabled className="w-full">
+                    <Clock className="size-4" />
+                    Starts {scheduledPlanAt ? formatDate(scheduledPlanAt) : 'at period end'}
+                  </Button>
                 ) : isPaidPlan ? (
                   <Button
                     className="w-full"
                     variant={plan.highlight ? 'default' : 'outline'}
-                    disabled={loadingPlan !== null}
+                    disabled={isBusy || hasScheduledChange}
+                    title={hasScheduledChange ? 'Cancel the scheduled plan change first' : undefined}
                     onClick={() => handleSubscribe(plan.slug as PaidPlan)}
                   >
-                    {loadingPlan === plan.slug ? (
+                    {loadingAction === plan.slug ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
                       <>
@@ -246,24 +354,48 @@ function RouteComponent() {
           })}
         </div>
 
-        {isPaid && !isPendingCancellation && (
-          <div className="mt-8 max-w-sm">
-            <Separator className="mb-6" />
-            <p className="text-sm text-muted-foreground mb-3">
-              You'll keep access until the end of your current billing period.
-            </p>
-            <Button
-              variant="destructive"
-              size="sm"
-              disabled={loadingPlan !== null}
-              onClick={handleCancel}
-            >
-              {loadingPlan === 'cancel' ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                'Cancel Subscription'
-              )}
-            </Button>
+        {/* Bottom action area */}
+        {isPaid && (
+          <div className="max-w-sm space-y-4">
+            <Separator />
+
+            {isPendingCancellation && !hasScheduledChange ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Your subscription is set to cancel at the end of the billing period. Changed your mind?
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isBusy}
+                  onClick={handleResume}
+                >
+                  {loadingAction === 'resume' ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    'Resume Subscription'
+                  )}
+                </Button>
+              </div>
+            ) : !hasScheduledChange ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Cancelling keeps your access active until the end of the current billing period.
+                </p>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={isBusy}
+                  onClick={handleCancel}
+                >
+                  {loadingAction === 'cancel' ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    'Cancel Subscription'
+                  )}
+                </Button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

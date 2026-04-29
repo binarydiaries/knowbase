@@ -25,23 +25,42 @@ export class RazorpayProvider implements PaymentProvider {
     return planId;
   }
 
-  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
-    const planId = this.getPlanId(plan);
-    const client = this.getClient();
-    const subscription = await client.subscriptions.create({
-      plan_id: planId,
+  private buildSubscriptionParams(plan: PaidPlanName, orgId: string, startAt?: Date) {
+    return {
+      plan_id: this.getPlanId(plan),
       total_count: 120,
       quantity: 1,
+      ...(startAt ? { start_at: Math.floor(startAt.getTime() / 1000) } : {}),
       notes: { orgId, plan },
-    });
-    return {
-      subscriptionId: subscription.id,
-      clientToken: process.env.RAZORPAY_KEY_ID ?? '',
     };
+  }
+
+  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
+    const subscription = await this.getClient().subscriptions.create(
+      this.buildSubscriptionParams(plan, orgId),
+    );
+    return { subscriptionId: subscription.id, clientToken: process.env.RAZORPAY_KEY_ID ?? '' };
+  }
+
+  async scheduleSubscription({ plan, orgId, startAt }: { plan: PaidPlanName; orgId: string; startAt: Date }): Promise<CheckoutResult> {
+    const subscription = await this.getClient().subscriptions.create(
+      this.buildSubscriptionParams(plan, orgId, startAt),
+    );
+    return { subscriptionId: subscription.id, clientToken: process.env.RAZORPAY_KEY_ID ?? '' };
   }
 
   async cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void> {
     await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
+  }
+
+  async resumeSubscription(subscriptionId: string): Promise<void> {
+    // Pass false to cancel_at_cycle_end to un-schedule the pending cancellation
+    await this.getClient().subscriptions.cancel(subscriptionId, false);
+  }
+
+  async getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null> {
+    const sub = await this.getClient().subscriptions.fetch(subscriptionId);
+    return (sub as any).current_end ? new Date((sub as any).current_end * 1000) : null;
   }
 
   parseWebhook(rawBody: string, signature: string): WebhookEvent | null {

@@ -6,6 +6,8 @@ export const PlanNameSchema = z.enum(['free', 'starter', 'growth', 'pro']);
 export const SubscriptionStatusSchema = z.object({
   plan: PlanNameSchema,
   subscriptionStatus: z.string().nullable(),
+  scheduledPlan: z.string().nullable(),
+  scheduledPlanAt: z.string().nullable(), // ISO date string
   activeAgentLimit: z.number(),
   activeAgentCount: z.number(),
   knowledgeSourceLimit: z.number(),
@@ -28,9 +30,18 @@ export const CheckoutResponseSchema = z.object({
   provider: z.string(),
   subscriptionId: z.string(),
   clientToken: z.string(),
+  scheduledFor: z.string().nullable(), // ISO date when new plan starts, null = starts immediately
 });
 
 export const CancelResponseSchema = z.object({
+  success: z.boolean(),
+});
+
+export const ResumeResponseSchema = z.object({
+  success: z.boolean(),
+});
+
+export const CancelScheduledChangeResponseSchema = z.object({
   success: z.boolean(),
 });
 
@@ -40,4 +51,6 @@ export const SubscriptionModel = new Elysia().model({
   CheckoutBodySchema,
   CheckoutResponseSchema,
   CancelResponseSchema,
+  ResumeResponseSchema,
+  CancelScheduledChangeResponseSchema,
 });

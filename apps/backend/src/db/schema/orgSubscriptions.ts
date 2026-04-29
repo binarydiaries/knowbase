@@ -10,9 +10,13 @@ export const orgSubscriptions = pgTable(
     provider: text().notNull().default('razorpay'),
     providerSubscriptionId: text(),
     providerCustomerId: text(),
-    // Subscription statuses: created | authenticated | active | paused | cancelled | halted | completed
+    // created | authenticated | active | pending_cancellation | paused | cancelled | halted | completed | transitioning
     status: text().notNull().default('free'),
     currentPeriodEnd: timestamp({ withTimezone: true }),
+    // Scheduled plan change (Option B: switch at next billing date)
+    scheduledPlan: text(),
+    scheduledPlanAt: timestamp({ withTimezone: true }),
+    scheduledProviderSubscriptionId: text(),
     ...timestamps,
   },
   (table) => [

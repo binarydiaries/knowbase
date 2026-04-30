@@ -159,7 +159,7 @@ export const Agent = ({
           </Alert>
         ) : null}
         <div className="rounded-2xl border border-input overflow-hidden">
-          <div className="px-4 py-2 text-xs text-muted-foreground border-b border-border bg-muted/50">
+          <div className="px-4 py-1 text-xs text-muted-foreground border-b border-border bg-muted/50">
             AI can make mistakes. Please verify responses.
           </div>
           <div className="relative">

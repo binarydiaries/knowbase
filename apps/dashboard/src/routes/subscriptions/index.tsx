@@ -4,17 +4,17 @@ import { createFileRoute } from '@tanstack/react-router';
 import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { PLANS, type PaidPlan } from './_data/plans';
+import { PLANS, type PaidPlan } from '@/data/subscriptionPlans';
 import {
   useCancelMutation,
   useCancelScheduledChangeMutation,
   useCheckoutMutation,
   useResumeMutation,
-} from './_hooks/useSubscriptionMutations';
-import { HaltedBanner } from './_components/HaltedBanner';
-import { PlanCard } from './_components/PlanCard';
-import { ScheduledChangeBanner } from './_components/ScheduledChangeBanner';
-import { SubscriptionActions } from './_components/SubscriptionActions';
+} from '@/hooks/useSubscriptionMutations';
+import { HaltedBanner } from '@/components/subscriptions/HaltedBanner';
+import { PlanCard } from '@/components/subscriptions/PlanCard';
+import { ScheduledChangeBanner } from '@/components/subscriptions/ScheduledChangeBanner';
+import { SubscriptionActions } from '@/components/subscriptions/SubscriptionActions';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,

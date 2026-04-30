@@ -29,7 +29,9 @@ const AgentPreviewContent = ({
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
 
-  const channelConfig = channelWeb.additional.config;
+  const channelAdditional = channelWeb.additional;
+  if (channelAdditional.type !== 'web') return null;
+  const channelConfig = channelAdditional.config;
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {

@@ -1,6 +1,6 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Clock, Loader2 } from 'lucide-react';
-import { formatDate } from '../_utils/razorpay';
+import { formatDate } from '@/utils/razorpay';
 
 interface Props {
   scheduledPlan: string;

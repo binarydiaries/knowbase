@@ -1,7 +1,7 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Loader2 } from 'lucide-react';
-import { formatDate } from '../_utils/razorpay';
+import { formatDate } from '@/utils/razorpay';
 
 interface Props {
   isPendingCancellation: boolean;

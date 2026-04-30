@@ -1,8 +1,8 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Check, Clock, Loader2, Sparkles } from 'lucide-react';
-import type { PaidPlan } from '../_data/plans';
-import { formatDate } from '../_utils/razorpay';
+import type { PaidPlan } from '@/data/subscriptionPlans';
+import { formatDate } from '@/utils/razorpay';
 
 interface Plan {
   name: string;

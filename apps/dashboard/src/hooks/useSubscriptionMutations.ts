@@ -7,8 +7,8 @@ import {
   postSubscriptionsCancelScheduledChange,
   postSubscriptionsResume,
 } from '@/services';
-import type { PaidPlan } from '../_data/plans';
-import { formatDate, loadRazorpayScript } from '../_utils/razorpay';
+import type { PaidPlan } from '@/data/subscriptionPlans';
+import { formatDate, loadRazorpayScript } from '@/utils/razorpay';
 
 function useInvalidateSubscription() {
   const queryClient = useQueryClient();

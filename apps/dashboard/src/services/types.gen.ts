@@ -9,6 +9,11 @@ export type UnauthorizedSchema = {
     message: string;
 };
 
+export type ForbiddenSchema = {
+    code: 'FORBIDDEN';
+    message: string;
+};
+
 export type MessagesDailyQuerySchema = {
     startDate: string;
     endDate: string;
@@ -166,7 +171,8 @@ export type ChatChannelResponseSchema = {
         } | {
             type: 'whatsapp';
             config: {
-                [key: string]: never;
+                phoneNumberId?: string;
+                displayPhone?: string;
             };
         } | {
             type: 'instagram';
@@ -290,6 +296,22 @@ export type ChatForbiddenResponse = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     messagesPerMonthLimit: number;
     messagesThisMonth: number;
+};
+
+export type LeadGenerationForbiddenResponse = {
+    code: 'PLAN_LIMIT_REACHED';
+    message: string;
+};
+
+export type ChannelWriteForbiddenResponse = {
+    code: 'AGENT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeAgentLimit: number;
+    activeAgentCount: number;
+} | {
+    code: 'PLAN_LIMIT_REACHED';
+    message: string;
 };
 
 export type MessageSchema = {
@@ -519,7 +541,8 @@ export type OneAgentResponse = {
         } | {
             type: 'whatsapp';
             config: {
-                [key: string]: never;
+                phoneNumberId?: string;
+                displayPhone?: string;
             };
         } | {
             type: 'instagram';
@@ -543,6 +566,9 @@ export type OneAgentResponse = {
     };
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
+        subscriptionStatus: string | null;
+        scheduledPlan: string | null;
+        scheduledPlanAt: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
         knowledgeSourceLimit: number;
@@ -571,6 +597,9 @@ export type ManyAgentResponse = {
     }>;
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
+        subscriptionStatus: string | null;
+        scheduledPlan: string | null;
+        scheduledPlanAt: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
         knowledgeSourceLimit: number;
@@ -714,7 +743,8 @@ export type ChannelSchema = {
     } | {
         type: 'whatsapp';
         config: {
-            [key: string]: never;
+            phoneNumberId?: string;
+            displayPhone?: string;
         };
     } | {
         type: 'instagram';
@@ -749,7 +779,8 @@ export type ManyChannelResponse = {
         } | {
             type: 'whatsapp';
             config: {
-                [key: string]: never;
+                phoneNumberId?: string;
+                displayPhone?: string;
             };
         } | {
             type: 'instagram';
@@ -779,7 +810,8 @@ export type CreateChannelBodySchema = {
     } | {
         type: 'whatsapp';
         config: {
-            [key: string]: never;
+            phoneNumberId?: string;
+            displayPhone?: string;
         };
     } | {
         type: 'instagram';
@@ -806,7 +838,8 @@ export type UpdateChannelBodySchema = {
     } | {
         type: 'whatsapp';
         config: {
-            [key: string]: never;
+            phoneNumberId?: string;
+            displayPhone?: string;
         };
     } | {
         type: 'instagram';
@@ -835,7 +868,8 @@ export type OneChannelResponse = {
         } | {
             type: 'whatsapp';
             config: {
-                [key: string]: never;
+                phoneNumberId?: string;
+                displayPhone?: string;
             };
         } | {
             type: 'instagram';
@@ -867,6 +901,319 @@ export type SubscriptionStatusSchema = {
     hasReachedKnowledgeSourceLimit: boolean;
     hasReachedMessagesPerMonthLimit: boolean;
     hasReachedTrainingRunsPerDayLimit: boolean;
+};
+
+export type CheckoutBodySchema = {
+    plan: 'starter' | 'growth' | 'pro';
+};
+
+export type CheckoutResponseSchema = {
+    provider: string;
+    subscriptionId: string;
+    clientToken: string;
+    scheduledFor: string | null;
+};
+
+export type CancelResponseSchema = {
+    success: boolean;
+};
+
+export type ResumeResponseSchema = {
+    success: boolean;
+};
+
+export type CancelScheduledChangeResponseSchema = {
+    success: boolean;
+};
+
+export type BadRequestResponse = {
+    code: string;
+    message: string;
+};
+
+export type AgentActionSchema = {
+    id: string;
+    agentId: string;
+    actionType: 'lead_generation';
+    enabled: boolean;
+    config: {
+        fields?: {
+            name?: {
+                collect: boolean;
+                required: boolean;
+            };
+            email?: {
+                collect: boolean;
+                required: boolean;
+            };
+            phone?: {
+                collect: boolean;
+                required: boolean;
+            };
+            company?: {
+                collect: boolean;
+                required: boolean;
+            };
+        };
+        triggerInstructions?: string;
+        successMessage?: string;
+    };
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type CreateAgentActionBody = {
+    agentId: string;
+    actionType: 'lead_generation';
+    config: {
+        fields?: {
+            name?: {
+                collect: boolean;
+                required: boolean;
+            };
+            email?: {
+                collect: boolean;
+                required: boolean;
+            };
+            phone?: {
+                collect: boolean;
+                required: boolean;
+            };
+            company?: {
+                collect: boolean;
+                required: boolean;
+            };
+        };
+        triggerInstructions?: string;
+        successMessage?: string;
+    };
+};
+
+export type UpdateAgentActionBody = {
+    enabled?: boolean;
+    config?: {
+        fields?: {
+            name?: {
+                collect: boolean;
+                required: boolean;
+            };
+            email?: {
+                collect: boolean;
+                required: boolean;
+            };
+            phone?: {
+                collect: boolean;
+                required: boolean;
+            };
+            company?: {
+                collect: boolean;
+                required: boolean;
+            };
+        };
+        triggerInstructions?: string;
+        successMessage?: string;
+    };
+};
+
+export type GetAgentActionsQuery = {
+    agentId: string;
+};
+
+export type ManyAgentActionResponse = {
+    actions: Array<{
+        id: string;
+        agentId: string;
+        actionType: 'lead_generation';
+        enabled: boolean;
+        config: {
+            fields?: {
+                name?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                email?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                phone?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                company?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+            };
+            triggerInstructions?: string;
+            successMessage?: string;
+        };
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type OneAgentActionResponse = {
+    action: {
+        id: string;
+        agentId: string;
+        actionType: 'lead_generation';
+        enabled: boolean;
+        config: {
+            fields?: {
+                name?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                email?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                phone?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+                company?: {
+                    collect: boolean;
+                    required: boolean;
+                };
+            };
+            triggerInstructions?: string;
+            successMessage?: string;
+        };
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type DeleteActionResponse = {
+    success: boolean;
+};
+
+export type LeadSchema = {
+    id: string;
+    agentId: string;
+    conversationId: string | null;
+    channelId: string | null;
+    orgId: string;
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+    customFields: {
+        [key: string]: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type GetLeadsQuery = {
+    agentId?: string;
+    page: number;
+    limit: number;
+};
+
+export type ManyLeadsResponse = {
+    leads: Array<{
+        id: string;
+        agentId: string;
+        conversationId: string | null;
+        channelId: string | null;
+        orgId: string;
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+        company: string | null;
+        customFields: {
+            [key: string]: string;
+        };
+        createdAt: string;
+        updatedAt: string;
+        agent: {
+            id: string;
+            name: string;
+        } | null;
+        channel: {
+            id: string;
+            type: string;
+        } | null;
+        conversation: {
+            id: string;
+        } | null;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+};
+
+export type AdminCostByOrganizationQuerySchema = {
+    startMonth?: string;
+    endMonth?: string;
+};
+
+export type AdminCostByOrganizationResponseSchema = {
+    data: Array<{
+        orgId: string;
+        requestCount: number;
+        inputTokens: number;
+        outputTokens: number;
+        cachedInputTokens: number;
+        totalTokens: number;
+        costUsd: number;
+    }>;
+    meta: {
+        startMonth: string;
+        endMonth: string;
+        totalRequestCount: number;
+        totalInputTokens: number;
+        totalOutputTokens: number;
+        totalCachedInputTokens: number;
+        totalTokens: number;
+        totalCostUsd: number;
+    };
+};
+
+export type QueueListQuerySchema = {
+    status?: 'waiting' | 'active' | 'delayed' | 'failed' | 'completed';
+    page: number;
+    limit: number;
+};
+
+export type QueueListResponseSchema = {
+    jobs: Array<{
+        id: string;
+        name: string;
+        data: {
+            documentId: string;
+            orgId: string;
+            version: number | null;
+        };
+        state: string;
+        attemptsMade: number;
+        timestamp: number;
+        processedOn: number | null;
+        finishedOn: number | null;
+        failedReason: string | null;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+};
+
+export type QueueCountsResponseSchema = {
+    waiting: number;
+    active: number;
+    delayed: number;
+    failed: number;
+    completed: number;
+};
+
+export type QueueActionResponseSchema = {
+    action: string;
+    state?: string;
+    documentId?: string;
 };
 
 export type GetUsageMessagesDailyData = {
@@ -1131,6 +1478,10 @@ export type PostChatErrors = {
      * Response for status 403
      */
     403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
 };
 
 export type PostChatError = PostChatErrors[keyof PostChatErrors];
@@ -1148,6 +1499,15 @@ export type GetChatChannelData = {
     query?: never;
     url: '/chat/channel';
 };
+
+export type GetChatChannelErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetChatChannelError = GetChatChannelErrors[keyof GetChatChannelErrors];
 
 export type GetChatChannelResponses = {
     /**
@@ -1517,12 +1877,7 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: {
-        agentId?: string;
-        channelId?: string;
-        page?: number;
-        limit?: number;
-    };
+    query?: never;
     url: '/conversations';
 };
 
@@ -1603,9 +1958,7 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: {
-        agentId?: string;
-    };
+    query?: never;
     url: '/channels';
 };
 
@@ -1642,7 +1995,7 @@ export type PostChannelsErrors = {
     /**
      * Response for status 403
      */
-    403: AgentLockedResponse;
+    403: ChannelWriteForbiddenResponse;
     /**
      * Response for status 404
      */
@@ -1673,7 +2026,7 @@ export type GetChannelsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: AgentLockedResponse;
+    403: ChannelWriteForbiddenResponse;
     /**
      * Response for status 404
      */
@@ -1704,7 +2057,7 @@ export type PatchChannelsByIdErrors = {
     /**
      * Response for status 403
      */
-    403: AgentLockedResponse;
+    403: ChannelWriteForbiddenResponse;
     /**
      * Response for status 404
      */
@@ -1721,6 +2074,15 @@ export type PatchChannelsByIdResponses = {
 };
 
 export type PatchChannelsByIdResponse = PatchChannelsByIdResponses[keyof PatchChannelsByIdResponses];
+
+export type PostSubscriptionsWebhookByProviderData = {
+    body?: never;
+    path: {
+        provider: string;
+    };
+    query?: never;
+    url: '/subscriptions/webhook/{provider}';
+};
 
 export type GetSubscriptionsStatusData = {
     body?: never;
@@ -1747,149 +2109,55 @@ export type GetSubscriptionsStatusResponses = {
 
 export type GetSubscriptionsStatusResponse = GetSubscriptionsStatusResponses[keyof GetSubscriptionsStatusResponses];
 
-// ── Actions & Leads (added with Actions feature) ──────────────────────────────
-
-export type LeadFieldConfig = {
-    collect: boolean;
-    required: boolean;
-};
-
-export type LeadGenerationConfig = {
-    fields?: {
-        name?: LeadFieldConfig;
-        email?: LeadFieldConfig;
-        phone?: LeadFieldConfig;
-        company?: LeadFieldConfig;
-    };
-    triggerInstructions?: string;
-    successMessage?: string;
-};
-
-export type AgentActionSchema = {
-    id: string;
-    agentId: string;
-    actionType: 'lead_generation';
-    enabled: boolean;
-    config: LeadGenerationConfig;
-    createdBy: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export type GetAgentActionsData = {
-    body?: never;
-    path?: never;
-    query: {
-        agentId: string;
-    };
-    url: '/agent-actions';
-};
-
-export type GetAgentActionsResponses = {
-    200: { actions: Array<AgentActionSchema> };
-};
-
-export type PostAgentActionsData = {
-    body: {
-        agentId: string;
-        actionType: 'lead_generation';
-        config?: LeadGenerationConfig;
-    };
-    path?: never;
-    query?: never;
-    url: '/agent-actions';
-};
-
-export type PostAgentActionsResponses = {
-    200: { action: AgentActionSchema };
-};
-
-export type PatchAgentActionsById = {
-    path: { id: string };
-    body: {
-        enabled?: boolean;
-        config?: LeadGenerationConfig;
-    };
-    query?: never;
-    url: '/agent-actions/{id}';
-};
-
-export type PatchAgentActionsByIdResponses = {
-    200: { action: AgentActionSchema };
-};
-
-export type DeleteAgentActionsByIdData = {
-    path: { id: string };
-    body?: never;
-    query?: never;
-    url: '/agent-actions/{id}';
-};
-
-export type DeleteAgentActionsByIdResponses = {
-    200: { success: boolean };
-};
-
-export type LeadWithRelations = {
-    id: string;
-    agentId: string;
-    conversationId: string | null;
-    channelId: string | null;
-    orgId: string;
-    name: string | null;
-    email: string | null;
-    phone: string | null;
-    company: string | null;
-    customFields: Record<string, string>;
-    createdAt: string;
-    updatedAt: string;
-    agent: { id: string; name: string } | null;
-    channel: { id: string; type: string } | null;
-    conversation: { id: string } | null;
-};
-
-export type GetLeadsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        agentId?: string;
-        page?: number;
-        limit?: number;
-    };
-    url: '/leads';
-};
-
-export type GetLeadsResponses = {
-    200: {
-        leads: Array<LeadWithRelations>;
-        total: number;
-        page: number;
-        limit: number;
-    };
-};
-
 export type PostSubscriptionsCheckoutData = {
-    body: {
-        plan: 'starter' | 'growth' | 'pro';
-    };
+    body: CheckoutBodySchema;
     path?: never;
     query?: never;
     url: '/subscriptions/checkout';
 };
 
 export type PostSubscriptionsCheckoutErrors = {
+    /**
+     * Response for status 401
+     */
     401: UnauthorizedSchema;
 };
 
 export type PostSubscriptionsCheckoutError = PostSubscriptionsCheckoutErrors[keyof PostSubscriptionsCheckoutErrors];
 
 export type PostSubscriptionsCheckoutResponses = {
-    200: {
-        provider: string;
-        subscriptionId: string;
-        clientToken: string;
-        scheduledFor: string | null;
-    };
+    /**
+     * Response for status 200
+     */
+    200: CheckoutResponseSchema;
 };
+
+export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
+
+export type PostSubscriptionsCancelData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/cancel';
+};
+
+export type PostSubscriptionsCancelErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type PostSubscriptionsCancelError = PostSubscriptionsCancelErrors[keyof PostSubscriptionsCancelErrors];
+
+export type PostSubscriptionsCancelResponses = {
+    /**
+     * Response for status 200
+     */
+    200: CancelResponseSchema;
+};
+
+export type PostSubscriptionsCancelResponse = PostSubscriptionsCancelResponses[keyof PostSubscriptionsCancelResponses];
 
 export type PostSubscriptionsResumeData = {
     body?: never;
@@ -1899,13 +2167,19 @@ export type PostSubscriptionsResumeData = {
 };
 
 export type PostSubscriptionsResumeErrors = {
+    /**
+     * Response for status 401
+     */
     401: UnauthorizedSchema;
 };
 
 export type PostSubscriptionsResumeError = PostSubscriptionsResumeErrors[keyof PostSubscriptionsResumeErrors];
 
 export type PostSubscriptionsResumeResponses = {
-    200: { success: boolean };
+    /**
+     * Response for status 200
+     */
+    200: ResumeResponseSchema;
 };
 
 export type PostSubscriptionsResumeResponse = PostSubscriptionsResumeResponses[keyof PostSubscriptionsResumeResponses];
@@ -1918,36 +2192,420 @@ export type PostSubscriptionsCancelScheduledChangeData = {
 };
 
 export type PostSubscriptionsCancelScheduledChangeErrors = {
+    /**
+     * Response for status 401
+     */
     401: UnauthorizedSchema;
 };
 
 export type PostSubscriptionsCancelScheduledChangeError = PostSubscriptionsCancelScheduledChangeErrors[keyof PostSubscriptionsCancelScheduledChangeErrors];
 
 export type PostSubscriptionsCancelScheduledChangeResponses = {
-    200: { success: boolean };
+    /**
+     * Response for status 200
+     */
+    200: CancelScheduledChangeResponseSchema;
 };
 
 export type PostSubscriptionsCancelScheduledChangeResponse = PostSubscriptionsCancelScheduledChangeResponses[keyof PostSubscriptionsCancelScheduledChangeResponses];
 
-export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
+export type GetWebhookWhatsappData = {
+    body?: never;
+    path?: never;
+    query?: {
+        'hub.mode'?: string;
+        'hub.verify_token'?: string;
+        'hub.challenge'?: string;
+    };
+    url: '/webhook/whatsapp';
+};
 
-export type PostSubscriptionsCancelData = {
+export type PostWebhookWhatsappData = {
+    body: unknown;
+    path?: never;
+    query?: never;
+    url: '/webhook/whatsapp';
+};
+
+export type DeleteWhatsappConnectionData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/subscriptions/cancel';
+    url: '/whatsapp/connection';
 };
 
-export type PostSubscriptionsCancelErrors = {
+export type DeleteWhatsappConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteWhatsappConnectionError = DeleteWhatsappConnectionErrors[keyof DeleteWhatsappConnectionErrors];
+
+export type GetWhatsappConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/connection';
+};
+
+export type GetWhatsappConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappConnectionError = GetWhatsappConnectionErrors[keyof GetWhatsappConnectionErrors];
+
+export type PostWhatsappConnectData = {
+    body: {
+        accessToken: string;
+        businessAccountId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/whatsapp/connect';
+};
+
+export type PostWhatsappConnectErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostWhatsappConnectError = PostWhatsappConnectErrors[keyof PostWhatsappConnectErrors];
+
+export type PostWhatsappBindData = {
+    body: {
+        channelId: string;
+        phoneNumberId: string;
+        displayPhone: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/whatsapp/bind';
+};
+
+export type PostWhatsappBindErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostWhatsappBindError = PostWhatsappBindErrors[keyof PostWhatsappBindErrors];
+
+export type DeleteWhatsappBindByChannelIdData = {
+    body?: never;
+    path: {
+        channelId: string;
+    };
+    query?: never;
+    url: '/whatsapp/bind/{channelId}';
+};
+
+export type DeleteWhatsappBindByChannelIdErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteWhatsappBindByChannelIdError = DeleteWhatsappBindByChannelIdErrors[keyof DeleteWhatsappBindByChannelIdErrors];
+
+export type GetAgentActionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/agent-actions';
+};
+
+export type GetAgentActionsErrors = {
+    /**
+     * Response for status 401
+     */
     401: UnauthorizedSchema;
 };
 
-export type PostSubscriptionsCancelError = PostSubscriptionsCancelErrors[keyof PostSubscriptionsCancelErrors];
+export type GetAgentActionsError = GetAgentActionsErrors[keyof GetAgentActionsErrors];
 
-export type PostSubscriptionsCancelResponses = {
-    200: {
-        success: boolean;
-    };
+export type GetAgentActionsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyAgentActionResponse;
 };
 
-export type PostSubscriptionsCancelResponse = PostSubscriptionsCancelResponses[keyof PostSubscriptionsCancelResponses];
+export type GetAgentActionsResponse = GetAgentActionsResponses[keyof GetAgentActionsResponses];
+
+export type PostAgentActionsData = {
+    body: CreateAgentActionBody;
+    path?: never;
+    query?: never;
+    url: '/agent-actions';
+};
+
+export type PostAgentActionsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: LeadGenerationForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostAgentActionsError = PostAgentActionsErrors[keyof PostAgentActionsErrors];
+
+export type PostAgentActionsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneAgentActionResponse;
+};
+
+export type PostAgentActionsResponse = PostAgentActionsResponses[keyof PostAgentActionsResponses];
+
+export type DeleteAgentActionsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/agent-actions/{id}';
+};
+
+export type DeleteAgentActionsByIdErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteAgentActionsByIdError = DeleteAgentActionsByIdErrors[keyof DeleteAgentActionsByIdErrors];
+
+export type DeleteAgentActionsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: DeleteActionResponse;
+};
+
+export type DeleteAgentActionsByIdResponse = DeleteAgentActionsByIdResponses[keyof DeleteAgentActionsByIdResponses];
+
+export type PatchAgentActionsByIdData = {
+    body: UpdateAgentActionBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/agent-actions/{id}';
+};
+
+export type PatchAgentActionsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: LeadGenerationForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PatchAgentActionsByIdError = PatchAgentActionsByIdErrors[keyof PatchAgentActionsByIdErrors];
+
+export type PatchAgentActionsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneAgentActionResponse;
+};
+
+export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
+
+export type GetLeadsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/leads';
+};
+
+export type GetLeadsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: LeadGenerationForbiddenResponse;
+};
+
+export type GetLeadsError = GetLeadsErrors[keyof GetLeadsErrors];
+
+export type GetLeadsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyLeadsResponse;
+};
+
+export type GetLeadsResponse = GetLeadsResponses[keyof GetLeadsResponses];
+
+export type GetAdminCostsByOrganizationData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/costs/by-organization';
+};
+
+export type GetAdminCostsByOrganizationErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminCostsByOrganizationError = GetAdminCostsByOrganizationErrors[keyof GetAdminCostsByOrganizationErrors];
+
+export type GetAdminCostsByOrganizationResponses = {
+    /**
+     * Response for status 200
+     */
+    200: AdminCostByOrganizationResponseSchema;
+};
+
+export type GetAdminCostsByOrganizationResponse = GetAdminCostsByOrganizationResponses[keyof GetAdminCostsByOrganizationResponses];
+
+export type GetAdminQueueCountsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/queue/counts';
+};
+
+export type GetAdminQueueCountsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminQueueCountsError = GetAdminQueueCountsErrors[keyof GetAdminQueueCountsErrors];
+
+export type GetAdminQueueCountsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: QueueCountsResponseSchema;
+};
+
+export type GetAdminQueueCountsResponse = GetAdminQueueCountsResponses[keyof GetAdminQueueCountsResponses];
+
+export type GetAdminQueueJobsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/queue/jobs';
+};
+
+export type GetAdminQueueJobsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminQueueJobsError = GetAdminQueueJobsErrors[keyof GetAdminQueueJobsErrors];
+
+export type GetAdminQueueJobsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: QueueListResponseSchema;
+};
+
+export type GetAdminQueueJobsResponse = GetAdminQueueJobsResponses[keyof GetAdminQueueJobsResponses];
+
+export type PostAdminQueueJobsByJobIdRetryData = {
+    body?: never;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/admin/queue/jobs/{jobId}/retry';
+};
+
+export type PostAdminQueueJobsByJobIdRetryErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PostAdminQueueJobsByJobIdRetryError = PostAdminQueueJobsByJobIdRetryErrors[keyof PostAdminQueueJobsByJobIdRetryErrors];
+
+export type PostAdminQueueJobsByJobIdRetryResponses = {
+    /**
+     * Response for status 200
+     */
+    200: QueueActionResponseSchema;
+};
+
+export type PostAdminQueueJobsByJobIdRetryResponse = PostAdminQueueJobsByJobIdRetryResponses[keyof PostAdminQueueJobsByJobIdRetryResponses];
+
+export type PostAdminQueueJobsByJobIdExecuteData = {
+    body?: never;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/admin/queue/jobs/{jobId}/execute';
+};
+
+export type PostAdminQueueJobsByJobIdExecuteErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PostAdminQueueJobsByJobIdExecuteError = PostAdminQueueJobsByJobIdExecuteErrors[keyof PostAdminQueueJobsByJobIdExecuteErrors];
+
+export type PostAdminQueueJobsByJobIdExecuteResponses = {
+    /**
+     * Response for status 200
+     */
+    200: QueueActionResponseSchema;
+};
+
+export type PostAdminQueueJobsByJobIdExecuteResponse = PostAdminQueueJobsByJobIdExecuteResponses[keyof PostAdminQueueJobsByJobIdExecuteResponses];

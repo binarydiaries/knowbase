@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteAgentActionsByIdData, DeleteAgentActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopAgentsData, GetAnalyticsTopAgentsErrors, GetAnalyticsTopAgentsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetAgentActionsData, GetAgentActionsResponses, GetAgentsByIdData, GetAgentsByIdErrors, GetAgentsByIdResponses, GetAgentsData, GetAgentsErrors, GetAgentsResponses, GetChatChannelData, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByAgentData, GetUsageKnowledgeByAgentErrors, GetUsageKnowledgeByAgentResponses, GetUsageMessagesByAgentData, GetUsageMessagesByAgentErrors, GetUsageMessagesByAgentResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchAgentActionsById as PatchAgentActionsByIdData, PatchAgentActionsByIdResponses, PatchAgentsByIdData, PatchAgentsByIdErrors, PatchAgentsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostAgentActionsData, PostAgentActionsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostAgentsData, PostAgentsErrors, PostAgentsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses, PostSubscriptionsResumeData, PostSubscriptionsResumeErrors, PostSubscriptionsResumeResponses, PostSubscriptionsCancelScheduledChangeData, PostSubscriptionsCancelScheduledChangeErrors, PostSubscriptionsCancelScheduledChangeResponses } from './types.gen';
+import type { DeleteAgentActionsByIdData, DeleteAgentActionsByIdErrors, DeleteAgentActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, DeleteWhatsappBindByChannelIdData, DeleteWhatsappBindByChannelIdErrors, DeleteWhatsappConnectionData, DeleteWhatsappConnectionErrors, GetAdminCostsByOrganizationData, GetAdminCostsByOrganizationErrors, GetAdminCostsByOrganizationResponses, GetAdminQueueCountsData, GetAdminQueueCountsErrors, GetAdminQueueCountsResponses, GetAdminQueueJobsData, GetAdminQueueJobsErrors, GetAdminQueueJobsResponses, GetAgentActionsData, GetAgentActionsErrors, GetAgentActionsResponses, GetAgentsByIdData, GetAgentsByIdErrors, GetAgentsByIdResponses, GetAgentsData, GetAgentsErrors, GetAgentsResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopAgentsData, GetAnalyticsTopAgentsErrors, GetAnalyticsTopAgentsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatChannelData, GetChatChannelErrors, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsErrors, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByAgentData, GetUsageKnowledgeByAgentErrors, GetUsageKnowledgeByAgentResponses, GetUsageMessagesByAgentData, GetUsageMessagesByAgentErrors, GetUsageMessagesByAgentResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, GetWebhookWhatsappData, GetWhatsappConnectionData, GetWhatsappConnectionErrors, PatchAgentActionsByIdData, PatchAgentActionsByIdErrors, PatchAgentActionsByIdResponses, PatchAgentsByIdData, PatchAgentsByIdErrors, PatchAgentsByIdResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostAdminQueueJobsByJobIdExecuteData, PostAdminQueueJobsByJobIdExecuteErrors, PostAdminQueueJobsByJobIdExecuteResponses, PostAdminQueueJobsByJobIdRetryData, PostAdminQueueJobsByJobIdRetryErrors, PostAdminQueueJobsByJobIdRetryResponses, PostAgentActionsData, PostAgentActionsErrors, PostAgentActionsResponses, PostAgentsData, PostAgentsErrors, PostAgentsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatData, PostChatErrors, PostChatResponses, PostDocumentsData, PostDocumentsErrors, PostDocumentsResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses, PostSubscriptionsCancelData, PostSubscriptionsCancelErrors, PostSubscriptionsCancelResponses, PostSubscriptionsCancelScheduledChangeData, PostSubscriptionsCancelScheduledChangeErrors, PostSubscriptionsCancelScheduledChangeResponses, PostSubscriptionsCheckoutData, PostSubscriptionsCheckoutErrors, PostSubscriptionsCheckoutResponses, PostSubscriptionsResumeData, PostSubscriptionsResumeErrors, PostSubscriptionsResumeResponses, PostSubscriptionsWebhookByProviderData, PostWebhookWhatsappData, PostWhatsappBindData, PostWhatsappBindErrors, PostWhatsappConnectData, PostWhatsappConnectErrors } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -88,7 +88,7 @@ export const postChat = <ThrowOnError extends boolean = true>(options: Options<P
     }
 });
 
-export const getChatChannel = <ThrowOnError extends boolean = true>(options?: Options<GetChatChannelData, ThrowOnError>) => (options?.client ?? client).get<GetChatChannelResponses, unknown, ThrowOnError>({
+export const getChatChannel = <ThrowOnError extends boolean = true>(options?: Options<GetChatChannelData, ThrowOnError>) => (options?.client ?? client).get<GetChatChannelResponses, GetChatChannelErrors, ThrowOnError>({
     responseType: 'json',
     url: '/chat/channel',
     ...options
@@ -240,6 +240,8 @@ export const patchChannelsById = <ThrowOnError extends boolean = true>(options: 
     }
 });
 
+export const postSubscriptionsWebhookByProvider = <ThrowOnError extends boolean = true>(options: Options<PostSubscriptionsWebhookByProviderData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({ url: '/subscriptions/webhook/{provider}', ...options });
+
 export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsStatusData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsStatusResponses, GetSubscriptionsStatusErrors, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/status',
@@ -252,74 +254,127 @@ export const postSubscriptionsCheckout = <ThrowOnError extends boolean = true>(o
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...options.headers
     }
 });
 
 export const postSubscriptionsCancel = <ThrowOnError extends boolean = true>(options?: Options<PostSubscriptionsCancelData, ThrowOnError>) => (options?.client ?? client).post<PostSubscriptionsCancelResponses, PostSubscriptionsCancelErrors, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/cancel',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers),
-    }
+    ...options
 });
 
 export const postSubscriptionsResume = <ThrowOnError extends boolean = true>(options?: Options<PostSubscriptionsResumeData, ThrowOnError>) => (options?.client ?? client).post<PostSubscriptionsResumeResponses, PostSubscriptionsResumeErrors, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/resume',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers),
-    }
+    ...options
 });
 
 export const postSubscriptionsCancelScheduledChange = <ThrowOnError extends boolean = true>(options?: Options<PostSubscriptionsCancelScheduledChangeData, ThrowOnError>) => (options?.client ?? client).post<PostSubscriptionsCancelScheduledChangeResponses, PostSubscriptionsCancelScheduledChangeErrors, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/cancel-scheduled-change',
+    ...options
+});
+
+export const getWebhookWhatsapp = <ThrowOnError extends boolean = true>(options?: Options<GetWebhookWhatsappData, ThrowOnError>) => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/webhook/whatsapp', ...options });
+
+export const postWebhookWhatsapp = <ThrowOnError extends boolean = true>(options: Options<PostWebhookWhatsappData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
+    url: '/webhook/whatsapp',
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...(options?.headers),
+        ...options.headers
     }
 });
 
-export const getAgentActions = <ThrowOnError extends boolean = true>(options: Options<GetAgentActionsData, ThrowOnError>) => (options.client ?? client).get<GetAgentActionsResponses, unknown, ThrowOnError>({
+export const deleteWhatsappConnection = <ThrowOnError extends boolean = true>(options?: Options<DeleteWhatsappConnectionData, ThrowOnError>) => (options?.client ?? client).delete<unknown, DeleteWhatsappConnectionErrors, ThrowOnError>({ url: '/whatsapp/connection', ...options });
+
+export const getWhatsappConnection = <ThrowOnError extends boolean = true>(options?: Options<GetWhatsappConnectionData, ThrowOnError>) => (options?.client ?? client).get<unknown, GetWhatsappConnectionErrors, ThrowOnError>({ url: '/whatsapp/connection', ...options });
+
+export const postWhatsappConnect = <ThrowOnError extends boolean = true>(options: Options<PostWhatsappConnectData, ThrowOnError>) => (options.client ?? client).post<unknown, PostWhatsappConnectErrors, ThrowOnError>({
+    url: '/whatsapp/connect',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const postWhatsappBind = <ThrowOnError extends boolean = true>(options: Options<PostWhatsappBindData, ThrowOnError>) => (options.client ?? client).post<unknown, PostWhatsappBindErrors, ThrowOnError>({
+    url: '/whatsapp/bind',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const deleteWhatsappBindByChannelId = <ThrowOnError extends boolean = true>(options: Options<DeleteWhatsappBindByChannelIdData, ThrowOnError>) => (options.client ?? client).delete<unknown, DeleteWhatsappBindByChannelIdErrors, ThrowOnError>({ url: '/whatsapp/bind/{channelId}', ...options });
+
+export const getAgentActions = <ThrowOnError extends boolean = true>(options?: Options<GetAgentActionsData, ThrowOnError>) => (options?.client ?? client).get<GetAgentActionsResponses, GetAgentActionsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/agent-actions',
     ...options
 });
 
-export const postAgentActions = <ThrowOnError extends boolean = true>(options: Options<PostAgentActionsData, ThrowOnError>) => (options.client ?? client).post<PostAgentActionsResponses, unknown, ThrowOnError>({
+export const postAgentActions = <ThrowOnError extends boolean = true>(options: Options<PostAgentActionsData, ThrowOnError>) => (options.client ?? client).post<PostAgentActionsResponses, PostAgentActionsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/agent-actions',
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...options.headers
     }
 });
 
-export const patchAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<PatchAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentActionsByIdResponses, unknown, ThrowOnError>({
-    responseType: 'json',
-    url: '/agent-actions/{id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-    }
-});
-
-export const deleteAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<DeleteAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteAgentActionsByIdResponses, unknown, ThrowOnError>({
+export const deleteAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<DeleteAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteAgentActionsByIdResponses, DeleteAgentActionsByIdErrors, ThrowOnError>({
     responseType: 'json',
     url: '/agent-actions/{id}',
     ...options
 });
 
-export const getLeads = <ThrowOnError extends boolean = true>(options?: Options<GetLeadsData, ThrowOnError>) => (options?.client ?? client).get<GetLeadsResponses, unknown, ThrowOnError>({
+export const patchAgentActionsById = <ThrowOnError extends boolean = true>(options: Options<PatchAgentActionsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentActionsByIdResponses, PatchAgentActionsByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/agent-actions/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getLeads = <ThrowOnError extends boolean = true>(options?: Options<GetLeadsData, ThrowOnError>) => (options?.client ?? client).get<GetLeadsResponses, GetLeadsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/leads',
+    ...options
+});
+
+export const getAdminCostsByOrganization = <ThrowOnError extends boolean = true>(options?: Options<GetAdminCostsByOrganizationData, ThrowOnError>) => (options?.client ?? client).get<GetAdminCostsByOrganizationResponses, GetAdminCostsByOrganizationErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/admin/costs/by-organization',
+    ...options
+});
+
+export const getAdminQueueCounts = <ThrowOnError extends boolean = true>(options?: Options<GetAdminQueueCountsData, ThrowOnError>) => (options?.client ?? client).get<GetAdminQueueCountsResponses, GetAdminQueueCountsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/admin/queue/counts',
+    ...options
+});
+
+export const getAdminQueueJobs = <ThrowOnError extends boolean = true>(options?: Options<GetAdminQueueJobsData, ThrowOnError>) => (options?.client ?? client).get<GetAdminQueueJobsResponses, GetAdminQueueJobsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/admin/queue/jobs',
+    ...options
+});
+
+export const postAdminQueueJobsByJobIdRetry = <ThrowOnError extends boolean = true>(options: Options<PostAdminQueueJobsByJobIdRetryData, ThrowOnError>) => (options.client ?? client).post<PostAdminQueueJobsByJobIdRetryResponses, PostAdminQueueJobsByJobIdRetryErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/admin/queue/jobs/{jobId}/retry',
+    ...options
+});
+
+export const postAdminQueueJobsByJobIdExecute = <ThrowOnError extends boolean = true>(options: Options<PostAdminQueueJobsByJobIdExecuteData, ThrowOnError>) => (options.client ?? client).post<PostAdminQueueJobsByJobIdExecuteResponses, PostAdminQueueJobsByJobIdExecuteErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/admin/queue/jobs/{jobId}/execute',
     ...options
 });

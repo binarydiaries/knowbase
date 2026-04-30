@@ -158,34 +158,36 @@ export const Agent = ({
             <AlertDescription>{alertMessage}</AlertDescription>
           </Alert>
         ) : null}
-        <div className="rounded-xl bg-muted px-4 py-2.5 text-xs text-muted-foreground">
-          AI can make mistakes. Please verify responses.
-        </div>
-        <div className="relative">
-          <Textarea
-            ref={inputRef}
-            className="min-h-12 rounded-2xl pr-14 py-3 resize-none placeholder:truncate"
-            placeholder={inputPlaceholder || 'Type your message...'}
-            value={input}
-            disabled={inputDisabled || isLoading}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                submitForm();
-              }
-            }}
-          />
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="absolute right-3 top-2"
-            disabled={inputDisabled || isLoading || input.trim().length === 0}
-            onClick={submitForm}
-            aria-label="Send message"
-          >
-            <SendHorizonal className="size-6" />
-          </Button>
+        <div className="rounded-2xl border border-input overflow-hidden">
+          <div className="px-4 py-2 text-xs text-muted-foreground border-b border-border bg-muted/50">
+            AI can make mistakes. Please verify responses.
+          </div>
+          <div className="relative">
+            <Textarea
+              ref={inputRef}
+              className="min-h-12 rounded-none border-0 shadow-none focus-visible:ring-0 pr-14 py-3 resize-none placeholder:truncate"
+              placeholder={inputPlaceholder || 'Type your message...'}
+              value={input}
+              disabled={inputDisabled || isLoading}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  submitForm();
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute right-3 top-2"
+              disabled={inputDisabled || isLoading || input.trim().length === 0}
+              onClick={submitForm}
+              aria-label="Send message"
+            >
+              <SendHorizonal className="size-6" />
+            </Button>
+          </div>
         </div>
         <a
           className="text-xs text-center text-slate-300"

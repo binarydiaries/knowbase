@@ -6,7 +6,7 @@ import { SubscriptionModel } from './model';
 import { SubscriptionService } from './service';
 import { getDefaultProvider, getProvider } from './providers';
 import { PLANS, PLAN_ORDER, type PlanName, type PaidPlanName } from './plans';
-import { OrgUsageMonthlyService } from './usage';
+import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 type OrgSubscriptionUpdate = {
   plan?: string;
@@ -166,11 +166,26 @@ export const Subscription = new Elysia({
           // Only refund if the billing period hasn't expired yet
           if (now < record.currentPeriodEnd) {
             const planData = PLANS[record.plan as PlanName];
+            const freePlan = PLANS['free'];
             if (planData && planData.priceMonthlyPaise > 0) {
-              const messagesThisMonth = await OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId);
-              const { messagesPerMonth } = planData.limits;
-              const usedRatio = Math.min(1, Math.max(0, messagesThisMonth / messagesPerMonth));
-              const refundPaise = Math.floor(planData.priceMonthlyPaise * (1 - usedRatio));
+              const [messagesThisMonth, trainingRunsToday] = await Promise.all([
+                OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId),
+                OrgUsageDailyService.getTodayTrainingRuns(orgId),
+              ]);
+
+              // Paid capacity = plan limit minus what the free plan already provides
+              const paidMessageCapacity = planData.limits.messagesPerMonth - freePlan.limits.messagesPerMonth;
+              const paidTrainingCapacity = planData.limits.trainingRunsPerDay - freePlan.limits.trainingRunsPerDay;
+
+              // Paid usage = consumption beyond the free tier
+              const paidMessagesUsed = Math.max(0, messagesThisMonth - freePlan.limits.messagesPerMonth);
+              const paidTrainingUsed = Math.max(0, trainingRunsToday - freePlan.limits.trainingRunsPerDay);
+
+              const messageUsedRatio = Math.min(1, paidMessagesUsed / Math.max(1, paidMessageCapacity));
+              const trainingUsedRatio = Math.min(1, paidTrainingUsed / Math.max(1, paidTrainingCapacity));
+
+              const combinedUsedRatio = (messageUsedRatio + trainingUsedRatio) / 2;
+              const refundPaise = Math.floor(planData.priceMonthlyPaise * (1 - combinedUsedRatio));
               if (refundPaise >= 100) {
                 await provider.issueRefund(record.lastPaymentId, refundPaise);
               }

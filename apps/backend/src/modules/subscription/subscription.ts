@@ -133,6 +133,30 @@ export const Subscription = new Elysia({
         );
       }
 
+      // Resume an incomplete checkout for the same plan rather than creating a duplicate
+      if (
+        existing?.status === 'created' &&
+        existing.providerSubscriptionId &&
+        existing.plan === plan
+      ) {
+        return {
+          provider: provider.name,
+          subscriptionId: existing.providerSubscriptionId,
+          clientToken: provider.clientToken,
+        };
+      }
+
+      // If a different plan was started but not paid, clean up the orphaned Razorpay subscription
+      if (existing?.status === 'created' && existing.providerSubscriptionId) {
+        try {
+          await provider.cancelSubscription(existing.providerSubscriptionId, {
+            atPeriodEnd: false,
+          });
+        } catch {
+          // best-effort — subscription may already be cancelled on Razorpay's side
+        }
+      }
+
       const result = await provider.createSubscription({
         plan: plan as PaidPlanName,
         orgId,

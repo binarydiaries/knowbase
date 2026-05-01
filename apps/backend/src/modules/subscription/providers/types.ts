@@ -20,6 +20,7 @@ export interface WebhookEvent {
 export interface PaymentProvider {
   readonly name: string;
   readonly signatureHeader: string;
+  readonly clientToken: string;
   createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
   /** Fetch the current period end date for an existing subscription. */

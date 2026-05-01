@@ -23,7 +23,7 @@ export const Route = createFileRoute('/subscriptions/')({
 
 function RouteComponent() {
   const posthog = usePostHog();
-  const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd } =
+  const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd, pendingPlan } =
     useClerkPlan();
   const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
 
@@ -98,6 +98,7 @@ function RouteComponent() {
                   key={p.slug}
                   plan={p}
                   currentPlan={plan}
+                  pendingPlan={pendingPlan}
                   hasActiveSubscription={hasActiveSubscription}
                   isBusy={isBusy}
                   isCheckingOut={

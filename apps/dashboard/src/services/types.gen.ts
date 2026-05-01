@@ -567,6 +567,7 @@ export type OneAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
+        pendingPlan: string | null;
         currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
@@ -597,6 +598,7 @@ export type ManyAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
+        pendingPlan: string | null;
         currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
@@ -885,7 +887,7 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
-    pendingPlan?: 'starter' | 'growth' | 'pro' | null;
+    pendingPlan: string | null;
     currentPeriodEnd: string | null;
     activeAgentLimit: number;
     activeAgentCount: number;
@@ -2615,3 +2617,59 @@ export type PostAdminQueueJobsByJobIdExecuteResponses = {
 };
 
 export type PostAdminQueueJobsByJobIdExecuteResponse = PostAdminQueueJobsByJobIdExecuteResponses[keyof PostAdminQueueJobsByJobIdExecuteResponses];
+
+export type GetAdminSubscriptionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: string | number;
+        limit?: string | number;
+        status?: string;
+    };
+    url: '/admin/subscriptions/';
+};
+
+export type GetAdminSubscriptionsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminSubscriptionsError = GetAdminSubscriptionsErrors[keyof GetAdminSubscriptionsErrors];
+
+export type PostAdminSubscriptionsByOrgIdSyncData = {
+    body?: never;
+    path: {
+        orgId: string;
+    };
+    query?: never;
+    url: '/admin/subscriptions/{orgId}/sync';
+};
+
+export type PostAdminSubscriptionsByOrgIdSyncErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PostAdminSubscriptionsByOrgIdSyncError = PostAdminSubscriptionsByOrgIdSyncErrors[keyof PostAdminSubscriptionsByOrgIdSyncErrors];
+
+export type PostAdminSubscriptionsBulkSyncData = {
+    body: {
+        orgIds?: Array<string>;
+    };
+    path?: never;
+    query?: never;
+    url: '/admin/subscriptions/bulk-sync';
+};
+
+export type PostAdminSubscriptionsBulkSyncErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PostAdminSubscriptionsBulkSyncError = PostAdminSubscriptionsBulkSyncErrors[keyof PostAdminSubscriptionsBulkSyncErrors];

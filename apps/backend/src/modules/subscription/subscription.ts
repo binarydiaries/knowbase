@@ -3,7 +3,7 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { SubscriptionModel } from './model';
-import { type PaidPlanName, PLAN_ORDER, PLANS, type PlanName } from './plans';
+import { type PaidPlanName, PLAN_ORDER, PLANS } from './plans';
 import {
   getDefaultProvider,
   getProvider,
@@ -11,7 +11,6 @@ import {
   type WebhookEvent,
 } from './providers';
 import { SubscriptionService } from './service';
-import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 type OrgSubscriptionUpdate = {
   plan?: string;
@@ -190,7 +189,7 @@ export const Subscription = new Elysia({
 
       if (
         !record?.providerSubscriptionId ||
-        !['active', 'authenticated', 'pending_cancellation'].includes(
+        !['active', 'authenticated', 'halted', 'pending_cancellation'].includes(
           record.status ?? '',
         )
       ) {
@@ -204,77 +203,6 @@ export const Subscription = new Elysia({
         await provider.cancelSubscription(record.providerSubscriptionId, {
           atPeriodEnd: false,
         });
-
-        if (record.lastPaymentId && record.currentPeriodEnd) {
-          const now = new Date();
-          // Only refund if the billing period hasn't expired yet
-          if (now < record.currentPeriodEnd) {
-            const planData = PLANS[record.plan as PlanName];
-            const freePlan = PLANS['free'];
-            if (planData && planData.priceMonthlyPaise > 0) {
-              const periodStartKey = record.currentPeriodStart
-                ? record.currentPeriodStart.toISOString().slice(0, 10)
-                : now.toISOString().slice(0, 10);
-
-              const msPerDay = 24 * 60 * 60 * 1000;
-              const startDate = new Date(periodStartKey + 'T00:00:00Z');
-              const todayDate = new Date(
-                now.toISOString().slice(0, 10) + 'T00:00:00Z',
-              );
-              const daysElapsed =
-                Math.floor(
-                  (todayDate.getTime() - startDate.getTime()) / msPerDay,
-                ) + 1;
-
-              const [messagesThisMonth, totalTrainingRuns] = await Promise.all([
-                OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId),
-                OrgUsageDailyService.getTotalTrainingRunsSince(
-                  orgId,
-                  periodStartKey,
-                ),
-              ]);
-
-              // Messages: paid capacity = plan limit minus free tier
-              const paidMessageCapacity =
-                planData.limits.messagesPerMonth -
-                freePlan.limits.messagesPerMonth;
-              const paidMessagesUsed = Math.max(
-                0,
-                messagesThisMonth - freePlan.limits.messagesPerMonth,
-              );
-              const messageUsedRatio = Math.min(
-                1,
-                paidMessagesUsed / Math.max(1, paidMessageCapacity),
-              );
-
-              // Training: aggregate across all days from period start; free allowance accrues per day
-              const totalFreeTraining =
-                daysElapsed * freePlan.limits.trainingRunsPerDay;
-              const totalPaidTrainingCapacity =
-                daysElapsed *
-                (planData.limits.trainingRunsPerDay -
-                  freePlan.limits.trainingRunsPerDay);
-              const paidTrainingUsed = Math.max(
-                0,
-                totalTrainingRuns - totalFreeTraining,
-              );
-              const trainingUsedRatio = Math.min(
-                1,
-                paidTrainingUsed / Math.max(1, totalPaidTrainingCapacity),
-              );
-
-              const combinedUsedRatio =
-                (messageUsedRatio + trainingUsedRatio) / 2;
-              const refundPaise = Math.floor(
-                planData.priceMonthlyPaise * (1 - combinedUsedRatio),
-              );
-              if (refundPaise >= 100) {
-                await provider.issueRefund(record.lastPaymentId, refundPaise);
-              }
-            }
-          }
-          // Period already expired → no refund
-        }
 
         await upsertOrgSubscription(orgId, {
           plan: 'free',

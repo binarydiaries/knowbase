@@ -1,11 +1,11 @@
 import { Elysia } from 'elysia';
+import { AuthGuard } from '../../common/authGuard/authGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
-import { AuthGuard } from '../../common/authGuard/authGuard';
 import { SubscriptionModel } from './model';
-import { SubscriptionService } from './service';
+import { type PaidPlanName, PLAN_ORDER, PLANS, type PlanName } from './plans';
 import { getDefaultProvider, getProvider } from './providers';
-import { PLANS, PLAN_ORDER, type PlanName, type PaidPlanName } from './plans';
+import { SubscriptionService } from './service';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
 type OrgSubscriptionUpdate = {
@@ -18,7 +18,10 @@ type OrgSubscriptionUpdate = {
   lastPaymentId?: string | null;
 };
 
-async function upsertOrgSubscription(orgId: string, data: OrgSubscriptionUpdate) {
+async function upsertOrgSubscription(
+  orgId: string,
+  data: OrgSubscriptionUpdate,
+) {
   const defined = Object.fromEntries(
     Object.entries(data).filter(([, v]) => v !== undefined),
   );
@@ -44,58 +47,55 @@ export const Subscription = new Elysia({
     }),
     { response: { 200: 'PlansResponseSchema' } },
   )
-  .post(
-    '/webhook/:provider',
-    async ({ params, request, set }) => {
-      let provider;
-      try {
-        provider = getProvider(params.provider);
-      } catch {
-        set.status = 400;
-        return { error: 'Unknown provider' };
-      }
+  .post('/webhook/:provider', async ({ params, request, set }) => {
+    let provider;
+    try {
+      provider = getProvider(params.provider);
+    } catch {
+      set.status = 400;
+      return { error: 'Unknown provider' };
+    }
 
-      const rawBody = await request.text();
-      const signature = request.headers.get(provider.signatureHeader) ?? '';
+    const rawBody = await request.text();
+    const signature = request.headers.get(provider.signatureHeader) ?? '';
 
-      let event;
-      try {
-        event = provider.parseWebhook(rawBody, signature);
-      } catch (err: any) {
-        set.status = 400;
-        return { error: err.message ?? 'Webhook verification failed' };
-      }
+    let event;
+    try {
+      event = provider.parseWebhook(rawBody, signature);
+    } catch (err: any) {
+      set.status = 400;
+      return { error: err.message ?? 'Webhook verification failed' };
+    }
 
-      if (!event) return { received: true };
+    if (!event) return { received: true };
 
-      if (event.status === 'cancelled' || event.status === 'completed') {
-        await upsertOrgSubscription(event.orgId, {
-          plan: 'free',
-          status: event.status,
-          currentPeriodStart: event.currentPeriodStart ?? null,
-          currentPeriodEnd: event.currentPeriodEnd ?? null,
-        });
-      } else if (event.status === 'active') {
-        await upsertOrgSubscription(event.orgId, {
-          plan: event.plan,
-          status: 'active',
-          provider: params.provider,
-          providerSubscriptionId: event.subscriptionId,
-          currentPeriodStart: event.currentPeriodStart ?? null,
-          currentPeriodEnd: event.currentPeriodEnd ?? null,
-          ...(event.lastPaymentId ? { lastPaymentId: event.lastPaymentId } : {}),
-        });
-      } else {
-        // halted, paused, pending, etc. — update status only, keep plan
-        await upsertOrgSubscription(event.orgId, {
-          status: event.status,
-          providerSubscriptionId: event.subscriptionId,
-        });
-      }
+    if (event.status === 'cancelled' || event.status === 'completed') {
+      await upsertOrgSubscription(event.orgId, {
+        plan: 'free',
+        status: event.status,
+        currentPeriodStart: event.currentPeriodStart ?? null,
+        currentPeriodEnd: event.currentPeriodEnd ?? null,
+      });
+    } else if (event.status === 'active') {
+      await upsertOrgSubscription(event.orgId, {
+        plan: event.plan,
+        status: 'active',
+        provider: params.provider,
+        providerSubscriptionId: event.subscriptionId,
+        currentPeriodStart: event.currentPeriodStart ?? null,
+        currentPeriodEnd: event.currentPeriodEnd ?? null,
+        ...(event.lastPaymentId ? { lastPaymentId: event.lastPaymentId } : {}),
+      });
+    } else {
+      // halted, paused, pending, etc. — update status only, keep plan
+      await upsertOrgSubscription(event.orgId, {
+        status: event.status,
+        providerSubscriptionId: event.subscriptionId,
+      });
+    }
 
-      return { received: true };
-    },
-  )
+    return { received: true };
+  })
   .use(AuthGuard)
   .get(
     '/status',
@@ -112,17 +112,26 @@ export const Subscription = new Elysia({
       const { plan } = body;
       const provider = getDefaultProvider();
 
-      const existing = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+      const existing = await db.query.orgSubscriptions.findFirst({
+        where: { orgId },
+      });
 
       if (
         existing?.providerSubscriptionId &&
-        ['active', 'authenticated', 'pending_cancellation'].includes(existing.status ?? '')
+        ['active', 'authenticated', 'pending_cancellation'].includes(
+          existing.status ?? '',
+        )
       ) {
         set.status = 400;
-        throw new Error('Cancel your current subscription before subscribing to a new plan.');
+        throw new Error(
+          'Cancel your current subscription before subscribing to a new plan.',
+        );
       }
 
-      const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId });
+      const result = await provider.createSubscription({
+        plan: plan as PaidPlanName,
+        orgId,
+      });
 
       await upsertOrgSubscription(orgId, {
         plan,
@@ -146,11 +155,15 @@ export const Subscription = new Elysia({
     '/cancel',
     async ({ body, orgId, set }) => {
       const { immediate } = body;
-      const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+      const record = await db.query.orgSubscriptions.findFirst({
+        where: { orgId },
+      });
 
       if (
         !record?.providerSubscriptionId ||
-        !['active', 'authenticated', 'pending_cancellation'].includes(record.status ?? '')
+        !['active', 'authenticated', 'pending_cancellation'].includes(
+          record.status ?? '',
+        )
       ) {
         set.status = 404;
         return { success: false };
@@ -159,7 +172,9 @@ export const Subscription = new Elysia({
       const provider = getProvider(record.provider ?? 'razorpay');
 
       if (immediate) {
-        await provider.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: false });
+        await provider.cancelSubscription(record.providerSubscriptionId, {
+          atPeriodEnd: false,
+        });
 
         if (record.lastPaymentId && record.currentPeriodEnd) {
           const now = new Date();
@@ -174,18 +189,37 @@ export const Subscription = new Elysia({
               ]);
 
               // Paid capacity = plan limit minus what the free plan already provides
-              const paidMessageCapacity = planData.limits.messagesPerMonth - freePlan.limits.messagesPerMonth;
-              const paidTrainingCapacity = planData.limits.trainingRunsPerDay - freePlan.limits.trainingRunsPerDay;
+              const paidMessageCapacity =
+                planData.limits.messagesPerMonth -
+                freePlan.limits.messagesPerMonth;
+              const paidTrainingCapacity =
+                planData.limits.trainingRunsPerDay -
+                freePlan.limits.trainingRunsPerDay;
 
               // Paid usage = consumption beyond the free tier
-              const paidMessagesUsed = Math.max(0, messagesThisMonth - freePlan.limits.messagesPerMonth);
-              const paidTrainingUsed = Math.max(0, trainingRunsToday - freePlan.limits.trainingRunsPerDay);
+              const paidMessagesUsed = Math.max(
+                0,
+                messagesThisMonth - freePlan.limits.messagesPerMonth,
+              );
+              const paidTrainingUsed = Math.max(
+                0,
+                trainingRunsToday - freePlan.limits.trainingRunsPerDay,
+              );
 
-              const messageUsedRatio = Math.min(1, paidMessagesUsed / Math.max(1, paidMessageCapacity));
-              const trainingUsedRatio = Math.min(1, paidTrainingUsed / Math.max(1, paidTrainingCapacity));
+              const messageUsedRatio = Math.min(
+                1,
+                paidMessagesUsed / Math.max(1, paidMessageCapacity),
+              );
+              const trainingUsedRatio = Math.min(
+                1,
+                paidTrainingUsed / Math.max(1, paidTrainingCapacity),
+              );
 
-              const combinedUsedRatio = (messageUsedRatio + trainingUsedRatio) / 2;
-              const refundPaise = Math.floor(planData.priceMonthlyPaise * (1 - combinedUsedRatio));
+              const combinedUsedRatio =
+                (messageUsedRatio + trainingUsedRatio) / 2;
+              const refundPaise = Math.floor(
+                planData.priceMonthlyPaise * (1 - combinedUsedRatio),
+              );
               if (refundPaise >= 100) {
                 await provider.issueRefund(record.lastPaymentId, refundPaise);
               }
@@ -194,9 +228,14 @@ export const Subscription = new Elysia({
           // Period already expired → no refund
         }
 
-        await upsertOrgSubscription(orgId, { plan: 'free', status: 'cancelled' });
+        await upsertOrgSubscription(orgId, {
+          plan: 'free',
+          status: 'cancelled',
+        });
       } else {
-        await provider.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: true });
+        await provider.cancelSubscription(record.providerSubscriptionId, {
+          atPeriodEnd: true,
+        });
         await upsertOrgSubscription(orgId, { status: 'pending_cancellation' });
       }
 

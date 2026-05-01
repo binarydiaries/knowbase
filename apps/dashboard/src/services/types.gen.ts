@@ -882,30 +882,6 @@ export type OneChannelResponse = {
 
 export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 
-export type PaidPlan = 'starter' | 'growth' | 'pro';
-
-export type PlanLimitsSchema = {
-    agents: number;
-    knowledgeSources: number;
-    messagesPerMonth: number;
-    trainingRunsPerDay: number;
-};
-
-export type PlanItemSchema = {
-    slug: PlanNameSchema;
-    name: string;
-    priceMonthlyPaise: number;
-    priceDisplay: string;
-    period: string;
-    highlight: boolean;
-    features: Array<string>;
-    limits: PlanLimitsSchema;
-};
-
-export type PlansResponseSchema = {
-    plans: Array<PlanItemSchema>;
-};
-
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
@@ -924,6 +900,40 @@ export type SubscriptionStatusSchema = {
     hasReachedTrainingRunsPerDayLimit: boolean;
 };
 
+export type PlanItemSchema = {
+    slug: 'free' | 'starter' | 'growth' | 'pro';
+    name: string;
+    priceMonthlyPaise: number;
+    priceDisplay: string;
+    period: string;
+    highlight: boolean;
+    features: Array<string>;
+    limits: {
+        agents: number;
+        knowledgeSources: number;
+        messagesPerMonth: number;
+        trainingRunsPerDay: number;
+    };
+};
+
+export type PlansResponseSchema = {
+    plans: Array<{
+        slug: 'free' | 'starter' | 'growth' | 'pro';
+        name: string;
+        priceMonthlyPaise: number;
+        priceDisplay: string;
+        period: string;
+        highlight: boolean;
+        features: Array<string>;
+        limits: {
+            agents: number;
+            knowledgeSources: number;
+            messagesPerMonth: number;
+            trainingRunsPerDay: number;
+        };
+    }>;
+};
+
 export type CheckoutBodySchema = {
     plan: 'starter' | 'growth' | 'pro';
 };
@@ -934,10 +944,13 @@ export type CheckoutResponseSchema = {
     clientToken: string;
 };
 
+export type CancelBodySchema = {
+    immediate: boolean;
+};
+
 export type CancelResponseSchema = {
     success: boolean;
 };
-
 
 export type BadRequestResponse = {
     code: string;
@@ -1890,7 +1903,7 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: ListConversation;
+    query?: never;
     url: '/conversations';
 };
 
@@ -1971,7 +1984,7 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: ChannelListQuerySchema;
+    query?: never;
     url: '/channels';
 };
 
@@ -2088,15 +2101,6 @@ export type PatchChannelsByIdResponses = {
 
 export type PatchChannelsByIdResponse = PatchChannelsByIdResponses[keyof PatchChannelsByIdResponses];
 
-export type PostSubscriptionsWebhookByProviderData = {
-    body?: never;
-    path: {
-        provider: string;
-    };
-    query?: never;
-    url: '/subscriptions/webhook/{provider}';
-};
-
 export type GetSubscriptionsPlansData = {
     body?: never;
     path?: never;
@@ -2105,10 +2109,22 @@ export type GetSubscriptionsPlansData = {
 };
 
 export type GetSubscriptionsPlansResponses = {
+    /**
+     * Response for status 200
+     */
     200: PlansResponseSchema;
 };
 
 export type GetSubscriptionsPlansResponse = GetSubscriptionsPlansResponses[keyof GetSubscriptionsPlansResponses];
+
+export type PostSubscriptionsWebhookByProviderData = {
+    body?: never;
+    path: {
+        provider: string;
+    };
+    query?: never;
+    url: '/subscriptions/webhook/{provider}';
+};
 
 export type GetSubscriptionsStatusData = {
     body?: never;
@@ -2161,7 +2177,7 @@ export type PostSubscriptionsCheckoutResponses = {
 export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
 
 export type PostSubscriptionsCancelData = {
-    body: { immediate: boolean };
+    body: CancelBodySchema;
     path?: never;
     query?: never;
     url: '/subscriptions/cancel';
@@ -2184,7 +2200,6 @@ export type PostSubscriptionsCancelResponses = {
 };
 
 export type PostSubscriptionsCancelResponse = PostSubscriptionsCancelResponses[keyof PostSubscriptionsCancelResponses];
-
 
 export type GetWebhookWhatsappData = {
     body?: never;
@@ -2316,7 +2331,7 @@ export type DeleteWhatsappBindByChannelIdError = DeleteWhatsappBindByChannelIdEr
 export type GetAgentActionsData = {
     body?: never;
     path?: never;
-    query?: GetAgentActionsQuery;
+    query?: never;
     url: '/agent-actions';
 };
 
@@ -2432,7 +2447,7 @@ export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof
 export type GetLeadsData = {
     body?: never;
     path?: never;
-    query?: GetLeadsQuery;
+    query?: never;
     url: '/leads';
 };
 

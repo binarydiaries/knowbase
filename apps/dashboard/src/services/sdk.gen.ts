@@ -240,13 +240,13 @@ export const patchChannelsById = <ThrowOnError extends boolean = true>(options: 
     }
 });
 
-export const postSubscriptionsWebhookByProvider = <ThrowOnError extends boolean = true>(options: Options<PostSubscriptionsWebhookByProviderData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({ url: '/subscriptions/webhook/{provider}', ...options });
-
-export const getSubscriptionsPlans = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsPlansData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsPlansResponses, never, ThrowOnError>({
+export const getSubscriptionsPlans = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsPlansData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsPlansResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/subscriptions/plans',
     ...options
 });
+
+export const postSubscriptionsWebhookByProvider = <ThrowOnError extends boolean = true>(options: Options<PostSubscriptionsWebhookByProviderData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({ url: '/subscriptions/webhook/{provider}', ...options });
 
 export const getSubscriptionsStatus = <ThrowOnError extends boolean = true>(options?: Options<GetSubscriptionsStatusData, ThrowOnError>) => (options?.client ?? client).get<GetSubscriptionsStatusResponses, GetSubscriptionsStatusErrors, ThrowOnError>({
     responseType: 'json',

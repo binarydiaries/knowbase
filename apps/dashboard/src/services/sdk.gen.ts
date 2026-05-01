@@ -186,7 +186,7 @@ export const getIndexingStatus = <ThrowOnError extends boolean = true>(options: 
     ...options
 });
 
-export const getConversations = <ThrowOnError extends boolean = true>(options?: Options<GetConversationsData, ThrowOnError>) => (options?.client ?? client).get<GetConversationsResponses, GetConversationsErrors, ThrowOnError>({
+export const getConversations = <ThrowOnError extends boolean = true>(options: Options<GetConversationsData, ThrowOnError>) => (options.client ?? client).get<GetConversationsResponses, GetConversationsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/conversations',
     ...options
@@ -309,7 +309,7 @@ export const postWhatsappBind = <ThrowOnError extends boolean = true>(options: O
 
 export const deleteWhatsappBindByChannelId = <ThrowOnError extends boolean = true>(options: Options<DeleteWhatsappBindByChannelIdData, ThrowOnError>) => (options.client ?? client).delete<unknown, DeleteWhatsappBindByChannelIdErrors, ThrowOnError>({ url: '/whatsapp/bind/{channelId}', ...options });
 
-export const getAgentActions = <ThrowOnError extends boolean = true>(options?: Options<GetAgentActionsData, ThrowOnError>) => (options?.client ?? client).get<GetAgentActionsResponses, GetAgentActionsErrors, ThrowOnError>({
+export const getAgentActions = <ThrowOnError extends boolean = true>(options: Options<GetAgentActionsData, ThrowOnError>) => (options.client ?? client).get<GetAgentActionsResponses, GetAgentActionsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/agent-actions',
     ...options
@@ -341,7 +341,7 @@ export const patchAgentActionsById = <ThrowOnError extends boolean = true>(optio
     }
 });
 
-export const getLeads = <ThrowOnError extends boolean = true>(options?: Options<GetLeadsData, ThrowOnError>) => (options?.client ?? client).get<GetLeadsResponses, GetLeadsErrors, ThrowOnError>({
+export const getLeads = <ThrowOnError extends boolean = true>(options: Options<GetLeadsData, ThrowOnError>) => (options.client ?? client).get<GetLeadsResponses, GetLeadsErrors, ThrowOnError>({
     responseType: 'json',
     url: '/leads',
     ...options

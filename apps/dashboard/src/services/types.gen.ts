@@ -1903,7 +1903,12 @@ export type GetIndexingStatusResponse = GetIndexingStatusResponses[keyof GetInde
 export type GetConversationsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        agentId?: string;
+        channelId?: string;
+        page: number;
+        limit: number;
+    };
     url: '/conversations';
 };
 
@@ -1984,7 +1989,9 @@ export type PatchBehaviourByIdResponse = PatchBehaviourByIdResponses[keyof Patch
 export type GetChannelsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        agentId?: string;
+    };
     url: '/channels';
 };
 
@@ -2331,7 +2338,9 @@ export type DeleteWhatsappBindByChannelIdError = DeleteWhatsappBindByChannelIdEr
 export type GetAgentActionsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        agentId: string;
+    };
     url: '/agent-actions';
 };
 
@@ -2447,7 +2456,11 @@ export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof
 export type GetLeadsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        agentId?: string;
+        page: number;
+        limit: number;
+    };
     url: '/leads';
 };
 

@@ -1,7 +1,7 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Check, Loader2, Sparkles } from 'lucide-react';
-import type { PaidPlan, PlanItemSchema } from '@/services';
+import type { CheckoutBodySchema, PlanItemSchema } from '@/services';
 
 interface Props {
   plan: PlanItemSchema;
@@ -9,7 +9,7 @@ interface Props {
   hasActiveSubscription: boolean;
   isBusy: boolean;
   isCheckingOut: boolean;
-  onSubscribe: (plan: PaidPlan) => void;
+  onSubscribe: (plan: CheckoutBodySchema['plan']) => void;
 }
 
 export function PlanCard({
@@ -40,7 +40,9 @@ export function PlanCard({
 
       <div>
         <span className="text-3xl font-bold">{plan.priceDisplay}</span>
-        <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>
+        <span className="text-sm text-muted-foreground ml-1">
+          {plan.period}
+        </span>
       </div>
 
       <Separator />
@@ -63,7 +65,7 @@ export function PlanCard({
           className="w-full"
           variant={plan.highlight ? 'default' : 'outline'}
           disabled={isBusy}
-          onClick={() => onSubscribe(plan.slug as PaidPlan)}
+          onClick={() => onSubscribe(plan.slug as CheckoutBodySchema['plan'])}
         >
           {isCheckingOut ? (
             <Loader2 className="size-4 animate-spin" />

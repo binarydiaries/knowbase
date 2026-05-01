@@ -2,15 +2,16 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePostHog } from 'posthog-js/react';
 import {
+  type CheckoutBodySchema,
   postSubscriptionsCancel,
   postSubscriptionsCheckout,
-  type PaidPlan,
 } from '@/services';
 import { loadRazorpayScript } from '@/utils/razorpay';
 
 function useInvalidateSubscription() {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+  return () =>
+    queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
 }
 
 export function useCheckoutMutation() {
@@ -18,14 +19,16 @@ export function useCheckoutMutation() {
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
-    mutationFn: async (plan: PaidPlan) => {
+    mutationFn: async (plan: CheckoutBodySchema['plan']) => {
       const loaded = await loadRazorpayScript();
-      if (!loaded) throw new Error('Failed to load payment gateway. Please try again.');
+      if (!loaded)
+        throw new Error('Failed to load payment gateway. Please try again.');
 
       const res = await postSubscriptionsCheckout({ body: { plan } });
       const { provider, subscriptionId, clientToken } = res.data;
 
-      if (provider !== 'razorpay') throw new Error(`Unsupported payment provider: ${provider}`);
+      if (provider !== 'razorpay')
+        throw new Error(`Unsupported payment provider: ${provider}`);
 
       await new Promise<void>((resolve, reject) => {
         const rzp = new (window as any).Razorpay({
@@ -59,7 +62,8 @@ export function useCancelMutation() {
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
-    mutationFn: (immediate: boolean) => postSubscriptionsCancel({ body: { immediate } }),
+    mutationFn: (immediate: boolean) =>
+      postSubscriptionsCancel({ body: { immediate } }),
     onSuccess: (_, immediate) => {
       invalidate();
       posthog.capture('subscription_cancelled', { immediate });

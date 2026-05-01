@@ -43,6 +43,15 @@ export class RazorpayProvider implements PaymentProvider {
     await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
   }
 
+  async fetchSubscription(subscriptionId: string) {
+    const sub = await this.getClient().subscriptions.fetch(subscriptionId) as any;
+    return {
+      status: sub.status as string,
+      currentPeriodStart: sub.current_start ? new Date(sub.current_start * 1000) : null,
+      currentPeriodEnd:   sub.current_end   ? new Date(sub.current_end   * 1000) : null,
+    };
+  }
+
   async getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null> {
     const sub = await this.getClient().subscriptions.fetch(subscriptionId);
     return (sub as any).current_end ? new Date((sub as any).current_end * 1000) : null;

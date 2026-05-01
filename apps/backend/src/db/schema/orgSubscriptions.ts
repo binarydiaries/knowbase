@@ -12,6 +12,7 @@ export const orgSubscriptions = pgTable(
     providerCustomerId: text(),
     // created | authenticated | active | pending_cancellation | paused | cancelled | halted | completed | transitioning
     status: text().notNull().default('free'),
+    currentPeriodStart: timestamp({ withTimezone: true }),
     currentPeriodEnd: timestamp({ withTimezone: true }),
     lastPaymentId: text(),
     ...timestamps,

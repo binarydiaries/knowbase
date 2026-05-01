@@ -4,8 +4,8 @@ import { usePostHog } from 'posthog-js/react';
 import {
   postSubscriptionsCancel,
   postSubscriptionsCheckout,
+  type PaidPlan,
 } from '@/services';
-import type { PaidPlan } from '@/data/subscriptionPlans';
 import { loadRazorpayScript } from '@/utils/razorpay';
 
 function useInvalidateSubscription() {

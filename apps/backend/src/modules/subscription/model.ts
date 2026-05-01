@@ -31,6 +31,28 @@ export const CheckoutResponseSchema = z.object({
   clientToken: z.string(),
 });
 
+export const PlanLimitsSchema = z.object({
+  agents: z.number(),
+  knowledgeSources: z.number(),
+  messagesPerMonth: z.number(),
+  trainingRunsPerDay: z.number(),
+});
+
+export const PlanItemSchema = z.object({
+  slug: PlanNameSchema,
+  name: z.string(),
+  priceMonthlyPaise: z.number(),
+  priceDisplay: z.string(),
+  period: z.string(),
+  highlight: z.boolean(),
+  features: z.array(z.string()),
+  limits: PlanLimitsSchema,
+});
+
+export const PlansResponseSchema = z.object({
+  plans: z.array(PlanItemSchema),
+});
+
 export const CancelBodySchema = z.object({
   immediate: z.boolean().default(false),
 });
@@ -42,6 +64,8 @@ export const CancelResponseSchema = z.object({
 export const SubscriptionModel = new Elysia().model({
   PlanNameSchema,
   SubscriptionStatusSchema,
+  PlanItemSchema,
+  PlansResponseSchema,
   CheckoutBodySchema,
   CheckoutResponseSchema,
   CancelBodySchema,

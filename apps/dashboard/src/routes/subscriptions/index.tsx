@@ -1,16 +1,18 @@
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { createFileRoute } from '@tanstack/react-router';
 import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { PLANS, type PaidPlan } from '@/data/subscriptionPlans';
+import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { useCancelMutation, useCheckoutMutation } from '@/hooks/useSubscriptionMutations';
 import { HaltedBanner } from '@/components/subscriptions/HaltedBanner';
 import { PendingCancellationBanner } from '@/components/subscriptions/PendingCancellationBanner';
 import { PlanCard } from '@/components/subscriptions/PlanCard';
 import { SubscriptionActions } from '@/components/subscriptions/SubscriptionActions';
 import { formatDate } from '@/utils/razorpay';
+import type { PaidPlan } from '@/services';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
@@ -19,6 +21,7 @@ export const Route = createFileRoute('/subscriptions/')({
 function RouteComponent() {
   const posthog = usePostHog();
   const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd } = useClerkPlan();
+  const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
 
   const checkoutMutation = useCheckoutMutation();
   const cancelMutation = useCancelMutation();
@@ -37,7 +40,7 @@ function RouteComponent() {
   }
 
   function handleCancelNow() {
-    if (!confirm('Cancel immediately? A prorated refund will be issued for unused days.')) return;
+    if (!confirm('Cancel immediately? A prorated refund will be issued for unused time.')) return;
     cancelMutation.mutate(true);
   }
 
@@ -65,17 +68,21 @@ function RouteComponent() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-w-6xl">
-          {PLANS.map((p) => (
-            <PlanCard
-              key={p.slug}
-              plan={p}
-              currentPlan={plan}
-              hasActiveSubscription={hasActiveSubscription}
-              isBusy={isBusy}
-              isCheckingOut={checkoutMutation.isPending && checkoutMutation.variables === p.slug}
-              onSubscribe={(slug: PaidPlan) => checkoutMutation.mutate(slug)}
-            />
-          ))}
+          {plansLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-80 rounded-2xl" />
+              ))
+            : plans?.map((p) => (
+                <PlanCard
+                  key={p.slug}
+                  plan={p}
+                  currentPlan={plan}
+                  hasActiveSubscription={hasActiveSubscription}
+                  isBusy={isBusy}
+                  isCheckingOut={checkoutMutation.isPending && checkoutMutation.variables === p.slug}
+                  onSubscribe={(slug: PaidPlan) => checkoutMutation.mutate(slug)}
+                />
+              ))}
         </div>
 
         {isPaid && (

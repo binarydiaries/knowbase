@@ -79,6 +79,9 @@ export class RazorpayProvider implements PaymentProvider {
 
     const planName: string = entity.notes?.plan;
     const subscriptionId: string = entity.id;
+    const currentPeriodStart = entity.current_start
+      ? new Date(entity.current_start * 1000)
+      : undefined;
     const currentPeriodEnd = entity.current_end
       ? new Date(entity.current_end * 1000)
       : undefined;
@@ -91,13 +94,14 @@ export class RazorpayProvider implements PaymentProvider {
           plan: planName ?? 'free',
           status: 'active',
           subscriptionId,
+          currentPeriodStart,
           currentPeriodEnd,
           lastPaymentId: paymentEntity?.id,
           lastPaymentAmount: paymentEntity?.amount,
         };
       }
       case 'subscription.activated':
-        return { orgId, plan: planName ?? 'free', status: 'active', subscriptionId, currentPeriodEnd };
+        return { orgId, plan: planName ?? 'free', status: 'active', subscriptionId, currentPeriodStart, currentPeriodEnd };
       case 'subscription.cancelled':
         return { orgId, plan: 'free', status: 'cancelled', subscriptionId, currentPeriodEnd };
       case 'subscription.completed':

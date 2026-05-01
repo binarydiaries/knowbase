@@ -882,6 +882,30 @@ export type OneChannelResponse = {
 
 export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 
+export type PaidPlan = 'starter' | 'growth' | 'pro';
+
+export type PlanLimitsSchema = {
+    agents: number;
+    knowledgeSources: number;
+    messagesPerMonth: number;
+    trainingRunsPerDay: number;
+};
+
+export type PlanItemSchema = {
+    slug: PlanNameSchema;
+    name: string;
+    priceMonthlyPaise: number;
+    priceDisplay: string;
+    period: string;
+    highlight: boolean;
+    features: Array<string>;
+    limits: PlanLimitsSchema;
+};
+
+export type PlansResponseSchema = {
+    plans: Array<PlanItemSchema>;
+};
+
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
@@ -2072,6 +2096,19 @@ export type PostSubscriptionsWebhookByProviderData = {
     query?: never;
     url: '/subscriptions/webhook/{provider}';
 };
+
+export type GetSubscriptionsPlansData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscriptions/plans';
+};
+
+export type GetSubscriptionsPlansResponses = {
+    200: PlansResponseSchema;
+};
+
+export type GetSubscriptionsPlansResponse = GetSubscriptionsPlansResponses[keyof GetSubscriptionsPlansResponses];
 
 export type GetSubscriptionsStatusData = {
     body?: never;

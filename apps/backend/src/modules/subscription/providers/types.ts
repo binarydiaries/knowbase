@@ -1,4 +1,5 @@
-export type PaidPlanName = 'starter' | 'growth' | 'pro';
+import type { PaidPlanName } from '../plans';
+export type { PaidPlanName };
 
 export interface CheckoutResult {
   subscriptionId: string;
@@ -10,6 +11,7 @@ export interface WebhookEvent {
   plan?: string; // undefined = don't update plan in DB
   status: string;
   subscriptionId: string;
+  currentPeriodStart?: Date;
   currentPeriodEnd?: Date;
   lastPaymentId?: string;
   lastPaymentAmount?: number;

@@ -5,19 +5,14 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { SubscriptionModel } from './model';
 import { SubscriptionService } from './service';
 import { getDefaultProvider, getProvider } from './providers';
-import type { PaidPlanName } from './providers/types';
-
-const PLAN_PRICES: Record<string, number> = {
-  starter: 49900,   // ₹499 in paise
-  growth:  149900,  // ₹1,499 in paise
-  pro:     399900,  // ₹3,999 in paise
-};
+import { PLANS, PLAN_ORDER, type PlanName, type PaidPlanName } from './plans';
 
 type OrgSubscriptionUpdate = {
   plan?: string;
   status?: string;
   provider?: string;
   providerSubscriptionId?: string;
+  currentPeriodStart?: Date | null;
   currentPeriodEnd?: Date | null;
   lastPaymentId?: string | null;
 };
@@ -40,7 +35,14 @@ export const Subscription = new Elysia({
   tags: ['Subscription'],
 })
   .use(SubscriptionModel)
-  // PUBLIC — no auth, payment providers call this directly
+  // PUBLIC — no auth required
+  .get(
+    '/plans',
+    () => ({
+      plans: PLAN_ORDER.map((slug) => PLANS[slug]),
+    }),
+    { response: { 200: 'PlansResponseSchema' } },
+  )
   .post(
     '/webhook/:provider',
     async ({ params, request, set }) => {
@@ -69,6 +71,7 @@ export const Subscription = new Elysia({
         await upsertOrgSubscription(event.orgId, {
           plan: 'free',
           status: event.status,
+          currentPeriodStart: event.currentPeriodStart ?? null,
           currentPeriodEnd: event.currentPeriodEnd ?? null,
         });
       } else if (event.status === 'active') {
@@ -77,6 +80,7 @@ export const Subscription = new Elysia({
           status: 'active',
           provider: params.provider,
           providerSubscriptionId: event.subscriptionId,
+          currentPeriodStart: event.currentPeriodStart ?? null,
           currentPeriodEnd: event.currentPeriodEnd ?? null,
           ...(event.lastPaymentId ? { lastPaymentId: event.lastPaymentId } : {}),
         });
@@ -134,9 +138,7 @@ export const Subscription = new Elysia({
     },
     {
       body: 'CheckoutBodySchema',
-      response: {
-        200: 'CheckoutResponseSchema',
-      },
+      response: { 200: 'CheckoutResponseSchema' },
     },
   )
   .post(
@@ -158,15 +160,24 @@ export const Subscription = new Elysia({
       if (immediate) {
         await provider.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: false });
 
-        if (record.lastPaymentId && record.currentPeriodEnd) {
+        if (record.lastPaymentId && record.currentPeriodStart && record.currentPeriodEnd) {
           const now = new Date();
-          const msRemaining = Math.max(0, record.currentPeriodEnd.getTime() - now.getTime());
-          const planAmount = PLAN_PRICES[record.plan ?? ''] ?? 0;
-          const msInMonth = 30 * 24 * 60 * 60 * 1000;
-          const refundPaise = Math.floor(planAmount * (msRemaining / msInMonth));
-          if (refundPaise >= 100) {
-            await provider.issueRefund(record.lastPaymentId, refundPaise);
+          const periodStart = record.currentPeriodStart;
+          const periodEnd = record.currentPeriodEnd;
+
+          // If current period hasn't expired, issue a prorated refund
+          if (now < periodEnd) {
+            const msUsed = now.getTime() - periodStart.getTime();
+            const msPeriod = periodEnd.getTime() - periodStart.getTime();
+            const usedRatio = Math.min(1, Math.max(0, msUsed / msPeriod));
+            const planAmount = PLANS[record.plan as PlanName]?.priceMonthlyPaise ?? 0;
+            const chargeForUsed = Math.floor(planAmount * usedRatio);
+            const refundPaise = planAmount - chargeForUsed;
+            if (refundPaise >= 100) {
+              await provider.issueRefund(record.lastPaymentId, refundPaise);
+            }
           }
+          // If period is already over → no refund
         }
 
         await upsertOrgSubscription(orgId, { plan: 'free', status: 'cancelled' });

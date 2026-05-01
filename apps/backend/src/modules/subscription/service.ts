@@ -4,35 +4,8 @@ import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
-
-export const PLAN_LIMITS = {
-  free: {
-    agents: 1,
-    knowledgeSources: 10,
-    messagesPerMonth: 100,
-    trainingRunsPerDay: 3,
-  },
-  starter: {
-    agents: 3,
-    knowledgeSources: 250,
-    messagesPerMonth: 500,
-    trainingRunsPerDay: 10,
-  },
-  growth: {
-    agents: 10,
-    knowledgeSources: 1000,
-    messagesPerMonth: 2000,
-    trainingRunsPerDay: 20,
-  },
-  pro: {
-    agents: 30,
-    knowledgeSources: 5000,
-    messagesPerMonth: 8000,
-    trainingRunsPerDay: 40,
-  },
-} as const;
-
-export type PlanName = keyof typeof PLAN_LIMITS;
+import { PLANS, type PlanName } from './plans';
+export type { PlanName } from './plans';
 
 const PLAN_NAMES = new Set<PlanName>(['free', 'starter', 'growth', 'pro']);
 
@@ -67,7 +40,7 @@ export abstract class SubscriptionService {
   }
 
   static getLimits(plan: PlanName) {
-    return PLAN_LIMITS[plan];
+    return PLANS[plan].limits;
   }
 
   static async getStatus(orgId: string) {

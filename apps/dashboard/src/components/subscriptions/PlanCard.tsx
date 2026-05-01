@@ -1,19 +1,10 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Check, Loader2, Sparkles } from 'lucide-react';
-import type { PaidPlan } from '@/data/subscriptionPlans';
-
-interface Plan {
-  name: string;
-  slug: string;
-  price: string;
-  period: string;
-  highlight: boolean;
-  features: string[];
-}
+import type { PaidPlan, PlanItemSchema } from '@/services';
 
 interface Props {
-  plan: Plan;
+  plan: PlanItemSchema;
   currentPlan: string;
   hasActiveSubscription: boolean;
   isBusy: boolean;
@@ -48,7 +39,7 @@ export function PlanCard({
       </div>
 
       <div>
-        <span className="text-3xl font-bold">{plan.price}</span>
+        <span className="text-3xl font-bold">{plan.priceDisplay}</span>
         <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>
       </div>
 

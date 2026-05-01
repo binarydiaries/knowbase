@@ -25,27 +25,13 @@ export class RazorpayProvider implements PaymentProvider {
     return planId;
   }
 
-  private buildSubscriptionParams(plan: PaidPlanName, orgId: string, startAt?: Date) {
-    return {
+  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
+    const subscription = await this.getClient().subscriptions.create({
       plan_id: this.getPlanId(plan),
       total_count: 120,
       quantity: 1,
-      ...(startAt ? { start_at: Math.floor(startAt.getTime() / 1000) } : {}),
       notes: { orgId, plan },
-    };
-  }
-
-  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
-    const subscription = await this.getClient().subscriptions.create(
-      this.buildSubscriptionParams(plan, orgId),
-    );
-    return { subscriptionId: subscription.id, clientToken: process.env.RAZORPAY_KEY_ID ?? '' };
-  }
-
-  async scheduleSubscription({ plan, orgId, startAt }: { plan: PaidPlanName; orgId: string; startAt: Date }): Promise<CheckoutResult> {
-    const subscription = await this.getClient().subscriptions.create(
-      this.buildSubscriptionParams(plan, orgId, startAt),
-    );
+    });
     return { subscriptionId: subscription.id, clientToken: process.env.RAZORPAY_KEY_ID ?? '' };
   }
 
@@ -53,14 +39,17 @@ export class RazorpayProvider implements PaymentProvider {
     await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
   }
 
-  async resumeSubscription(subscriptionId: string): Promise<void> {
-    // Pass false to cancel_at_cycle_end to un-schedule the pending cancellation
-    await this.getClient().subscriptions.cancel(subscriptionId, false);
-  }
-
   async getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null> {
     const sub = await this.getClient().subscriptions.fetch(subscriptionId);
     return (sub as any).current_end ? new Date((sub as any).current_end * 1000) : null;
+  }
+
+  async issueRefund(paymentId: string, amountPaise: number): Promise<void> {
+    await this.getClient().payments.refund(paymentId, {
+      amount: amountPaise,
+      speed: 'normal',
+      notes: { reason: 'Prorated subscription cancellation refund' },
+    });
   }
 
   parseWebhook(rawBody: string, signature: string): WebhookEvent | null {
@@ -95,8 +84,19 @@ export class RazorpayProvider implements PaymentProvider {
       : undefined;
 
     switch (event) {
+      case 'subscription.charged': {
+        const paymentEntity = payload?.payload?.payment?.entity;
+        return {
+          orgId,
+          plan: planName ?? 'free',
+          status: 'active',
+          subscriptionId,
+          currentPeriodEnd,
+          lastPaymentId: paymentEntity?.id,
+          lastPaymentAmount: paymentEntity?.amount,
+        };
+      }
       case 'subscription.activated':
-      case 'subscription.charged':
         return { orgId, plan: planName ?? 'free', status: 'active', subscriptionId, currentPeriodEnd };
       case 'subscription.cancelled':
         return { orgId, plan: 'free', status: 'cancelled', subscriptionId, currentPeriodEnd };

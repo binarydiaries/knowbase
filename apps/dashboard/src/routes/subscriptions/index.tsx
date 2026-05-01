@@ -5,16 +5,12 @@ import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 import { PLANS, type PaidPlan } from '@/data/subscriptionPlans';
-import {
-  useCancelMutation,
-  useCancelScheduledChangeMutation,
-  useCheckoutMutation,
-  useResumeMutation,
-} from '@/hooks/useSubscriptionMutations';
+import { useCancelMutation, useCheckoutMutation } from '@/hooks/useSubscriptionMutations';
 import { HaltedBanner } from '@/components/subscriptions/HaltedBanner';
+import { PendingCancellationBanner } from '@/components/subscriptions/PendingCancellationBanner';
 import { PlanCard } from '@/components/subscriptions/PlanCard';
-import { ScheduledChangeBanner } from '@/components/subscriptions/ScheduledChangeBanner';
 import { SubscriptionActions } from '@/components/subscriptions/SubscriptionActions';
+import { formatDate } from '@/utils/razorpay';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
@@ -22,38 +18,27 @@ export const Route = createFileRoute('/subscriptions/')({
 
 function RouteComponent() {
   const posthog = usePostHog();
-  const { plan, isPaid, isPendingCancellation, isHalted, scheduledPlan, scheduledPlanAt } = useClerkPlan();
+  const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd } = useClerkPlan();
 
   const checkoutMutation = useCheckoutMutation();
   const cancelMutation = useCancelMutation();
-  const resumeMutation = useResumeMutation();
-  const cancelScheduledMutation = useCancelScheduledChangeMutation();
 
-  const isBusy =
-    checkoutMutation.isPending ||
-    cancelMutation.isPending ||
-    resumeMutation.isPending ||
-    cancelScheduledMutation.isPending;
-
-  const hasScheduledChange = !!scheduledPlan;
+  const isBusy = checkoutMutation.isPending || cancelMutation.isPending;
+  const hasActiveSubscription = isPaid || isPendingCancellation;
 
   useEffect(() => {
     posthog.capture('subscription_page_viewed');
   }, [posthog]);
 
-  function handleCancel() {
-    if (!confirm("Are you sure you want to cancel? You'll keep full access until the end of your current billing period.")) return;
-    cancelMutation.mutate();
+  function handleCancelAtPeriodEnd() {
+    const dateStr = currentPeriodEnd ? ` on ${formatDate(currentPeriodEnd)}` : ' at the end of your billing period';
+    if (!confirm(`Cancel at end of billing period? You'll keep full access${dateStr}. This cannot be undone.`)) return;
+    cancelMutation.mutate(false);
   }
 
-  function handleResume() {
-    if (!confirm('Resume your subscription? Your plan will continue as normal after the current billing period.')) return;
-    resumeMutation.mutate();
-  }
-
-  function handleCancelScheduledChange() {
-    if (!confirm('Cancel the scheduled plan change? Your current plan will remain active.')) return;
-    cancelScheduledMutation.mutate();
+  function handleCancelNow() {
+    if (!confirm('Cancel immediately? A prorated refund will be issued for unused days.')) return;
+    cancelMutation.mutate(true);
   }
 
   return (
@@ -70,13 +55,12 @@ function RouteComponent() {
       <div className="p-6 space-y-6">
         {isHalted && <HaltedBanner />}
 
-        {hasScheduledChange && scheduledPlanAt && (
-          <ScheduledChangeBanner
-            scheduledPlan={scheduledPlan!}
-            scheduledPlanAt={scheduledPlanAt}
+        {isPendingCancellation && currentPeriodEnd && (
+          <PendingCancellationBanner
+            expiresOn={currentPeriodEnd}
             isBusy={isBusy}
-            isCancelling={cancelScheduledMutation.isPending}
-            onCancelScheduledChange={handleCancelScheduledChange}
+            isCancellingNow={cancelMutation.isPending && cancelMutation.variables === true}
+            onCancelNow={handleCancelNow}
           />
         )}
 
@@ -86,11 +70,8 @@ function RouteComponent() {
               key={p.slug}
               plan={p}
               currentPlan={plan}
-              scheduledPlan={scheduledPlan}
-              scheduledPlanAt={scheduledPlanAt}
-              isPaid={isPaid}
+              hasActiveSubscription={hasActiveSubscription}
               isBusy={isBusy}
-              hasScheduledChange={hasScheduledChange}
               isCheckingOut={checkoutMutation.isPending && checkoutMutation.variables === p.slug}
               onSubscribe={(slug: PaidPlan) => checkoutMutation.mutate(slug)}
             />
@@ -100,13 +81,11 @@ function RouteComponent() {
         {isPaid && (
           <SubscriptionActions
             isPendingCancellation={isPendingCancellation}
-            hasScheduledChange={hasScheduledChange}
-            scheduledPlanAt={scheduledPlanAt}
             isBusy={isBusy}
-            isResuming={resumeMutation.isPending}
-            isCancelling={cancelMutation.isPending}
-            onResume={handleResume}
-            onCancel={handleCancel}
+            isCancellingAtPeriodEnd={cancelMutation.isPending && cancelMutation.variables === false}
+            isCancellingNow={cancelMutation.isPending && cancelMutation.variables === true}
+            onCancelAtPeriodEnd={handleCancelAtPeriodEnd}
+            onCancelNow={handleCancelNow}
           />
         )}
       </div>

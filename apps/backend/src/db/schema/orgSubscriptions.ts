@@ -13,10 +13,7 @@ export const orgSubscriptions = pgTable(
     // created | authenticated | active | pending_cancellation | paused | cancelled | halted | completed | transitioning
     status: text().notNull().default('free'),
     currentPeriodEnd: timestamp({ withTimezone: true }),
-    // Scheduled plan change (Option B: switch at next billing date)
-    scheduledPlan: text(),
-    scheduledPlanAt: timestamp({ withTimezone: true }),
-    scheduledProviderSubscriptionId: text(),
+    lastPaymentId: text(),
     ...timestamps,
   },
   (table) => [

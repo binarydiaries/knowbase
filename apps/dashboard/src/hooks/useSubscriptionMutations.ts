@@ -4,11 +4,9 @@ import { usePostHog } from 'posthog-js/react';
 import {
   postSubscriptionsCancel,
   postSubscriptionsCheckout,
-  postSubscriptionsCancelScheduledChange,
-  postSubscriptionsResume,
 } from '@/services';
 import type { PaidPlan } from '@/data/subscriptionPlans';
-import { formatDate, loadRazorpayScript } from '@/utils/razorpay';
+import { loadRazorpayScript } from '@/utils/razorpay';
 
 function useInvalidateSubscription() {
   const queryClient = useQueryClient();
@@ -25,7 +23,7 @@ export function useCheckoutMutation() {
       if (!loaded) throw new Error('Failed to load payment gateway. Please try again.');
 
       const res = await postSubscriptionsCheckout({ body: { plan } });
-      const { provider, subscriptionId, clientToken, scheduledFor } = res.data;
+      const { provider, subscriptionId, clientToken } = res.data;
 
       if (provider !== 'razorpay') throw new Error(`Unsupported payment provider: ${provider}`);
 
@@ -34,9 +32,7 @@ export function useCheckoutMutation() {
           key: clientToken,
           subscription_id: subscriptionId,
           name: 'Agenvik',
-          description: scheduledFor
-            ? `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan — starts ${formatDate(new Date(scheduledFor))}`
-            : `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
+          description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
           theme: { color: '#301B69' },
           handler: () => resolve(),
           modal: { ondismiss: () => reject(new Error('dismissed')) },
@@ -44,11 +40,11 @@ export function useCheckoutMutation() {
         rzp.open();
       });
 
-      return { plan, scheduledFor };
+      return { plan };
     },
-    onSuccess: ({ plan, scheduledFor }) => {
+    onSuccess: ({ plan }) => {
       invalidate();
-      posthog.capture('subscription_checkout_completed', { plan, scheduledFor });
+      posthog.capture('subscription_checkout_completed', { plan });
     },
     onError: (err: Error) => {
       if (err.message !== 'dismissed') {
@@ -63,48 +59,18 @@ export function useCancelMutation() {
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
-    mutationFn: () => postSubscriptionsCancel(),
-    onSuccess: () => {
+    mutationFn: (immediate: boolean) => postSubscriptionsCancel({ body: { immediate } }),
+    onSuccess: (_, immediate) => {
       invalidate();
-      posthog.capture('subscription_cancelled');
-      toast.success("Subscription cancelled. You'll keep access until the end of your billing period.");
+      posthog.capture('subscription_cancelled', { immediate });
+      toast.success(
+        immediate
+          ? 'Subscription cancelled. A prorated refund will be credited within 5–7 business days.'
+          : "Subscription cancelled. You'll keep access until the end of your billing period.",
+      );
     },
     onError: () => {
       toast.error('Failed to cancel subscription. Please try again.');
-    },
-  });
-}
-
-export function useResumeMutation() {
-  const posthog = usePostHog();
-  const invalidate = useInvalidateSubscription();
-
-  return useMutation({
-    mutationFn: () => postSubscriptionsResume(),
-    onSuccess: () => {
-      invalidate();
-      posthog.capture('subscription_resumed');
-      toast.success('Subscription resumed. Your plan will continue as normal.');
-    },
-    onError: () => {
-      toast.error('Failed to resume subscription. Please try again.');
-    },
-  });
-}
-
-export function useCancelScheduledChangeMutation() {
-  const posthog = usePostHog();
-  const invalidate = useInvalidateSubscription();
-
-  return useMutation({
-    mutationFn: () => postSubscriptionsCancelScheduledChange(),
-    onSuccess: () => {
-      invalidate();
-      posthog.capture('subscription_scheduled_change_cancelled');
-      toast.success('Scheduled plan change cancelled. Your current plan remains active.');
-    },
-    onError: () => {
-      toast.error('Failed to cancel scheduled change. Please try again.');
     },
   });
 }

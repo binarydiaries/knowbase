@@ -567,8 +567,7 @@ export type OneAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
-        scheduledPlan: string | null;
-        scheduledPlanAt: string | null;
+        currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
         knowledgeSourceLimit: number;
@@ -598,8 +597,7 @@ export type ManyAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
-        scheduledPlan: string | null;
-        scheduledPlanAt: string | null;
+        currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
         knowledgeSourceLimit: number;
@@ -887,8 +885,7 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
-    scheduledPlan: string | null;
-    scheduledPlanAt: string | null;
+    currentPeriodEnd: string | null;
     activeAgentLimit: number;
     activeAgentCount: number;
     knowledgeSourceLimit: number;
@@ -911,20 +908,12 @@ export type CheckoutResponseSchema = {
     provider: string;
     subscriptionId: string;
     clientToken: string;
-    scheduledFor: string | null;
 };
 
 export type CancelResponseSchema = {
     success: boolean;
 };
 
-export type ResumeResponseSchema = {
-    success: boolean;
-};
-
-export type CancelScheduledChangeResponseSchema = {
-    success: boolean;
-};
 
 export type BadRequestResponse = {
     code: string;
@@ -2135,7 +2124,7 @@ export type PostSubscriptionsCheckoutResponses = {
 export type PostSubscriptionsCheckoutResponse = PostSubscriptionsCheckoutResponses[keyof PostSubscriptionsCheckoutResponses];
 
 export type PostSubscriptionsCancelData = {
-    body?: never;
+    body: { immediate: boolean };
     path?: never;
     query?: never;
     url: '/subscriptions/cancel';
@@ -2159,55 +2148,6 @@ export type PostSubscriptionsCancelResponses = {
 
 export type PostSubscriptionsCancelResponse = PostSubscriptionsCancelResponses[keyof PostSubscriptionsCancelResponses];
 
-export type PostSubscriptionsResumeData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/subscriptions/resume';
-};
-
-export type PostSubscriptionsResumeErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-};
-
-export type PostSubscriptionsResumeError = PostSubscriptionsResumeErrors[keyof PostSubscriptionsResumeErrors];
-
-export type PostSubscriptionsResumeResponses = {
-    /**
-     * Response for status 200
-     */
-    200: ResumeResponseSchema;
-};
-
-export type PostSubscriptionsResumeResponse = PostSubscriptionsResumeResponses[keyof PostSubscriptionsResumeResponses];
-
-export type PostSubscriptionsCancelScheduledChangeData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/subscriptions/cancel-scheduled-change';
-};
-
-export type PostSubscriptionsCancelScheduledChangeErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-};
-
-export type PostSubscriptionsCancelScheduledChangeError = PostSubscriptionsCancelScheduledChangeErrors[keyof PostSubscriptionsCancelScheduledChangeErrors];
-
-export type PostSubscriptionsCancelScheduledChangeResponses = {
-    /**
-     * Response for status 200
-     */
-    200: CancelScheduledChangeResponseSchema;
-};
-
-export type PostSubscriptionsCancelScheduledChangeResponse = PostSubscriptionsCancelScheduledChangeResponses[keyof PostSubscriptionsCancelScheduledChangeResponses];
 
 export type GetWebhookWhatsappData = {
     body?: never;

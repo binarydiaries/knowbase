@@ -101,8 +101,7 @@ export abstract class SubscriptionService {
     return {
       plan,
       subscriptionStatus,
-      scheduledPlan: record?.scheduledPlan ?? null,
-      scheduledPlanAt: record?.scheduledPlanAt?.toISOString() ?? null,
+      currentPeriodEnd: record?.currentPeriodEnd?.toISOString() ?? null,
       activeAgentLimit,
       activeAgentCount,
       knowledgeSourceLimit,

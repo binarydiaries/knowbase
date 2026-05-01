@@ -11,19 +11,19 @@ export interface WebhookEvent {
   status: string;
   subscriptionId: string;
   currentPeriodEnd?: Date;
+  lastPaymentId?: string;
+  lastPaymentAmount?: number;
 }
 
 export interface PaymentProvider {
   readonly name: string;
   readonly signatureHeader: string;
   createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
-  /** Create a subscription that starts billing on a future date (for plan changes at period end). */
-  scheduleSubscription(params: { plan: PaidPlanName; orgId: string; startAt: Date }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
-  /** Undo a pending-cancellation (cancel_at_cycle_end) before the period ends. */
-  resumeSubscription(subscriptionId: string): Promise<void>;
   /** Fetch the current period end date for an existing subscription. */
   getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null>;
+  /** Issue a partial refund for a Razorpay payment. Amount in paise. */
+  issueRefund(paymentId: string, amountPaise: number): Promise<void>;
   /** Throws on invalid signature. Returns null for unknown/ignored events. */
   parseWebhook(rawBody: string, signature: string): WebhookEvent | null;
 }

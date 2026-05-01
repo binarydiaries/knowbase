@@ -9,8 +9,7 @@ export function useClerkPlan() {
   const subscriptionStatus = data?.subscriptionStatus ?? null;
   const isPendingCancellation = subscriptionStatus === 'pending_cancellation';
   const isHalted = subscriptionStatus === 'halted';
-  const scheduledPlan = data?.scheduledPlan ?? null;
-  const scheduledPlanAt = data?.scheduledPlanAt ? new Date(data.scheduledPlanAt) : null;
+  const currentPeriodEnd = data?.currentPeriodEnd ? new Date(data.currentPeriodEnd) : null;
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-  return { plan, isPaid, isPendingCancellation, isHalted, scheduledPlan, scheduledPlanAt, planLabel, isLoading };
+  return { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd, planLabel, isLoading };
 }

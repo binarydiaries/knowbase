@@ -1,8 +1,7 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
-import { Check, Clock, Loader2, Sparkles } from 'lucide-react';
+import { Check, Loader2, Sparkles } from 'lucide-react';
 import type { PaidPlan } from '@/data/subscriptionPlans';
-import { formatDate } from '@/utils/razorpay';
 
 interface Plan {
   name: string;
@@ -16,11 +15,8 @@ interface Plan {
 interface Props {
   plan: Plan;
   currentPlan: string;
-  scheduledPlan: string | null;
-  scheduledPlanAt: Date | null;
-  isPaid: boolean;
+  hasActiveSubscription: boolean;
   isBusy: boolean;
-  hasScheduledChange: boolean;
   isCheckingOut: boolean;
   onSubscribe: (plan: PaidPlan) => void;
 }
@@ -28,16 +24,12 @@ interface Props {
 export function PlanCard({
   plan,
   currentPlan,
-  scheduledPlan,
-  scheduledPlanAt,
-  isPaid,
+  hasActiveSubscription,
   isBusy,
-  hasScheduledChange,
   isCheckingOut,
   onSubscribe,
 }: Props) {
   const isCurrent = currentPlan === plan.slug;
-  const isScheduledTarget = scheduledPlan === plan.slug;
   const isPaidPlan = plan.slug !== 'free';
 
   return (
@@ -48,14 +40,9 @@ export function PlanCard({
     >
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-semibold">{plan.name}</h2>
-        {plan.highlight && !isScheduledTarget && (
+        {plan.highlight && (
           <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
             Most Popular
-          </span>
-        )}
-        {isScheduledTarget && (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">
-            Scheduled
           </span>
         )}
       </div>
@@ -77,22 +64,14 @@ export function PlanCard({
       </ul>
 
       {isCurrent ? (
-        <div className="flex flex-col gap-1">
-          <Button variant="outline" disabled className="w-full">
-            Current Plan
-          </Button>
-        </div>
-      ) : isScheduledTarget ? (
         <Button variant="outline" disabled className="w-full">
-          <Clock className="size-4" />
-          Starts {scheduledPlanAt ? formatDate(scheduledPlanAt) : 'at period end'}
+          Current Plan
         </Button>
-      ) : isPaidPlan ? (
+      ) : isPaidPlan && !hasActiveSubscription ? (
         <Button
           className="w-full"
           variant={plan.highlight ? 'default' : 'outline'}
-          disabled={isBusy || hasScheduledChange}
-          title={hasScheduledChange ? 'Cancel the scheduled plan change first' : undefined}
+          disabled={isBusy}
           onClick={() => onSubscribe(plan.slug as PaidPlan)}
         >
           {isCheckingOut ? (
@@ -100,7 +79,7 @@ export function PlanCard({
           ) : (
             <>
               <Sparkles className="size-4" />
-              {isPaid ? 'Switch Plan' : 'Subscribe'}
+              Subscribe
             </>
           )}
         </Button>

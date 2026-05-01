@@ -567,6 +567,7 @@ export type OneAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
+        pendingPlan: string | null;
         currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
@@ -597,6 +598,7 @@ export type ManyAgentResponse = {
     subscription: {
         plan: 'free' | 'starter' | 'growth' | 'pro';
         subscriptionStatus: string | null;
+        pendingPlan: string | null;
         currentPeriodEnd: string | null;
         activeAgentLimit: number;
         activeAgentCount: number;
@@ -885,7 +887,7 @@ export type PlanNameSchema = 'free' | 'starter' | 'growth' | 'pro';
 export type SubscriptionStatusSchema = {
     plan: 'free' | 'starter' | 'growth' | 'pro';
     subscriptionStatus: string | null;
-    pendingPlan: 'starter' | 'growth' | 'pro' | null;
+    pendingPlan: string | null;
     currentPeriodEnd: string | null;
     activeAgentLimit: number;
     activeAgentCount: number;

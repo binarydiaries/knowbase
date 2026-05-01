@@ -4,7 +4,12 @@ import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { SubscriptionModel } from './model';
 import { type PaidPlanName, PLAN_ORDER, PLANS, type PlanName } from './plans';
-import { getDefaultProvider, getProvider } from './providers';
+import {
+  getDefaultProvider,
+  getProvider,
+  type PaymentProvider,
+  type WebhookEvent,
+} from './providers';
 import { SubscriptionService } from './service';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 
@@ -48,7 +53,7 @@ export const Subscription = new Elysia({
     { response: { 200: 'PlansResponseSchema' } },
   )
   .post('/webhook/:provider', async ({ params, request, set }) => {
-    let provider;
+    let provider: PaymentProvider;
     try {
       provider = getProvider(params.provider);
     } catch {
@@ -59,7 +64,7 @@ export const Subscription = new Elysia({
     const rawBody = await request.text();
     const signature = request.headers.get(provider.signatureHeader) ?? '';
 
-    let event;
+    let event: WebhookEvent | null;
     try {
       event = provider.parseWebhook(rawBody, signature);
     } catch (err: any) {
@@ -183,36 +188,55 @@ export const Subscription = new Elysia({
             const planData = PLANS[record.plan as PlanName];
             const freePlan = PLANS['free'];
             if (planData && planData.priceMonthlyPaise > 0) {
-              const [messagesThisMonth, trainingRunsToday] = await Promise.all([
+              const periodStartKey = record.currentPeriodStart
+                ? record.currentPeriodStart.toISOString().slice(0, 10)
+                : now.toISOString().slice(0, 10);
+
+              const msPerDay = 24 * 60 * 60 * 1000;
+              const startDate = new Date(periodStartKey + 'T00:00:00Z');
+              const todayDate = new Date(
+                now.toISOString().slice(0, 10) + 'T00:00:00Z',
+              );
+              const daysElapsed =
+                Math.floor(
+                  (todayDate.getTime() - startDate.getTime()) / msPerDay,
+                ) + 1;
+
+              const [messagesThisMonth, totalTrainingRuns] = await Promise.all([
                 OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId),
-                OrgUsageDailyService.getTodayTrainingRuns(orgId),
+                OrgUsageDailyService.getTotalTrainingRunsSince(
+                  orgId,
+                  periodStartKey,
+                ),
               ]);
 
-              // Paid capacity = plan limit minus what the free plan already provides
+              // Messages: paid capacity = plan limit minus free tier
               const paidMessageCapacity =
                 planData.limits.messagesPerMonth -
                 freePlan.limits.messagesPerMonth;
-              const paidTrainingCapacity =
-                planData.limits.trainingRunsPerDay -
-                freePlan.limits.trainingRunsPerDay;
-
-              // Paid usage = consumption beyond the free tier
               const paidMessagesUsed = Math.max(
                 0,
                 messagesThisMonth - freePlan.limits.messagesPerMonth,
               );
-              const paidTrainingUsed = Math.max(
-                0,
-                trainingRunsToday - freePlan.limits.trainingRunsPerDay,
-              );
-
               const messageUsedRatio = Math.min(
                 1,
                 paidMessagesUsed / Math.max(1, paidMessageCapacity),
               );
+
+              // Training: aggregate across all days from period start; free allowance accrues per day
+              const totalFreeTraining =
+                daysElapsed * freePlan.limits.trainingRunsPerDay;
+              const totalPaidTrainingCapacity =
+                daysElapsed *
+                (planData.limits.trainingRunsPerDay -
+                  freePlan.limits.trainingRunsPerDay);
+              const paidTrainingUsed = Math.max(
+                0,
+                totalTrainingRuns - totalFreeTraining,
+              );
               const trainingUsedRatio = Math.min(
                 1,
-                paidTrainingUsed / Math.max(1, paidTrainingCapacity),
+                paidTrainingUsed / Math.max(1, totalPaidTrainingCapacity),
               );
 
               const combinedUsedRatio =

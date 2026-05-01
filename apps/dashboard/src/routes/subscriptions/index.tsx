@@ -15,7 +15,6 @@ import {
 } from '@/hooks/useSubscriptionMutations';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import type { CheckoutBodySchema } from '@/services';
-import { formatDate } from '@/utils/razorpay';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
@@ -37,29 +36,6 @@ function RouteComponent() {
     posthog.capture('subscription_page_viewed');
   }, [posthog]);
 
-  function handleCancelAtPeriodEnd() {
-    const dateStr = currentPeriodEnd
-      ? ` on ${formatDate(currentPeriodEnd)}`
-      : ' at the end of your billing period';
-    if (
-      !confirm(
-        `Cancel at end of billing period? You'll keep full access${dateStr}. This cannot be undone.`,
-      )
-    )
-      return;
-    cancelMutation.mutate(false);
-  }
-
-  function handleCancelNow() {
-    if (
-      !confirm(
-        'Cancel immediately? A prorated refund will be issued for unused time.',
-      )
-    )
-      return;
-    cancelMutation.mutate(true);
-  }
-
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -78,14 +54,7 @@ function RouteComponent() {
         {isHalted && <HaltedBanner />}
 
         {isPendingCancellation && currentPeriodEnd && (
-          <PendingCancellationBanner
-            expiresOn={currentPeriodEnd}
-            isBusy={isBusy}
-            isCancellingNow={
-              cancelMutation.isPending && cancelMutation.variables === true
-            }
-            onCancelNow={handleCancelNow}
-          />
+          <PendingCancellationBanner expiresOn={currentPeriodEnd} />
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-w-6xl">
@@ -115,15 +84,10 @@ function RouteComponent() {
         {isPaid && (
           <SubscriptionActions
             isPendingCancellation={isPendingCancellation}
+            currentPeriodEnd={currentPeriodEnd}
             isBusy={isBusy}
-            isCancellingAtPeriodEnd={
-              cancelMutation.isPending && cancelMutation.variables === false
-            }
-            isCancellingNow={
-              cancelMutation.isPending && cancelMutation.variables === true
-            }
-            onCancelAtPeriodEnd={handleCancelAtPeriodEnd}
-            onCancelNow={handleCancelNow}
+            isCancelling={cancelMutation.isPending}
+            onConfirmCancel={() => cancelMutation.mutate()}
           />
         )}
       </div>

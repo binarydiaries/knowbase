@@ -2,6 +2,8 @@ import Razorpay from 'razorpay';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { CheckoutResult, PaymentProvider, PaidPlanName, WebhookEvent } from './types';
 
+const PAID_PLAN_NAMES = new Set<string>(['starter', 'growth', 'pro']);
+
 export class RazorpayProvider implements PaymentProvider {
   readonly name = 'razorpay';
   readonly signatureHeader = 'x-razorpay-signature';
@@ -90,7 +92,8 @@ export class RazorpayProvider implements PaymentProvider {
     const orgId: string = entity.notes?.orgId;
     if (!orgId) return null;
 
-    const planName: string = entity.notes?.plan;
+    const rawPlan: string = entity.notes?.plan;
+    const planName: PaidPlanName | undefined = PAID_PLAN_NAMES.has(rawPlan) ? rawPlan as PaidPlanName : undefined;
     const subscriptionId: string = entity.id;
     const currentPeriodStart = entity.current_start
       ? new Date(entity.current_start * 1000)

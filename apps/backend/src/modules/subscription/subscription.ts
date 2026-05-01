@@ -190,7 +190,7 @@ export const Subscription = new Elysia({
 
       if (
         !record?.providerSubscriptionId ||
-        !['active', 'authenticated', 'pending_cancellation'].includes(
+        !['active', 'authenticated', 'halted', 'pending_cancellation'].includes(
           record.status ?? '',
         )
       ) {
@@ -269,7 +269,12 @@ export const Subscription = new Elysia({
                 planData.priceMonthlyPaise * (1 - combinedUsedRatio),
               );
               if (refundPaise >= 100) {
-                await provider.issueRefund(record.lastPaymentId, refundPaise);
+                try {
+                  await provider.issueRefund(record.lastPaymentId, refundPaise);
+                } catch (err: any) {
+                  // Log but don't block cancellation — subscription is already cancelled on Razorpay
+                  console.error('[cancel] Refund failed, proceeding with cancellation:', err?.message ?? err);
+                }
               }
             }
           }

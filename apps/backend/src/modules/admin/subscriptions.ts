@@ -136,7 +136,7 @@ export const AdminSubscriptions = new Elysia({
       let targets: string[];
 
       if (body?.orgIds?.length) {
-        targets = body.orgIds;
+        targets = body.orgIds.slice(0, 200);
       } else {
         const all = await db.query.orgSubscriptions.findMany();
         targets = all

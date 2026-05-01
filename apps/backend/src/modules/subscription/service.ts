@@ -45,7 +45,12 @@ export abstract class SubscriptionService {
 
   static async getStatus(orgId: string) {
     const record = await this.getRecord(orgId);
-    const plan = normalizePlanName(record?.plan) ?? 'free';
+    // 'created' means checkout initiated but payment not yet confirmed — treat as free
+    const rawPlan = normalizePlanName(record?.plan) ?? 'free';
+    const plan: PlanName =
+      record?.status === 'created' ? 'free' : rawPlan;
+    const pendingPlan: PlanName | null =
+      record?.status === 'created' && rawPlan !== 'free' ? rawPlan : null;
     const subscriptionStatus = record?.status ?? null;
     const limits = this.getLimits(plan);
     const activeAgentLimit = limits.agents;
@@ -74,6 +79,7 @@ export abstract class SubscriptionService {
     return {
       plan,
       subscriptionStatus,
+      pendingPlan,
       currentPeriodEnd: record?.currentPeriodEnd?.toISOString() ?? null,
       activeAgentLimit,
       activeAgentCount,

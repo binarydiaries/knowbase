@@ -6,6 +6,10 @@ export class RazorpayProvider implements PaymentProvider {
   readonly name = 'razorpay';
   readonly signatureHeader = 'x-razorpay-signature';
 
+  get clientToken(): string {
+    return process.env.RAZORPAY_KEY_ID ?? '';
+  }
+
   private getClient(): Razorpay {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;

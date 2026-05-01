@@ -1,11 +1,12 @@
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
-import { Check, Loader2, Sparkles } from 'lucide-react';
+import { Check, CreditCard, Loader2, Sparkles } from 'lucide-react';
 import type { CheckoutBodySchema, PlanItemSchema } from '@/services';
 
 interface Props {
   plan: PlanItemSchema;
   currentPlan: string;
+  pendingPlan: string | null;
   hasActiveSubscription: boolean;
   isBusy: boolean;
   isCheckingOut: boolean;
@@ -15,6 +16,7 @@ interface Props {
 export function PlanCard({
   plan,
   currentPlan,
+  pendingPlan,
   hasActiveSubscription,
   isBusy,
   isCheckingOut,
@@ -22,6 +24,7 @@ export function PlanCard({
 }: Props) {
   const isCurrent = currentPlan === plan.slug;
   const isPaidPlan = plan.slug !== 'free';
+  const isPendingPayment = pendingPlan === plan.slug;
 
   return (
     <div
@@ -59,6 +62,22 @@ export function PlanCard({
       {isCurrent ? (
         <Button variant="outline" disabled className="w-full">
           Current Plan
+        </Button>
+      ) : isPendingPayment ? (
+        <Button
+          className="w-full"
+          variant={plan.highlight ? 'default' : 'outline'}
+          disabled={isBusy}
+          onClick={() => onSubscribe(plan.slug as CheckoutBodySchema['plan'])}
+        >
+          {isCheckingOut ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <>
+              <CreditCard className="size-4" />
+              Complete Payment
+            </>
+          )}
         </Button>
       ) : isPaidPlan && !hasActiveSubscription ? (
         <Button

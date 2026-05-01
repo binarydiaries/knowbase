@@ -6,6 +6,7 @@ import { SubscriptionModel } from './model';
 import { SubscriptionService } from './service';
 import { getDefaultProvider, getProvider } from './providers';
 import { PLANS, PLAN_ORDER, type PlanName, type PaidPlanName } from './plans';
+import { OrgUsageMonthlyService } from './usage';
 
 type OrgSubscriptionUpdate = {
   plan?: string;
@@ -160,24 +161,22 @@ export const Subscription = new Elysia({
       if (immediate) {
         await provider.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: false });
 
-        if (record.lastPaymentId && record.currentPeriodStart && record.currentPeriodEnd) {
+        if (record.lastPaymentId && record.currentPeriodEnd) {
           const now = new Date();
-          const periodStart = record.currentPeriodStart;
-          const periodEnd = record.currentPeriodEnd;
-
-          // If current period hasn't expired, issue a prorated refund
-          if (now < periodEnd) {
-            const msUsed = now.getTime() - periodStart.getTime();
-            const msPeriod = periodEnd.getTime() - periodStart.getTime();
-            const usedRatio = Math.min(1, Math.max(0, msUsed / msPeriod));
-            const planAmount = PLANS[record.plan as PlanName]?.priceMonthlyPaise ?? 0;
-            const chargeForUsed = Math.floor(planAmount * usedRatio);
-            const refundPaise = planAmount - chargeForUsed;
-            if (refundPaise >= 100) {
-              await provider.issueRefund(record.lastPaymentId, refundPaise);
+          // Only refund if the billing period hasn't expired yet
+          if (now < record.currentPeriodEnd) {
+            const planData = PLANS[record.plan as PlanName];
+            if (planData && planData.priceMonthlyPaise > 0) {
+              const messagesThisMonth = await OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId);
+              const { messagesPerMonth } = planData.limits;
+              const usedRatio = Math.min(1, Math.max(0, messagesThisMonth / messagesPerMonth));
+              const refundPaise = Math.floor(planData.priceMonthlyPaise * (1 - usedRatio));
+              if (refundPaise >= 100) {
+                await provider.issueRefund(record.lastPaymentId, refundPaise);
+              }
             }
           }
-          // If period is already over → no refund
+          // Period already expired → no refund
         }
 
         await upsertOrgSubscription(orgId, { plan: 'free', status: 'cancelled' });

@@ -1,59 +1,38 @@
 import { Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import GetStartedButton from '../components/GetStartedButton'
 import { usePostHog } from '@posthog/react'
 
-const PLANS = [
-    {
-        slug: 'free',
-        name: 'Free',
-        price: '₹0',
-        priceSuffix: ' forever',
-        isFree: true,
-        highlight: false,
-        features: [
-            '1 active agent',
-            '10 knowledge sources',
-            '100 messages / month',
-            '3 training runs / day',
-        ],
-    },
-    {
-        slug: 'starter',
-        name: 'Starter',
-        price: '₹499',
-        priceSuffix: ' /month',
-        isFree: false,
-        highlight: false,
-        features: [
-            '3 active agents',
-            '250 knowledge sources',
-            '500 messages / month',
-            '10 training runs / day',
-            'WhatsApp & Instagram channels',
-            'Lead generation',
-        ],
-    },
-    {
-        slug: 'growth',
-        name: 'Growth',
-        price: '₹1,499',
-        priceSuffix: ' /month',
-        isFree: false,
-        highlight: true,
-        features: [
-            '10 active agents',
-            '1,000 knowledge sources',
-            '2,000 messages / month',
-            '20 training runs / day',
-            'WhatsApp & Instagram channels',
-            'Lead generation',
-            'Analytics',
-        ],
-    },
-] as const
+type PlanItem = {
+    slug: string
+    name: string
+    priceDisplay: string
+    period: string
+    priceMonthlyPaise: number
+    highlight: boolean
+    features: string[]
+}
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000'
+
+function usePlans() {
+    const [plans, setPlans] = useState<PlanItem[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch(`${API_BASE}/subscriptions/plans`)
+            .then((res) => res.json())
+            .then((data) => setPlans(data.plans ?? []))
+            .catch(() => {})
+            .finally(() => setLoading(false))
+    }, [])
+
+    return { plans, loading }
+}
 
 const PricingSection = () => {
     const posthog = usePostHog()
+    const { plans, loading } = usePlans()
 
     return (
         <section id="pricing" aria-labelledby="pricing-heading" className="px-6 pt-16">
@@ -77,67 +56,78 @@ const PricingSection = () => {
                             </p>
                         </div>
 
-                        <ul className="grid md:grid-cols-3 gap-6 list-none">
-                            {PLANS.map((plan) => (
-                                <li
-                                    key={plan.slug}
-                                    className={`rounded-2xl p-6 border shadow-sm transition ${
-                                        plan.highlight
-                                            ? 'bg-white shadow-lg border-[#301B69]/20'
-                                            : 'bg-white/80 border-[#301B69]/10'
-                                    }`}
-                                >
-                                    <article aria-label={`${plan.name} plan`}>
-                                        <div className="mb-4 flex items-start justify-between">
-                                            <h3 className="text-xl font-semibold text-[#301B69]">{plan.name}</h3>
-                                            {plan.highlight && (
-                                                <span className="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-[#301B69]/10 text-[#301B69]">
-                                                    ✦ Most Popular ✦
-                                                </span>
-                                            )}
-                                        </div>
+                        {loading ? (
+                            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 list-none">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <li key={i} className="rounded-2xl bg-white/60 animate-pulse h-80" />
+                                ))}
+                            </ul>
+                        ) : (
+                            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 list-none">
+                                {plans.map((plan) => {
+                                    const isFree = plan.priceMonthlyPaise === 0
+                                    return (
+                                        <li
+                                            key={plan.slug}
+                                            className={`rounded-2xl p-6 border shadow-sm transition ${
+                                                plan.highlight
+                                                    ? 'bg-white shadow-lg border-[#301B69]/20'
+                                                    : 'bg-white/80 border-[#301B69]/10'
+                                            }`}
+                                        >
+                                            <article aria-label={`${plan.name} plan`}>
+                                                <div className="mb-4 flex items-start justify-between">
+                                                    <h3 className="text-xl font-semibold text-[#301B69]">{plan.name}</h3>
+                                                    {plan.highlight && (
+                                                        <span className="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-[#301B69]/10 text-[#301B69]">
+                                                            ✦ Most Popular ✦
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                        <div className="mb-6">
-                                            <span className="text-3xl font-bold text-[#301B69]">
-                                                {plan.price}
-                                            </span>
-                                            <span className="text-sm text-[#301B69]/70">
-                                                {plan.priceSuffix}
-                                            </span>
-                                        </div>
+                                                <div className="mb-6">
+                                                    <span className="text-3xl font-bold text-[#301B69]">
+                                                        {plan.priceDisplay}
+                                                    </span>
+                                                    <span className="text-sm text-[#301B69]/70">
+                                                        {isFree ? ' forever' : ` ${plan.period}`}
+                                                    </span>
+                                                </div>
 
-                                        <div className="border-t border-[#301B69]/10 mb-6" />
+                                                <div className="border-t border-[#301B69]/10 mb-6" />
 
-                                        <ul className="space-y-3 mb-6 list-none">
-                                            {plan.features.map((feature) => (
-                                                <li key={feature} className="flex items-center gap-2">
-                                                    <Check className="w-4 h-4 text-[#301B69] flex-shrink-0" aria-hidden="true" />
-                                                    <span className="text-sm text-[#301B69]/80">{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                                <ul className="space-y-3 mb-6 list-none">
+                                                    {plan.features.map((feature) => (
+                                                        <li key={feature} className="flex items-center gap-2">
+                                                            <Check className="w-4 h-4 text-[#301B69] flex-shrink-0" aria-hidden="true" />
+                                                            <span className="text-sm text-[#301B69]/80">{feature}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
 
-                                        <div onClick={() => posthog?.capture('pricing_plan_clicked', {
-                                            plan_name: plan.name,
-                                            plan_slug: plan.slug,
-                                            is_free: plan.isFree,
-                                            price: plan.price,
-                                            is_highlighted: plan.highlight,
-                                        })}>
-                                            <GetStartedButton
-                                                className={`w-full py-2.5 rounded-xl text-sm transition ${
-                                                    plan.highlight
-                                                        ? 'bg-[#301B69] text-white shadow-md'
-                                                        : 'bg-white border border-[#301B69]/20 text-[#301B69]'
-                                                }`}
-                                            >
-                                                {plan.isFree ? 'Get Started Free' : 'Get Started'}
-                                            </GetStartedButton>
-                                        </div>
-                                    </article>
-                                </li>
-                            ))}
-                        </ul>
+                                                <div onClick={() => posthog?.capture('pricing_plan_clicked', {
+                                                    plan_name: plan.name,
+                                                    plan_slug: plan.slug,
+                                                    is_free: isFree,
+                                                    price: plan.priceDisplay,
+                                                    is_highlighted: plan.highlight,
+                                                })}>
+                                                    <GetStartedButton
+                                                        className={`w-full py-2.5 rounded-xl text-sm transition ${
+                                                            plan.highlight
+                                                                ? 'bg-[#301B69] text-white shadow-md'
+                                                                : 'bg-white border border-[#301B69]/20 text-[#301B69]'
+                                                        }`}
+                                                    >
+                                                        {isFree ? 'Get Started Free' : 'Get Started'}
+                                                    </GetStartedButton>
+                                                </div>
+                                            </article>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div>

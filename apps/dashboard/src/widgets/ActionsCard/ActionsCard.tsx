@@ -6,37 +6,46 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import { Separator } from '@knowbase/ui/components/separator';
-import { Switch } from '@knowbase/ui/components/switch';
 import { toast } from '@knowbase/ui/components/sonner';
+import { Switch } from '@knowbase/ui/components/switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { LockIcon, UserRound } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { useState } from 'react';
+import { useClerkPlan } from '@/hooks/useClerkPlan';
 import {
   getAgentActions,
-  postAgentActions,
   patchAgentActionsById,
+  postAgentActions,
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
-import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer';
 
-const ACTION_TYPES = [
-  {
-    id: 'lead_generation' as const,
-    label: 'Lead Generation',
-    description: 'Capture contact info (name, email, phone) through natural conversation.',
-    icon: UserRound,
-  },
-];
+// import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer'; // LEAD_GENERATION_DISABLED: uncomment to restore
+
+// LEAD_GENERATION_DISABLED: uncomment to restore the lead_generation action type
+// const ACTION_TYPES = [
+//   {
+//     id: 'lead_generation' as const,
+//     label: 'Lead Generation',
+//     description: 'Capture contact info (name, email, phone) through natural conversation.',
+//     icon: UserRound,
+//   },
+// ];
+const ACTION_TYPES: Array<{
+  id: 'lead_generation';
+  label: string;
+  description: string;
+  icon: typeof UserRound;
+}> = [];
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
   const queryClient = useQueryClient();
-  const [configuringActionId, setConfiguringActionId] = useState<string | null>(null);
+  // const [configuringActionId, setConfiguringActionId] = useState<string | null>(
+  //   null,
+  // );
   const { plan } = useClerkPlan();
   const hasLeadGeneration = plan !== 'free';
 
@@ -76,8 +85,11 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         enabled: variables.enabled,
         agent_id: agentId,
       });
-      const actionLabel = ACTION_TYPES.find((a) => a.id === variables.type)?.label ?? 'Action';
-      toast.success(`${actionLabel} ${variables.enabled ? 'enabled' : 'disabled'}`);
+      const actionLabel =
+        ACTION_TYPES.find((a) => a.id === variables.type)?.label ?? 'Action';
+      toast.success(
+        `${actionLabel} ${variables.enabled ? 'enabled' : 'disabled'}`,
+      );
       queryClient.invalidateQueries({ queryKey: ['agent-actions', agentId] });
     },
     onError: (error) => {
@@ -85,9 +97,11 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
   });
 
-  const configuredAction = configuringActionId
-    ? getAction(configuringActionId as 'lead_generation')
-    : null;
+  // const configuredAction = configuringActionId
+  //   ? getAction(configuringActionId as 'lead_generation')
+  //   : null;
+
+  if (ACTION_TYPES.length === 0) return null;
 
   return (
     <>
@@ -103,19 +117,24 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             const action = getAction(actionType.id);
             const isEnabled = action?.enabled ?? false;
             const Icon = actionType.icon;
-            const isLocked = actionType.id === 'lead_generation' && !hasLeadGeneration;
+            const isLocked =
+              actionType.id === 'lead_generation' && !hasLeadGeneration;
 
             return (
               <div key={actionType.id}>
                 {index > 0 && <Separator />}
-                <div className={`flex items-center justify-between px-6 py-4 ${isLocked ? 'opacity-60' : ''}`}>
+                <div
+                  className={`flex items-center justify-between px-6 py-4 ${isLocked ? 'opacity-60' : ''}`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="rounded-md border p-2">
                       <Icon className="size-4 text-muted-foreground" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium">{actionType.label}</p>
+                        <p className="text-sm font-medium">
+                          {actionType.label}
+                        </p>
                         {isLocked && (
                           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border rounded-full px-2 py-0.5">
                             <LockIcon className="size-3" />
@@ -135,7 +154,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                       <button
                         type="button"
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => setConfiguringActionId(actionType.id)}
+                        // onClick={() => setConfiguringActionId(actionType.id)}
                         disabled={readOnly}
                       >
                         Configure
@@ -143,9 +162,14 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                     )}
                     <Switch
                       checked={isEnabled}
-                      disabled={readOnly || isLocked || toggleMutation.isPending}
+                      disabled={
+                        readOnly || isLocked || toggleMutation.isPending
+                      }
                       onCheckedChange={(checked) =>
-                        toggleMutation.mutate({ type: actionType.id, enabled: checked })
+                        toggleMutation.mutate({
+                          type: actionType.id,
+                          enabled: checked,
+                        })
                       }
                     />
                   </div>
@@ -156,6 +180,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         </CardContent>
       </Card>
 
+      {/* LEAD_GENERATION_DISABLED: uncomment to restore the config drawer
       {configuredAction && (
         <LeadGenerationConfigDrawer
           action={configuredAction}
@@ -169,6 +194,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           }}
         />
       )}
+      */}
     </>
   );
 };

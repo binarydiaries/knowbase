@@ -33,6 +33,7 @@ import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
 import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
 import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
+import SlackChannelCard from '@/widgets/ChannelCard/SlackChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
 
@@ -129,6 +130,9 @@ function RouteComponent() {
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             <WhatsAppChannelCard readOnly={readOnly} />
+            {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
+              <SlackChannelCard readOnly={readOnly} />
+            )}
             <ActionsCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex overflow-hidden">

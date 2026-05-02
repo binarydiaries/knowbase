@@ -13,7 +13,7 @@ import {
 } from '../../utils/columns.utils';
 import { agents } from './agents';
 
-export const channelType = pgEnum('type', ['web', 'whatsapp', 'instagram']);
+export const channelType = pgEnum('type', ['web', 'whatsapp', 'instagram', 'voice']);
 export const channelStatus = pgEnum('channelStatus', [
   'inactive',
   'active',

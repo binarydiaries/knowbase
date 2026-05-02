@@ -12,6 +12,8 @@ export type ChannelSchema = {
       inputPlaceholder?: string;
       primaryColor: string;
       allowedDomains: Array<string>;
+      voiceEnabled?: boolean;
+      ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
     };
   };
   createdAt: string;

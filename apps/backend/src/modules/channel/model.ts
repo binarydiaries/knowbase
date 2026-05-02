@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 export const ChannelStatusSchema = z.enum(['inactive', 'active', 'error']);
 
+export const TtsVoiceSchema = z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
+
 export const ChannelWebConfigSchema = z.object({
   displayName: z.string(),
   subtitle: z.string().optional(),
@@ -10,6 +12,8 @@ export const ChannelWebConfigSchema = z.object({
   inputPlaceholder: z.string().optional(),
   primaryColor: z.string(),
   allowedDomains: z.array(z.string()),
+  voiceEnabled: z.boolean().default(false),
+  ttsVoice: TtsVoiceSchema.default('alloy'),
 });
 
 export type IChannelWebConfig = z.infer<typeof ChannelWebConfigSchema>;
@@ -40,6 +44,15 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
       config: z.object({}),
     })
     .meta({ title: 'instagram' }),
+  z
+    .object({
+      type: z.literal('voice'),
+      config: z.object({
+        displayName: z.string(),
+        ttsVoice: TtsVoiceSchema.default('alloy'),
+      }),
+    })
+    .meta({ title: 'voice' }),
 ]);
 
 export const ChannelSchema = z.object({

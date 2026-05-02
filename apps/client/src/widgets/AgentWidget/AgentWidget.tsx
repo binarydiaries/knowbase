@@ -1,5 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
+import { VoiceCall } from '@knowbase/ui/widgets/VoiceCall/VoiceCall';
 import { usePostHog } from '@posthog/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { useEffect, useId, useState } from 'react';
@@ -16,6 +17,11 @@ interface IAgentWidgetContentProps extends IAgentWidgetProps {
   onNewChat: () => void;
 }
 
+function buildVoiceWsUrl(apiBase: string, channelId: string, orgId: string, conversationId: string) {
+  const wsBase = apiBase.replace(/^http/, 'ws');
+  return `${wsBase}/voice/session?channelId=${channelId}&orgId=${orgId}&conversationId=${conversationId}`;
+}
+
 const AgentWidgetContent = ({
   channelSchema,
   orgId,
@@ -26,6 +32,8 @@ const AgentWidgetContent = ({
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [voiceConversationId, setVoiceConversationId] = useState<string>('');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only event
   useEffect(() => {
@@ -94,50 +102,86 @@ const AgentWidgetContent = ({
     },
   });
 
+  const handleStartCall = () => {
+    const convId = crypto.randomUUID();
+    setVoiceConversationId(convId);
+    setIsCallActive(true);
+    posthog?.capture('voice_call_started', {
+      channel_id: channelSchema.id,
+      org_id: orgId,
+      agent_id: channelSchema.agentId,
+    });
+  };
+
+  const handleCallClose = () => {
+    setIsCallActive(false);
+    posthog?.capture('voice_call_ended', {
+      channel_id: channelSchema.id,
+      org_id: orgId,
+      agent_id: channelSchema.agentId,
+    });
+  };
+
+  const voiceWsUrl = voiceConversationId
+    ? buildVoiceWsUrl(import.meta.env.VITE_API_BASE, channelSchema.id, orgId, voiceConversationId)
+    : '';
+
   return (
-    <Agent
-      displayName={channelConfig.displayName}
-      primaryColor={channelConfig.primaryColor}
-      inputPlaceholder={channelConfig.inputPlaceholder}
-      subTitle={channelConfig.subtitle}
-      className="h-full"
-      isLoading={status === 'submitted'}
-      inputDisabled={isUsageExhausted}
-      alertMessage={alertMessage}
-      messages={messages.map((value) => ({
-        id: value.id,
-        message: value.parts.find((v) => v?.type === 'text')?.text || '',
-        type: value.role === 'user' ? 'user' : 'system',
-      }))}
-      onSendMessage={(message) => {
-        posthog?.capture('chat_message_sent', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          message_count: messages.length,
-        });
-        sendMessage({ text: message });
-      }}
-      onNewChat={() => {
-        posthog?.capture('chat_new_session_started', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          messages_in_previous_session: messages.length,
-        });
-        onNewChat();
-      }}
-      onClose={() => {
-        posthog?.capture('chat_widget_closed', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          message_count: messages.length,
-        });
-        window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
-      }}
-      brandLink={import.meta.env.VITE_APP_URL}
-    />
+    <div className="relative h-full">
+      <Agent
+        displayName={channelConfig.displayName}
+        primaryColor={channelConfig.primaryColor}
+        inputPlaceholder={channelConfig.inputPlaceholder}
+        subTitle={channelConfig.subtitle}
+        className="h-full"
+        isLoading={status === 'submitted'}
+        inputDisabled={isUsageExhausted}
+        alertMessage={alertMessage}
+        voiceEnabled={channelConfig.voiceEnabled}
+        onStartCall={handleStartCall}
+        messages={messages.map((value) => ({
+          id: value.id,
+          message: value.parts.find((v) => v?.type === 'text')?.text || '',
+          type: value.role === 'user' ? 'user' : 'system',
+        }))}
+        onSendMessage={(message) => {
+          posthog?.capture('chat_message_sent', {
+            channel_id: channelSchema.id,
+            org_id: orgId,
+            agent_id: channelSchema.agentId,
+            message_count: messages.length,
+          });
+          sendMessage({ text: message });
+        }}
+        onNewChat={() => {
+          posthog?.capture('chat_new_session_started', {
+            channel_id: channelSchema.id,
+            org_id: orgId,
+            agent_id: channelSchema.agentId,
+            messages_in_previous_session: messages.length,
+          });
+          onNewChat();
+        }}
+        onClose={() => {
+          posthog?.capture('chat_widget_closed', {
+            channel_id: channelSchema.id,
+            org_id: orgId,
+            agent_id: channelSchema.agentId,
+            message_count: messages.length,
+          });
+          window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
+        }}
+        brandLink={import.meta.env.VITE_APP_URL}
+      />
+      {isCallActive && voiceWsUrl && (
+        <VoiceCall
+          wsUrl={voiceWsUrl}
+          agentName={channelConfig.displayName}
+          primaryColor={channelConfig.primaryColor}
+          onClose={handleCallClose}
+        />
+      )}
+    </div>
   );
 };
 

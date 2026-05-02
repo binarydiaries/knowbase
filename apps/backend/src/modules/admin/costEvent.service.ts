@@ -25,6 +25,11 @@ const DEFAULT_PRICING: Record<string, Pricing> = {
     outputPer1M: 0.4,
     cachedInputPer1M: 0.025,
   },
+  'gpt-4o-realtime-preview': {
+    // Audio-blended rate: ~$40/1M input, ~$80/1M output audio tokens
+    inputPer1M: 40,
+    outputPer1M: 80,
+  },
 };
 
 function normalizeModel(model: string) {

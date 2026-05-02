@@ -36,7 +36,8 @@ export abstract class SubscriptionService {
 
   static async getPlan(orgId: string): Promise<PlanName> {
     const record = await this.getRecord(orgId);
-    return normalizePlanName(record?.plan) ?? 'free';
+    const rawPlan = normalizePlanName(record?.plan) ?? 'free';
+    return record?.status === 'created' ? 'free' : rawPlan;
   }
 
   static getLimits(plan: PlanName) {

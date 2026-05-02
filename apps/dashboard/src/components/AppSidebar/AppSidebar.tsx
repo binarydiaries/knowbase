@@ -11,6 +11,7 @@ import {
 } from '@knowbase/ui/components/sidebar';
 import {
   Bot,
+  CreditCard,
   Gauge,
   LifeBuoy,
   LineChart,
@@ -51,6 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? [
         { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
         { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
+        { name: 'Admin Subscriptions', url: '/admin/subscriptions', icon: CreditCard },
       ]
     : [];
 

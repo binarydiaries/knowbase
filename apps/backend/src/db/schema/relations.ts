@@ -11,6 +11,7 @@ import { leads } from './leads';
 import { messages } from './messages';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
+import { orgSubscriptions } from './orgSubscriptions';
 import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
 
@@ -28,6 +29,7 @@ export const relations = defineRelations(
     leads,
     orgUsageDaily,
     orgUsageMonthly,
+    orgSubscriptions,
     whatsappConnections,
     slackConnections,
   },
@@ -116,6 +118,7 @@ export const relations = defineRelations(
     },
     orgUsageDaily: {},
     orgUsageMonthly: {},
+    orgSubscriptions: {},
     aiCostEvents: {},
     whatsappConnections: {},
     slackConnections: {},

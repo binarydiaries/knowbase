@@ -1,6 +1,3 @@
-import { Separator } from '@knowbase/ui/components/separator';
-import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { createFileRoute } from '@tanstack/react-router';
 import {
   Card,
   CardContent,
@@ -8,8 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
-import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
+import { Separator } from '@knowbase/ui/components/separator';
+import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { createFileRoute } from '@tanstack/react-router';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
+import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
 
 export const Route = createFileRoute('/integrations/')({
   component: RouteComponent,
@@ -71,7 +71,14 @@ function RouteComponent() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <WhatsAppIntegrationCard />
-          <SlackIntegrationCard />
+          {import.meta.env.VITE_SLACK_ENABLED === 'true' ? (
+            <SlackIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="Slack"
+              description="Send and receive messages in Slack channels."
+            />
+          )}
           <ComingSoonCard
             name="Discord"
             description="Integrate your agent into Discord servers."

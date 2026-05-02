@@ -1,38 +1,11 @@
 import { and, count, eq } from 'drizzle-orm';
-import { clerkClient } from 'elysia-clerk';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
+import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
-
-export const PLAN_LIMITS = {
-  free: {
-    agents: 1,
-    knowledgeSources: 10,
-    messagesPerMonth: 100,
-    trainingRunsPerDay: 3,
-  },
-  starter: {
-    agents: 3,
-    knowledgeSources: 250,
-    messagesPerMonth: 500,
-    trainingRunsPerDay: 10,
-  },
-  growth: {
-    agents: 10,
-    knowledgeSources: 1000,
-    messagesPerMonth: 2000,
-    trainingRunsPerDay: 20,
-  },
-  pro: {
-    agents: 30,
-    knowledgeSources: 5000,
-    messagesPerMonth: 8000,
-    trainingRunsPerDay: 40,
-  },
-} as const;
-
-export type PlanName = keyof typeof PLAN_LIMITS;
+import { PLANS, type PlanName } from './plans';
+export type { PlanName } from './plans';
 
 const PLAN_NAMES = new Set<PlanName>(['free', 'starter', 'growth', 'pro']);
 
@@ -57,49 +30,29 @@ function normalizePlanName(value: unknown): PlanName | null {
 }
 
 export abstract class SubscriptionService {
+  static async getRecord(orgId: string) {
+    return db.query.orgSubscriptions.findFirst({ where: { orgId } });
+  }
+
   static async getPlan(orgId: string): Promise<PlanName> {
-    try {
-      const subscription =
-        await clerkClient.billing.getOrganizationBillingSubscription(orgId);
-
-      for (const item of subscription.subscriptionItems) {
-        const plan =
-          normalizePlanName(item.plan?.slug) ??
-          normalizePlanName(item.plan?.name) ??
-          normalizePlanName(item.planId);
-
-        if (plan) {
-          return plan;
-        }
-      }
-    } catch {
-      // Fall back to the default plan if billing is unavailable or no active
-      // subscription can be resolved for the organization.
-    }
-
-    try {
-      const plans = await clerkClient.billing.getPlanList({ payerType: 'org' });
-      const defaultPlan = plans.data.find((plan) => plan.isDefault);
-      const plan =
-        normalizePlanName(defaultPlan?.slug) ??
-        normalizePlanName(defaultPlan?.name);
-
-      if (plan) {
-        return plan;
-      }
-    } catch {
-      // If billing plan lookup also fails, keep the default free tier.
-    }
-
-    return 'free';
+    const record = await this.getRecord(orgId);
+    const rawPlan = normalizePlanName(record?.plan) ?? 'free';
+    return record?.status === 'created' ? 'free' : rawPlan;
   }
 
   static getLimits(plan: PlanName) {
-    return PLAN_LIMITS[plan];
+    return PLANS[plan].limits;
   }
 
   static async getStatus(orgId: string) {
-    const plan = await this.getPlan(orgId);
+    const record = await this.getRecord(orgId);
+    // 'created' means checkout initiated but payment not yet confirmed — treat as free
+    const rawPlan = normalizePlanName(record?.plan) ?? 'free';
+    const plan: PlanName =
+      record?.status === 'created' ? 'free' : rawPlan;
+    const pendingPlan: PlanName | null =
+      record?.status === 'created' && rawPlan !== 'free' ? rawPlan : null;
+    const subscriptionStatus = record?.status ?? null;
     const limits = this.getLimits(plan);
     const activeAgentLimit = limits.agents;
     const knowledgeSourceLimit = limits.knowledgeSources;
@@ -126,6 +79,9 @@ export abstract class SubscriptionService {
 
     return {
       plan,
+      subscriptionStatus,
+      pendingPlan,
+      currentPeriodEnd: record?.currentPeriodEnd?.toISOString() ?? null,
       activeAgentLimit,
       activeAgentCount,
       knowledgeSourceLimit,

@@ -1,143 +1,340 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 const TermsPage = () => {
-    return (
-        <div className="min-h-screen bg-[#f8f7fc]">
-            {/* Nav */}
-            <header className="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                    <Link to="/" aria-label="Back to Agenvik home" className="flex items-center gap-2 text-[#301B69] font-semibold text-lg">
-                        <div className="w-6 h-6 rounded-full bg-[#301B69]" aria-hidden="true" />
-                        Agenvik
-                    </Link>
-                    <Link to="/" className="text-sm text-[#301B69]/70 hover:text-[#301B69] transition">
-                        ← Back to Home
-                    </Link>
-                </div>
-            </header>
-
-            {/* Content */}
-            <main className="max-w-4xl mx-auto px-6 py-16">
-                <div className="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
-                    <div className="mb-10">
-                        <p className="text-xs text-[#301B69]/50 mb-2">Last updated: April 21, 2026</p>
-                        <h1 className="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">Terms & Conditions</h1>
-                        <p className="text-[#301B69]/70 leading-relaxed">
-                            These Terms and Conditions govern your access to and use of the Agenvik platform. By signing up or using our services, you agree to be bound by these terms.
-                        </p>
-                    </div>
-
-                    <div className="space-y-10 text-[#301B69]/80 text-sm leading-relaxed">
-
-                        <section aria-labelledby="acceptance">
-                            <h2 id="acceptance" className="text-lg font-semibold text-[#301B69] mb-3">1. Acceptance of Terms</h2>
-                            <p>By accessing or using Agenvik, you confirm that you are at least 13 years of age, have read and understood these Terms, and agree to be legally bound by them. If you are using Agenvik on behalf of an organization, you represent that you have the authority to bind that organization to these Terms.</p>
-                        </section>
-
-                        <section aria-labelledby="account">
-                            <h2 id="account" className="text-lg font-semibold text-[#301B69] mb-3">2. Account Registration</h2>
-                            <p className="mb-3">To use Agenvik, you must create an account. You agree to:</p>
-                            <ul className="list-disc list-inside space-y-1 ml-2">
-                                <li>Provide accurate and complete registration information</li>
-                                <li>Keep your credentials secure and confidential</li>
-                                <li>Notify us immediately of any unauthorized access to your account</li>
-                                <li>Take responsibility for all activity under your account</li>
-                            </ul>
-                        </section>
-
-                        <section aria-labelledby="use-of-service">
-                            <h2 id="use-of-service" className="text-lg font-semibold text-[#301B69] mb-3">3. Permitted Use</h2>
-                            <p className="mb-3">You may use Agenvik to build, train, and deploy AI agents for lawful purposes. You agree not to:</p>
-                            <ul className="list-disc list-inside space-y-1 ml-2">
-                                <li>Use the platform to generate illegal, harmful, or deceptive content</li>
-                                <li>Attempt to reverse engineer, copy, or replicate the platform</li>
-                                <li>Use the platform to infringe on the intellectual property rights of others</li>
-                                <li>Upload malicious code, viruses, or harmful data</li>
-                                <li>Resell, sublicense, or commercially exploit the platform without written consent</li>
-                                <li>Circumvent usage limits, rate limits, or access controls</li>
-                            </ul>
-                        </section>
-
-                        <section aria-labelledby="content">
-                            <h2 id="content" className="text-lg font-semibold text-[#301B69] mb-3">4. Your Content</h2>
-                            <p>You retain ownership of any content you upload to Agenvik (knowledge sources, documents, FAQs, etc.). By uploading content, you grant us a limited, non-exclusive license to process and use that content solely to provide the platform's services to you. You are solely responsible for ensuring your content does not violate any third-party rights or applicable laws.</p>
-                        </section>
-
-                        <section aria-labelledby="subscription">
-                            <h2 id="subscription" className="text-lg font-semibold text-[#301B69] mb-3">5. Subscriptions & Billing</h2>
-                            <p className="mb-3">Paid plans are billed monthly in advance. By subscribing, you authorize us to charge your payment method on a recurring basis. The following applies:</p>
-                            <ul className="list-disc list-inside space-y-1 ml-2">
-                                <li>Prices are listed in USD and may be subject to applicable taxes</li>
-                                <li>Downgrades or cancellations take effect at the end of the current billing period</li>
-                                <li>We do not offer refunds for partial months or unused capacity</li>
-                                <li>We reserve the right to change pricing with 30 days' notice</li>
-                            </ul>
-                        </section>
-
-                        <section aria-labelledby="usage-limits">
-                            <h2 id="usage-limits" className="text-lg font-semibold text-[#301B69] mb-3">6. Usage Limits</h2>
-                            <p>Each plan includes defined limits on AI agents, knowledge sources, messages, and training runs. Exceeding these limits may result in throttling or temporary suspension of certain features until your next billing cycle. We reserve the right to enforce these limits to ensure fair use across all customers.</p>
-                        </section>
-
-                        <section aria-labelledby="ai-disclaimer">
-                            <h2 id="ai-disclaimer" className="text-lg font-semibold text-[#301B69] mb-3">7. AI Output Disclaimer</h2>
-                            <p>Agenvik's AI agents generate responses based on the knowledge you provide. We do not guarantee the accuracy, completeness, or reliability of any AI-generated output. You are responsible for reviewing and validating responses before using them in any business-critical, legal, medical, or financial context.</p>
-                        </section>
-
-                        <section aria-labelledby="intellectual-property">
-                            <h2 id="intellectual-property" className="text-lg font-semibold text-[#301B69] mb-3">8. Intellectual Property</h2>
-                            <p>All rights, title, and interest in the Agenvik platform — including its design, software, trademarks, and technology — are owned by Agenvik. Nothing in these Terms grants you any ownership rights in the platform. Feedback or suggestions you provide may be used by us without any obligation to you.</p>
-                        </section>
-
-                        <section aria-labelledby="termination">
-                            <h2 id="termination" className="text-lg font-semibold text-[#301B69] mb-3">9. Termination</h2>
-                            <p>You may cancel your account at any time. We may suspend or terminate your access if you violate these Terms, engage in fraudulent activity, or if required by law. Upon termination, your right to use the platform ceases immediately. Sections on intellectual property, disclaimers, and liability will survive termination.</p>
-                        </section>
-
-                        <section aria-labelledby="liability">
-                            <h2 id="liability" className="text-lg font-semibold text-[#301B69] mb-3">10. Limitation of Liability</h2>
-                            <p>To the maximum extent permitted by law, Agenvik shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the platform — including loss of data, revenue, or business opportunities. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
-                        </section>
-
-                        <section aria-labelledby="warranty">
-                            <h2 id="warranty" className="text-lg font-semibold text-[#301B69] mb-3">11. Disclaimer of Warranties</h2>
-                            <p>Agenvik is provided "as is" and "as available" without warranties of any kind, express or implied. We do not warrant that the platform will be uninterrupted, error-free, or free of harmful components.</p>
-                        </section>
-
-                        <section aria-labelledby="governing-law">
-                            <h2 id="governing-law" className="text-lg font-semibold text-[#301B69] mb-3">12. Governing Law</h2>
-                            <p>These Terms are governed by the laws of the State of California, United States, without regard to conflict of law principles. Any disputes arising from these Terms shall be resolved in the courts located in San Francisco, California.</p>
-                        </section>
-
-                        <section aria-labelledby="changes-terms">
-                            <h2 id="changes-terms" className="text-lg font-semibold text-[#301B69] mb-3">13. Changes to These Terms</h2>
-                            <p>We may update these Terms from time to time. We will provide at least 14 days' notice of material changes via email or an in-app notice. Continued use of Agenvik after the effective date of changes constitutes your acceptance of the updated Terms.</p>
-                        </section>
-
-                        <section aria-labelledby="contact-terms">
-                            <h2 id="contact-terms" className="text-lg font-semibold text-[#301B69] mb-3">14. Contact Us</h2>
-                            <p>If you have any questions about these Terms, please contact us at:</p>
-                            <address className="not-italic mt-3 space-y-1">
-                                <p><strong>Agenvik</strong></p>
-                                <p>794 McAllister St, San Francisco, CA 94102</p>
-                                <p><a href="mailto:legal@agenvik.com" className="text-[#301B69] underline">legal@agenvik.com</a></p>
-                            </address>
-                        </section>
-
-                    </div>
-                </div>
-            </main>
-
-            {/* Footer */}
-            <footer className="text-center text-sm text-[#301B69]/50 py-8">
-                <p>© 2026 Agenvik. All rights reserved. ·{' '}
-                    <Link to="/privacy-policy" className="hover:text-[#301B69]">Privacy Policy</Link>
-                    {' · '}
-                    <Link to="/terms" className="hover:text-[#301B69]">Terms & Conditions</Link>
-                </p>
-            </footer>
+  return (
+    <div className="min-h-screen bg-[#f8f7fc]">
+      {/* Nav */}
+      <header className="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <Link
+            to="/"
+            aria-label="Back to Agenvik home"
+            className="flex items-center gap-2 text-[#301B69] font-semibold text-lg"
+          >
+            <div
+              className="w-6 h-6 rounded-full bg-[#301B69]"
+              aria-hidden="true"
+            />
+            Agenvik
+          </Link>
+          <Link
+            to="/"
+            className="text-sm text-[#301B69]/70 hover:text-[#301B69] transition"
+          >
+            ← Back to Home
+          </Link>
         </div>
-    )
-}
+      </header>
 
-export default TermsPage
+      {/* Content */}
+      <main className="max-w-4xl mx-auto px-6 py-16">
+        <div className="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
+          <div className="mb-10">
+            <p className="text-xs text-[#301B69]/50 mb-2">
+              Last updated: April 21, 2026
+            </p>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">
+              Terms & Conditions
+            </h1>
+            <p className="text-[#301B69]/70 leading-relaxed">
+              These Terms and Conditions govern your access to and use of the
+              Agenvik platform. By signing up or using our services, you agree
+              to be bound by these terms.
+            </p>
+          </div>
+
+          <div className="space-y-10 text-[#301B69]/80 text-sm leading-relaxed">
+            <section aria-labelledby="acceptance">
+              <h2
+                id="acceptance"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                1. Acceptance of Terms
+              </h2>
+              <p>
+                By accessing or using Agenvik, you confirm that you are at least
+                13 years of age, have read and understood these Terms, and agree
+                to be legally bound by them. If you are using Agenvik on behalf
+                of an organization, you represent that you have the authority to
+                bind that organization to these Terms.
+              </p>
+            </section>
+
+            <section aria-labelledby="account">
+              <h2
+                id="account"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                2. Account Registration
+              </h2>
+              <p className="mb-3">
+                To use Agenvik, you must create an account. You agree to:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>Provide accurate and complete registration information</li>
+                <li>Keep your credentials secure and confidential</li>
+                <li>
+                  Notify us immediately of any unauthorized access to your
+                  account
+                </li>
+                <li>Take responsibility for all activity under your account</li>
+              </ul>
+            </section>
+
+            <section aria-labelledby="use-of-service">
+              <h2
+                id="use-of-service"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                3. Permitted Use
+              </h2>
+              <p className="mb-3">
+                You may use Agenvik to build, train, and deploy AI agents for
+                lawful purposes. You agree not to:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>
+                  Use the platform to generate illegal, harmful, or deceptive
+                  content
+                </li>
+                <li>
+                  Attempt to reverse engineer, copy, or replicate the platform
+                </li>
+                <li>
+                  Use the platform to infringe on the intellectual property
+                  rights of others
+                </li>
+                <li>Upload malicious code, viruses, or harmful data</li>
+                <li>
+                  Resell, sublicense, or commercially exploit the platform
+                  without written consent
+                </li>
+                <li>
+                  Circumvent usage limits, rate limits, or access controls
+                </li>
+              </ul>
+            </section>
+
+            <section aria-labelledby="content">
+              <h2
+                id="content"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                4. Your Content
+              </h2>
+              <p>
+                You retain ownership of any content you upload to Agenvik
+                (knowledge sources, documents, FAQs, etc.). By uploading
+                content, you grant us a limited, non-exclusive license to
+                process and use that content solely to provide the platform's
+                services to you. You are solely responsible for ensuring your
+                content does not violate any third-party rights or applicable
+                laws.
+              </p>
+            </section>
+
+            <section aria-labelledby="subscription">
+              <h2
+                id="subscription"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                5. Subscriptions & Billing
+              </h2>
+              <p className="mb-3">
+                Paid plans are billed monthly in advance. By subscribing, you
+                authorize us to charge your payment method on a recurring basis.
+                The following applies:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>
+                  Prices are listed in USD and may be subject to applicable
+                  taxes
+                </li>
+                <li>
+                  Downgrades or cancellations take effect at the end of the
+                  current billing period
+                </li>
+                <li>
+                  We do not offer refunds for partial months or unused capacity
+                </li>
+                <li>
+                  We reserve the right to change pricing with 30 days' notice
+                </li>
+              </ul>
+            </section>
+
+            <section aria-labelledby="usage-limits">
+              <h2
+                id="usage-limits"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                6. Usage Limits
+              </h2>
+              <p>
+                Each plan includes defined limits on AI agents, knowledge
+                sources, messages, and training runs. Exceeding these limits may
+                result in throttling or temporary suspension of certain features
+                until your next billing cycle. We reserve the right to enforce
+                these limits to ensure fair use across all customers.
+              </p>
+            </section>
+
+            <section aria-labelledby="ai-disclaimer">
+              <h2
+                id="ai-disclaimer"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                7. AI Output Disclaimer
+              </h2>
+              <p>
+                Agenvik's AI agents generate responses based on the knowledge
+                you provide. We do not guarantee the accuracy, completeness, or
+                reliability of any AI-generated output. You are responsible for
+                reviewing and validating responses before using them in any
+                business-critical, legal, medical, or financial context.
+              </p>
+            </section>
+
+            <section aria-labelledby="intellectual-property">
+              <h2
+                id="intellectual-property"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                8. Intellectual Property
+              </h2>
+              <p>
+                All rights, title, and interest in the Agenvik platform —
+                including its design, software, trademarks, and technology — are
+                owned by Agenvik. Nothing in these Terms grants you any
+                ownership rights in the platform. Feedback or suggestions you
+                provide may be used by us without any obligation to you.
+              </p>
+            </section>
+
+            <section aria-labelledby="termination">
+              <h2
+                id="termination"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                9. Termination
+              </h2>
+              <p>
+                You may cancel your account at any time. We may suspend or
+                terminate your access if you violate these Terms, engage in
+                fraudulent activity, or if required by law. Upon termination,
+                your right to use the platform ceases immediately. Sections on
+                intellectual property, disclaimers, and liability will survive
+                termination.
+              </p>
+            </section>
+
+            <section aria-labelledby="liability">
+              <h2
+                id="liability"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                10. Limitation of Liability
+              </h2>
+              <p>
+                To the maximum extent permitted by law, Agenvik shall not be
+                liable for any indirect, incidental, special, or consequential
+                damages arising from your use of the platform — including loss
+                of data, revenue, or business opportunities. Our total liability
+                shall not exceed the amount you paid us in the 12 months
+                preceding the claim.
+              </p>
+            </section>
+
+            <section aria-labelledby="warranty">
+              <h2
+                id="warranty"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                11. Disclaimer of Warranties
+              </h2>
+              <p>
+                Agenvik is provided "as is" and "as available" without
+                warranties of any kind, express or implied. We do not warrant
+                that the platform will be uninterrupted, error-free, or free of
+                harmful components.
+              </p>
+            </section>
+
+            <section aria-labelledby="governing-law">
+              <h2
+                id="governing-law"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                12. Governing Law
+              </h2>
+              <p>
+                These Terms are governed by the laws of the State of California,
+                United States, without regard to conflict of law principles. Any
+                disputes arising from these Terms shall be resolved in the
+                courts located in San Francisco, California.
+              </p>
+            </section>
+
+            <section aria-labelledby="changes-terms">
+              <h2
+                id="changes-terms"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                13. Changes to These Terms
+              </h2>
+              <p>
+                We may update these Terms from time to time. We will provide at
+                least 14 days' notice of material changes via email or an in-app
+                notice. Continued use of Agenvik after the effective date of
+                changes constitutes your acceptance of the updated Terms.
+              </p>
+            </section>
+
+            <section aria-labelledby="contact-terms">
+              <h2
+                id="contact-terms"
+                className="text-lg font-semibold text-[#301B69] mb-3"
+              >
+                14. Contact Us
+              </h2>
+              <p>
+                If you have any questions about these Terms, please contact us
+                at:
+              </p>
+              <address className="not-italic mt-3 space-y-1">
+                <p>
+                  <strong>Agenvik</strong>
+                </p>
+                {/*<p>794 McAllister St, San Francisco, CA 94102</p>*/}
+                <p>
+                  <a
+                    href="mailto:hello@agenvik.com"
+                    className="text-[#301B69] underline"
+                  >
+                    hello@agenvik.com
+                  </a>
+                </p>
+              </address>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="text-center text-sm text-[#301B69]/50 py-8">
+        <p>
+          © 2026 Agenvik. All rights reserved. ·{' '}
+          <Link to="/privacy-policy" className="hover:text-[#301B69]">
+            Privacy Policy
+          </Link>
+          {' · '}
+          <Link to="/terms" className="hover:text-[#301B69]">
+            Terms & Conditions
+          </Link>
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+export default TermsPage;

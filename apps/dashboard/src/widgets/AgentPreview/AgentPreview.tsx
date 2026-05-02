@@ -4,7 +4,7 @@ import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePostHog } from 'posthog-js/react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ChannelSchema } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
@@ -29,7 +29,11 @@ const AgentPreviewContent = ({
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
 
-  const channelConfig = channelWeb.additional.config;
+  const channelConfig = useMemo(() => {
+    const channelAdditional = channelWeb.additional;
+    if (channelAdditional.type !== 'web') return null;
+    return channelAdditional.config;
+  }, [channelWeb.additional]);
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {

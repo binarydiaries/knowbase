@@ -65,7 +65,8 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       (channel) => channel.additional.type === 'web',
     ),
   );
-  const channelConfig = channelWeb?.additional.config;
+  const channelAdditional = channelWeb?.additional;
+  const channelConfig = channelAdditional?.type === 'web' ? channelAdditional.config : undefined;
   const updateChannel = useChannels((s) => s.updateChannel);
 
   const {

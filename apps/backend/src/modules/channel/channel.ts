@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { AgentService } from '../agent/service';
@@ -40,11 +41,14 @@ export const Channel = new Elysia({
       }
 
       if (body.additional.type !== 'web') {
-        const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+        const channelAccess =
+          await SubscriptionService.assertPaidChannelAccess(orgId);
         if (!channelAccess.allowed) {
           return status(403, {
             code: 'PLAN_LIMIT_REACHED',
-            message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+            message: SubscriptionService.getPaidChannelMessage(
+              channelAccess.plan,
+            ),
           });
         }
       }
@@ -79,7 +83,9 @@ export const Channel = new Elysia({
       };
     },
     {
-      query: 'ChannelListQuerySchema',
+      query: z.object({
+        agentId: z.string().optional(),
+      }),
       response: 'ManyChannelResponse',
     },
   )
@@ -142,11 +148,14 @@ export const Channel = new Elysia({
 
       const effectiveType = body?.additional?.type ?? channel.type;
       if (effectiveType !== 'web') {
-        const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+        const channelAccess =
+          await SubscriptionService.assertPaidChannelAccess(orgId);
         if (!channelAccess.allowed) {
           return status(403, {
             code: 'PLAN_LIMIT_REACHED',
-            message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+            message: SubscriptionService.getPaidChannelMessage(
+              channelAccess.plan,
+            ),
           });
         }
       }

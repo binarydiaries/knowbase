@@ -1,8 +1,9 @@
 import { Elysia } from 'elysia';
+import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
-import { SubscriptionService } from '../subscription/service';
 import { AgentService } from '../agent/service';
+import { SubscriptionService } from '../subscription/service';
 import { ActionModel } from './model';
 import { ActionService } from './service';
 
@@ -21,7 +22,9 @@ export const Action = new Elysia({
       return { actions };
     },
     {
-      query: 'GetAgentActionsQuery',
+      query: z.object({
+        agentId: z.string(),
+      }),
       response: {
         200: 'ManyAgentActionResponse',
       },
@@ -31,11 +34,13 @@ export const Action = new Elysia({
     '',
     async ({ body, orgId, userId, status }) => {
       if (body.actionType === 'lead_generation') {
-        const access = await SubscriptionService.assertLeadGenerationAccess(orgId);
+        const access =
+          await SubscriptionService.assertLeadGenerationAccess(orgId);
         if (!access.allowed) {
           return status(403, {
             code: 'PLAN_LIMIT_REACHED',
-            message: 'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
+            message:
+              'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
           });
         }
       }
@@ -77,11 +82,13 @@ export const Action = new Elysia({
 
       // Block free plan from enabling lead generation
       if (existing.actionType === 'lead_generation' && body.enabled === true) {
-        const access = await SubscriptionService.assertLeadGenerationAccess(orgId);
+        const access =
+          await SubscriptionService.assertLeadGenerationAccess(orgId);
         if (!access.allowed) {
           return status(403, {
             code: 'PLAN_LIMIT_REACHED',
-            message: 'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
+            message:
+              'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
           });
         }
       }

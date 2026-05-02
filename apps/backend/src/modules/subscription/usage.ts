@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { orgUsageDaily } from '../../db/schema/orgUsageDaily';
 import { orgUsageMonthly } from '../../db/schema/orgUsageMonthly';
@@ -22,6 +22,14 @@ export abstract class OrgUsageDailyService {
     });
 
     return usage?.trainingRuns ?? 0;
+  }
+
+  static async getTotalTrainingRunsSince(orgId: string, fromDateKey: string): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`coalesce(sum(${orgUsageDaily.trainingRuns}), 0)` })
+      .from(orgUsageDaily)
+      .where(and(eq(orgUsageDaily.orgId, orgId), gte(orgUsageDaily.dateKey, fromDateKey)));
+    return Number(result[0]?.total ?? 0);
   }
 
   static async tryConsumeTrainingRun(orgId: string, limit: number) {

@@ -51,7 +51,7 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '500 messages / month',
       '10 training runs / day',
       'WhatsApp & Instagram channels',
-      'Lead generation',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
     ],
     limits: {
       agents: 3,
@@ -73,7 +73,7 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '2,000 messages / month',
       '20 training runs / day',
       'WhatsApp & Instagram channels',
-      'Lead generation',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
       'Analytics',
     ],
     limits: {
@@ -96,7 +96,7 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '8,000 messages / month',
       '40 training runs / day',
       'WhatsApp & Instagram channels',
-      'Lead generation',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
       'Analytics',
       'Priority support',
     ],

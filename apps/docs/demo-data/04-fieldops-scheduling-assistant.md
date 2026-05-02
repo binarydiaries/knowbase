@@ -13,7 +13,7 @@ FieldOps coordinates commercial maintenance visits for HVAC, electrical, and fac
 
 ## Behaviour
 
-- **System Prompt:** You are the FieldOps Scheduling Assistant. Help customers understand service coverage, visit windows, maintenance plan rules, and when an issue should be escalated. Answer clearly and operationally. Confirm what city, service type, and urgency the customer has shared. If the issue sounds urgent, direct them to the approved emergency path. If the user wants a visit, collect lead details so scheduling can follow up.
+- **System Prompt:** You are the FieldOps Scheduling Assistant. Help customers understand service coverage, visit windows, maintenance plan rules, and when an issue should be escalated. Answer clearly and operationally. Confirm what city, service type, and urgency the customer has shared. If the issue sounds urgent, direct them to the approved emergency path. <!-- LEAD_GENERATION_DISABLED: original prompt ended with "If the user wants a visit, collect lead details so scheduling can follow up." — restore when re-enabling -->
 - **Tone:** neutral
 - **Verbosity:** balanced
 - **Fallback Message:** I can help with scheduling and service coverage, but I need your city, service type, and urgency to guide you correctly.
@@ -27,6 +27,7 @@ FieldOps coordinates commercial maintenance visits for HVAC, electrical, and fac
 - **Input Placeholder:** Ask about service areas, appointment timing, or urgent issues...
 - **Primary Color:** `#C2410C`
 
+<!-- LEAD_GENERATION_DISABLED: uncomment to restore Lead Generation section
 ## Lead Generation
 
 - **Enabled:** yes
@@ -37,6 +38,7 @@ FieldOps coordinates commercial maintenance visits for HVAC, electrical, and fac
   - company: collect yes, required no
 - **Trigger instructions:** Collect lead details when the visitor asks to schedule a visit, requests emergency support, asks for a quote, or wants maintenance follow-up.
 - **Success message:** Thanks, I have your request details. Our scheduling team will use them to coordinate the next step.
+-->
 
 ## WhatsApp
 
@@ -84,7 +86,7 @@ When a customer asks for service:
 1. Ask the city.
 2. Ask the service type.
 3. Ask whether the issue is routine or urgent.
-4. Collect lead details if they want follow-up.
+<!-- LEAD_GENERATION_DISABLED: original step 4 was "Collect lead details if they want follow-up." — restore when re-enabling -->
 
 ### Text source 2
 
@@ -137,10 +139,10 @@ Safety-critical issues should be escalated immediately and should not be handled
    Expected points: yes, Seattle metro is covered.
 
 2. **Can I book a routine HVAC visit in San Diego next week?**  
-   Expected points: yes possible in principle, ask city already known, ask urgency and collect lead if scheduling request.
+   Expected points: yes possible in principle, ask city already known, ask urgency.<!-- LEAD_GENERATION_DISABLED: original included "and collect lead if scheduling request" — restore when re-enabling -->
 
 3. **My refrigeration system is down and we may lose inventory.**  
-   Expected points: treat as urgent, emergency path, avoid promising dispatch, collect lead.
+   Expected points: treat as urgent, emergency path, avoid promising dispatch.<!-- LEAD_GENERATION_DISABLED: original included "collect lead" — restore when re-enabling -->
 
 4. **Can I reschedule tomorrow's appointment?**  
    Expected points: yes, mention 24-hour ideal notice and scheduling review if late.
@@ -152,7 +154,7 @@ Safety-critical issues should be escalated immediately and should not be handled
    Expected points: no guarantee, must avoid overpromising.
 
 7. **We need a maintenance plan quote for two sites in Los Angeles.**  
-   Expected points: collect lead details, city, service type, quote path.
+   Expected points: city, service type, quote path.<!-- LEAD_GENERATION_DISABLED: original included "collect lead details," — restore when re-enabling -->
 
 8. **Do you cover Austin?**  
    Expected points: no, outside approved zones.
@@ -169,10 +171,12 @@ Safety-critical issues should be escalated immediately and should not be handled
 12. **My team missed the appointment and wants another slot.**  
    Expected points: missed appointments require manual review, collect details and follow-up.
 
+<!-- LEAD_GENERATION_DISABLED: uncomment to restore lead capture prompts section
 ## Lead capture prompts
 
 1. **We need an HVAC maintenance quote for our San Francisco office. Can someone call me today?**
 2. **Our refrigeration system is failing in Seattle and we need urgent help.**
+-->
 
 ## Out-of-scope prompts
 
@@ -181,11 +185,13 @@ Safety-critical issues should be escalated immediately and should not be handled
 
 ## Suggested screenshot conversations
 
-- one successful quote-request lead
+<!-- LEAD_GENERATION_DISABLED: original included "- one successful quote-request lead" — restore when re-enabling -->
 - one urgent issue thread
 - one unsupported city thread
 - one WhatsApp scheduling intake thread
 
+<!-- LEAD_GENERATION_DISABLED: uncomment to restore suggested lead row section
 ## Suggested lead row
 
 - Elena Torres, Harbor Facilities
+-->

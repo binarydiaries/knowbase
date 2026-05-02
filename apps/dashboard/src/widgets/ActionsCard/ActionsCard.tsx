@@ -20,16 +20,18 @@ import {
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer';
+// import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer'; // LEAD_GENERATION_DISABLED: uncomment to restore
 
-const ACTION_TYPES = [
-  {
-    id: 'lead_generation' as const,
-    label: 'Lead Generation',
-    description: 'Capture contact info (name, email, phone) through natural conversation.',
-    icon: UserRound,
-  },
-];
+// LEAD_GENERATION_DISABLED: uncomment to restore the lead_generation action type
+// const ACTION_TYPES = [
+//   {
+//     id: 'lead_generation' as const,
+//     label: 'Lead Generation',
+//     description: 'Capture contact info (name, email, phone) through natural conversation.',
+//     icon: UserRound,
+//   },
+// ];
+const ACTION_TYPES: Array<{ id: 'lead_generation'; label: string; description: string; icon: typeof UserRound }> = [];
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
@@ -156,6 +158,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         </CardContent>
       </Card>
 
+      {/* LEAD_GENERATION_DISABLED: uncomment to restore the config drawer
       {configuredAction && (
         <LeadGenerationConfigDrawer
           action={configuredAction}
@@ -169,6 +172,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           }}
         />
       )}
+      */}
     </>
   );
 };

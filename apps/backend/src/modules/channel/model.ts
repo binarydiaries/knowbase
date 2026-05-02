@@ -21,6 +21,15 @@ export const ChannelWhatsAppConfigSchema = z.object({
 
 export type IChannelWhatsAppConfig = z.infer<typeof ChannelWhatsAppConfigSchema>;
 
+export const ChannelSlackConfigSchema = z.object({
+  mode: z.enum(['channel', 'mention', 'command']).optional(),
+  slackChannelId: z.string().optional(),
+  slackChannelName: z.string().optional(),
+  slackCommand: z.string().optional(),
+});
+
+export type IChannelSlackConfig = z.infer<typeof ChannelSlackConfigSchema>;
+
 const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
@@ -40,6 +49,12 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
       config: z.object({}),
     })
     .meta({ title: 'instagram' }),
+  z
+    .object({
+      type: z.literal('slack'),
+      config: ChannelSlackConfigSchema,
+    })
+    .meta({ title: 'slack' }),
 ]);
 
 export const ChannelSchema = z.object({

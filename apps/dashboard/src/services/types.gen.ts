@@ -179,6 +179,14 @@ export type ChatChannelResponseSchema = {
             config: {
                 [key: string]: never;
             };
+        } | {
+            type: 'slack';
+            config: {
+                mode?: 'channel' | 'mention' | 'command';
+                slackChannelId?: string;
+                slackChannelName?: string;
+                slackCommand?: string;
+            };
         };
         createdAt: string;
         updatedAt: string;
@@ -549,6 +557,14 @@ export type OneAgentResponse = {
             config: {
                 [key: string]: never;
             };
+        } | {
+            type: 'slack';
+            config: {
+                mode?: 'channel' | 'mention' | 'command';
+                slackChannelId?: string;
+                slackChannelName?: string;
+                slackCommand?: string;
+            };
         };
         createdAt: string;
         updatedAt: string;
@@ -751,6 +767,14 @@ export type ChannelSchema = {
         config: {
             [key: string]: never;
         };
+    } | {
+        type: 'slack';
+        config: {
+            mode?: 'channel' | 'mention' | 'command';
+            slackChannelId?: string;
+            slackChannelName?: string;
+            slackCommand?: string;
+        };
     };
     createdAt: string;
     updatedAt: string;
@@ -787,6 +811,14 @@ export type ManyChannelResponse = {
             config: {
                 [key: string]: never;
             };
+        } | {
+            type: 'slack';
+            config: {
+                mode?: 'channel' | 'mention' | 'command';
+                slackChannelId?: string;
+                slackChannelName?: string;
+                slackCommand?: string;
+            };
         };
         createdAt: string;
         updatedAt: string;
@@ -818,6 +850,14 @@ export type CreateChannelBodySchema = {
         config: {
             [key: string]: never;
         };
+    } | {
+        type: 'slack';
+        config: {
+            mode?: 'channel' | 'mention' | 'command';
+            slackChannelId?: string;
+            slackChannelName?: string;
+            slackCommand?: string;
+        };
     };
 };
 
@@ -845,6 +885,14 @@ export type UpdateChannelBodySchema = {
         type: 'instagram';
         config: {
             [key: string]: never;
+        };
+    } | {
+        type: 'slack';
+        config: {
+            mode?: 'channel' | 'mention' | 'command';
+            slackChannelId?: string;
+            slackChannelName?: string;
+            slackCommand?: string;
         };
     };
 };
@@ -875,6 +923,14 @@ export type OneChannelResponse = {
             type: 'instagram';
             config: {
                 [key: string]: never;
+            };
+        } | {
+            type: 'slack';
+            config: {
+                mode?: 'channel' | 'mention' | 'command';
+                slackChannelId?: string;
+                slackChannelName?: string;
+                slackCommand?: string;
             };
         };
         createdAt: string;
@@ -2337,6 +2393,132 @@ export type DeleteWhatsappBindByChannelIdErrors = {
 };
 
 export type DeleteWhatsappBindByChannelIdError = DeleteWhatsappBindByChannelIdErrors[keyof DeleteWhatsappBindByChannelIdErrors];
+
+export type PostWebhookSlackData = {
+    body: unknown;
+    path?: never;
+    query?: never;
+    url: '/webhook/slack';
+};
+
+export type GetSlackOauthCallbackData = {
+    body?: never;
+    path?: never;
+    query?: {
+        code?: string;
+        state?: string;
+        error?: string;
+    };
+    url: '/slack/oauth/callback';
+};
+
+export type GetSlackOauthStartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/slack/oauth/start';
+};
+
+export type GetSlackOauthStartErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetSlackOauthStartError = GetSlackOauthStartErrors[keyof GetSlackOauthStartErrors];
+
+export type DeleteSlackConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/slack/connection';
+};
+
+export type DeleteSlackConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteSlackConnectionError = DeleteSlackConnectionErrors[keyof DeleteSlackConnectionErrors];
+
+export type GetSlackConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/slack/connection';
+};
+
+export type GetSlackConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetSlackConnectionError = GetSlackConnectionErrors[keyof GetSlackConnectionErrors];
+
+export type PostSlackBindData = {
+    body: {
+        channelId: string;
+        mode: 'channel' | 'mention' | 'command';
+        slackChannelId?: string;
+        slackChannelName?: string;
+        slackCommand?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/slack/bind';
+};
+
+export type PostSlackBindErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostSlackBindError = PostSlackBindErrors[keyof PostSlackBindErrors];
+
+export type DeleteSlackBindByChannelIdData = {
+    body?: never;
+    path: {
+        channelId: string;
+    };
+    query?: never;
+    url: '/slack/bind/{channelId}';
+};
+
+export type DeleteSlackBindByChannelIdErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteSlackBindByChannelIdError = DeleteSlackBindByChannelIdErrors[keyof DeleteSlackBindByChannelIdErrors];
 
 export type GetAgentActionsData = {
     body?: never;

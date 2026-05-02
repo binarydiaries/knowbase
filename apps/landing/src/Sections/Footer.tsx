@@ -33,7 +33,7 @@ const Footer = () => {
           />
 
           <div className="relative z-10">
-            <div className="grid md:grid-cols-5 gap-10">
+            <div className="grid md:grid-cols-4 gap-10">
               {/* Logo */}
               <div className="col-span-1">
                 <a href="/" aria-label="Agenvik home">
@@ -225,7 +225,7 @@ const Footer = () => {
               </address>
 
               {/* Social */}
-              <div>
+              <div className="hidden">
                 <h2 className="text-sm font-semibold text-[#301B69] mb-4">
                   Social
                 </h2>

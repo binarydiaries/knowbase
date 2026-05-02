@@ -165,6 +165,8 @@ export abstract class SubscriptionService {
   }
 
   static planHasLeadGeneration(plan: PlanName): boolean {
+    // LEAD_GENERATION_DISABLED: change condition back to `plan !== 'free'` to restore
+    if (process.env.LEAD_GENERATION_ENABLED !== 'true') return false;
     return plan !== 'free';
   }
 

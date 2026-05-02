@@ -10,6 +10,7 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
+import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 
 export const Route = createFileRoute('/integrations/')({
   component: RouteComponent,

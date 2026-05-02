@@ -19,7 +19,7 @@ import {
   MessageCircle,
   Plug,
   Shield,
-  UserRound,
+  // UserRound, // LEAD_GENERATION_DISABLED: uncomment to restore
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -35,7 +35,7 @@ const mainNav = [
 
 const inboxNav = [
   { name: 'Conversations', url: '/conversations', icon: MessageCircle },
-  { name: 'Leads', url: '/leads', icon: UserRound },
+  // { name: 'Leads', url: '/leads', icon: UserRound }, // LEAD_GENERATION_DISABLED: uncomment to restore
 ];
 
 const footerNav = [

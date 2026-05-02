@@ -101,6 +101,8 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   //   ? getAction(configuringActionId as 'lead_generation')
   //   : null;
 
+  if (ACTION_TYPES.length === 0) return null;
+
   return (
     <>
       <Card className="w-full">

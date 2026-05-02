@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { Separator } from '@knowbase/ui/components/separator';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { formatDate } from '@/utils/razorpay';
 
 interface Props {
@@ -49,8 +49,10 @@ export function SubscriptionActions({
             <p className="text-sm font-medium">Cancel subscription</p>
             <p className="text-sm text-muted-foreground mt-1">
               You'll keep full access to all features until{' '}
-              {currentPeriodEnd ? formatDate(currentPeriodEnd) : 'your billing period ends'}.
-              After that, your account will revert to the free plan.
+              {currentPeriodEnd
+                ? formatDate(currentPeriodEnd)
+                : 'your billing period ends'}
+              . After that, your account will revert to the free plan.
             </p>
           </div>
           <Button
@@ -85,12 +87,14 @@ export function SubscriptionActions({
                 <p>
                   Until then, you'll continue to have full access to all paid
                   features. After{' '}
-                  {currentPeriodEnd ? formatDate(currentPeriodEnd) : 'that date'}
+                  {currentPeriodEnd
+                    ? formatDate(currentPeriodEnd)
+                    : 'that date'}
                   , your account will automatically switch to the free plan.
                 </p>
                 <p>
                   If you change your mind, you can re-subscribe at any time
-                  before the period ends.
+                  after the period ends.
                 </p>
               </div>
             </DialogDescription>

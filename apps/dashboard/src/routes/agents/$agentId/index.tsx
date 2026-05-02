@@ -33,6 +33,7 @@ import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
 import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
 import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
+import SlackChannelCard from '@/widgets/ChannelCard/SlackChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
 import SlackChannelCard from '@/widgets/ChannelCard/SlackChannelCard.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';

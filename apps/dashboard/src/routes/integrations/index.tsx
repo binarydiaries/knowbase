@@ -1,6 +1,3 @@
-import { Separator } from '@knowbase/ui/components/separator';
-import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { createFileRoute } from '@tanstack/react-router';
 import {
   Card,
   CardContent,
@@ -8,6 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import { Separator } from '@knowbase/ui/components/separator';
+import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { createFileRoute } from '@tanstack/react-router';
+import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 

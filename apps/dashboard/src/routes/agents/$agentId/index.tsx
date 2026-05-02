@@ -130,7 +130,9 @@ function RouteComponent() {
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             <WhatsAppChannelCard readOnly={readOnly} />
-            <SlackChannelCard readOnly={readOnly} />
+            {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
+              <SlackChannelCard readOnly={readOnly} />
+            )}
             <ActionsCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex overflow-hidden">

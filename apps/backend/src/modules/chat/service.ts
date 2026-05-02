@@ -9,8 +9,9 @@ import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import { SubscriptionService } from '../subscription/service';
-import type { IChannelWhatsAppConfig } from '../channel/model';
+import type { IChannelWhatsAppConfig, IChannelSlackConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
+import { SlackConnectionService } from '../slack/connectionService';
 import { AiCostEventService } from '../admin/costEvent.service';
 import { referenceResolverPrompt } from './prompts';
 import { buildChatContext } from './context';
@@ -635,6 +636,113 @@ export abstract class ChatService {
       finalQuery,
       chunks,
       sentiment: null, // WhatsApp doesn't score sentiment
+    });
+  }
+
+  // ── Slack — full handler (channel + mention modes) ───────────────────────
+
+  static async sendSlack({
+    channelId,
+    orgId,
+    message,
+    slackChannelId,
+    threadTs,
+    ip,
+  }: {
+    channelId: string;
+    orgId: string;
+    message: string;
+    slackChannelId: string;
+    threadTs: string;
+    ip?: string;
+  }) {
+    const channel = await ChannelService.single({ id: channelId, orgId });
+    if (!channel || channel.type !== 'slack') {
+      throw new NotFoundError('Slack channel not found');
+    }
+    const config = channel.config as IChannelSlackConfig;
+    if (!config.slackChannelId) {
+      throw new NotFoundError('Slack channel not configured');
+    }
+
+    const connection = await SlackConnectionService.findByOrg(orgId);
+    if (!connection) {
+      throw new NotFoundError('Slack not connected for this org');
+    }
+
+    // threadTs is the conversation key — each Slack thread = one conversation
+    const conversation = await ConversationService.findByExternalId({
+      channelId,
+      externalId: threadTs,
+    });
+
+    const { assistantMessage, chunks, finalQuery, toolCalls } =
+      await ChatService.generateWhatsAppResponse({
+        agentId: channel.agentId,
+        channelId,
+        message,
+        conversationId: conversation?.id,
+        orgId,
+        ip,
+      });
+
+    // Reply in the same thread
+    const replyRes = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${connection.botToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        channel: slackChannelId,
+        text: assistantMessage,
+        thread_ts: threadTs,
+      }),
+    });
+    if (!replyRes.ok) {
+      console.error('[Slack reply] error:', await replyRes.text());
+    }
+
+    // Persist conversation
+    const conversationData = {
+      lastUserQuestion: finalQuery,
+      lastAssistantUtterance: assistantMessage,
+      lastMessageAt: new Date(),
+    };
+
+    let conversationId: string;
+    if (!conversation) {
+      conversationId = createId();
+      await ConversationService.create({
+        id: conversationId,
+        agentId: channel.agentId,
+        channelId,
+        externalId: threadTs,
+        ...conversationData,
+      });
+    } else {
+      await ConversationService.update(conversation.id, conversationData);
+      conversationId = conversation.id;
+    }
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    await handleLeadCapture(toolCalls, {
+      agentId: channel.agentId,
+      conversationId,
+      channelId,
+      orgId,
+    });
+
+    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
+
+    await persistMessages({
+      conversationId,
+      userMessage: message,
+      assistantMessage,
+      finalQuery,
+      chunks,
+      sentiment: null,
     });
   }
 

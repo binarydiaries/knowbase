@@ -71,7 +71,14 @@ function RouteComponent() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <WhatsAppIntegrationCard />
-          <SlackIntegrationCard />
+          {import.meta.env.VITE_SLACK_ENABLED === 'true' ? (
+            <SlackIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="Slack"
+              description="Send and receive messages in Slack channels."
+            />
+          )}
           <ComingSoonCard
             name="Discord"
             description="Integrate your agent into Discord servers."

@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@knowbase/ui/components/sidebar';
+import { Link } from '@tanstack/react-router';
 import {
   Bot,
   CreditCard,
@@ -52,7 +53,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? [
         { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
         { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
-        { name: 'Admin Subscriptions', url: '/admin/subscriptions', icon: CreditCard },
+        {
+          name: 'Admin Subscriptions',
+          url: '/admin/subscriptions',
+          icon: CreditCard,
+        },
       ]
     : [];
 
@@ -65,7 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/">
+              <Link to="/">
                 <img
                   src="/TextLogoLight.svg"
                   alt="Agenvik"
@@ -77,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   alt="Agenvik"
                   className="size-25 mt-2 hidden dark:block"
                 />
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

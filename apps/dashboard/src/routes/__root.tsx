@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/clerk-react';
 import { SidebarInset, SidebarProvider } from '@knowbase/ui/components/sidebar';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { usePostHog, PostHogProvider } from 'posthog-js/react';
+import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { AppSidebar } from '@/components/AppSidebar/AppSidebar.tsx';
 
@@ -30,8 +30,7 @@ export default function RootComponent() {
     <PostHogProvider
       apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN!}
       options={{
-        api_host: '/ingest',
-        ui_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com',
+        api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
         defaults: '2026-01-30',
         capture_exceptions: true,
         debug: import.meta.env.DEV,

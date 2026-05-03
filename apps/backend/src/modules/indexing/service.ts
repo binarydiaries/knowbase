@@ -8,6 +8,7 @@ import { documents } from '../../db/schema/documents';
 import { embeddings } from '../../db/schema/embeddings';
 import { MarkdownHeaderTextSplitter } from '../../utils/MarkdownHeaderTextSplitter';
 import type { DocumentContent, DocumentContentQna } from '../document/model';
+import { AiCostEventService } from '../admin/costEvent.service';
 
 const model = openai.embedding('text-embedding-3-small');
 
@@ -28,26 +29,31 @@ const CHUNK_SIZE = 800;
 const CHUNK_OVERLAP = 100;
 
 export abstract class IndexingService {
-  static embedDocument = async (document: typeof documents.$inferSelect) => {
+  static embedDocument = async (document: typeof documents.$inferSelect, orgId: string) => {
     const documentContent = {
       type: document.type,
       data: document.contentSerialized,
     } as z.infer<typeof DocumentContent>;
 
     let generatedEmbeddings: { embedding: number[]; content: string }[] = [];
+    let totalTokens = 0;
 
     if (documentContent.type === 'qna') {
       const chunks = await IndexingService.chunkQnA({
         title: document.title,
         questions: documentContent.data,
       });
-      generatedEmbeddings = await IndexingService.generateEmbeddings(chunks);
+      const result = await IndexingService.generateEmbeddings(chunks);
+      generatedEmbeddings = result.embeddings;
+      totalTokens = result.tokens;
     } else if (documentContent.type === 'text') {
       const chunks = await IndexingService.chunkText({
         title: document.title,
         content: documentContent.data,
       });
-      generatedEmbeddings = await IndexingService.generateEmbeddings(chunks);
+      const result = await IndexingService.generateEmbeddings(chunks);
+      generatedEmbeddings = result.embeddings;
+      totalTokens = result.tokens;
     }
 
     if (generatedEmbeddings.length > 0) {
@@ -60,6 +66,17 @@ export abstract class IndexingService {
           embedding: embedding.embedding,
         })),
       );
+    }
+
+    if (totalTokens > 0) {
+      await AiCostEventService.recordEvent({
+        orgId,
+        agentId: document.agentId ?? undefined,
+        provider: 'openai',
+        model: 'text-embedding-3-small',
+        usage: { inputTokens: totalTokens },
+        metadata: { operation: 'embed-document', documentId: document.id },
+      }).catch(() => {});
     }
   };
 
@@ -151,27 +168,46 @@ export abstract class IndexingService {
 
   static generateEmbeddings = async (
     chunks: string[],
-  ): Promise<Array<{ embedding: number[]; content: string }>> => {
-    const { embeddings } = await embedMany({
+  ): Promise<{ embeddings: Array<{ embedding: number[]; content: string }>; tokens: number }> => {
+    const { embeddings, usage } = await embedMany({
       model,
       values: chunks,
     });
-    return embeddings.map((e, i) => ({ content: chunks[i], embedding: e }));
+    return {
+      embeddings: embeddings.map((e, i) => ({ content: chunks[i], embedding: e })),
+      tokens: usage?.tokens ?? 0,
+    };
   };
 
-  static generateEmbedding = async (value: string): Promise<number[]> => {
+  static generateEmbedding = async (value: string): Promise<{ embedding: number[]; tokens: number }> => {
     // Normalise whitespace the same way as at index time so that query
     // vectors sit in the same space as document chunk vectors.
     const input = value.replaceAll('\n', ' ').trim();
-    const { embedding } = await embed({
+    const { embedding, usage } = await embed({
       model,
       value: input,
     });
-    return embedding;
+    return { embedding, tokens: usage?.tokens ?? 0 };
   };
 
-  static findRelevantContent = async (userQuery: string, agentId: string) => {
-    const userQueryEmbedded = await this.generateEmbedding(userQuery);
+  static findRelevantContent = async (
+    userQuery: string,
+    agentId: string,
+    orgId: string,
+    conversationId?: string,
+  ) => {
+    const { embedding: userQueryEmbedded, tokens } = await this.generateEmbedding(userQuery);
+
+    AiCostEventService.recordEvent({
+      orgId,
+      agentId,
+      conversationId,
+      provider: 'openai',
+      model: 'text-embedding-3-small',
+      usage: { inputTokens: tokens },
+      metadata: { operation: 'embed-query' },
+    }).catch(() => {});
+
     const similarity = sql<number>`1 - (${cosineDistance(
       embeddings.embedding,
       userQueryEmbedded,

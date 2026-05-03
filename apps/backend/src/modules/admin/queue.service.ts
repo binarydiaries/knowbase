@@ -98,7 +98,7 @@ export abstract class AdminQueueService {
     await DocumentService.update(documentId, { status: 'indexing' });
 
     // Run directly in background — do not await so the HTTP response returns immediately.
-    IndexingService.embedDocument(document)
+    IndexingService.embedDocument(document, orgId)
       .then(async () => {
         await DocumentService.update(documentId, {
           status: 'indexed',

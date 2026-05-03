@@ -129,8 +129,13 @@ export abstract class ChatService {
     });
   }
 
-  static async getSearchChunks(finalQuery: string, agentId: string) {
-    const chunks = await IndexingService.findRelevantContent(finalQuery, agentId);
+  static async getSearchChunks(
+    finalQuery: string,
+    agentId: string,
+    orgId: string,
+    conversationId?: string,
+  ) {
+    const chunks = await IndexingService.findRelevantContent(finalQuery, agentId, orgId, conversationId);
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
@@ -290,7 +295,7 @@ export abstract class ChatService {
       agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
 
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
@@ -430,7 +435,7 @@ export abstract class ChatService {
       agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
 
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
     const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');

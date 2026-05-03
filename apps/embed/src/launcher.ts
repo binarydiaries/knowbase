@@ -4,8 +4,9 @@ import { launcherStyle } from './styles';
 
 const btn = document.createElement('button');
 
-export function createLauncher(chatUrl: string) {
+export function createLauncher(chatUrl: string, primaryColor?: string) {
   btn.style.cssText = launcherStyle;
+  if (primaryColor) btn.style.background = primaryColor;
   showButtonBrand();
   // Hover enlarge
   btn.addEventListener('mouseenter', () => {
@@ -71,8 +72,4 @@ export function showButtonArrow() {
 
 export function showButtonBrand() {
   btn.innerHTML = bubbleIcon;
-}
-
-export function updateBubbleColor(color: string) {
-  btn.style.background = color;
 }

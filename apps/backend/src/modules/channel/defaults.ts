@@ -4,7 +4,6 @@ export const CHANNEL_CONFIG_DEFAULTS: Partial<IChannelWebConfig> = {
   allowedDomains: [],
   inputPlaceholder: 'Type your message...',
   primaryColor: '#000000',
-  bubbleColor: '#000000',
   subtitle: 'Virtual Assistant',
   welcomeMessage: 'Hi, How can i help you?',
 };

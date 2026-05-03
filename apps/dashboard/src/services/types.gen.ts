@@ -166,7 +166,6 @@ export type ChatChannelResponseSchema = {
                 welcomeMessage: string;
                 inputPlaceholder?: string;
                 primaryColor: string;
-                bubbleColor?: string;
                 allowedDomains: Array<string>;
             };
         } | {
@@ -545,7 +544,6 @@ export type OneAgentResponse = {
                 welcomeMessage: string;
                 inputPlaceholder?: string;
                 primaryColor: string;
-                bubbleColor?: string;
                 allowedDomains: Array<string>;
             };
         } | {
@@ -756,7 +754,6 @@ export type ChannelSchema = {
             welcomeMessage: string;
             inputPlaceholder?: string;
             primaryColor: string;
-            bubbleColor?: string;
             allowedDomains: Array<string>;
         };
     } | {
@@ -801,7 +798,6 @@ export type ManyChannelResponse = {
                 welcomeMessage: string;
                 inputPlaceholder?: string;
                 primaryColor: string;
-                bubbleColor?: string;
                 allowedDomains: Array<string>;
             };
         } | {
@@ -841,7 +837,6 @@ export type CreateChannelBodySchema = {
             welcomeMessage: string;
             inputPlaceholder?: string;
             primaryColor: string;
-            bubbleColor?: string;
             allowedDomains: Array<string>;
         };
     } | {
@@ -878,7 +873,6 @@ export type UpdateChannelBodySchema = {
             welcomeMessage: string;
             inputPlaceholder?: string;
             primaryColor: string;
-            bubbleColor?: string;
             allowedDomains: Array<string>;
         };
     } | {
@@ -917,7 +911,6 @@ export type OneChannelResponse = {
                 welcomeMessage: string;
                 inputPlaceholder?: string;
                 primaryColor: string;
-                bubbleColor?: string;
                 allowedDomains: Array<string>;
             };
         } | {

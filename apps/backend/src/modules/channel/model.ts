@@ -9,6 +9,7 @@ export const ChannelWebConfigSchema = z.object({
   welcomeMessage: z.string(),
   inputPlaceholder: z.string().optional(),
   primaryColor: z.string(),
+  bubbleColor: z.string().optional(),
   allowedDomains: z.array(z.string()),
 });
 

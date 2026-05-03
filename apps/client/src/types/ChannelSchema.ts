@@ -11,6 +11,7 @@ export type ChannelSchema = {
       welcomeMessage: string;
       inputPlaceholder?: string;
       primaryColor: string;
+      bubbleColor?: string;
       allowedDomains: Array<string>;
     };
   };

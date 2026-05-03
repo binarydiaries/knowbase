@@ -49,6 +49,10 @@ export const ChannelSchema = z.object({
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
+
+  bubbleColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{6})$/, 'Bubble color must be a valid hex color'),
 });
 type ChannelFormValues = z.infer<typeof ChannelSchema>;
 const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
@@ -83,6 +87,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       welcomeMessage: '',
       inputPlaceholder: '',
       primaryColor: '#915964',
+      bubbleColor: '#000000',
     },
   });
 
@@ -94,6 +99,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
         primaryColor: channelConfig.primaryColor ?? '#915964',
+        bubbleColor: channelConfig.bubbleColor ?? '#000000',
       });
     }
   }, [channelConfig, reset]);
@@ -187,6 +193,12 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             control={control}
             name="primaryColor"
             label="Primary Color"
+            disabled={readOnly}
+          />
+          <FormInputColor
+            control={control}
+            name="bubbleColor"
+            label="Bubble Color"
             disabled={readOnly}
           />
           <div className="flex justify-end">

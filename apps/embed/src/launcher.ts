@@ -72,3 +72,7 @@ export function showButtonArrow() {
 export function showButtonBrand() {
   btn.innerHTML = bubbleIcon;
 }
+
+export function updateBubbleColor(color: string) {
+  btn.style.background = color;
+}

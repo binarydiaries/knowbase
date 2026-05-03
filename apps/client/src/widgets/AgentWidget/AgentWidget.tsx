@@ -35,6 +35,13 @@ const AgentWidgetContent = ({
       agent_id: channelSchema.agentId,
       channel_name: channelConfig.displayName,
     });
+
+    if (channelConfig.bubbleColor) {
+      window.parent.postMessage(
+        { type: 'KB_BUBBLE_COLOR', color: channelConfig.bubbleColor },
+        '*',
+      );
+    }
   }, []);
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage

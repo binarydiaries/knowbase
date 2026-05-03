@@ -151,7 +151,7 @@ const AgentPreviewContent = ({
         sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
       }}
       onNewChat={onNewChat}
-      brandLink={import.meta.env.VITE_APP_URL}
+      brandLink={import.meta.env.VITE_LANDING_URL}
     />
   );
 };

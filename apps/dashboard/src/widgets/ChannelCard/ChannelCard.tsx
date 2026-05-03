@@ -7,12 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import { Field, FieldLabel } from '@knowbase/ui/components/field';
+import { Switch } from '@knowbase/ui/components/switch';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useController, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import {
   AGENT_LOCK_TOOLTIP,
@@ -20,10 +22,20 @@ import {
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormInputColor } from '@/components/FormInputColor/FormInputColor.tsx';
+import { FormSelect } from '@/components/FormSelect/FormSelect.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import { patchChannelsById } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
+
+const TTS_VOICE_OPTIONS = [
+  { value: 'alloy', label: 'Alloy' },
+  { value: 'echo', label: 'Echo' },
+  { value: 'fable', label: 'Fable' },
+  { value: 'onyx', label: 'Onyx' },
+  { value: 'nova', label: 'Nova' },
+  { value: 'shimmer', label: 'Shimmer' },
+];
 
 export const ChannelSchema = z.object({
   displayName: z
@@ -49,13 +61,17 @@ export const ChannelSchema = z.object({
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
+
+  voiceEnabled: z.boolean(),
+
+  ttsVoice: z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']),
 });
+
 type ChannelFormValues = z.infer<typeof ChannelSchema>;
+
 const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const posthog = usePostHog();
-  // const [primaryColor, setPrimaryColor] = React.useState('#915964');
   const { agentId } = useParams({ strict: false });
-  // const initialMessageId = useId();
   if (!agentId) {
     throw new Error('agentId not available');
   }
@@ -83,17 +99,28 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       welcomeMessage: '',
       inputPlaceholder: '',
       primaryColor: '#915964',
+      voiceEnabled: false,
+      ttsVoice: 'alloy',
     },
   });
 
+  const { field: voiceEnabledField } = useController({ control, name: 'voiceEnabled' });
+  const voiceEnabled = useWatch({ control, name: 'voiceEnabled' });
+
   useEffect(() => {
     if (channelConfig) {
+      const cfg = channelConfig as typeof channelConfig & {
+        voiceEnabled?: boolean;
+        ttsVoice?: string;
+      };
       reset({
-        displayName: channelConfig.displayName ?? '',
-        subtitle: channelConfig.subtitle ?? '',
-        welcomeMessage: channelConfig.welcomeMessage ?? '',
-        inputPlaceholder: channelConfig.inputPlaceholder ?? '',
-        primaryColor: channelConfig.primaryColor ?? '#915964',
+        displayName: cfg.displayName ?? '',
+        subtitle: cfg.subtitle ?? '',
+        welcomeMessage: cfg.welcomeMessage ?? '',
+        inputPlaceholder: cfg.inputPlaceholder ?? '',
+        primaryColor: cfg.primaryColor ?? '#915964',
+        voiceEnabled: cfg.voiceEnabled ?? false,
+        ttsVoice: (cfg.ttsVoice as ChannelFormValues['ttsVoice']) ?? 'alloy',
       });
     }
   }, [channelConfig, reset]);
@@ -138,8 +165,6 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       toast.error(getErrorMessage(error));
     },
   });
-
-  /* -------------------- Submit -------------------- */
 
   const onSave = (values: ChannelFormValues) => {
     saveChannelMutation.mutate(values);
@@ -189,6 +214,27 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             label="Primary Color"
             disabled={readOnly}
           />
+
+          <Field>
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={voiceEnabledField.value}
+                onCheckedChange={voiceEnabledField.onChange}
+                disabled={readOnly}
+              />
+              <FieldLabel>Enable Voice Calls</FieldLabel>
+            </div>
+          </Field>
+
+          {voiceEnabled && (
+            <FormSelect
+              name="ttsVoice"
+              control={control}
+              label="AI Voice"
+              options={TTS_VOICE_OPTIONS}
+            />
+          )}
+
           <div className="flex justify-end">
             <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button

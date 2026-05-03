@@ -20,7 +20,7 @@ export const indexingWorker = new Worker(
       throw new Error('Document not found');
     }
 
-    await IndexingService.embedDocument(document);
+    await IndexingService.embedDocument(document, orgId);
   },
   {
     connection,

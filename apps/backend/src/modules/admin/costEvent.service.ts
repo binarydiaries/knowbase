@@ -25,6 +25,10 @@ const DEFAULT_PRICING: Record<string, Pricing> = {
     outputPer1M: 0.4,
     cachedInputPer1M: 0.025,
   },
+  'text-embedding-3-small': {
+    inputPer1M: 0.02,
+    outputPer1M: 0,
+  },
 };
 
 function normalizeModel(model: string) {

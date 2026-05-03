@@ -20,6 +20,7 @@ import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } from './routes/conversations/{-$conversationId}/index'
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
+import { Route as AdminSubscriptionsIndexRouteImport } from './routes/admin/subscriptions/index'
 import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
 import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 
@@ -79,6 +80,11 @@ const AgentsAgentIdIndexRoute = AgentsAgentIdIndexRouteImport.update({
   path: '/agents/$agentId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSubscriptionsIndexRoute = AdminSubscriptionsIndexRouteImport.update({
+  id: '/admin/subscriptions/',
+  path: '/admin/subscriptions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
   id: '/admin/queue/',
   path: '/admin/queue/',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
+  '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/usage': typeof UsageIndexRoute
   '/admin/costs': typeof AdminCostsIndexRoute
   '/admin/queue': typeof AdminQueueIndexRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
+  '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/usage/'
     | '/admin/costs/'
     | '/admin/queue/'
+    | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesByTo: FileRoutesByTo
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/usage'
     | '/admin/costs'
     | '/admin/queue'
+    | '/admin/subscriptions'
     | '/agents/$agentId'
     | '/conversations/{-$conversationId}'
   id:
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/usage/'
     | '/admin/costs/'
     | '/admin/queue/'
+    | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
   fileRoutesById: FileRoutesById
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   UsageIndexRoute: typeof UsageIndexRoute
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
   AdminQueueIndexRoute: typeof AdminQueueIndexRoute
+  AdminSubscriptionsIndexRoute: typeof AdminSubscriptionsIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
 }
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentsAgentIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/subscriptions/': {
+      id: '/admin/subscriptions/'
+      path: '/admin/subscriptions'
+      fullPath: '/admin/subscriptions/'
+      preLoaderRoute: typeof AdminSubscriptionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/queue/': {
       id: '/admin/queue/'
       path: '/admin/queue'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsageIndexRoute: UsageIndexRoute,
   AdminCostsIndexRoute: AdminCostsIndexRoute,
   AdminQueueIndexRoute: AdminQueueIndexRoute,
+  AdminSubscriptionsIndexRoute: AdminSubscriptionsIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:
     ConversationsChar123ConversationIdChar125IndexRoute,

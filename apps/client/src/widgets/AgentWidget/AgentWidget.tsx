@@ -171,7 +171,7 @@ const AgentWidgetContent = ({
           });
           window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
         }}
-        brandLink={import.meta.env.VITE_APP_URL}
+        brandLink={import.meta.env.VITE_LANDING_URL}
       />
       {isCallActive && voiceWsUrl && (
         <VoiceCall

@@ -50,8 +50,8 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '250 knowledge sources',
       '500 messages / month',
       '10 training runs / day',
-      'WhatsApp & Instagram channels',
-      'Lead generation',
+      'WhatsApp',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
     ],
     limits: {
       agents: 3,
@@ -72,8 +72,8 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '1,000 knowledge sources',
       '2,000 messages / month',
       '20 training runs / day',
-      'WhatsApp & Instagram channels',
-      'Lead generation',
+      'WhatsApp',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
       'Analytics',
     ],
     limits: {
@@ -95,8 +95,8 @@ export const PLANS: Record<PlanName, PlanItem> = {
       '5,000 knowledge sources',
       '8,000 messages / month',
       '40 training runs / day',
-      'WhatsApp & Instagram channels',
-      'Lead generation',
+      'WhatsApp',
+      // 'Lead generation', // LEAD_GENERATION_DISABLED: uncomment to restore
       'Analytics',
       'Priority support',
     ],

@@ -11,6 +11,7 @@ import {
 } from '@knowbase/ui/components/sidebar';
 import {
   Bot,
+  CreditCard,
   Gauge,
   LifeBuoy,
   LineChart,
@@ -18,7 +19,7 @@ import {
   MessageCircle,
   Plug,
   Shield,
-  UserRound,
+  // UserRound, // LEAD_GENERATION_DISABLED: uncomment to restore
 } from 'lucide-react';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -34,7 +35,7 @@ const mainNav = [
 
 const inboxNav = [
   { name: 'Conversations', url: '/conversations', icon: MessageCircle },
-  { name: 'Leads', url: '/leads', icon: UserRound },
+  // { name: 'Leads', url: '/leads', icon: UserRound }, // LEAD_GENERATION_DISABLED: uncomment to restore
 ];
 
 const footerNav = [
@@ -51,6 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? [
         { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
         { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
+        { name: 'Admin Subscriptions', url: '/admin/subscriptions', icon: CreditCard },
       ]
     : [];
 

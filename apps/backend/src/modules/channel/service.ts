@@ -2,6 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { slackConnections } from '../../db/schema/slackConnections';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {
@@ -37,6 +38,44 @@ export abstract class ChannelService {
       .where(eq(channels.id, id))
       .returning();
     return channel;
+  }
+
+  static async findBySlackChannelId(slackChannelId: string, mode: 'channel' | 'mention') {
+    const rows = await db
+      .select({ channel: channels, agent: agents })
+      .from(channels)
+      .innerJoin(agents, eq(channels.agentId, agents.id))
+      .where(
+        and(
+          eq(channels.type, 'slack'),
+          sql`${channels.config}->>'slackChannelId' = ${slackChannelId}`,
+          sql`${channels.config}->>'mode' = ${mode}`,
+        ),
+      )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, agent: rows[0].agent };
+  }
+
+  static async findBySlackCommand(teamId: string, command: string) {
+    const rows = await db
+      .select({ channel: channels, agent: agents })
+      .from(channels)
+      .innerJoin(agents, eq(channels.agentId, agents.id))
+      .innerJoin(slackConnections, eq(agents.orgId, slackConnections.orgId))
+      .where(
+        and(
+          eq(channels.type, 'slack'),
+          eq(slackConnections.teamId, teamId),
+          sql`${channels.config}->>'mode' = 'command'`,
+          sql`${channels.config}->>'slackCommand' = ${command}`,
+        ),
+      )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, agent: rows[0].agent };
   }
 
   static async findByWhatsappPhoneNumberId(phoneNumberId: string) {

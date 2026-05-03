@@ -36,7 +36,8 @@ export abstract class SubscriptionService {
 
   static async getPlan(orgId: string): Promise<PlanName> {
     const record = await this.getRecord(orgId);
-    return normalizePlanName(record?.plan) ?? 'free';
+    const rawPlan = normalizePlanName(record?.plan) ?? 'free';
+    return record?.status === 'created' ? 'free' : rawPlan;
   }
 
   static getLimits(plan: PlanName) {
@@ -164,6 +165,8 @@ export abstract class SubscriptionService {
   }
 
   static planHasLeadGeneration(plan: PlanName): boolean {
+    // LEAD_GENERATION_DISABLED: change condition back to `plan !== 'free'` to restore
+    if (process.env.LEAD_GENERATION_ENABLED !== 'true') return false;
     return plan !== 'free';
   }
 

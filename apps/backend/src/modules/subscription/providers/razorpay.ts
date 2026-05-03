@@ -2,6 +2,8 @@ import Razorpay from 'razorpay';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { CheckoutResult, PaymentProvider, PaidPlanName, WebhookEvent } from './types';
 
+const PAID_PLAN_NAMES = new Set<string>(['starter', 'growth', 'pro']);
+
 export class RazorpayProvider implements PaymentProvider {
   readonly name = 'razorpay';
   readonly signatureHeader = 'x-razorpay-signature';
@@ -43,6 +45,15 @@ export class RazorpayProvider implements PaymentProvider {
     await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
   }
 
+  async fetchSubscription(subscriptionId: string) {
+    const sub = await this.getClient().subscriptions.fetch(subscriptionId) as any;
+    return {
+      status: sub.status as string,
+      currentPeriodStart: sub.current_start ? new Date(sub.current_start * 1000) : null,
+      currentPeriodEnd:   sub.current_end   ? new Date(sub.current_end   * 1000) : null,
+    };
+  }
+
   async getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null> {
     const sub = await this.getClient().subscriptions.fetch(subscriptionId);
     return (sub as any).current_end ? new Date((sub as any).current_end * 1000) : null;
@@ -81,7 +92,8 @@ export class RazorpayProvider implements PaymentProvider {
     const orgId: string = entity.notes?.orgId;
     if (!orgId) return null;
 
-    const planName: string = entity.notes?.plan;
+    const rawPlan: string = entity.notes?.plan;
+    const planName: PaidPlanName | undefined = PAID_PLAN_NAMES.has(rawPlan) ? rawPlan as PaidPlanName : undefined;
     const subscriptionId: string = entity.id;
     const currentPeriodStart = entity.current_start
       ? new Date(entity.current_start * 1000)

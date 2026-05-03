@@ -19,9 +19,9 @@ import { setupMessageListener } from './listener';
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () =>
-      createLauncher(chatUrl),
+      createLauncher(chatUrl, config.primaryColor),
     );
   } else {
-    createLauncher(chatUrl);
+    createLauncher(chatUrl, config.primaryColor);
   }
 })();

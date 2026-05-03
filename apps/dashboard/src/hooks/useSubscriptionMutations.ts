@@ -62,15 +62,13 @@ export function useCancelMutation() {
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
-    mutationFn: (immediate: boolean) =>
-      postSubscriptionsCancel({ body: { immediate } }),
-    onSuccess: (_, immediate) => {
+    mutationFn: () =>
+      postSubscriptionsCancel({ body: { immediate: false } }),
+    onSuccess: () => {
       invalidate();
-      posthog.capture('subscription_cancelled', { immediate });
+      posthog.capture('subscription_cancelled', { immediate: false });
       toast.success(
-        immediate
-          ? 'Subscription cancelled. A prorated refund will be credited within 5–7 business days.'
-          : "Subscription cancelled. You'll keep access until the end of your billing period.",
+        "Subscription cancelled. You'll keep full access until the end of your billing period.",
       );
     },
     onError: () => {

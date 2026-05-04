@@ -1,6 +1,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
+import { VoiceCall } from '@knowbase/ui/widgets/VoiceCall/VoiceCall';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePostHog } from 'posthog-js/react';
@@ -28,6 +29,8 @@ const AgentPreviewContent = ({
   const firstTokenTimeRef = useRef<number>(0);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [voiceConversationId, setVoiceConversationId] = useState('');
 
   const channelConfig = useMemo(() => {
     const channelAdditional = channelWeb.additional;
@@ -131,28 +134,52 @@ const AgentPreviewContent = ({
     }
   }, [setMessages, initialMessage]);
 
+  const voiceWsUrl = voiceConversationId
+    ? (() => {
+        const wsBase = import.meta.env.VITE_API_BASE.replace(/^http/, 'ws');
+        return `${wsBase}/voice/session?channelId=${channelWeb.id}&orgId=${orgId}&conversationId=${voiceConversationId}`;
+      })()
+    : '';
+
+  const handleStartCall = () => {
+    setVoiceConversationId(crypto.randomUUID());
+    setIsCallActive(true);
+  };
+
   return (
-    <Agent
-      displayName={channelConfig?.displayName || ''}
-      subTitle={channelConfig?.subtitle}
-      inputPlaceholder={channelConfig?.inputPlaceholder}
-      primaryColor={channelConfig?.primaryColor || ''}
-      className="max-h-175 h-full"
-      isLoading={status === 'submitted'}
-      inputDisabled={isUsageExhausted}
-      alertMessage={alertMessage}
-      messages={messages.map((value) => ({
-        id: value.id,
-        message: value.parts.find((v) => v?.type === 'text')?.text || '',
-        type: value.role === 'user' ? 'user' : 'system',
-      }))}
-      onSendMessage={(message) => {
-        sendStartTimeRef.current = Date.now();
-        sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
-      }}
-      onNewChat={onNewChat}
-      brandLink={import.meta.env.VITE_LANDING_URL}
-    />
+    <div className="relative h-full">
+      <Agent
+        displayName={channelConfig?.displayName || ''}
+        subTitle={channelConfig?.subtitle}
+        inputPlaceholder={channelConfig?.inputPlaceholder}
+        primaryColor={channelConfig?.primaryColor || ''}
+        className="max-h-175 h-full"
+        isLoading={status === 'submitted'}
+        inputDisabled={isUsageExhausted}
+        alertMessage={alertMessage}
+        voiceEnabled={channelConfig?.voiceEnabled}
+        onStartCall={handleStartCall}
+        messages={messages.map((value) => ({
+          id: value.id,
+          message: value.parts.find((v) => v?.type === 'text')?.text || '',
+          type: value.role === 'user' ? 'user' : 'system',
+        }))}
+        onSendMessage={(message) => {
+          sendStartTimeRef.current = Date.now();
+          sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
+        }}
+        onNewChat={onNewChat}
+        brandLink={import.meta.env.VITE_LANDING_URL}
+      />
+      {isCallActive && voiceWsUrl && (
+        <VoiceCall
+          wsUrl={voiceWsUrl}
+          agentName={channelConfig?.displayName || ''}
+          primaryColor={channelConfig?.primaryColor || ''}
+          onClose={() => setIsCallActive(false)}
+        />
+      )}
+    </div>
   );
 };
 

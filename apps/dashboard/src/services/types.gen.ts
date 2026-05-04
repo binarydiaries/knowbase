@@ -167,6 +167,8 @@ export type ChatChannelResponseSchema = {
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
+                voiceEnabled?: boolean;
+                ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
             };
         } | {
             type: 'whatsapp';
@@ -545,6 +547,8 @@ export type OneAgentResponse = {
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
+                voiceEnabled?: boolean;
+                ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
             };
         } | {
             type: 'whatsapp';
@@ -755,6 +759,8 @@ export type ChannelSchema = {
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
+            voiceEnabled?: boolean;
+            ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
         };
     } | {
         type: 'whatsapp';
@@ -799,6 +805,8 @@ export type ManyChannelResponse = {
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
+                voiceEnabled?: boolean;
+                ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
             };
         } | {
             type: 'whatsapp';
@@ -838,6 +846,8 @@ export type CreateChannelBodySchema = {
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
+            voiceEnabled?: boolean;
+            ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
         };
     } | {
         type: 'whatsapp';
@@ -874,6 +884,8 @@ export type UpdateChannelBodySchema = {
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
+            voiceEnabled?: boolean;
+            ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
         };
     } | {
         type: 'whatsapp';
@@ -912,6 +924,8 @@ export type OneChannelResponse = {
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
+                voiceEnabled?: boolean;
+                ttsVoice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
             };
         } | {
             type: 'whatsapp';

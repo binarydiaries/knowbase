@@ -2,8 +2,6 @@ import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { createFileRoute } from '@tanstack/react-router';
-import { usePostHog } from 'posthog-js/react';
-import { useEffect } from 'react';
 import { HaltedBanner } from '@/components/subscriptions/HaltedBanner';
 import { PendingCancellationBanner } from '@/components/subscriptions/PendingCancellationBanner';
 import { PlanCard } from '@/components/subscriptions/PlanCard';
@@ -21,7 +19,6 @@ export const Route = createFileRoute('/subscriptions/')({
 });
 
 function RouteComponent() {
-  const posthog = usePostHog();
   const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd, pendingPlan } =
     useClerkPlan();
   const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
@@ -31,10 +28,6 @@ function RouteComponent() {
 
   const isBusy = checkoutMutation.isPending || cancelMutation.isPending;
   const hasActiveSubscription = isPaid || isPendingCancellation;
-
-  useEffect(() => {
-    posthog.capture('subscription_page_viewed');
-  }, [posthog]);
 
   return (
     <>

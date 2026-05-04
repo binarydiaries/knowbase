@@ -12,7 +12,6 @@ import {
 import { Switch } from '@knowbase/ui/components/switch';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
-import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -90,7 +89,6 @@ export function LeadGenerationConfigDrawer({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const posthog = usePostHog();
   const cfg = action.config;
 
   const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>({
@@ -124,13 +122,7 @@ export function LeadGenerationConfigDrawer({
           },
         },
       }),
-    onSuccess: (_, values) => {
-      posthog.capture('lead_generation_configured', {
-        action_id: action.id,
-        fields_collected: Object.entries(values.fields)
-          .filter(([, v]) => v?.collect)
-          .map(([k]) => k),
-      });
+    onSuccess: () => {
       toast.success('Lead generation settings saved.');
       onSaved();
     },

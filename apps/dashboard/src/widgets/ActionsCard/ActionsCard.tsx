@@ -11,7 +11,6 @@ import { Switch } from '@knowbase/ui/components/switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { LockIcon, UserRound } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 import {
   getAgentActions,
@@ -39,7 +38,6 @@ const ACTION_TYPES: Array<{
 }> = [];
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
   const queryClient = useQueryClient();
@@ -80,11 +78,6 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       }
     },
     onSuccess: (_, variables) => {
-      posthog.capture('action_toggled', {
-        action_type: variables.type,
-        enabled: variables.enabled,
-        agent_id: agentId,
-      });
       const actionLabel =
         ACTION_TYPES.find((a) => a.id === variables.type)?.label ?? 'Action';
       toast.success(

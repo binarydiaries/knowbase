@@ -1,4 +1,3 @@
-import { usePostHog } from '@posthog/react';
 import { Mail } from 'lucide-react';
 import {
   FaFacebook,
@@ -18,8 +17,6 @@ const socialLinks = [
 ];
 
 const Footer = () => {
-  const posthog = usePostHog();
-
   return (
     <footer className="px-6" aria-label="Site footer">
       <div className="w-full mx-auto">
@@ -52,74 +49,19 @@ const Footer = () => {
                 </h2>
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Home',
-                          section: 'quick_links',
-                        })
-                      }
-                    >
-                      Home
-                    </a>
+                    <a href="#" className="hover:text-[#301B69]">Home</a>
                   </li>
                   <li>
-                    <a
-                      href="#features"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Features',
-                          section: 'quick_links',
-                        })
-                      }
-                    >
-                      Features
-                    </a>
+                    <a href="#features" className="hover:text-[#301B69]">Features</a>
                   </li>
                   <li>
-                    <a
-                      href="#how-it-works"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'How it Works',
-                          section: 'quick_links',
-                        })
-                      }
-                    >
-                      How it Works
-                    </a>
+                    <a href="#how-it-works" className="hover:text-[#301B69]">How it Works</a>
                   </li>
                   <li>
-                    <a
-                      href="#pricing"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Pricing',
-                          section: 'quick_links',
-                        })
-                      }
-                    >
-                      Pricing
-                    </a>
+                    <a href="#pricing" className="hover:text-[#301B69]">Pricing</a>
                   </li>
                   <li>
-                    <a
-                      href="#faq"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'FAQ',
-                          section: 'quick_links',
-                        })
-                      }
-                    >
-                      FAQ
-                    </a>
+                    <a href="#faq" className="hover:text-[#301B69]">FAQ</a>
                   </li>
                 </ul>
               </nav>
@@ -131,44 +73,17 @@ const Footer = () => {
                 </h2>
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
-                    <a
-                      href="https://docs.agenvik.com/"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Help Center',
-                          section: 'support',
-                        })
-                      }
-                    >
+                    <a href="https://docs.agenvik.com/" className="hover:text-[#301B69]">
                       User guide
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="https://docs.agenvik.com/developer-guide/overview"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Getting Started',
-                          section: 'support',
-                        })
-                      }
-                    >
+                    <a href="https://docs.agenvik.com/developer-guide/overview" className="hover:text-[#301B69]">
                       Developer Guide
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="https://docs.agenvik.com/help-and-support/overview"
-                      className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_nav_link_clicked', {
-                          label: 'Contact Support',
-                          section: 'support',
-                        })
-                      }
-                    >
+                    <a href="https://docs.agenvik.com/help-and-support/overview" className="hover:text-[#301B69]">
                       Help & Support
                     </a>
                   </li>
@@ -186,11 +101,6 @@ const Footer = () => {
                     <a
                       href="mailto:hello@agenvik.com"
                       className="hover:text-[#301B69]"
-                      onClick={() =>
-                        posthog?.capture('footer_contact_clicked', {
-                          type: 'email',
-                        })
-                      }
                     >
                       hello@agenvik.com
                     </a>
@@ -200,10 +110,7 @@ const Footer = () => {
                   {/*  <a*/}
                   {/*    href="tel:+14146875892"*/}
                   {/*    className="hover:text-[#301B69]"*/}
-                  {/*    onClick={() =>*/}
-                  {/*      posthog?.capture('footer_contact_clicked', {*/}
-                  {/*        type: 'phone',*/}
-                  {/*      })*/}
+                  {/*    onClick={() => {}*/}
                   {/*    }*/}
                   {/*  >*/}
                   {/*    (414) 687-5892*/}
@@ -236,12 +143,6 @@ const Footer = () => {
                         href={href}
                         aria-label={`Agenvik on ${label}`}
                         className="w-9 h-9 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-md hover:opacity-90 transition"
-                        onClick={() =>
-                          posthog?.capture('footer_social_clicked', {
-                            platform: label,
-                            href,
-                          })
-                        }
                       >
                         <Icon size={16} aria-hidden="true" />
                       </a>

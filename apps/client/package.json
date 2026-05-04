@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.3",
-    "@posthog/react": "^1.9.0",
-    "posthog-js": "^1.369.5",
     "@knowbase/ui": "*",
     "@paralleldrive/cuid2": "^3.0.6",
     "@radix-ui/react-separator": "^1.1.8",

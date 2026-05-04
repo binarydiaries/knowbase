@@ -1,4 +1,3 @@
-import { usePostHog } from '@posthog/react';
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import GetStartedButton from '../components/GetStartedButton';
@@ -31,7 +30,6 @@ function usePlans() {
 }
 
 const PricingSection = () => {
-  const posthog = usePostHog();
   const { plans, loading } = usePlans();
 
   return (
@@ -136,17 +134,7 @@ const PricingSection = () => {
                           ))}
                         </ul>
 
-                        <div
-                          onClick={() =>
-                            posthog?.capture('pricing_plan_clicked', {
-                              plan_name: plan.name,
-                              plan_slug: plan.slug,
-                              is_free: isFree,
-                              price: plan.priceDisplay,
-                              is_highlighted: plan.highlight,
-                            })
-                          }
-                        >
+                        <div>
                           <GetStartedButton
                             className={`w-full py-2.5 rounded-xl text-sm transition ${
                               plan.highlight

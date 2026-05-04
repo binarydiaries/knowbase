@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { usePostHog } from "@posthog/react";
 
 const faqs = [
     {
@@ -57,17 +56,9 @@ const faqs = [
 
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(1);
-    const posthog = usePostHog();
 
     const toggle = (index: number) => {
-        const isOpening = openIndex !== index;
         setOpenIndex(openIndex === index ? null : index);
-        if (isOpening) {
-            posthog?.capture('faq_expanded', {
-                question: faqs[index].question,
-                question_index: index,
-            });
-        }
     };
 
     return (

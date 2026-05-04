@@ -3,7 +3,6 @@ import { useAuth } from '@clerk/clerk-react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { usePostHog } from 'posthog-js/react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ChannelSchema } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
@@ -22,7 +21,6 @@ const AgentPreviewContent = ({
   orgId,
   onNewChat,
 }: IAgentPreviewContentProps) => {
-  const posthog = usePostHog();
   const initialMessageId = useId();
   const sendStartTimeRef = useRef<number>(0);
   const firstTokenTimeRef = useRef<number>(0);
@@ -66,29 +64,9 @@ const AgentPreviewContent = ({
         };
       },
     }),
-    onFinish({ isError }) {
-      const now = Date.now();
-      const latency = sendStartTimeRef.current
-        ? (now - sendStartTimeRef.current) / 1000
-        : undefined;
-      const timeToFirstToken =
-        sendStartTimeRef.current && firstTokenTimeRef.current
-          ? (firstTokenTimeRef.current - sendStartTimeRef.current) / 1000
-          : undefined;
+    onFinish() {
       sendStartTimeRef.current = 0;
       firstTokenTimeRef.current = 0;
-
-      posthog.capture('$ai_generation', {
-        $ai_trace_id: conversationId,
-        $ai_session_id: agentId,
-        $ai_provider: 'custom',
-        $ai_stream: true,
-        $ai_latency: latency,
-        $ai_time_to_first_token: timeToFirstToken,
-        $ai_is_error: isError,
-        $ai_span_name: 'agent_preview_chat',
-        $ai_base_url: import.meta.env.VITE_API_BASE,
-      });
     },
     onError(error) {
       const chatError = parseChatError(error);

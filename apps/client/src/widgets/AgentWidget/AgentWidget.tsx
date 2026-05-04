@@ -1,8 +1,7 @@
 import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
-import { usePostHog } from '@posthog/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useEffect, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { baseUrl } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 import { parseChatError } from '@/utils/chatError.ts';
@@ -21,21 +20,10 @@ const AgentWidgetContent = ({
   orgId,
   onNewChat,
 }: IAgentWidgetContentProps) => {
-  const posthog = usePostHog();
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only event
-  useEffect(() => {
-    posthog?.capture('chat_widget_opened', {
-      channel_id: channelSchema.id,
-      org_id: orgId,
-      agent_id: channelSchema.agentId,
-      channel_name: channelConfig.displayName,
-    });
-  }, []);
 
   const initialMessage: UIMessage | undefined = channelConfig?.welcomeMessage
     ? {
@@ -71,11 +59,6 @@ const AgentWidgetContent = ({
         setAlertMessage(
           'This assistant is temporarily unavailable right now. Please try again later.',
         );
-        posthog?.capture('chat_usage_limit_reached', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-        });
         return;
       }
 
@@ -83,13 +66,6 @@ const AgentWidgetContent = ({
         setAlertMessage(
           chatError.message || 'Something went wrong. Please try again.',
         );
-        posthog?.capture('chat_error_occurred', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          error_code: chatError.code,
-          error_message: chatError.message,
-        });
       }
     },
   });
@@ -110,30 +86,12 @@ const AgentWidgetContent = ({
         type: value.role === 'user' ? 'user' : 'system',
       }))}
       onSendMessage={(message) => {
-        posthog?.capture('chat_message_sent', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          message_count: messages.length,
-        });
         sendMessage({ text: message });
       }}
       onNewChat={() => {
-        posthog?.capture('chat_new_session_started', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          messages_in_previous_session: messages.length,
-        });
         onNewChat();
       }}
       onClose={() => {
-        posthog?.capture('chat_widget_closed', {
-          channel_id: channelSchema.id,
-          org_id: orgId,
-          agent_id: channelSchema.agentId,
-          message_count: messages.length,
-        });
         window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
       }}
       brandLink={import.meta.env.VITE_LANDING_URL}

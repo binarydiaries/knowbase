@@ -1,9 +1,6 @@
-import { usePostHog } from '@posthog/react';
 import GetStartedButton from '../components/GetStartedButton';
 
 const HeroSection = () => {
-  const posthog = usePostHog();
-
   return (
     <section
       aria-label="Hero"
@@ -28,48 +25,24 @@ const HeroSection = () => {
             <a
               href="#features"
               className="hover:opacity-80"
-              onClick={() =>
-                posthog?.capture('nav_link_clicked', {
-                  label: 'Features',
-                  href: '#features',
-                })
-              }
             >
               Features
             </a>
             <a
               href="#how-it-works"
               className="hover:opacity-80"
-              onClick={() =>
-                posthog?.capture('nav_link_clicked', {
-                  label: 'How it Works',
-                  href: '#how-it-works',
-                })
-              }
             >
               How it Works
             </a>
             <a
               href="#pricing"
               className="hover:opacity-80"
-              onClick={() =>
-                posthog?.capture('nav_link_clicked', {
-                  label: 'Pricing',
-                  href: '#pricing',
-                })
-              }
             >
               Pricing
             </a>
             <a
               href="#faq"
               className="hover:opacity-80"
-              onClick={() =>
-                posthog?.capture('nav_link_clicked', {
-                  label: 'FAQ',
-                  href: '#faq',
-                })
-              }
             >
               FAQ
             </a>
@@ -103,7 +76,6 @@ const HeroSection = () => {
           <a
             href="mailto:hello@agenvik.com"
             className="px-6 py-3 text-[#301B69] bg-white rounded-xl"
-            onClick={() => posthog?.capture('contact_us_clicked')}
           >
             Contact Us
           </a>

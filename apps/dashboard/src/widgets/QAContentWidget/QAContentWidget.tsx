@@ -14,7 +14,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2, Trash2 } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
@@ -67,7 +66,6 @@ export const QAContentWidget = ({
   onClose,
   readOnly = false,
 }: IQAContentWidgetProps) => {
-  const posthog = usePostHog();
   const { addUpdateDocument } = useDocuments();
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
@@ -114,12 +112,6 @@ export const QAContentWidget = ({
       return { document: data.document };
     },
     onSuccess: ({ document: saved }) => {
-      posthog.capture('knowledge_source_saved', {
-        agent_id: agentId,
-        document_id: saved.id,
-        source_type: 'qna',
-        mode,
-      });
       addUpdateDocument(agentId, saved);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success(

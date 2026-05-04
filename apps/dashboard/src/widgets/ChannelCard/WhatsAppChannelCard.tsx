@@ -25,7 +25,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { Loader2, LockIcon } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
   AGENT_LOCK_TOOLTIP,
@@ -47,7 +46,6 @@ interface ConnectionResponse {
 }
 
 const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const { isPaid, isLoading: planLoading } = useClerkPlan();
 
@@ -160,10 +158,6 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         updatePhoneBinding(phone.phoneNumberId, agentId, null);
       }
       setSelectedPhoneNumberId('');
-      posthog.capture('agent_channel_connected', {
-        agent_id: agentId,
-        channel_type: 'whatsapp',
-      });
       toast.success('Phone number assigned');
     },
     onError: (error) => {
@@ -188,10 +182,6 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (phone) {
         updatePhoneBinding(phone.phoneNumberId, null, null);
       }
-      posthog.capture('agent_channel_disconnected', {
-        agent_id: agentId,
-        channel_type: 'whatsapp',
-      });
       setUnassignConfirmOpen(false);
       toast.success('Phone number unassigned');
     },

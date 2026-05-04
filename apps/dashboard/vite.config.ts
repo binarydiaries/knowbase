@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
@@ -18,6 +19,11 @@ export default defineConfig(() => {
         },
       }),
       tailwindcss(),
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: 'binarydiaries',
+        project: 'dashboard',
+      }),
     ],
     resolve: {
       alias: {

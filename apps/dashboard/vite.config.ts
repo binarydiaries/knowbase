@@ -3,10 +3,11 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 // https://vite.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [
       tanstackRouter({
@@ -20,7 +21,7 @@ export default defineConfig(() => {
       }),
       tailwindcss(),
       sentryVitePlugin({
-        authToken: process.env.SENTRY_AUTH_TOKEN,
+        authToken: env.VITE_SENTRY_AUTH_TOKEN,
         org: 'binarydiaries',
         project: 'dashboard',
       }),

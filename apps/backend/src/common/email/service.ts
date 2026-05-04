@@ -49,6 +49,8 @@ export abstract class EmailService {
     const client = getClient();
     if (!client) return;
 
+    console.log('coming here ', from, data);
+
     await client.emails.send({
       from,
       to: data.to,

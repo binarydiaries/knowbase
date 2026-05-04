@@ -29,6 +29,10 @@ const DEFAULT_PRICING: Record<string, Pricing> = {
     inputPer1M: 0.02,
     outputPer1M: 0,
   },
+  'gpt-4o-realtime-preview': {
+    inputPer1M: 40,
+    outputPer1M: 80,
+  },
 };
 
 function normalizeModel(model: string) {

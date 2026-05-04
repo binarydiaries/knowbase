@@ -23,6 +23,7 @@ export function openIframe(chatUrl: string) {
 
   iframe = document.createElement('iframe');
   iframe.src = chatUrl;
+  iframe.allow = 'microphone';
   iframe.style.cssText = BASE_STYLE;
 
   iframe.onload = () => {

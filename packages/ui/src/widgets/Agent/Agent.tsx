@@ -2,7 +2,7 @@ import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
 import { Button } from '@knowbase/ui/components/button';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, MessageSquarePlus, SendHorizonal, X } from 'lucide-react';
+import { Ellipsis, MessageSquarePlus, Phone, SendHorizonal, X } from 'lucide-react';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Agent.types';
 import { ChatMessage } from './ChatMessage';
@@ -20,6 +20,8 @@ interface IAgentProps extends ComponentProps<'div'> {
   inputPlaceholder?: string;
   primaryColor: string;
   brandLink: string;
+  voiceEnabled?: boolean;
+  onStartCall?: () => void;
 }
 
 export const Agent = ({
@@ -36,6 +38,8 @@ export const Agent = ({
   inputPlaceholder,
   primaryColor,
   brandLink,
+  voiceEnabled,
+  onStartCall,
   ...otherProps
 }: IAgentProps) => {
   const [input, setInput] = useState('');
@@ -100,6 +104,17 @@ export const Agent = ({
           <h2 className="text-base font-semibold">{displayName}</h2>
           {subTitle && <p className="text-sm">{subTitle}</p>}
         </div>
+        {voiceEnabled && onStartCall && (
+          <Button
+            size="icon-sm"
+            variant="link"
+            onClick={onStartCall}
+            className="cursor-pointer"
+            aria-label="Start voice call"
+          >
+            <Phone className="text-white size-5" />
+          </Button>
+        )}
         {onNewChat && (
           <Button
             size="icon-sm"

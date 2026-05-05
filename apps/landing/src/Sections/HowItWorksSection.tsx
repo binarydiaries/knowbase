@@ -91,7 +91,7 @@ const HowItWorksSection = () => {
                                         Start for free. No setup. No complexity. No credit card required.
                                     </p>
                                 </div>
-                                <GetStartedButton className="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow hover:opacity-90">
+                                <GetStartedButton source="how_it_works" className="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow hover:opacity-90">
                                     Get Started →
                                 </GetStartedButton>
                             </div>

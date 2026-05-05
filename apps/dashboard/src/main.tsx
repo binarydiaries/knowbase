@@ -24,8 +24,7 @@ const router = createRouter({ routeTree });
 
 Sentry.init({
   dsn: 'https://e7f1b31d7d33df35a37aa773be554f8d@o4505526005399552.ingest.us.sentry.io/4511332509941760',
-  // Setting this option to true will send default PII data to Sentry.
-  // For example, automatic IP address collection on events
+  environment: import.meta.env.VITE_ENV_KEY ?? 'development',
   sendDefaultPii: true,
   integrations: [
     Sentry.browserTracingIntegration(),
@@ -33,7 +32,8 @@ Sentry.init({
     Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
   ],
   enableLogs: true,
-  tracesSampleRate: 1.0,
+  tracesSampleRate: 0.2,
+  tracePropagationTargets: [import.meta.env.VITE_API_BASE].filter(Boolean),
 });
 
 // Create a new router instance

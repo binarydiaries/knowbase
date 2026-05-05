@@ -9,7 +9,6 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  console.log(env.VITE_SENTRY_AUTH_TOKEN);
   return {
     plugins: [
       tanstackRouter({

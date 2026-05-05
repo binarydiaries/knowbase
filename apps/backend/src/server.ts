@@ -25,16 +25,13 @@ import { WhatsApp } from './modules/whatsapp/whatsapp';
 
 Sentry.init({
   dsn: 'https://c9a6f1f3bd7cfafb990c1d3ef07c518d@o4505526005399552.ingest.us.sentry.io/4511332466884609',
-  // Adds request headers and IP for users, for more info visit:
-  // https://docs.sentry.io/platforms/javascript/guides/elysia/configuration/options/#sendDefaultPii
+  environment: process.env.ENV_KEY ?? 'development',
   sendDefaultPii: true,
   enableLogs: true,
   integrations: [
     Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
   ],
-  // We recommend adjusting this value in production, or using tracesSampler
-  // for finer control
-  tracesSampleRate: 1.0,
+  tracesSampleRate: 0.2,
 });
 
 const app = Sentry.withElysia(new Elysia())

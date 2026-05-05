@@ -27,7 +27,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { Loader2, LockIcon } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
   AGENT_LOCK_TOOLTIP,
@@ -51,7 +50,6 @@ interface ConnectionResponse {
 }
 
 const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const { isPaid, isLoading: planLoading } = useClerkPlan();
 
@@ -172,11 +170,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       }
       setSelectedSlackChannelId('');
       setCommandName('');
-      posthog.capture('agent_channel_connected', {
-        agent_id: agentId,
-        channel_type: 'slack',
-        mode: selectedMode,
-      });
       toast.success('Slack channel assigned');
     },
     onError: (error) => {
@@ -200,10 +193,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (sc) {
         updateChannelBinding(sc.slackChannelId, null, null);
       }
-      posthog.capture('agent_channel_disconnected', {
-        agent_id: agentId,
-        channel_type: 'slack',
-      });
       setUnassignConfirmOpen(false);
       toast.success('Slack channel unassigned');
     },

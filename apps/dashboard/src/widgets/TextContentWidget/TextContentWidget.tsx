@@ -14,7 +14,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
@@ -52,7 +51,6 @@ export const TextContentWidget = ({
   onClose,
   readOnly = false,
 }: ITextContentWidgetProps) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
 
@@ -91,12 +89,6 @@ export const TextContentWidget = ({
       return { document: data.document };
     },
     onSuccess: ({ document: savedDocument }) => {
-      posthog.capture('knowledge_source_saved', {
-        agent_id: agentId,
-        document_id: savedDocument.id,
-        source_type: 'text',
-        mode,
-      });
       addUpdateDocument(agentId, savedDocument);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success(

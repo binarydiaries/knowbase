@@ -12,7 +12,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink, LockIcon } from 'lucide-react';
 import { useEffect } from 'react';
-import { usePostHog } from 'posthog-js/react';
 import { Link } from '@tanstack/react-router';
 import { useClerkPlan } from '@/hooks/useClerkPlan.ts';
 import { client } from '@/services/client.gen';
@@ -29,7 +28,6 @@ interface ConnectionResponse {
 }
 
 export function SlackIntegrationCard() {
-  const posthog = usePostHog();
   const { connected, teamName, slackChannels, setConnection, clearConnection } =
     useSlackConnection();
   const { isPaid, isLoading: planLoading } = useClerkPlan();
@@ -81,7 +79,6 @@ export function SlackIntegrationCard() {
       return res.data as { url: string };
     },
     onSuccess: ({ url }) => {
-      posthog.capture('slack_oauth_started');
       window.location.href = url;
     },
     onError: (error) => {
@@ -98,7 +95,6 @@ export function SlackIntegrationCard() {
     },
     onSuccess: () => {
       clearConnection();
-      posthog.capture('slack_disconnected');
       toast.success('Slack disconnected');
     },
     onError: (error) => {

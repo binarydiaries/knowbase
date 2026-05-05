@@ -1,6 +1,5 @@
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { usePostHog } from 'posthog-js/react';
 import {
   type CheckoutBodySchema,
   postSubscriptionsCancel,
@@ -15,7 +14,6 @@ function useInvalidateSubscription() {
 }
 
 export function useCheckoutMutation() {
-  const posthog = usePostHog();
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
@@ -45,9 +43,8 @@ export function useCheckoutMutation() {
 
       return { plan };
     },
-    onSuccess: ({ plan }) => {
+    onSuccess: () => {
       invalidate();
-      posthog.capture('subscription_checkout_completed', { plan });
     },
     onError: (err: Error) => {
       if (err.message !== 'dismissed') {
@@ -58,7 +55,6 @@ export function useCheckoutMutation() {
 }
 
 export function useCancelMutation() {
-  const posthog = usePostHog();
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
@@ -66,7 +62,6 @@ export function useCancelMutation() {
       postSubscriptionsCancel({ body: { immediate: false } }),
     onSuccess: () => {
       invalidate();
-      posthog.capture('subscription_cancelled', { immediate: false });
       toast.success(
         "Subscription cancelled. You'll keep full access until the end of your billing period.",
       );

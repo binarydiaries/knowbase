@@ -12,7 +12,6 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -52,7 +51,6 @@ export function CreateAgentDialog({
   disabled?: boolean;
   disabledReason?: string;
 }) {
-  const posthog = usePostHog();
   const { handleSubmit, reset, control } = useForm({
     resolver: zodResolver(schema),
     mode: 'all',
@@ -88,17 +86,10 @@ export function CreateAgentDialog({
       // ✨ CREATE
       return postAgents({ body: { name, description } });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       if (agent) {
-        posthog.capture('agent_updated', {
-          agent_id: agent.id,
-          agent_name: variables.name,
-        });
         toast.success('Agent updated');
       } else {
-        posthog.capture('agent_created', {
-          agent_name: variables.name,
-        });
         toast.success('Agent created');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });

@@ -28,11 +28,9 @@ import {
   Sun,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { usePostHog } from 'posthog-js/react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 
 export function NavUser() {
-  const posthog = usePostHog();
   const { isMobile } = useSidebar();
   const { user } = useUser();
   const { isPaid, planLabel } = useClerkPlan();
@@ -83,12 +81,6 @@ export function NavUser() {
               <DropdownMenuItem asChild>
                 <Link
                   to={'/subscriptions'}
-                  onClick={() =>
-                    posthog.capture('upgrade_plan_clicked', {
-                      is_paid: isPaid,
-                      plan_label: planLabel,
-                    })
-                  }
                 >
                   {isPaid ? <CreditCard /> : <Sparkles />}
                   {isPaid ? 'Manage Billing' : 'Upgrade Plan'}
@@ -130,12 +122,7 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <SignOutButton>
-              <DropdownMenuItem
-                onClick={() => {
-                  posthog.capture('user_signed_out');
-                  posthog.reset();
-                }}
-              >
+              <DropdownMenuItem>
                 <LogOut />
                 Log out
               </DropdownMenuItem>

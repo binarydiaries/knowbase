@@ -12,7 +12,6 @@ import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink, LockIcon } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useForm } from 'react-hook-form';
 import { Link } from '@tanstack/react-router';
 import { z } from 'zod';
@@ -38,7 +37,6 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function WhatsAppIntegrationCard() {
-  const posthog = usePostHog();
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
   const { isPaid, isLoading: planLoading } = useClerkPlan();
@@ -88,10 +86,6 @@ export function WhatsAppIntegrationCard() {
         })),
       });
       reset();
-      posthog.capture('whatsapp_connected', {
-        business_account_id: data.businessAccountId,
-        phone_numbers_count: data.phoneNumbers.length,
-      });
       toast.success('WhatsApp Business Account connected');
     },
     onError: (error) => {
@@ -108,7 +102,6 @@ export function WhatsAppIntegrationCard() {
     },
     onSuccess: () => {
       clearConnection();
-      posthog.capture('whatsapp_disconnected');
       toast.success('WhatsApp disconnected');
     },
     onError: (error) => {

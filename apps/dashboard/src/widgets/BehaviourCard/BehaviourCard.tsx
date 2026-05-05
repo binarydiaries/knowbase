@@ -10,7 +10,6 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { usePostHog } from 'posthog-js/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -58,7 +57,6 @@ export const agentBehaviourSchema = z.object({
 type BehaviourFormValues = z.infer<typeof agentBehaviourSchema>;
 
 const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
 
@@ -93,12 +91,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       // 🔥 instant UI update
       patchBehaviour(agentId, values);
     },
-    onSuccess: (_, values) => {
-      posthog.capture('agent_behaviour_saved', {
-        agent_id: agentId,
-        tone: values.tone,
-        verbosity: values.verbosity,
-      });
+    onSuccess: () => {
       toast.success('Behaviour saved');
     },
     onError: (error) => {

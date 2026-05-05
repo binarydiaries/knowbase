@@ -46,7 +46,6 @@
 - **Forms**: React Hook Form + Zod
 - **Rich editor**: TipTap
 - **Auth**: Clerk (`@clerk/clerk-react`)
-- **Analytics**: PostHog
 - **Charts**: Recharts
 
 ### Monorepo tooling
@@ -225,7 +224,6 @@ There is currently no test suite. The backend `test` script is a placeholder.
 | `RAZORPAY_PLAN_ID_*` | Plan IDs for each subscription tier |
 | `RESEND_API_KEY` | Transactional email |
 | `EMAIL_FROM` | Sender email address |
-| `POSTHOG_API_KEY` / `POSTHOG_HOST` | Analytics |
 | `ADMIN_EMAILS` / `ADMIN_USER_IDS` | Comma-separated admin access list |
 | `SLACK_CLIENT_ID` / `SLACK_CLIENT_SECRET` / `SLACK_SIGNING_SECRET` | Slack OAuth |
 | `APP_URL` | Public URL of the deployed app |
@@ -239,7 +237,6 @@ There is currently no test suite. The backend `test` script is a placeholder.
 | `VITE_API_BASE` | Backend API base URL |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk public key |
 | `VITE_EMBED_BASE` | Embed widget base URL |
-| `VITE_PUBLIC_POSTHOG_PROJECT_TOKEN` | PostHog token |
 | `VITE_FACEBOOK_APP_ID` | Facebook app for Meta integrations |
 | `VITE_ADMIN_EMAILS` | Comma-separated admin emails |
 | `VITE_SLACK_ENABLED` | Feature flag |
@@ -247,7 +244,7 @@ There is currently no test suite. The backend `test` script is a placeholder.
 
 ### Client & Landing
 
-`VITE_API_BASE`, `VITE_PUBLIC_POSTHOG_TOKEN/HOST`, and `VITE_CLERK_PUBLISHABLE_KEY` respectively. See each app's `.env.example`.
+`VITE_API_BASE` and `VITE_CLERK_PUBLISHABLE_KEY` (landing only). See each app's `.env.example`.
 
 ---
 

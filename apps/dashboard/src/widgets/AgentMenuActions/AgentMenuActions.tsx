@@ -9,7 +9,6 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Archive, ArchiveRestore, MoreHorizontal } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
 import { patchAgentsById } from '@/services';
@@ -30,7 +29,6 @@ export const AgentMenuActions = ({
   disableUnarchive?: boolean;
   disableUnarchiveReason?: string;
 }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -50,10 +48,8 @@ export const AgentMenuActions = ({
     },
     onSuccess: () => {
       if (agentStatus === 'active') {
-        posthog.capture('agent_archived', { agent_id: agentId });
         toast.success('Agent archived');
       } else {
-        posthog.capture('agent_unarchived', { agent_id: agentId });
         toast.success('Agent unarchived');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });

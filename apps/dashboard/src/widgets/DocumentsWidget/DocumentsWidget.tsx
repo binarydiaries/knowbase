@@ -38,7 +38,6 @@ import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { FolderIcon } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -71,7 +70,6 @@ export const DocumentsWidget = ({
   readOnly?: boolean;
   subscription?: SubscriptionStatusSchema;
 }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const { documentsByAgentId, deleteDocument, addUpdateDocument } =
     useDocuments();
@@ -131,10 +129,6 @@ export const DocumentsWidget = ({
       };
     },
     onSuccess: ({ documentId }) => {
-      posthog.capture('knowledge_source_deleted', {
-        agent_id: agentId,
-        document_id: documentId,
-      });
       deleteDocument(agentId, documentId);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success('Knowledge source deleted');
@@ -153,10 +147,6 @@ export const DocumentsWidget = ({
         return;
       }
 
-      posthog.capture('agent_training_started', {
-        agent_id: agentId,
-        documents_count: documents.filter((d) => d.status === 'ready').length,
-      });
       toast.success('Training started');
       setIsPollingActive(true);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });

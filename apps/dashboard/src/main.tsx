@@ -20,15 +20,23 @@ import { client } from '@/services/client.gen.ts';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
+const router = createRouter({ routeTree });
+
 Sentry.init({
   dsn: 'https://e7f1b31d7d33df35a37aa773be554f8d@o4505526005399552.ingest.us.sentry.io/4511332509941760',
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.tanstackRouterBrowserTracingIntegration(router),
+    Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+  ],
+  enableLogs: true,
+  tracesSampleRate: 1.0,
 });
 
 // Create a new router instance
-const router = createRouter({ routeTree });
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {

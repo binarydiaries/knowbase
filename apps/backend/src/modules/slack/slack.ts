@@ -179,6 +179,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
   .guard({
     response: {
       400: 'BadRequestResponse',
+      403: 'LeadGenerationForbiddenResponse',
       404: 'NotFoundResponse',
     },
   })

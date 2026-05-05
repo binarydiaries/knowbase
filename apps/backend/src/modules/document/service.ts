@@ -6,7 +6,8 @@ import type { DocumentSchema } from './model';
 
 export abstract class DocumentService {
   static async create(data: typeof documents.$inferInsert) {
-    const [doc] = await db.insert(documents).values(data).returning();
+    // biome-ignore lint/suspicious/noExplicitAny: Drizzle $inferInsert types contentSerialized as optional despite notNull()
+    const [doc] = await db.insert(documents).values(data as any).returning();
     return doc;
   }
 

@@ -143,13 +143,14 @@ export abstract class AdminQueueService {
     await pipeline.exec();
   }
 
-  static async getQueueCounts() {
-    return indexingQueue.getJobCounts(
+  static async getQueueCounts(): Promise<{ waiting: number; active: number; delayed: number; failed: number; completed: number }> {
+    const raw = await indexingQueue.getJobCounts(
       'waiting',
       'active',
       'delayed',
       'failed',
       'completed',
     );
+    return raw as { waiting: number; active: number; delayed: number; failed: number; completed: number };
   }
 }

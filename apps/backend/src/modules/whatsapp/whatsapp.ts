@@ -66,6 +66,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .guard({
     response: {
       400: 'BadRequestResponse',
+      403: 'LeadGenerationForbiddenResponse',
       404: 'NotFoundResponse',
     },
   })

@@ -1,28 +1,40 @@
 import cors from '@elysiajs/cors';
 import openapi from '@elysiajs/openapi';
+import * as Sentry from '@sentry/elysia';
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
-import { Behaviour } from './modules/behaviour/behaviour';
-import { WhatsApp } from './modules/whatsapp/whatsapp';
-import { Slack } from './modules/slack/slack';
-import { Analytics } from './modules/analytics/analytics';
-import { UsageCharts } from './modules/usage/usage';
-import { Channel } from './modules/channel/channel';
-import { Chat } from './modules/chat/chat';
-import { Agent } from './modules/agent/agent';
-import { Conversation } from './modules/conversation/conversation';
-import { Document } from './modules/document/document';
-import { Indexing } from './modules/indexing/indexing';
-import { message } from './modules/message/message';
-import { Subscription } from './modules/subscription/subscription';
 import { Action } from './modules/action/action';
-import { Lead } from './modules/lead/lead';
 import { Admin } from './modules/admin/admin';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
+import { Agent } from './modules/agent/agent';
+import { Analytics } from './modules/analytics/analytics';
+import { Behaviour } from './modules/behaviour/behaviour';
+import { Channel } from './modules/channel/channel';
+import { Chat } from './modules/chat/chat';
+import { Conversation } from './modules/conversation/conversation';
+import { Document } from './modules/document/document';
+import { Indexing } from './modules/indexing/indexing';
+import { Lead } from './modules/lead/lead';
+import { message } from './modules/message/message';
+import { Slack } from './modules/slack/slack';
+import { Subscription } from './modules/subscription/subscription';
+import { UsageCharts } from './modules/usage/usage';
+import { WhatsApp } from './modules/whatsapp/whatsapp';
 
-const app = new Elysia()
+Sentry.init({
+  dsn: 'https://c9a6f1f3bd7cfafb990c1d3ef07c518d@o4505526005399552.ingest.us.sentry.io/4511332466884609',
+  environment: process.env.ENV_KEY ?? 'development',
+  sendDefaultPii: true,
+  enableLogs: true,
+  integrations: [
+    Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+  ],
+  tracesSampleRate: 0.2,
+});
+
+const app = Sentry.withElysia(new Elysia())
   .use(
     openapi({
       path: '/docs',

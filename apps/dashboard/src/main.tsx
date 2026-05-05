@@ -7,11 +7,12 @@ import {
   SignedOut,
 } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
-import { Loader2 } from 'lucide-react';
 import { Toaster } from '@knowbase/ui/components/sonner';
 import { TooltipProvider } from '@knowbase/ui/components/tooltip';
+import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 import { ThemeProvider, useTheme } from 'next-themes';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -19,8 +20,23 @@ import { client } from '@/services/client.gen.ts';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
-// Create a new router instance
 const router = createRouter({ routeTree });
+
+Sentry.init({
+  dsn: 'https://e7f1b31d7d33df35a37aa773be554f8d@o4505526005399552.ingest.us.sentry.io/4511332509941760',
+  environment: import.meta.env.VITE_ENV_KEY ?? 'development',
+  sendDefaultPii: true,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.tanstackRouterBrowserTracingIntegration(router),
+    Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+  ],
+  enableLogs: true,
+  tracesSampleRate: 0.2,
+  tracePropagationTargets: [import.meta.env.VITE_API_BASE].filter(Boolean),
+});
+
+// Create a new router instance
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
@@ -42,7 +58,11 @@ client.setConfig({
 });
 
 client.instance.interceptors.request.use(async (config) => {
-  const token = await (window as Window & { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk?.session?.getToken();
+  const token = await (
+    window as Window & {
+      Clerk?: { session?: { getToken: () => Promise<string | null> } };
+    }
+  ).Clerk?.session?.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

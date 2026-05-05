@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? 'Agenvik <notifications@agenvik.com>';
+const from = 'Agenvik <noreply@agenvik.com>';
 
 let resend: Resend | null = null;
 
@@ -48,6 +48,8 @@ export abstract class EmailService {
   static async sendDocumentIndexed(data: DocumentEmailData): Promise<void> {
     const client = getClient();
     if (!client) return;
+
+    console.log('coming here ', from, data);
 
     await client.emails.send({
       from,

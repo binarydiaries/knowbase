@@ -1,7 +1,6 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { AdminGuard } from '../../common/authGuard/adminGuard';
-import { ErrorModel } from '../../common/models/error';
 import { AdminQueueService } from './queue.service';
 
 const QueueJobStatusSchema = z.enum(['waiting', 'active', 'delayed', 'failed', 'completed']);
@@ -60,7 +59,6 @@ export const AdminQueue = new Elysia({
 })
   .use(AdminGuard)
   .use(QueueModel)
-  .use(ErrorModel)
   .get(
     '/counts',
     async () => AdminQueueService.getQueueCounts(),
@@ -83,33 +81,27 @@ export const AdminQueue = new Elysia({
   )
   .post(
     '/jobs/:jobId/retry',
-    async ({ params, status }) => {
+    async ({ params, error }) => {
       try {
         return await AdminQueueService.retryJob(params.jobId);
       } catch (err) {
-        return status(404, { code: 'NOT_FOUND', message: (err as Error).message });
+        throw error(404, { code: 'NOT_FOUND', message: (err as Error).message });
       }
     },
     {
-      response: {
-        200: 'QueueActionResponseSchema',
-        404: 'NotFoundResponse',
-      },
+      response: 'QueueActionResponseSchema',
     },
   )
   .post(
     '/jobs/:jobId/execute',
-    async ({ params, status }) => {
+    async ({ params, error }) => {
       try {
         return await AdminQueueService.executeJob(params.jobId);
       } catch (err) {
-        return status(404, { code: 'NOT_FOUND', message: (err as Error).message });
+        throw error(404, { code: 'NOT_FOUND', message: (err as Error).message });
       }
     },
     {
-      response: {
-        200: 'QueueActionResponseSchema',
-        404: 'NotFoundResponse',
-      },
+      response: 'QueueActionResponseSchema',
     },
   );

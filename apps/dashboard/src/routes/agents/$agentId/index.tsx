@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import {
   Alert,
   AlertAction,
@@ -58,6 +59,10 @@ function RouteComponent() {
     },
     queryKey: ['agent', agentId],
   });
+
+  useEffect(() => {
+    amplitude.track('Agent Opened', { agent_id: agentId });
+  }, [agentId]);
 
   useEffect(() => {
     if (query.data?.data.documents && agentId && query.data?.data.behaviour) {

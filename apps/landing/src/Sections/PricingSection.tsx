@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import GetStartedButton from '../components/GetStartedButton';
+import amplitude from '../lib/amplitude';
 
 type PlanItem = {
   slug: string;
@@ -21,7 +22,16 @@ function usePlans() {
   useEffect(() => {
     fetch(`${API_BASE}/subscriptions/plans`)
       .then((res) => res.json())
-      .then((data) => setPlans(data.plans ?? []))
+      .then((data) => {
+        const fetched = data.plans ?? []
+        setPlans(fetched)
+        if (fetched.length > 0) {
+          amplitude.track('Pricing Plan Viewed', {
+            plan_count: fetched.length,
+            plan_names: fetched.map((p: PlanItem) => p.name),
+          })
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -136,6 +146,8 @@ const PricingSection = () => {
 
                         <div>
                           <GetStartedButton
+                            source="pricing"
+                            planName={plan.name}
                             className={`w-full py-2.5 rounded-xl text-sm transition ${
                               plan.highlight
                                 ? 'bg-[#301B69] text-white shadow-md'

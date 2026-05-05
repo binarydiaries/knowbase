@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
@@ -124,6 +125,7 @@ function RouteComponent() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
       toast.success(variables.status === 'archived' ? 'Agent archived' : 'Agent unarchived');
+      amplitude.track('Agent Archived', { agent_id: variables.id, new_status: variables.status });
       setArchiveConfirm(null);
     },
     onError: (error) => {

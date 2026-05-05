@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import {
@@ -89,8 +90,10 @@ export function CreateAgentDialog({
     onSuccess: () => {
       if (agent) {
         toast.success('Agent updated');
+        amplitude.track('Agent Updated', { agent_id: agent.id });
       } else {
         toast.success('Agent created');
+        amplitude.track('Agent Created');
       }
       queryClient.invalidateQueries({ queryKey: ['agents'] });
       reset();

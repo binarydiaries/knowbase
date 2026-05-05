@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import amplitude from "../lib/amplitude";
 
 const faqs = [
     {
@@ -58,7 +59,14 @@ const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(1);
 
     const toggle = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
+        const isOpening = openIndex !== index
+        setOpenIndex(isOpening ? index : null)
+        if (isOpening) {
+            amplitude.track('FAQ Item Expanded', {
+                question: faqs[index].question,
+                question_index: index,
+            })
+        }
     };
 
     return (

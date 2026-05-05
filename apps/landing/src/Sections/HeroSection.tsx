@@ -1,4 +1,5 @@
 import GetStartedButton from '../components/GetStartedButton';
+import amplitude from '../lib/amplitude';
 
 const HeroSection = () => {
   return (
@@ -48,7 +49,7 @@ const HeroSection = () => {
             </a>
           </nav>
 
-          <GetStartedButton className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">
+          <GetStartedButton source="hero_nav" className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">
             Get Started
           </GetStartedButton>
         </div>
@@ -70,12 +71,13 @@ const HeroSection = () => {
         </p>
 
         <div className="flex justify-center gap-4 flex-wrap">
-          <GetStartedButton className="px-6 py-3 bg-[#301B69] text-white rounded-xl">
+          <GetStartedButton source="hero_body" className="px-6 py-3 bg-[#301B69] text-white rounded-xl">
             Get Started →
           </GetStartedButton>
           <a
             href="mailto:hello@agenvik.com"
             className="px-6 py-3 text-[#301B69] bg-white rounded-xl"
+            onClick={() => amplitude.track('Contact Us Clicked', { source: 'hero' })}
           >
             Contact Us
           </a>

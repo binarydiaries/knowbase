@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Card,
@@ -159,6 +160,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       }
       setSelectedPhoneNumberId('');
       toast.success('Phone number assigned');
+      amplitude.track('WhatsApp Channel Connected', { agent_id: agentId });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

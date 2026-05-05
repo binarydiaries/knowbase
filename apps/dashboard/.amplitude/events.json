@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Agent Created",
+    "description": "Fires when user successfully creates a new agent.",
+    "file": "src/widgets/CreateAgentDialog/CreateAgentDialog.tsx"
+  },
+  {
+    "name": "Agent Updated",
+    "description": "Fires when user saves edits to an existing agent's name or description.",
+    "file": "src/widgets/CreateAgentDialog/CreateAgentDialog.tsx"
+  },
+  {
+    "name": "Agent Archived",
+    "description": "Fires when user archives or unarchives an agent.",
+    "file": "src/routes/agents/index.tsx"
+  },
+  {
+    "name": "Agent Opened",
+    "description": "Fires when user navigates to an individual agent detail page.",
+    "file": "src/routes/agents/$agentId/index.tsx"
+  },
+  {
+    "name": "Knowledge Source Added",
+    "description": "Fires when a document or text content is successfully saved to an agent.",
+    "file": "src/widgets/TextContentWidget/TextContentWidget.tsx"
+  },
+  {
+    "name": "Knowledge Source Deleted",
+    "description": "Fires when user confirms deletion of a knowledge source.",
+    "file": "src/widgets/DocumentsWidget/DocumentsWidget.tsx"
+  },
+  {
+    "name": "Agent Training Started",
+    "description": "Fires when user confirms starting a training run for an agent.",
+    "file": "src/widgets/DocumentsWidget/DocumentsWidget.tsx"
+  },
+  {
+    "name": "Subscription Plan Selected",
+    "description": "Fires when user clicks to subscribe to a plan on the subscriptions page.",
+    "file": "src/hooks/useSubscriptionMutations.ts"
+  },
+  {
+    "name": "Subscription Cancelled",
+    "description": "Fires when user confirms cancellation of their current subscription.",
+    "file": "src/hooks/useSubscriptionMutations.ts"
+  },
+  {
+    "name": "Channel Settings Saved",
+    "description": "Fires when user saves web channel configuration for an agent.",
+    "file": "src/widgets/ChannelCard/ChannelCard.tsx"
+  },
+  {
+    "name": "WhatsApp Channel Connected",
+    "description": "Fires when WhatsApp channel connection is successfully established.",
+    "file": "src/widgets/ChannelCard/WhatsAppChannelCard.tsx"
+  },
+  {
+    "name": "Conversation Viewed",
+    "description": "Fires when user opens a specific conversation thread.",
+    "file": "src/routes/conversations/{-$conversationId}/index.tsx"
+  },
+  {
+    "name": "Lead Captured",
+    "description": "Fires when a new lead appears and user views the leads page.",
+    "file": "src/routes/leads/index.tsx"
+  },
+  {
+    "name": "Conversation Filter Applied",
+    "description": "Fires when user filters conversations by agent or searches by keyword.",
+    "file": "src/routes/conversations/{-$conversationId}/index.tsx"
+  }
+]

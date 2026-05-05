@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import {
@@ -127,6 +128,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
     onSuccess: () => {
       toast.success('Channel settings saved');
+      amplitude.track('Channel Settings Saved', { agent_id: agentId, channel_type: 'web' });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

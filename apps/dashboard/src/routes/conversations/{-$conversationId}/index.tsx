@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import {
   Alert,
   AlertDescription,
@@ -135,6 +136,12 @@ function RouteComponent() {
   });
 
   useEffect(() => {
+    if (conversationId) {
+      amplitude.track('Conversation Viewed', { conversation_id: conversationId });
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
     if (
       !conversationQuery.isLoading &&
       conversations.length > 0 &&
@@ -194,6 +201,7 @@ function RouteComponent() {
               agentIdFilter={agentIdFilter}
               onAgentIdFilterChange={(value) => {
                 setAgentIdFilter(value);
+                amplitude.track('Conversation Filter Applied', { filter_type: 'agent', agent_id: value });
                 void navigate({
                   from: '/conversations/{-$conversationId}/',
                   search: (prev) => ({ ...prev, page: 1 }),

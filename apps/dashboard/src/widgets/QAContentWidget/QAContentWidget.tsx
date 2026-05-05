@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent } from '@knowbase/ui/components/card';
@@ -117,6 +118,9 @@ export const QAContentWidget = ({
       toast.success(
         mode === 'edit' ? 'Q&A source updated' : 'Q&A source added',
       );
+      if (mode === 'add') {
+        amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'qna' });
+      }
       onClose?.();
     },
     onError: (error) => {

@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -43,8 +44,9 @@ export function useCheckoutMutation() {
 
       return { plan };
     },
-    onSuccess: () => {
+    onSuccess: ({ plan }) => {
       invalidate();
+      amplitude.track('Subscription Plan Selected', { plan });
     },
     onError: (err: Error) => {
       if (err.message !== 'dismissed') {
@@ -62,6 +64,7 @@ export function useCancelMutation() {
       postSubscriptionsCancel({ body: { immediate: false } }),
     onSuccess: () => {
       invalidate();
+      amplitude.track('Subscription Cancelled');
       toast.success(
         "Subscription cancelled. You'll keep full access until the end of your billing period.",
       );

@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
 import { Label } from '@knowbase/ui/components/label';
@@ -94,6 +95,9 @@ export const TextContentWidget = ({
       toast.success(
         mode === 'edit' ? 'Text source updated' : 'Text source added',
       );
+      if (mode === 'add') {
+        amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'text' });
+      }
       onClose?.();
     },
     onError: (error) => {

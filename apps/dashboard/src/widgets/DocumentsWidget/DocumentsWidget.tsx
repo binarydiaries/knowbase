@@ -1,3 +1,4 @@
+import * as amplitude from '@amplitude/unified';
 import { Button } from '@knowbase/ui/components/button';
 import { toast } from '@knowbase/ui/components/sonner';
 import { Alert, AlertDescription, AlertTitle } from '@knowbase/ui/components/alert';
@@ -132,6 +133,7 @@ export const DocumentsWidget = ({
       deleteDocument(agentId, documentId);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success('Knowledge source deleted');
+      amplitude.track('Knowledge Source Deleted', { agent_id: agentId, document_id: documentId });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -148,6 +150,7 @@ export const DocumentsWidget = ({
       }
 
       toast.success('Training started');
+      amplitude.track('Agent Training Started', { agent_id: agentId });
       setIsPollingActive(true);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       setIsTrainDialogOpen(false);

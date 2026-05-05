@@ -1,5 +1,6 @@
 import { useUser } from '@clerk/clerk-react';
 import { SidebarInset, SidebarProvider } from '@knowbase/ui/components/sidebar';
+import * as Sentry from '@sentry/react';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
@@ -25,6 +26,21 @@ function PostHogIdentify() {
   return null;
 }
 
+function SentryIdentify() {
+  const { user, isLoaded } = useUser();
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      Sentry.setUser({
+        id: user.id,
+        email: user.primaryEmailAddress?.emailAddress,
+      });
+    }
+  }, [user, isLoaded]);
+
+  return null;
+}
+
 export default function RootComponent() {
   return (
     <PostHogProvider
@@ -37,6 +53,7 @@ export default function RootComponent() {
       }}
     >
       <PostHogIdentify />
+      <SentryIdentify />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>

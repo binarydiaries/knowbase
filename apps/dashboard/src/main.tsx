@@ -23,8 +23,8 @@ import { routeTree } from './routeTree.gen';
 const router = createRouter({ routeTree });
 
 Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  environment: import.meta.env.VITE_SENTRY_ENVIRONMENT ?? 'development',
+  dsn: 'https://e7f1b31d7d33df35a37aa773be554f8d@o4505526005399552.ingest.us.sentry.io/4511332509941760',
+  environment: import.meta.env.VITE_ENV_KEY ?? 'development',
   sendDefaultPii: true,
   integrations: [
     Sentry.browserTracingIntegration(),
@@ -32,7 +32,7 @@ Sentry.init({
     Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
   ],
   enableLogs: true,
-  tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
+  tracesSampleRate: 0.2,
   tracePropagationTargets: [import.meta.env.VITE_API_BASE].filter(Boolean),
 });
 
@@ -103,11 +103,9 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <Sentry.ErrorBoundary fallback={<p>Something went wrong</p>} showDialog>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AppWithTheme />
-        </ThemeProvider>
-      </Sentry.ErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <AppWithTheme />
+      </ThemeProvider>
     </StrictMode>,
   );
 }

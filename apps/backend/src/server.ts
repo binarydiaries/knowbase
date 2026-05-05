@@ -24,14 +24,14 @@ import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.SENTRY_ENVIRONMENT ?? 'development',
+  dsn: 'https://c9a6f1f3bd7cfafb990c1d3ef07c518d@o4505526005399552.ingest.us.sentry.io/4511332466884609',
+  environment: process.env.ENV_KEY ?? 'development',
   sendDefaultPii: true,
   enableLogs: true,
   integrations: [
     Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
   ],
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
+  tracesSampleRate: 0.2,
 });
 
 const app = Sentry.withElysia(new Elysia())

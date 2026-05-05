@@ -1,11 +1,17 @@
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
-import { buildChatContext } from '../chat/context';
 import { ConversationService } from '../conversation/service';
 import { MessageService } from '../message/service';
 import { AiCostEventService } from '../admin/costEvent.service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import type { IChannelWebConfig } from '../channel/model';
+import {
+  buildPlatformRules,
+  buildBehaviorPrompt,
+  buildKnowledgeBasePrompt,
+} from '../chat/prompts';
+import { computeConfidenceScore } from '../chat/persistence';
+import type { SearchChunk } from '../chat/persistence';
 
 interface VoiceSession {
   openAiWs: WebSocket;
@@ -13,9 +19,15 @@ interface VoiceSession {
   orgId: string;
   conversationId: string;
   channelId: string;
+  /** Platform rules + behavior prompt, without the knowledge base section.
+   *  Updated per user turn with fresh RAG results before triggering response. */
+  systemPromptPrefix: string;
   transcript: Array<{ role: 'user' | 'assistant'; content: string }>;
+  chunks: SearchChunk[];
   totalUsage: { inputTokens: number; outputTokens: number; totalTokens: number };
   ended: boolean;
+  /** True after speech is committed, waiting for transcription to do RAG + trigger response. */
+  awaitingResponse: boolean;
 }
 
 interface WsHandle {
@@ -55,20 +67,21 @@ export abstract class VoiceService {
     await ChatService.getAgent({ agentId: channel.agentId, orgId });
     const behavior = await ChatService.getBehaviour(channel.agentId);
 
-    const { knowledgeBase } = await ChatService.getSearchChunks(
-      'services business hours contact information location',
-      channel.agentId,
-    );
+    // Build the non-knowledge portion of the system prompt. This prefix is
+    // reused every turn — only the knowledge section changes based on the
+    // user's actual question.
+    const systemPromptPrefix = [
+      buildPlatformRules({ hasLeadCollection: false }),
+      buildBehaviorPrompt(behavior),
+    ].join('\n');
 
-    const { systemPrompt } = await buildChatContext({
-      agentId: channel.agentId,
-      conversationId,
-      orgId,
-      knowledgeBase,
-      behavior,
-      hasExistingConversation: false,
-      leadAction: undefined,
-    });
+    // Seed the initial knowledge using the agent's own behavior description so
+    // we fetch semantically relevant content rather than a generic phrase.
+    const seedQuery = behavior.systemPrompt?.slice(0, 300) || 'general information';
+    const { knowledgeBase: initialKnowledgeBase, chunks: initialChunks } =
+      await ChatService.getSearchChunks(seedQuery, channel.agentId, orgId, conversationId);
+
+    const systemPrompt = systemPromptPrefix + '\n' + buildKnowledgeBasePrompt(initialKnowledgeBase);
 
     const ttsVoice = (config as IChannelWebConfig & { ttsVoice?: string }).ttsVoice ?? 'alloy';
 
@@ -83,9 +96,12 @@ export abstract class VoiceService {
       orgId,
       conversationId,
       channelId,
+      systemPromptPrefix,
       transcript: [],
+      chunks: initialChunks,
       totalUsage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       ended: false,
+      awaitingResponse: false,
     };
     sessions.set(ws.id, session);
 
@@ -103,6 +119,9 @@ export abstract class VoiceService {
             threshold: 0.5,
             prefix_padding_ms: 300,
             silence_duration_ms: 500,
+            // Disable auto-response so we can inject per-turn RAG knowledge
+            // before the model starts generating.
+            create_response: false,
           },
           instructions: systemPrompt,
         },
@@ -139,6 +158,11 @@ export abstract class VoiceService {
         ws.send(JSON.stringify({ type: 'connected' }));
         break;
 
+      case 'input_audio_buffer.committed':
+        // Audio committed — wait for transcription before triggering response.
+        session.awaitingResponse = true;
+        break;
+
       case 'response.audio.delta': {
         const audioBuffer = Buffer.from(data.delta as string, 'base64');
         ws.send(audioBuffer);
@@ -150,11 +174,41 @@ export abstract class VoiceService {
         break;
 
       case 'conversation.item.input_audio_transcription.completed': {
-        const text = data.transcript as string;
-        if (text?.trim()) {
-          session.transcript.push({ role: 'user', content: text });
+        const text = (data.transcript as string) ?? '';
+        const trimmed = text.trim();
+
+        if (trimmed) {
+          session.transcript.push({ role: 'user', content: trimmed });
+          ws.send(JSON.stringify({ type: 'transcript', role: 'user', text: trimmed }));
         }
-        ws.send(JSON.stringify({ type: 'transcript', role: 'user', text }));
+
+        if (session.awaitingResponse) {
+          session.awaitingResponse = false;
+
+          if (trimmed) {
+            // Fetch knowledge relevant to what the user actually asked.
+            try {
+              const { knowledgeBase, chunks } = await ChatService.getSearchChunks(
+                trimmed,
+                session.agentId,
+                session.orgId,
+                session.conversationId,
+              );
+              session.chunks = chunks;
+              const updatedPrompt =
+                session.systemPromptPrefix + '\n' + buildKnowledgeBasePrompt(knowledgeBase);
+              session.openAiWs.send(JSON.stringify({
+                type: 'session.update',
+                session: { instructions: updatedPrompt },
+              }));
+            } catch (err) {
+              console.error('[voice] RAG search failed, continuing with current knowledge:', err);
+            }
+          }
+
+          // Trigger the model to generate a response now.
+          session.openAiWs.send(JSON.stringify({ type: 'response.create' }));
+        }
         break;
       }
 
@@ -218,7 +272,10 @@ export abstract class VoiceService {
     const session = sessions.get(ws.id);
     if (!session) return;
     sessions.delete(ws.id);
-    if (session.openAiWs.readyState === WebSocket.OPEN) {
+    // Persist transcript even when the browser disconnects without sending end_call.
+    if (!session.ended) {
+      void VoiceService._endCall(ws, session);
+    } else if (session.openAiWs.readyState === WebSocket.OPEN) {
       session.openAiWs.close();
     }
   }
@@ -245,11 +302,22 @@ export abstract class VoiceService {
           lastMessageAt: new Date(),
         });
 
+        const confidenceScore = computeConfidenceScore(session.chunks);
+        const sources = session.chunks.map((c) => ({
+          documentId: c.documentId,
+          documentVersion: c.documentVersion,
+          chunkIndex: c.chunkIndex,
+          similarity: c.similarity,
+        }));
+
         await MessageService.addMessages(
           session.transcript.map((t) => ({
             conversationId: session.conversationId,
             role: t.role,
             content: t.content,
+            ...(t.role === 'assistant'
+              ? { metadata: { confidenceScore, sources, sentiment: null } }
+              : {}),
           })),
         );
       }

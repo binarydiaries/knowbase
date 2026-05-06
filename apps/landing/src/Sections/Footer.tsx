@@ -1,19 +1,15 @@
 import { Mail } from 'lucide-react';
 import {
-  FaFacebook,
   FaInstagram,
   FaLinkedin,
   FaTwitter,
-  FaYoutube,
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const socialLinks = [
-  { Icon: FaFacebook, label: 'Facebook', href: '#' },
-  { Icon: FaTwitter, label: 'Twitter / X', href: '#' },
-  { Icon: FaLinkedin, label: 'LinkedIn', href: '#' },
-  { Icon: FaYoutube, label: 'YouTube', href: '#' },
-  { Icon: FaInstagram, label: 'Instagram', href: '#' },
+  { Icon: FaTwitter, label: 'Twitter / X', href: 'https://x.com/agenvik' },
+  { Icon: FaLinkedin, label: 'LinkedIn', href: 'https://linkedin.com/company/agenvik' },
+  { Icon: FaInstagram, label: 'Instagram', href: 'https://instagram.com/agenvik' },
 ];
 
 const Footer = () => {
@@ -132,7 +128,7 @@ const Footer = () => {
               </address>
 
               {/* Social */}
-              <div className="hidden">
+              <div>
                 <h2 className="text-sm font-semibold text-[#301B69] mb-4">
                   Social
                 </h2>

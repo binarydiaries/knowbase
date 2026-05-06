@@ -1,11 +1,15 @@
 import { Mail } from 'lucide-react';
-import { FaInstagram, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
 const socialLinks = [
-  { Icon: FaTwitter, label: 'Twitter / X', href: 'https://x.com/agenvik' },
   {
-    Icon: FaLinkedin,
+    Icon: FaXTwitter,
+    label: 'Twitter / X',
+    href: 'https://x.com/agenvik',
+  },
+  {
+    Icon: FaLinkedinIn,
     label: 'LinkedIn',
     href: 'https://linkedin.com/company/agenvik',
   },

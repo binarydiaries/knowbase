@@ -17,6 +17,10 @@ import { useParams } from '@tanstack/react-router';
 import { Loader2, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  AGENT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea.tsx';
 import {
@@ -24,10 +28,6 @@ import {
   patchDocumentsById,
   postDocuments,
 } from '@/services';
-import {
-  AGENT_LOCK_TOOLTIP,
-  DisabledTooltip,
-} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -119,7 +119,10 @@ export const QAContentWidget = ({
         mode === 'edit' ? 'Q&A source updated' : 'Q&A source added',
       );
       if (mode === 'add') {
-        amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'qna' });
+        amplitude.track('Knowledge Source Added', {
+          agent_id: agentId,
+          source_type: 'qna',
+        });
       }
       onClose?.();
     },
@@ -148,59 +151,61 @@ export const QAContentWidget = ({
           placeholder="Enter a title for this Q&A group"
           disabled={readOnly}
         />
-        <div className="flex flex-row justify-between items-center">
-          <Label>Questions & Answers</Label>
-          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-            <Button
-              variant="outline"
-              onClick={() => append({ question: '', answer: '' })}
-              disabled={readOnly}
-            >
-              + Add Question
-            </Button>
-          </DisabledTooltip>
-        </div>
-        {fields.map((field, index) => (
-          <Card key={field.id}>
-            <CardContent className="space-y-4">
-              <div className="flex flex-row justify-between items-center">
-                <p className="text-sm text-muted-foreground">
-                  Question {index + 1}
-                </p>
-                {fields.length > 1 && (
-                  <DisabledTooltip
-                    disabled={readOnly}
-                    content={AGENT_LOCK_TOOLTIP}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="icon"
+        <Label>Questions & Answers</Label>
+        <div className="flex flex-col gap-4">
+          {fields.map((field, index) => (
+            <Card key={field.id}>
+              <CardContent className="flex flex-col gap-4">
+                <div className="flex flex-row justify-between items-center">
+                  <p className="text-sm text-muted-foreground">
+                    Question {index + 1}
+                  </p>
+                  {fields.length > 1 && (
+                    <DisabledTooltip
                       disabled={readOnly}
-                      onClick={() => remove(index)}
-                      className="text-destructive hover:text-destructive"
+                      content={AGENT_LOCK_TOOLTIP}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </DisabledTooltip>
-                )}
-              </div>
-              <FormInput
-                name={`qaList.${index}.question` as `qaList.${number}.question`}
-                control={control}
-                label="Question"
-                placeholder="Enter question..."
-                disabled={readOnly}
-              />
-              <FormTextarea
-                name={`qaList.${index}.answer` as `qaList.${number}.answer`}
-                control={control}
-                label="Answer"
-                placeholder="Enter the answer..."
-                disabled={readOnly}
-              />
-            </CardContent>
-          </Card>
-        ))}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={readOnly}
+                        onClick={() => remove(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </DisabledTooltip>
+                  )}
+                </div>
+                <FormInput
+                  name={
+                    `qaList.${index}.question` as `qaList.${number}.question`
+                  }
+                  control={control}
+                  label="Question"
+                  placeholder="Enter question..."
+                  disabled={readOnly}
+                />
+                <FormTextarea
+                  name={`qaList.${index}.answer` as `qaList.${number}.answer`}
+                  control={control}
+                  label="Answer"
+                  placeholder="Enter the answer..."
+                  disabled={readOnly}
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
+          <Button
+            variant="outline"
+            onClick={() => append({ question: '', answer: '' })}
+            disabled={readOnly}
+          >
+            + Add Question
+          </Button>
+        </DisabledTooltip>
       </div>
       <SheetFooter>
         <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>

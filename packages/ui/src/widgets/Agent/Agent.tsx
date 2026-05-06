@@ -2,10 +2,32 @@ import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
 import { Button } from '@knowbase/ui/components/button';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, MessageSquarePlus, SendHorizonal, X } from 'lucide-react';
+import { Ellipsis, MessageSquarePlus, SendHorizonal, Volume2, VolumeOff, X } from 'lucide-react';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Agent.types';
 import { ChatMessage } from './ChatMessage';
+
+const MUTE_KEY = 'kb_chat_muted';
+
+const playNotificationTone = () => {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+    osc.onended = () => ctx.close();
+  } catch {
+    // AudioContext not available
+  }
+};
 
 interface IAgentProps extends ComponentProps<'div'> {
   messages?: IChatMessage[];
@@ -41,8 +63,18 @@ export const Agent = ({
   ...otherProps
 }: IAgentProps) => {
   const [input, setInput] = useState('');
+  const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === 'true');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const prevSystemCountRef = useRef(0);
+
+  const toggleMute = () => {
+    setMuted((prev) => {
+      const next = !prev;
+      localStorage.setItem(MUTE_KEY, String(next));
+      return next;
+    });
+  };
 
   // Scroll to bottom whenever messages change or loading state changes.
   // Previously only scrolled while isLoading was true, missing the final
@@ -52,6 +84,15 @@ export const Agent = ({
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
+
+  // Play tone when a new system message arrives and not muted.
+  useEffect(() => {
+    const systemCount = messages?.filter((m) => m.type === 'system').length ?? 0;
+    if (systemCount > prevSystemCountRef.current && !muted) {
+      playNotificationTone();
+    }
+    prevSystemCountRef.current = systemCount;
+  }, [messages, muted]);
 
   // Restore focus to the input after the response finishes streaming.
   useEffect(() => {
@@ -104,6 +145,19 @@ export const Agent = ({
           <h2 className="text-base font-semibold">{displayName}</h2>
           {subTitle && <p className="text-sm">{subTitle}</p>}
         </div>
+        <Button
+          size="icon-sm"
+          variant="link"
+          onClick={toggleMute}
+          className="cursor-pointer"
+          aria-label={muted ? 'Unmute notifications' : 'Mute notifications'}
+        >
+          {muted ? (
+            <VolumeOff className="text-white size-5" />
+          ) : (
+            <Volume2 className="text-white size-5" />
+          )}
+        </Button>
         {onNewChat && (
           <Button
             size="icon-sm"

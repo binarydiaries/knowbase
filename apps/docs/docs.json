@@ -102,7 +102,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app-stage.agenvik.com/"
+      "href": "https://app.agenvik.com/"
     }
   },
   "contextual": {

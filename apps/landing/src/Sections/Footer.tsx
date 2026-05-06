@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
+
 const socialLinks = [
   { Icon: FaTwitter, label: 'Twitter / X', href: 'https://x.com/agenvik' },
   { Icon: FaLinkedin, label: 'LinkedIn', href: 'https://linkedin.com/company/agenvik' },
@@ -58,6 +59,9 @@ const Footer = () => {
                   </li>
                   <li>
                     <a href="#faq" className="hover:text-[#301B69]">FAQ</a>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-[#301B69]">Blog</Link>
                   </li>
                 </ul>
               </nav>

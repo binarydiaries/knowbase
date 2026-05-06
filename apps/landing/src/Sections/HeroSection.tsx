@@ -47,6 +47,12 @@ const HeroSection = () => {
             >
               FAQ
             </a>
+            <a
+              href="/blog"
+              className="hover:opacity-80"
+            >
+              Blog
+            </a>
           </nav>
 
           <GetStartedButton source="hero_nav" className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">

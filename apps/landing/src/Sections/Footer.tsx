@@ -1,15 +1,23 @@
 import { Mail } from 'lucide-react';
-import {
-  FaInstagram,
-  FaLinkedin,
-  FaTwitter,
-} from 'react-icons/fa';
+import { FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
 const socialLinks = [
-  { Icon: FaTwitter, label: 'Twitter / X', href: 'https://x.com/agenvik' },
-  { Icon: FaLinkedin, label: 'LinkedIn', href: 'https://linkedin.com/company/agenvik' },
-  { Icon: FaInstagram, label: 'Instagram', href: 'https://instagram.com/agenvik' },
+  {
+    Icon: FaXTwitter,
+    label: 'Twitter / X',
+    href: 'https://x.com/agenvik',
+  },
+  {
+    Icon: FaLinkedinIn,
+    label: 'LinkedIn',
+    href: 'https://linkedin.com/company/agenvik',
+  },
+  {
+    Icon: FaInstagram,
+    label: 'Instagram',
+    href: 'https://instagram.com/agenvik',
+  },
 ];
 
 const Footer = () => {
@@ -26,7 +34,7 @@ const Footer = () => {
           />
 
           <div className="relative z-10">
-            <div className="grid md:grid-cols-4 gap-10">
+            <div className="grid md:grid-cols-5 gap-10">
               {/* Logo */}
               <div className="col-span-1">
                 <a href="/" aria-label="Agenvik home">
@@ -45,19 +53,29 @@ const Footer = () => {
                 </h2>
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
-                    <a href="#" className="hover:text-[#301B69]">Home</a>
+                    <a href="#" className="hover:text-[#301B69]">
+                      Home
+                    </a>
                   </li>
                   <li>
-                    <a href="#features" className="hover:text-[#301B69]">Features</a>
+                    <a href="#features" className="hover:text-[#301B69]">
+                      Features
+                    </a>
                   </li>
                   <li>
-                    <a href="#how-it-works" className="hover:text-[#301B69]">How it Works</a>
+                    <a href="#how-it-works" className="hover:text-[#301B69]">
+                      How it Works
+                    </a>
                   </li>
                   <li>
-                    <a href="#pricing" className="hover:text-[#301B69]">Pricing</a>
+                    <a href="#pricing" className="hover:text-[#301B69]">
+                      Pricing
+                    </a>
                   </li>
                   <li>
-                    <a href="#faq" className="hover:text-[#301B69]">FAQ</a>
+                    <a href="#faq" className="hover:text-[#301B69]">
+                      FAQ
+                    </a>
                   </li>
                 </ul>
               </nav>
@@ -69,17 +87,26 @@ const Footer = () => {
                 </h2>
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
-                    <a href="https://docs.agenvik.com/" className="hover:text-[#301B69]">
+                    <a
+                      href="https://docs.agenvik.com/"
+                      className="hover:text-[#301B69]"
+                    >
                       User guide
                     </a>
                   </li>
                   <li>
-                    <a href="https://docs.agenvik.com/developer-guide/overview" className="hover:text-[#301B69]">
+                    <a
+                      href="https://docs.agenvik.com/developer-guide/overview"
+                      className="hover:text-[#301B69]"
+                    >
                       Developer Guide
                     </a>
                   </li>
                   <li>
-                    <a href="https://docs.agenvik.com/help-and-support/overview" className="hover:text-[#301B69]">
+                    <a
+                      href="https://docs.agenvik.com/help-and-support/overview"
+                      className="hover:text-[#301B69]"
+                    >
                       Help & Support
                     </a>
                   </li>

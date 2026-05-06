@@ -37,12 +37,7 @@ const AgentPreviewContent = ({
       }
     : undefined;
 
-  const {
-    messages,
-    setMessages,
-    sendMessage,
-    status,
-  } = useChat({
+  const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: `${import.meta.env.VITE_API_BASE}/chat`,
@@ -109,6 +104,7 @@ const AgentPreviewContent = ({
       }}
       onNewChat={onNewChat}
       brandLink={import.meta.env.VITE_LANDING_URL}
+      suggestionQuestions={channelConfig?.suggestionQuestions}
     />
   );
 };

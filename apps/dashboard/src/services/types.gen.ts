@@ -164,6 +164,7 @@ export type ChatChannelResponseSchema = {
                 displayName: string;
                 subtitle?: string;
                 welcomeMessage: string;
+                suggestionQuestions?: Array<string>;
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
@@ -542,6 +543,7 @@ export type OneAgentResponse = {
                 displayName: string;
                 subtitle?: string;
                 welcomeMessage: string;
+                suggestionQuestions?: Array<string>;
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
@@ -752,6 +754,7 @@ export type ChannelSchema = {
             displayName: string;
             subtitle?: string;
             welcomeMessage: string;
+            suggestionQuestions?: Array<string>;
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
@@ -796,6 +799,7 @@ export type ManyChannelResponse = {
                 displayName: string;
                 subtitle?: string;
                 welcomeMessage: string;
+                suggestionQuestions?: Array<string>;
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;
@@ -835,6 +839,7 @@ export type CreateChannelBodySchema = {
             displayName: string;
             subtitle?: string;
             welcomeMessage: string;
+            suggestionQuestions?: Array<string>;
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
@@ -871,6 +876,7 @@ export type UpdateChannelBodySchema = {
             displayName: string;
             subtitle?: string;
             welcomeMessage: string;
+            suggestionQuestions?: Array<string>;
             inputPlaceholder?: string;
             primaryColor: string;
             allowedDomains: Array<string>;
@@ -909,6 +915,7 @@ export type OneChannelResponse = {
                 displayName: string;
                 subtitle?: string;
                 welcomeMessage: string;
+                suggestionQuestions?: Array<string>;
                 inputPlaceholder?: string;
                 primaryColor: string;
                 allowedDomains: Array<string>;

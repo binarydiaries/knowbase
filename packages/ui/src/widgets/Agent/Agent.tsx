@@ -18,6 +18,7 @@ interface IAgentProps extends ComponentProps<'div'> {
   displayName: string;
   subTitle?: string;
   inputPlaceholder?: string;
+  suggestionQuestions?: string[];
   primaryColor: string;
   brandLink: string;
 }
@@ -34,6 +35,7 @@ export const Agent = ({
   displayName,
   subTitle,
   inputPlaceholder,
+  suggestionQuestions,
   primaryColor,
   brandLink,
   ...otherProps
@@ -66,6 +68,8 @@ export const Agent = ({
   };
 
   const isEmpty = !messages || messages.length === 0;
+  const showSuggestions =
+    !isLoading && !inputDisabled && (suggestionQuestions?.length ?? 0) > 0;
 
   return (
     <div
@@ -152,6 +156,22 @@ export const Agent = ({
         )}
         <div ref={bottomRef} />
       </div>
+      {showSuggestions && !(messages?.length && messages?.length > 1) ? (
+        <div className="flex flex-wrap gap-2 p-5 pb-0 justify-end">
+          {suggestionQuestions?.map((question) => (
+            <Button
+              key={question}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={() => onSendMessage?.(question)}
+            >
+              {question}
+            </Button>
+          ))}
+        </div>
+      ) : null}
       <div className="p-5 flex flex-col gap-2">
         {alertMessage ? (
           <Alert variant="destructive">

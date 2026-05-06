@@ -9,6 +9,7 @@ export type ChannelSchema = {
       displayName: string;
       subtitle?: string;
       welcomeMessage: string;
+      suggestionQuestions?: Array<string>;
       inputPlaceholder?: string;
       primaryColor: string;
       allowedDomains: Array<string>;

@@ -88,7 +88,7 @@ const Footer = () => {
                 <ul className="space-y-2 text-sm text-[#301B69]/70 list-none">
                   <li>
                     <a
-                      href="https://docs.agenvik.com/"
+                      href="https://agenvik.com/docs"
                       className="hover:text-[#301B69]"
                     >
                       User guide
@@ -96,7 +96,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <a
-                      href="https://docs.agenvik.com/developer-guide/overview"
+                      href="https://agenvik.com/docs/developer-guide/overview"
                       className="hover:text-[#301B69]"
                     >
                       Developer Guide
@@ -104,7 +104,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <a
-                      href="https://docs.agenvik.com/help-and-support/overview"
+                      href="https://agenvik.com/docs/help-and-support/overview"
                       className="hover:text-[#301B69]"
                     >
                       Help & Support

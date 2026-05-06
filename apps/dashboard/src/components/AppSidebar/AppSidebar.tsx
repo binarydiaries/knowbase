@@ -42,7 +42,7 @@ const inboxNav = [
 const footerNav = [
   {
     name: 'Help & Support',
-    url: 'https://docs.agenvik.com/help-and-support/overview',
+    url: 'https://agenvik.com/docshelp-and-support/overview',
     icon: LifeBuoy,
   },
 ];

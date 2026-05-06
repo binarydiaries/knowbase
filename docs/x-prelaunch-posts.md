@@ -1,11 +1,11 @@
 # Agenvik — Pre-Launch X Posts
 
-Post these in order over 7–10 days leading up to launch day.
-Space them 1–2 days apart. Do not reveal the product name until Day 5.
+Launch date: **May 10, 2026**
+Post once per day at 9–10am IST.
 
 ---
 
-## Day 1 — The Problem (Curiosity hook)
+## May 6 (Today) — The Problem (Curiosity hook)
 
 ```
 Every business has the answers their customers need.
@@ -21,7 +21,7 @@ We're building the fix. 👀
 
 ---
 
-## Day 2 — The Pain Point (Relatable)
+## May 7 — The Pain Point (Relatable)
 
 ```
 Your support team's daily routine:
@@ -38,37 +38,25 @@ There's a better way. Coming soon.
 
 ---
 
-## Day 3 — The Tease (Show don't tell)
+## May 8 — The Tease + Social Proof (Combined)
 
 ```
 What if your documents could talk?
 
 Upload a PDF → ask it anything → get an instant,
-accurate answer.
+accurate answer. No digging. No waiting. No support ticket.
 
-No digging. No waiting. No support ticket.
-
-Something we've been working on for a while.
-Dropping soon 🔜
-```
-
----
-
-## Day 4 — Social Proof Tease (Build trust)
-
-```
 We've been quietly testing this with a few teams.
 
 One reduced their support response time by 80%.
 Another replaced their entire FAQ page with it.
-One used it to onboard new hires in half the time.
 
-All from the same tool. Announcing next week.
+Announcing tomorrow. 🔜
 ```
 
 ---
 
-## Day 5 — The Name Drop (First reveal)
+## May 9 — The Name Drop + Waitlist (First reveal)
 
 ```
 Introducing Agenvik.
@@ -76,106 +64,51 @@ Introducing Agenvik.
 Build AI agents from your own knowledge.
 No code. No setup. No nonsense.
 
-Waitlist opens tomorrow → agenvik.com
+Join the waitlist → agenvik.com
 
 RT to help us spread the word 🙏
 ```
 
----
-
-## Day 6 — Waitlist Push (Drive signups)
-
-```
-The waitlist for Agenvik is now open.
-
-Here's what early access gets you:
-
-→ First to try every new feature
-→ Priority support from the founders
-→ Locked-in free tier, forever
-
-Join free → agenvik.com
-```
+> Attach the OG image to this post.
+> Pin this tweet after posting.
 
 ---
 
-## Day 7 — Use Case (Show value)
+## May 10 — 🚀 Launch Day
 
 ```
-Here's what you can build with Agenvik:
+We're live.
 
-🎧 A support bot that answers customer questions 24/7
-📚 A study assistant trained on your course material
-🏢 An internal agent that knows your entire company wiki
-🚀 A product guide embedded right on your website
+Agenvik is officially open — build AI agents from
+your documents, FAQs, and data in minutes.
 
-All in under 5 minutes. No code required.
+No code. Deploy on web, WhatsApp & Slack.
 
-→ agenvik.com
+Try it free → agenvik.com
+
+If this is useful, an RT means the world 🙏
 ```
+
+> Attach the OG image to this post too.
 
 ---
 
-## Day 8 — How It Works (Simplicity)
+## Post-Launch (May 11–17) — Save these for after launch
 
-```
-How Agenvik works:
+Use the remaining posts from the original plan as post-launch content:
 
-1. Upload your docs, FAQs, or notes
-2. Agenvik trains an AI agent on them
-3. Embed it on your site, WhatsApp, or Slack
-4. Your users get instant answers
-
-That's it. No engineers needed.
-No 6-month implementation. No per-seat pricing nonsense.
-
-→ agenvik.com
-```
-
----
-
-## Day 9 — Channels (Feature highlight)
-
-```
-Your customers don't live on your website.
-
-They're on WhatsApp. They're on Slack.
-They expect answers where they already are.
-
-Agenvik agents deploy everywhere:
-→ Website chat widget
-→ WhatsApp
-→ Slack
-
-One knowledge base. Every channel.
-
-Launching tomorrow 👀
-```
-
----
-
-## Day 10 — Launch Eve (Final push)
-
-```
-Tomorrow we launch Agenvik.
-
-If you've ever:
-— spent hours on repetitive support questions
-— wished your docs could just answer themselves
-— wanted an AI agent but couldn't code one
-
-This is for you.
-
-Set a reminder. We go live at 9am tomorrow 🚀
-
-→ agenvik.com
-```
+| Date | Post |
+|------|------|
+| May 11 | Use Case — what you can build |
+| May 12 | How It Works — 4-step explainer |
+| May 13 | Channels — web, WhatsApp, Slack |
+| May 14+ | Rotate from the 30-day feed plan in `x-feed-plan.md` |
 
 ---
 
 ## Notes
 
-- Pin Day 5 (name drop) tweet once posted
-- Add the OG image as a card to Day 5 and Day 6 posts
-- Engage with every reply within the first hour of each post
-- Repost Day 6 (waitlist) every 3 days until launch
+- Post May 6 today, as early as possible
+- Engage with every reply within the first hour — X's algorithm rewards early engagement
+- Repost the May 9 waitlist tweet on May 10 morning before the launch post
+- Do not mention Agenvik by name before May 9

@@ -17,6 +17,8 @@ So customers wait. Support teams burn out.
 And nothing gets better.
 
 We're building the fix. 👀
+
+→ agenvik.com
 ```
 
 ---
@@ -33,7 +35,9 @@ Your support team's daily routine:
 
 Repeat 40 more times.
 
-There's a better way. Coming soon.
+Agenvik handles all of this automatically.
+
+→ agenvik.com
 ```
 
 ---
@@ -51,7 +55,7 @@ We've been quietly testing this with a few teams.
 One reduced their support response time by 80%.
 Another replaced their entire FAQ page with it.
 
-Announcing tomorrow. 🔜
+Join the waitlist → agenvik.com
 ```
 
 ---

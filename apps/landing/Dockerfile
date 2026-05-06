@@ -37,7 +37,7 @@ RUN echo 'server { \
   location /docs { \
     proxy_pass https://arokart.mintlify.dev; \
     proxy_set_header Host arokart.mintlify.dev; \
-    proxy_set_header X-Forwarded-Host $host; \
+    proxy_set_header X-Forwarded-Host agenvik.com; \
     proxy_set_header X-Forwarded-Proto https; \
     proxy_ssl_server_name on; \
   } \

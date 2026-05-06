@@ -33,6 +33,15 @@ RUN echo 'server { \
     add_header Cache-Control "public, max-age=31536000, immutable"; \
   } \
   \
+  # Proxy /docs to Mintlify. \
+  location /docs { \
+    proxy_pass https://arokart.mintlify.dev; \
+    proxy_set_header Host arokart.mintlify.dev; \
+    proxy_set_header X-Forwarded-Host $host; \
+    proxy_set_header X-Forwarded-Proto https; \
+    proxy_ssl_server_name on; \
+  } \
+  \
   # SPA fallback for client-side routes. \
   location / { \
     index index.html; \

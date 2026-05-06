@@ -75,6 +75,7 @@ const AgentWidgetContent = ({
       displayName={channelConfig.displayName}
       primaryColor={channelConfig.primaryColor}
       inputPlaceholder={channelConfig.inputPlaceholder}
+      suggestionQuestions={channelConfig.suggestionQuestions}
       subTitle={channelConfig.subtitle}
       className="h-full"
       isLoading={status === 'submitted'}

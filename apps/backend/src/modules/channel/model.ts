@@ -7,6 +7,7 @@ export const ChannelWebConfigSchema = z.object({
   displayName: z.string(),
   subtitle: z.string().optional(),
   welcomeMessage: z.string(),
+  suggestionQuestions: z.array(z.string()).max(6).optional(),
   inputPlaceholder: z.string().optional(),
   primaryColor: z.string(),
   allowedDomains: z.array(z.string()),

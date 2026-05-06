@@ -46,6 +46,11 @@ export const ChannelSchema = z.object({
     .max(60, 'Input placeholder is too long (max 60 characters)')
     .optional(),
 
+  suggestionQuestions: z
+    .string()
+    .max(500, 'Suggestion questions are too long (max 500 characters)')
+    .optional(),
+
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
@@ -81,6 +86,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       subtitle: '',
       welcomeMessage: '',
       inputPlaceholder: '',
+      suggestionQuestions: '',
       primaryColor: '#915964',
     },
   });
@@ -92,6 +98,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         subtitle: channelConfig.subtitle ?? '',
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
+        suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join('\n'),
         primaryColor: channelConfig.primaryColor ?? '#915964',
       });
     }
@@ -103,6 +110,11 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
       const updatedConfig = {
         ...values,
+        suggestionQuestions: (values.suggestionQuestions ?? '')
+          .split('\n')
+          .map((question) => question.trim())
+          .filter((question) => question.length > 0)
+          .slice(0, 6),
         allowedDomains: channelConfig?.allowedDomains ?? [],
       };
 
@@ -177,6 +189,13 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             control={control}
             label="Input Placeholder"
             placeholder="Enter a input placeholder"
+            disabled={readOnly}
+          />
+          <FormTextarea
+            name="suggestionQuestions"
+            control={control}
+            label="Suggestion Questions"
+            placeholder="One question per line"
             disabled={readOnly}
           />
           <FormInputColor

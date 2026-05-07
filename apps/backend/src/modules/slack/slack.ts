@@ -310,8 +310,15 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         });
       }
 
-      const { channelId, mode, slackChannelId, slackChannelName, slackCommand } =
-        body;
+      const {
+        channelId,
+        mode,
+        slackChannelId,
+        slackChannelName,
+        commandKeyword,
+        commandChannelId,
+        commandChannelName,
+      } = body;
 
       const channel = await ChannelService.single({ id: channelId, orgId });
       if (!channel || channel.type !== 'slack') {
@@ -348,8 +355,8 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         }
       }
 
-      // Prevent duplicate command name within workspace for command mode
-      if (mode === 'command' && slackCommand) {
+      // Prevent duplicate keyword within workspace for command mode
+      if (mode === 'command' && commandKeyword) {
         const connection = await SlackConnectionService.findByOrg(orgId);
         if (connection) {
           const existingCmd = await db
@@ -361,7 +368,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
                 eq(channels.type, 'slack'),
                 eq(agents.orgId, orgId),
                 sql`${channels.config}->>'mode' = 'command'`,
-                sql`${channels.config}->>'slackCommand' = ${slackCommand}`,
+                sql`${channels.config}->>'commandKeyword' = ${commandKeyword}`,
               ),
             )
             .limit(1);
@@ -369,7 +376,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
           if (existingCmd.length > 0 && existingCmd[0].id !== channelId) {
             return status(400, {
               code: 'BAD_REQUEST',
-              message: `The command /${slackCommand} is already assigned to another agent`,
+              message: `The keyword "${commandKeyword}" is already assigned to another agent`,
             });
           }
         }
@@ -380,7 +387,12 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         ...(mode !== 'command' && slackChannelId
           ? { slackChannelId, slackChannelName }
           : {}),
-        ...(mode === 'command' && slackCommand ? { slackCommand } : {}),
+        ...(mode === 'command' && commandKeyword
+          ? {
+              commandKeyword,
+              ...(commandChannelId ? { commandChannelId, commandChannelName } : {}),
+            }
+          : {}),
       };
 
       const updated = await ChannelService.update(channelId, {
@@ -401,7 +413,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         ]),
         slackChannelId: t.Optional(t.String()),
         slackChannelName: t.Optional(t.String()),
-        slackCommand: t.Optional(t.String()),
+        commandKeyword: t.Optional(t.String()),
+        commandChannelId: t.Optional(t.String()),
+        commandChannelName: t.Optional(t.String()),
       }),
     },
   )
@@ -509,11 +523,9 @@ async function processInboundEvent(payload: {
 
 // ─── Process slash command ───────────────────────────────────────────────────
 async function processSlashCommand({
-  command,
   text,
   teamId,
   slackChannelId,
-  userId,
   responseUrl,
 }: {
   command: string;
@@ -523,25 +535,33 @@ async function processSlashCommand({
   userId: string;
   responseUrl: string;
 }) {
-  if (!text.trim()) {
+  const parts = text.trim().split(/\s+/);
+  const keyword = parts[0]?.toLowerCase() ?? '';
+  const question = parts.slice(1).join(' ').trim();
+
+  if (!keyword || !question) {
     await fetch(responseUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         response_type: 'ephemeral',
-        text: 'Please provide a message after the command.',
+        text: 'Usage: `/agent <keyword> <your question>`',
       }),
     });
     return;
   }
 
-  const result = await ChannelService.findBySlackCommand(teamId, command);
+  const result = await ChannelService.findBySlackCommandKeyword(teamId, keyword);
   if (!result?.enabled || !result.agent) return;
+
+  // Respect optional channel restriction
+  const config = result.config as IChannelSlackConfig;
+  if (config.commandChannelId && config.commandChannelId !== slackChannelId) return;
 
   const { assistantMessage } = await ChatService.generateWhatsAppResponse({
     agentId: result.agentId,
     channelId: result.id,
-    message: text,
+    message: question,
     orgId: result.agent.orgId,
   });
 

@@ -58,7 +58,7 @@ export abstract class ChannelService {
     return { ...rows[0].channel, agent: rows[0].agent };
   }
 
-  static async findBySlackCommand(teamId: string, command: string) {
+  static async findBySlackCommandKeyword(teamId: string, keyword: string) {
     const rows = await db
       .select({ channel: channels, agent: agents })
       .from(channels)
@@ -69,7 +69,7 @@ export abstract class ChannelService {
           eq(channels.type, 'slack'),
           eq(slackConnections.teamId, teamId),
           sql`${channels.config}->>'mode' = 'command'`,
-          sql`${channels.config}->>'slackCommand' = ${command}`,
+          sql`${channels.config}->>'commandKeyword' = ${keyword}`,
         ),
       )
       .limit(1);

@@ -26,7 +26,9 @@ export const ChannelSlackConfigSchema = z.object({
   mode: z.enum(['channel', 'mention', 'command']).optional(),
   slackChannelId: z.string().optional(),
   slackChannelName: z.string().optional(),
-  slackCommand: z.string().optional(),
+  commandKeyword: z.string().optional(),
+  commandChannelId: z.string().optional(),
+  commandChannelName: z.string().optional(),
 });
 
 export type IChannelSlackConfig = z.infer<typeof ChannelSlackConfigSchema>;

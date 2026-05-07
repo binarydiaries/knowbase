@@ -145,7 +145,9 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           : null;
 
       const restrictedChannel =
-        selectedMode === 'command' && commandChannelId
+        selectedMode === 'command' &&
+        commandChannelId &&
+        commandChannelId !== '__any__'
           ? slackChannels.find((c) => c.slackChannelId === commandChannelId)
           : null;
 
@@ -477,7 +479,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                   <SelectValue placeholder="Any channel" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any channel</SelectItem>
+                  <SelectItem value="__any__">Any channel</SelectItem>
                   {slackChannels.map((c) => (
                     <SelectItem key={c.slackChannelId} value={c.slackChannelId}>
                       #{c.slackChannelName}

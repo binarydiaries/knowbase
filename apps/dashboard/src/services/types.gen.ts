@@ -186,7 +186,9 @@ export type ChatChannelResponseSchema = {
                 mode?: 'channel' | 'mention' | 'command';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                slackCommand?: string;
+                commandKeyword?: string;
+                commandChannelId?: string;
+                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -565,7 +567,9 @@ export type OneAgentResponse = {
                 mode?: 'channel' | 'mention' | 'command';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                slackCommand?: string;
+                commandKeyword?: string;
+                commandChannelId?: string;
+                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -776,7 +780,9 @@ export type ChannelSchema = {
             mode?: 'channel' | 'mention' | 'command';
             slackChannelId?: string;
             slackChannelName?: string;
-            slackCommand?: string;
+            commandKeyword?: string;
+            commandChannelId?: string;
+            commandChannelName?: string;
         };
     };
     createdAt: string;
@@ -821,7 +827,9 @@ export type ManyChannelResponse = {
                 mode?: 'channel' | 'mention' | 'command';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                slackCommand?: string;
+                commandKeyword?: string;
+                commandChannelId?: string;
+                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -861,7 +869,9 @@ export type CreateChannelBodySchema = {
             mode?: 'channel' | 'mention' | 'command';
             slackChannelId?: string;
             slackChannelName?: string;
-            slackCommand?: string;
+            commandKeyword?: string;
+            commandChannelId?: string;
+            commandChannelName?: string;
         };
     };
 };
@@ -898,7 +908,9 @@ export type UpdateChannelBodySchema = {
             mode?: 'channel' | 'mention' | 'command';
             slackChannelId?: string;
             slackChannelName?: string;
-            slackCommand?: string;
+            commandKeyword?: string;
+            commandChannelId?: string;
+            commandChannelName?: string;
         };
     };
 };
@@ -937,7 +949,9 @@ export type OneChannelResponse = {
                 mode?: 'channel' | 'mention' | 'command';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                slackCommand?: string;
+                commandKeyword?: string;
+                commandChannelId?: string;
+                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -2485,7 +2499,9 @@ export type PostSlackBindData = {
         mode: 'channel' | 'mention' | 'command';
         slackChannelId?: string;
         slackChannelName?: string;
-        slackCommand?: string;
+        commandKeyword?: string;
+        commandChannelId?: string;
+        commandChannelName?: string;
     };
     path?: never;
     query?: never;

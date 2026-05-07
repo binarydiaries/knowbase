@@ -72,7 +72,15 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { connected, slackChannels, setConnection, updateChannelBinding } =
     useSlackConnection();
 
-  const [selectedMode, setSelectedMode] = useState<SlackMode>('channel');
+  // Derive slackConfig early so it can seed initial state below
+  const slackConfigInitial =
+    channelSlack?.additional.type === 'slack'
+      ? (channelSlack.additional.config as { mode?: SlackMode })
+      : undefined;
+
+  const [selectedMode, setSelectedMode] = useState<SlackMode>(
+    slackConfigInitial?.mode ?? 'channel',
+  );
   const [selectedSlackChannelId, setSelectedSlackChannelId] =
     useState<string>('');
   const [commandKeyword, setCommandKeyword] = useState<string>('');

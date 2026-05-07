@@ -69,7 +69,8 @@ export abstract class ChannelService {
           eq(channels.type, 'slack'),
           eq(slackConnections.teamId, teamId),
           sql`${channels.config}->>'mode' = 'command'`,
-          sql`${channels.config}->>'commandKeyword' = ${keyword}`,
+          // Support both commandKeyword (current) and slackCommand (legacy field name)
+          sql`(${channels.config}->>'commandKeyword' = ${keyword} OR ${channels.config}->>'slackCommand' = ${keyword})`,
         ),
       )
       .limit(1);

@@ -556,7 +556,17 @@ async function processSlashCommand({
   }
 
   const result = await ChannelService.findBySlackCommandKeyword(teamId, keyword);
-  if (!result?.enabled || !result.agent) return;
+  if (!result?.enabled || !result.agent) {
+    await fetch(responseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        response_type: 'ephemeral',
+        text: `No agent is configured for keyword \`${keyword}\`. Check your agent's Slack channel settings.`,
+      }),
+    });
+    return;
+  }
 
   // Respect optional channel restriction
   const config = result.config as IChannelSlackConfig;

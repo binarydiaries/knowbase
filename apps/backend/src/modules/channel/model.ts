@@ -23,12 +23,9 @@ export const ChannelWhatsAppConfigSchema = z.object({
 export type IChannelWhatsAppConfig = z.infer<typeof ChannelWhatsAppConfigSchema>;
 
 export const ChannelSlackConfigSchema = z.object({
-  mode: z.enum(['channel', 'mention', 'command']).optional(),
+  mode: z.enum(['channel', 'mention']).optional(),
   slackChannelId: z.string().optional(),
   slackChannelName: z.string().optional(),
-  commandKeyword: z.string().optional(),
-  commandChannelId: z.string().optional(),
-  commandChannelName: z.string().optional(),
 });
 
 export type IChannelSlackConfig = z.infer<typeof ChannelSlackConfigSchema>;

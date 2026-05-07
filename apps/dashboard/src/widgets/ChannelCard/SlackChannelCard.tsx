@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@knowbase/ui/components/dialog';
-import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
   Select,
@@ -42,7 +41,7 @@ import type { SlackChannel } from '@/store/useSlackConnection.ts';
 import { useSlackConnection } from '@/store/useSlackConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
-type SlackMode = 'channel' | 'mention' | 'command';
+type SlackMode = 'channel' | 'mention';
 
 interface ConnectionResponse {
   connected: boolean;
@@ -53,7 +52,6 @@ interface ConnectionResponse {
 const MODES: { value: SlackMode; label: string }[] = [
   { value: 'channel', label: 'Channel' },
   { value: 'mention', label: 'Mention' },
-  { value: 'command', label: 'Command' },
 ];
 
 const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
@@ -83,8 +81,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   );
   const [selectedSlackChannelId, setSelectedSlackChannelId] =
     useState<string>('');
-  const [commandKeyword, setCommandKeyword] = useState<string>('');
-  const [commandChannelId, setCommandChannelId] = useState<string>('');
   const [unassignConfirmOpen, setUnassignConfirmOpen] = useState(false);
 
   useQuery({
@@ -109,16 +105,13 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       ? (channelSlack.additional.config as {
           mode?: SlackMode;
           slackChannelName?: string;
-          commandKeyword?: string;
-          commandChannelId?: string;
-          commandChannelName?: string;
         })
       : undefined;
 
   const isAssigned =
     channelSlack?.channelStatus === 'active' &&
     channelSlack?.additional.type === 'slack' &&
-    !!(slackConfig?.slackChannelName || slackConfig?.commandKeyword);
+    !!slackConfig?.slackChannelName;
 
   const availableChannels = slackChannels.filter(
     (c) => !c.boundToAgentId || c.boundToAgentId === agentId,
@@ -145,40 +138,19 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         channelId = channelSlack.id;
       }
 
-      const sc =
-        selectedMode !== 'command'
-          ? slackChannels.find(
-              (c) => c.slackChannelId === selectedSlackChannelId,
-            )
-          : null;
-
-      const restrictedChannel =
-        selectedMode === 'command' &&
-        commandChannelId &&
-        commandChannelId !== '__any__'
-          ? slackChannels.find((c) => c.slackChannelId === commandChannelId)
-          : null;
+      const sc = slackChannels.find(
+        (c) => c.slackChannelId === selectedSlackChannelId,
+      );
 
       const res = await client.post({
         url: '/slack/bind',
         body: {
           channelId,
           mode: selectedMode,
-          ...(selectedMode !== 'command' && sc
+          ...(sc
             ? {
                 slackChannelId: sc.slackChannelId,
                 slackChannelName: sc.slackChannelName,
-              }
-            : {}),
-          ...(selectedMode === 'command'
-            ? {
-                commandKeyword: commandKeyword.trim(),
-                ...(restrictedChannel
-                  ? {
-                      commandChannelId: restrictedChannel.slackChannelId,
-                      commandChannelName: restrictedChannel.slackChannelName,
-                    }
-                  : {}),
               }
             : {}),
         },
@@ -202,8 +174,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         updateChannelBinding(sc.slackChannelId, agentId, null);
       }
       setSelectedSlackChannelId('');
-      setCommandKeyword('');
-      setCommandChannelId('');
       toast.success('Slack channel assigned');
     },
     onError: (error) => {
@@ -277,17 +247,9 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   // ── State 2: Assigned ───────────────────────────────────────────────────────
   if (isAssigned && slackConfig) {
-    const displayLabel =
-      slackConfig.mode === 'command'
-        ? `/agenvik ${slackConfig.commandKeyword}`
-        : `#${slackConfig.slackChannelName}`;
+    const displayLabel = `#${slackConfig.slackChannelName}`;
 
-    const modeLabel =
-      slackConfig.mode === 'channel'
-        ? 'Channel'
-        : slackConfig.mode === 'mention'
-          ? 'Mention'
-          : 'Command';
+    const modeLabel = slackConfig.mode === 'mention' ? 'Mention' : 'Channel';
 
     return (
       <>
@@ -302,10 +264,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             </CardTitle>
             <CardDescription>
               {modeLabel} mode · {displayLabel}
-              {slackConfig.mode === 'command' &&
-                slackConfig.commandChannelName && (
-                  <> · #{slackConfig.commandChannelName}</>
-                )}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-end">
@@ -360,10 +318,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   }
 
   // ── State 3: Connected, not assigned — configuration form ───────────────────
-  const canAssign =
-    selectedMode === 'command'
-      ? !!commandKeyword.trim()
-      : !!selectedSlackChannelId;
+  const canAssign = !!selectedSlackChannelId;
 
   return (
     <Card className="w-full">
@@ -388,8 +343,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                 onClick={() => {
                   setSelectedMode(m.value);
                   setSelectedSlackChannelId('');
-                  setCommandKeyword('');
-                  setCommandChannelId('');
                 }}
                 disabled={readOnly}
                 className={cn(
@@ -434,105 +387,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
               </SelectContent>
             </Select>
           </div>
-        )}
-
-        {/* Command mode */}
-        {selectedMode === 'command' && (
-          <>
-            {/* Explanation box */}
-            <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-              Users type{' '}
-              <code className="font-mono text-xs">
-                /agenvik &lt;keyword&gt; question
-              </code>{' '}
-              in any Slack channel. The keyword routes the message to this
-              specific agent.
-            </div>
-
-            {/* Agent Keyword input */}
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Agent Keyword
-              </Label>
-              <div className="flex rounded-md border overflow-hidden">
-                <span className="px-3 py-2 text-sm bg-muted text-muted-foreground border-r font-mono shrink-0">
-                  /agenvik
-                </span>
-                <Input
-                  placeholder="support"
-                  value={commandKeyword}
-                  onChange={(e) =>
-                    setCommandKeyword(
-                      e.target.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase(),
-                    )
-                  }
-                  disabled={readOnly}
-                  className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
-              </div>
-            </div>
-
-            {/* Restrict to channel (optional) */}
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Restrict to channel{' '}
-                <span className="text-muted-foreground/60">(optional)</span>
-              </Label>
-              <Select
-                value={commandChannelId}
-                onValueChange={setCommandChannelId}
-                disabled={readOnly}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any channel" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__any__">Any channel</SelectItem>
-                  {slackChannels.map((c) => (
-                    <SelectItem key={c.slackChannelId} value={c.slackChannelId}>
-                      #{c.slackChannelName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Preview */}
-            {commandKeyword && (
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Preview
-                </Label>
-                <div className="rounded-md border bg-background p-3 space-y-2 text-sm">
-                  <div className="flex items-start gap-2">
-                    <div className="size-7 rounded bg-violet-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-semibold text-xs">User</span>
-                      <p className="text-sm mt-0.5">
-                        <span className="text-blue-500 font-mono text-xs">
-                          /agenvik
-                        </span>{' '}
-                        <span className="text-green-600 font-mono text-xs font-semibold">
-                          {commandKeyword}
-                        </span>{' '}
-                        what is your refund policy?
-                      </p>
-                    </div>
-                  </div>
-                  <div className="ml-9 rounded border-l-2 border-muted-foreground/20 pl-3 py-1">
-                    <span className="font-semibold text-xs">Agenvik </span>
-                    <span className="text-xs bg-muted rounded px-1 py-0.5">
-                      APP
-                    </span>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Replying as this agent — only visible to the sender.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </>
         )}
 
         <div className="flex justify-end">

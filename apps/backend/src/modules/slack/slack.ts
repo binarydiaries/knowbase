@@ -7,7 +7,6 @@ import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
-import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
 import { SubscriptionService } from '../subscription/service';
@@ -21,7 +20,7 @@ const BadRequestResponse = z.object({
 export const Slack = new Elysia({ tags: ['Slack'] })
   .use(ErrorModel)
 
-  // ─── POST /webhook/slack — Inbound events + slash commands ────────────────
+  // ─── POST /webhook/slack — Inbound events ────────────────────────────────
   .post(
     '/webhook/slack',
     async ({ body, headers }) => {
@@ -29,41 +28,6 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       const contentType = headers['content-type'] ?? '';
       const sig = headers['x-slack-signature'] ?? '';
       const ts = headers['x-slack-request-timestamp'] ?? '';
-
-      // ── Slash commands (application/x-www-form-urlencoded) ────────────────
-      if (contentType.includes('application/x-www-form-urlencoded')) {
-        if (!verifySlackSignature(sig, ts, rawBody)) {
-          return new Response(
-            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-            { status: 403, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
-
-        const params = new URLSearchParams(rawBody);
-        const command = (params.get('command') ?? '').replace(/^\//, '');
-        const text = params.get('text') ?? '';
-        const teamId = params.get('team_id') ?? '';
-        const channelId = params.get('channel_id') ?? '';
-        const userId = params.get('user_id') ?? '';
-        const responseUrl = params.get('response_url') ?? '';
-
-        if (command && teamId) {
-          void processSlashCommand({
-            command,
-            text,
-            teamId,
-            slackChannelId: channelId,
-            userId,
-            responseUrl,
-          }).catch(console.error);
-        }
-
-        // Acknowledge immediately to beat Slack's 3-second timeout
-        return new Response('{}', {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
 
       // ── Events API (application/json) ─────────────────────────────────────
       let payload: {
@@ -193,7 +157,6 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       'app_mentions:read',
       'channels:history',
       'groups:history',
-      'commands',
     ].join(',');
 
     const url = new URL('https://slack.com/oauth/v2/authorize');
@@ -298,7 +261,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     return { success: true };
   })
 
-  // POST /slack/bind — bind a Slack channel/command to an agent's channel record
+  // POST /slack/bind — bind a Slack channel to an agent's channel record
   .post(
     '/slack/bind',
     async ({ body, orgId, status }) => {
@@ -311,15 +274,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         });
       }
 
-      const {
-        channelId,
-        mode,
-        slackChannelId,
-        slackChannelName,
-        commandKeyword,
-        commandChannelId,
-        commandChannelName,
-      } = body;
+      const { channelId, mode, slackChannelId, slackChannelName } = body;
 
       const channel = await ChannelService.single({ id: channelId, orgId });
       if (!channel || channel.type !== 'slack') {
@@ -356,44 +311,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         }
       }
 
-      // Prevent duplicate keyword within workspace for command mode
-      if (mode === 'command' && commandKeyword) {
-        const connection = await SlackConnectionService.findByOrg(orgId);
-        if (connection) {
-          const existingCmd = await db
-            .select({ id: channels.id })
-            .from(channels)
-            .innerJoin(agents, eq(channels.agentId, agents.id))
-            .where(
-              and(
-                eq(channels.type, 'slack'),
-                eq(agents.orgId, orgId),
-                sql`${channels.config}->>'mode' = 'command'`,
-                sql`${channels.config}->>'commandKeyword' = ${commandKeyword}`,
-              ),
-            )
-            .limit(1);
-
-          if (existingCmd.length > 0 && existingCmd[0].id !== channelId) {
-            return status(400, {
-              code: 'BAD_REQUEST',
-              message: `The keyword "${commandKeyword}" is already assigned to another agent`,
-            });
-          }
-        }
-      }
-
-      const config: IChannelSlackConfig = {
+      const config = {
         mode,
-        ...(mode !== 'command' && slackChannelId
-          ? { slackChannelId, slackChannelName }
-          : {}),
-        ...(mode === 'command' && commandKeyword
-          ? {
-              commandKeyword,
-              ...(commandChannelId ? { commandChannelId, commandChannelName } : {}),
-            }
-          : {}),
+        ...(slackChannelId ? { slackChannelId, slackChannelName } : {}),
       };
 
       const updated = await ChannelService.update(channelId, {
@@ -407,16 +327,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     {
       body: t.Object({
         channelId: t.String(),
-        mode: t.Union([
-          t.Literal('channel'),
-          t.Literal('mention'),
-          t.Literal('command'),
-        ]),
+        mode: t.Union([t.Literal('channel'), t.Literal('mention')]),
         slackChannelId: t.Optional(t.String()),
         slackChannelName: t.Optional(t.String()),
-        commandKeyword: t.Optional(t.String()),
-        commandChannelId: t.Optional(t.String()),
-        commandChannelName: t.Optional(t.String()),
       }),
     },
   )
@@ -526,66 +439,3 @@ async function processInboundEvent(payload: {
   }
 }
 
-// ─── Process slash command ───────────────────────────────────────────────────
-async function processSlashCommand({
-  text,
-  teamId,
-  slackChannelId,
-  responseUrl,
-}: {
-  command: string;
-  text: string;
-  teamId: string;
-  slackChannelId: string;
-  userId: string;
-  responseUrl: string;
-}) {
-  const postEphemeral = (msg: string) =>
-    fetch(responseUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ response_type: 'ephemeral', text: msg }),
-    });
-
-  try {
-    const parts = text.trim().split(/\s+/);
-    const keyword = parts[0]?.toLowerCase() ?? '';
-    const question = parts.slice(1).join(' ').trim();
-
-    if (!keyword || !question) {
-      await postEphemeral('Usage: `/agenvik <keyword> <your question>`');
-      return;
-    }
-
-    const result = await ChannelService.findBySlackCommandKeyword(teamId, keyword);
-    if (!result?.enabled || !result.agent) {
-      await postEphemeral(
-        `No agent is configured for keyword \`${keyword}\`. Check your agent's Slack channel settings.`,
-      );
-      return;
-    }
-
-    // Respect optional channel restriction
-    const config = result.config as IChannelSlackConfig;
-    if (config.commandChannelId && config.commandChannelId !== slackChannelId) {
-      await postEphemeral(
-        `The \`${keyword}\` agent is not available in this channel.`,
-      );
-      return;
-    }
-
-    const { assistantMessage } = await ChatService.generateWhatsAppResponse({
-      agentId: result.agentId,
-      channelId: result.id,
-      message: question,
-      orgId: result.agent.orgId,
-    });
-
-    await postEphemeral(assistantMessage);
-  } catch (err) {
-    console.error('[Slack command] error:', err);
-    await postEphemeral(
-      'Something went wrong processing your request. Please try again.',
-    ).catch(() => {});
-  }
-}

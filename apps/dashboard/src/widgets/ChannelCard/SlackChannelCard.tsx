@@ -28,7 +28,6 @@ import { cn } from '@knowbase/ui/lib/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { Loader2, LockIcon } from 'lucide-react';
-import { usePostHog } from 'posthog-js/react';
 import { useState } from 'react';
 import {
   AGENT_LOCK_TOOLTIP,
@@ -58,7 +57,6 @@ const MODES: { value: SlackMode; label: string }[] = [
 ];
 
 const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
-  const posthog = usePostHog();
   const { agentId } = useParams({ strict: false });
   const { isPaid, isLoading: planLoading } = useClerkPlan();
 
@@ -196,11 +194,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       setSelectedSlackChannelId('');
       setCommandKeyword('');
       setCommandChannelId('');
-      posthog.capture('agent_channel_connected', {
-        agent_id: agentId,
-        channel_type: 'slack',
-        mode: selectedMode,
-      });
       toast.success('Slack channel assigned');
     },
     onError: (error) => {
@@ -224,10 +217,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (sc) {
         updateChannelBinding(sc.slackChannelId, null, null);
       }
-      posthog.capture('agent_channel_disconnected', {
-        agent_id: agentId,
-        channel_type: 'slack',
-      });
+
       setUnassignConfirmOpen(false);
       toast.success('Slack channel unassigned');
     },
@@ -302,9 +292,10 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             </CardTitle>
             <CardDescription>
               {modeLabel} mode · {displayLabel}
-              {slackConfig.mode === 'command' && slackConfig.commandChannelName && (
-                <> · #{slackConfig.commandChannelName}</>
-              )}
+              {slackConfig.mode === 'command' &&
+                slackConfig.commandChannelName && (
+                  <> · #{slackConfig.commandChannelName}</>
+                )}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-end">
@@ -320,7 +311,10 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             </DisabledTooltip>
           </CardContent>
         </Card>
-        <Dialog open={unassignConfirmOpen} onOpenChange={setUnassignConfirmOpen}>
+        <Dialog
+          open={unassignConfirmOpen}
+          onOpenChange={setUnassignConfirmOpen}
+        >
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Unassign Slack channel?</DialogTitle>
@@ -438,7 +432,9 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             {/* Explanation box */}
             <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
               Users type{' '}
-              <code className="font-mono text-xs">/agent &lt;keyword&gt; question</code>{' '}
+              <code className="font-mono text-xs">
+                /agent &lt;keyword&gt; question
+              </code>{' '}
               in any Slack channel. The keyword routes the message to this
               specific agent.
             </div>
@@ -457,9 +453,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                   value={commandKeyword}
                   onChange={(e) =>
                     setCommandKeyword(
-                      e.target.value
-                        .replace(/[^a-z0-9_-]/gi, '')
-                        .toLowerCase(),
+                      e.target.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase(),
                     )
                   }
                   disabled={readOnly}
@@ -485,10 +479,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                 <SelectContent>
                   <SelectItem value="">Any channel</SelectItem>
                   {slackChannels.map((c) => (
-                    <SelectItem
-                      key={c.slackChannelId}
-                      value={c.slackChannelId}
-                    >
+                    <SelectItem key={c.slackChannelId} value={c.slackChannelId}>
                       #{c.slackChannelName}
                     </SelectItem>
                   ))}
@@ -535,10 +526,9 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             <div className="flex gap-2 rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
               <span className="shrink-0">ℹ️</span>
               <span>
-                Register{' '}
-                <code className="font-mono">/agent</code> once in your Slack
-                App dashboard. Each agent gets a unique keyword — users reach
-                different agents with{' '}
+                Register <code className="font-mono">/agent</code> once in your
+                Slack App dashboard. Each agent gets a unique keyword — users
+                reach different agents with{' '}
                 <code className="font-mono">/agent support …</code> or{' '}
                 <code className="font-mono">/agent sales …</code>
               </span>

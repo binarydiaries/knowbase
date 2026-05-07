@@ -540,52 +540,52 @@ async function processSlashCommand({
   userId: string;
   responseUrl: string;
 }) {
-  const parts = text.trim().split(/\s+/);
-  const keyword = parts[0]?.toLowerCase() ?? '';
-  const question = parts.slice(1).join(' ').trim();
-
-  if (!keyword || !question) {
-    await fetch(responseUrl, {
+  const postEphemeral = (msg: string) =>
+    fetch(responseUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'ephemeral',
-        text: 'Usage: `/agenvik <keyword> <your question>`',
-      }),
+      body: JSON.stringify({ response_type: 'ephemeral', text: msg }),
     });
-    return;
-  }
 
-  const result = await ChannelService.findBySlackCommandKeyword(teamId, keyword);
-  if (!result?.enabled || !result.agent) {
-    await fetch(responseUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'ephemeral',
-        text: `No agent is configured for keyword \`${keyword}\`. Check your agent's Slack channel settings.`,
-      }),
+  try {
+    const parts = text.trim().split(/\s+/);
+    const keyword = parts[0]?.toLowerCase() ?? '';
+    const question = parts.slice(1).join(' ').trim();
+
+    if (!keyword || !question) {
+      await postEphemeral('Usage: `/agenvik <keyword> <your question>`');
+      return;
+    }
+
+    const result = await ChannelService.findBySlackCommandKeyword(teamId, keyword);
+    if (!result?.enabled || !result.agent) {
+      await postEphemeral(
+        `No agent is configured for keyword \`${keyword}\`. Check your agent's Slack channel settings.`,
+      );
+      return;
+    }
+
+    // Respect optional channel restriction
+    const config = result.config as IChannelSlackConfig;
+    if (config.commandChannelId && config.commandChannelId !== slackChannelId) {
+      await postEphemeral(
+        `The \`${keyword}\` agent is not available in this channel.`,
+      );
+      return;
+    }
+
+    const { assistantMessage } = await ChatService.generateWhatsAppResponse({
+      agentId: result.agentId,
+      channelId: result.id,
+      message: question,
+      orgId: result.agent.orgId,
     });
-    return;
+
+    await postEphemeral(assistantMessage);
+  } catch (err) {
+    console.error('[Slack command] error:', err);
+    await postEphemeral(
+      'Something went wrong processing your request. Please try again.',
+    ).catch(() => {});
   }
-
-  // Respect optional channel restriction
-  const config = result.config as IChannelSlackConfig;
-  if (config.commandChannelId && config.commandChannelId !== slackChannelId) return;
-
-  const { assistantMessage } = await ChatService.generateWhatsAppResponse({
-    agentId: result.agentId,
-    channelId: result.id,
-    message: question,
-    orgId: result.agent.orgId,
-  });
-
-  await fetch(responseUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      response_type: 'ephemeral',
-      text: assistantMessage,
-    }),
-  });
 }

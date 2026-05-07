@@ -24,15 +24,14 @@ export const Slack = new Elysia({ tags: ['Slack'] })
   // ─── POST /webhook/slack — Inbound events + slash commands ────────────────
   .post(
     '/webhook/slack',
-    async ({ body, headers, request }) => {
+    async ({ body, headers }) => {
+      const rawBody = body as string;
       const contentType = headers['content-type'] ?? '';
+      const sig = headers['x-slack-signature'] ?? '';
+      const ts = headers['x-slack-request-timestamp'] ?? '';
 
       // ── Slash commands (application/x-www-form-urlencoded) ────────────────
       if (contentType.includes('application/x-www-form-urlencoded')) {
-        const rawBody = await request.clone().text();
-        const sig = headers['x-slack-signature'] ?? '';
-        const ts = headers['x-slack-request-timestamp'] ?? '';
-
         if (!verifySlackSignature(sig, ts, rawBody)) {
           return new Response(
             JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
@@ -67,7 +66,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       }
 
       // ── Events API (application/json) ─────────────────────────────────────
-      const payload = body as {
+      let payload: {
         type?: string;
         challenge?: string;
         event?: {
@@ -83,7 +82,13 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         team_id?: string;
       };
 
-      // URL verification — no signature check required by Slack on this event
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        return new Response('Bad request', { status: 400 });
+      }
+
+      // URL verification — respond before signature check (Slack requirement)
       if (payload.type === 'url_verification') {
         return new Response(JSON.stringify({ challenge: payload.challenge }), {
           status: 200,
@@ -91,11 +96,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         });
       }
 
-      // Verify signature for all other events
-      const rawBody = JSON.stringify(body);
-      const sig = headers['x-slack-signature'] ?? '';
-      const ts = headers['x-slack-request-timestamp'] ?? '';
-
+      // Verify signature against the exact raw bytes received
       if (!verifySlackSignature(sig, ts, rawBody)) {
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
@@ -106,7 +107,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       void processInboundEvent(payload).catch(console.error);
       return new Response('OK', { status: 200 });
     },
-    { body: t.Any() },
+    { type: 'text' },
   )
 
   // ─── OAuth callback — browser redirect after Slack approval ──────────────

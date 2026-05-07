@@ -5,8 +5,9 @@ import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
-import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { channels } from '../../db/schema/channels';
+import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
 import { SubscriptionService } from '../subscription/service';
@@ -20,17 +21,34 @@ const BadRequestResponse = z.object({
 export const Slack = new Elysia({ tags: ['Slack'] })
   .use(ErrorModel)
 
-  // ─── POST /webhook/slack — Inbound events ────────────────────────────────
+  // ─── POST /webhook/slack — Inbound events + slash commands ────────────────
   .post(
     '/webhook/slack',
-    async ({ body, headers }) => {
-      const rawBody = body as string;
+    async ({ body, headers, request }) => {
       const contentType = headers['content-type'] ?? '';
-      const sig = headers['x-slack-signature'] ?? '';
-      const ts = headers['x-slack-request-timestamp'] ?? '';
+
+      // ── Slash commands (application/x-www-form-urlencoded) ────────────────
+      if (contentType.includes('application/x-www-form-urlencoded')) {
+        const rawBody = await request.clone().text();
+        const sig = headers['x-slack-signature'] ?? '';
+        const ts = headers['x-slack-request-timestamp'] ?? '';
+
+        if (!verifySlackSignature(sig, ts, rawBody)) {
+          return new Response(
+            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } },
+          );
+        }
+
+        // Acknowledge immediately to beat Slack's 3-second timeout
+        return new Response('{}', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
 
       // ── Events API (application/json) ─────────────────────────────────────
-      let payload: {
+      const payload = body as {
         type?: string;
         challenge?: string;
         event?: {
@@ -46,13 +64,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         team_id?: string;
       };
 
-      try {
-        payload = JSON.parse(rawBody);
-      } catch {
-        return new Response('Bad request', { status: 400 });
-      }
-
-      // URL verification — respond before signature check (Slack requirement)
+      // URL verification — no signature check required by Slack on this event
       if (payload.type === 'url_verification') {
         return new Response(JSON.stringify({ challenge: payload.challenge }), {
           status: 200,
@@ -60,7 +72,11 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         });
       }
 
-      // Verify signature against the exact raw bytes received
+      // Verify signature for all other events
+      const rawBody = JSON.stringify(body);
+      const sig = headers['x-slack-signature'] ?? '';
+      const ts = headers['x-slack-request-timestamp'] ?? '';
+
       if (!verifySlackSignature(sig, ts, rawBody)) {
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
@@ -71,7 +87,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       void processInboundEvent(payload).catch(console.error);
       return new Response('OK', { status: 200 });
     },
-    { type: 'text' },
+    { body: t.Any() },
   )
 
   // ─── OAuth callback — browser redirect after Slack approval ──────────────
@@ -261,7 +277,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     return { success: true };
   })
 
-  // POST /slack/bind — bind a Slack channel to an agent's channel record
+  // POST /slack/bind — bind a Slack channel/command to an agent's channel record
   .post(
     '/slack/bind',
     async ({ body, orgId, status }) => {
@@ -270,7 +286,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       if (!channelAccess.allowed) {
         return status(403, {
           code: 'PLAN_LIMIT_REACHED',
-          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          message: SubscriptionService.getPaidChannelMessage(
+            channelAccess.plan,
+          ),
         });
       }
 
@@ -285,10 +303,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       }
 
       // Prevent double-binding for channel/mention modes
-      if (
-        (mode === 'channel' || mode === 'mention') &&
-        slackChannelId
-      ) {
+      if ((mode === 'channel' || mode === 'mention') && slackChannelId) {
         const existing = await db
           .select({ id: channels.id })
           .from(channels)
@@ -311,7 +326,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         }
       }
 
-      const config = {
+      const config: IChannelSlackConfig = {
         mode,
         ...(slackChannelId ? { slackChannelId, slackChannelName } : {}),
       };
@@ -403,10 +418,6 @@ async function processInboundEvent(payload: {
   const slackChannelId = event.channel;
   // Thread anchor: use existing thread_ts if in a thread, otherwise start one from event.ts
   const threadTs = event.thread_ts ?? event.ts;
-  // Strip Slack mention tokens like <@U0B11CJ8Z8A> from the message text
-  const cleanText = (event.text ?? '').replace(/<@[A-Z0-9]+>/g, '').trim();
-
-  if (!cleanText) return;
 
   if (event.type === 'message') {
     const result = await ChannelService.findBySlackChannelId(
@@ -418,7 +429,7 @@ async function processInboundEvent(payload: {
     await ChatService.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: cleanText,
+      message: event.text,
       slackChannelId,
       threadTs,
     });
@@ -432,10 +443,9 @@ async function processInboundEvent(payload: {
     await ChatService.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: cleanText,
+      message: event.text,
       slackChannelId,
       threadTs,
     });
   }
 }
-

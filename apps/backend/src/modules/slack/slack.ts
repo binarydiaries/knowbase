@@ -549,7 +549,7 @@ async function processSlashCommand({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         response_type: 'ephemeral',
-        text: 'Usage: `/agent <keyword> <your question>`',
+        text: 'Usage: `/agenvik <keyword> <your question>`',
       }),
     });
     return;

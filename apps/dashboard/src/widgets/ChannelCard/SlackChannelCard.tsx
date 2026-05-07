@@ -271,7 +271,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   if (isAssigned && slackConfig) {
     const displayLabel =
       slackConfig.mode === 'command'
-        ? `/agent ${slackConfig.commandKeyword}`
+        ? `/agenvik ${slackConfig.commandKeyword}`
         : `#${slackConfig.slackChannelName}`;
 
     const modeLabel =
@@ -435,7 +435,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
               Users type{' '}
               <code className="font-mono text-xs">
-                /agent &lt;keyword&gt; question
+                /agenvik &lt;keyword&gt; question
               </code>{' '}
               in any Slack channel. The keyword routes the message to this
               specific agent.
@@ -448,7 +448,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
               </Label>
               <div className="flex rounded-md border overflow-hidden">
                 <span className="px-3 py-2 text-sm bg-muted text-muted-foreground border-r font-mono shrink-0">
-                  /agent
+                  /agenvik
                 </span>
                 <Input
                   placeholder="support"
@@ -502,7 +502,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                       <span className="font-semibold text-xs">User</span>
                       <p className="text-sm mt-0.5">
                         <span className="text-blue-500 font-mono text-xs">
-                          /agent
+                          /agenvik
                         </span>{' '}
                         <span className="text-green-600 font-mono text-xs font-semibold">
                           {commandKeyword}
@@ -524,17 +524,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
               </div>
             )}
 
-            {/* Info note */}
-            <div className="flex gap-2 rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-              <span className="shrink-0">ℹ️</span>
-              <span>
-                Register <code className="font-mono">/agent</code> once in your
-                Slack App dashboard. Each agent gets a unique keyword — users
-                reach different agents with{' '}
-                <code className="font-mono">/agent support …</code> or{' '}
-                <code className="font-mono">/agent sales …</code>
-              </span>
-            </div>
           </>
         )}
 

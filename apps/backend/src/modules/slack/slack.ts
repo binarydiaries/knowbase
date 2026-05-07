@@ -5,8 +5,8 @@ import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
-import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { channels } from '../../db/schema/channels';
 import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
@@ -38,25 +38,6 @@ export const Slack = new Elysia({ tags: ['Slack'] })
             JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
             { status: 403, headers: { 'Content-Type': 'application/json' } },
           );
-        }
-
-        const params = new URLSearchParams(rawBody);
-        const command = (params.get('command') ?? '').replace(/^\//, '');
-        const text = params.get('text') ?? '';
-        const teamId = params.get('team_id') ?? '';
-        const channelId = params.get('channel_id') ?? '';
-        const userId = params.get('user_id') ?? '';
-        const responseUrl = params.get('response_url') ?? '';
-
-        if (command && teamId) {
-          void processSlashCommand({
-            command,
-            text,
-            teamId,
-            slackChannelId: channelId,
-            userId,
-            responseUrl,
-          }).catch(console.error);
         }
 
         // Acknowledge immediately to beat Slack's 3-second timeout
@@ -192,7 +173,6 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       'app_mentions:read',
       'channels:history',
       'groups:history',
-      'commands',
     ].join(',');
 
     const url = new URL('https://slack.com/oauth/v2/authorize');
@@ -306,12 +286,13 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       if (!channelAccess.allowed) {
         return status(403, {
           code: 'PLAN_LIMIT_REACHED',
-          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          message: SubscriptionService.getPaidChannelMessage(
+            channelAccess.plan,
+          ),
         });
       }
 
-      const { channelId, mode, slackChannelId, slackChannelName, slackCommand } =
-        body;
+      const { channelId, mode, slackChannelId, slackChannelName } = body;
 
       const channel = await ChannelService.single({ id: channelId, orgId });
       if (!channel || channel.type !== 'slack') {
@@ -322,10 +303,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       }
 
       // Prevent double-binding for channel/mention modes
-      if (
-        (mode === 'channel' || mode === 'mention') &&
-        slackChannelId
-      ) {
+      if ((mode === 'channel' || mode === 'mention') && slackChannelId) {
         const existing = await db
           .select({ id: channels.id })
           .from(channels)
@@ -348,39 +326,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         }
       }
 
-      // Prevent duplicate command name within workspace for command mode
-      if (mode === 'command' && slackCommand) {
-        const connection = await SlackConnectionService.findByOrg(orgId);
-        if (connection) {
-          const existingCmd = await db
-            .select({ id: channels.id })
-            .from(channels)
-            .innerJoin(agents, eq(channels.agentId, agents.id))
-            .where(
-              and(
-                eq(channels.type, 'slack'),
-                eq(agents.orgId, orgId),
-                sql`${channels.config}->>'mode' = 'command'`,
-                sql`${channels.config}->>'slackCommand' = ${slackCommand}`,
-              ),
-            )
-            .limit(1);
-
-          if (existingCmd.length > 0 && existingCmd[0].id !== channelId) {
-            return status(400, {
-              code: 'BAD_REQUEST',
-              message: `The command /${slackCommand} is already assigned to another agent`,
-            });
-          }
-        }
-      }
-
       const config: IChannelSlackConfig = {
         mode,
-        ...(mode !== 'command' && slackChannelId
-          ? { slackChannelId, slackChannelName }
-          : {}),
-        ...(mode === 'command' && slackCommand ? { slackCommand } : {}),
+        ...(slackChannelId ? { slackChannelId, slackChannelName } : {}),
       };
 
       const updated = await ChannelService.update(channelId, {
@@ -394,14 +342,9 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     {
       body: t.Object({
         channelId: t.String(),
-        mode: t.Union([
-          t.Literal('channel'),
-          t.Literal('mention'),
-          t.Literal('command'),
-        ]),
+        mode: t.Union([t.Literal('channel'), t.Literal('mention')]),
         slackChannelId: t.Optional(t.String()),
         slackChannelName: t.Optional(t.String()),
-        slackCommand: t.Optional(t.String()),
       }),
     },
   )
@@ -505,52 +448,4 @@ async function processInboundEvent(payload: {
       threadTs,
     });
   }
-}
-
-// ─── Process slash command ───────────────────────────────────────────────────
-async function processSlashCommand({
-  command,
-  text,
-  teamId,
-  slackChannelId,
-  userId,
-  responseUrl,
-}: {
-  command: string;
-  text: string;
-  teamId: string;
-  slackChannelId: string;
-  userId: string;
-  responseUrl: string;
-}) {
-  if (!text.trim()) {
-    await fetch(responseUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'ephemeral',
-        text: 'Please provide a message after the command.',
-      }),
-    });
-    return;
-  }
-
-  const result = await ChannelService.findBySlackCommand(teamId, command);
-  if (!result?.enabled || !result.agent) return;
-
-  const { assistantMessage } = await ChatService.generateWhatsAppResponse({
-    agentId: result.agentId,
-    channelId: result.id,
-    message: text,
-    orgId: result.agent.orgId,
-  });
-
-  await fetch(responseUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      response_type: 'ephemeral',
-      text: assistantMessage,
-    }),
-  });
 }

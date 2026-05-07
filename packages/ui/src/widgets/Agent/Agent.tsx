@@ -1,8 +1,14 @@
 import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
 import { Button } from '@knowbase/ui/components/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@knowbase/ui/components/dropdown-menu';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, MessageSquarePlus, SendHorizonal, Volume2, VolumeOff, X } from 'lucide-react';
+import { Ellipsis, MessageSquarePlus, MoreVertical, SendHorizonal, Volume2, VolumeOff, X } from 'lucide-react';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Agent.types';
 import { ChatMessage } from './ChatMessage';
@@ -66,7 +72,10 @@ export const Agent = ({
   const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === 'true');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const prevSystemCountRef = useRef(0);
+  // Initialise with the current count so the welcome message never triggers a tone.
+  const prevSystemCountRef = useRef(
+    messages?.filter((m) => m.type === 'system').length ?? 0,
+  );
 
   const toggleMute = () => {
     setMuted((prev) => {
@@ -141,40 +150,49 @@ export const Agent = ({
           />
         </svg>
 
-        <div className="text-white flex-1">
-          <h2 className="text-base font-semibold">{displayName}</h2>
-          {subTitle && <p className="text-sm">{subTitle}</p>}
+        <div className="text-white flex-1 min-w-0">
+          <h2 className="text-base font-semibold truncate">{displayName}</h2>
+          {subTitle && <p className="text-sm truncate">{subTitle}</p>}
         </div>
-        <Button
-          size="icon-sm"
-          variant="link"
-          onClick={toggleMute}
-          className="cursor-pointer"
-          aria-label={muted ? 'Unmute notifications' : 'Mute notifications'}
-        >
-          {muted ? (
-            <VolumeOff className="text-white size-5" />
-          ) : (
-            <Volume2 className="text-white size-5" />
-          )}
-        </Button>
-        {onNewChat && (
-          <Button
-            size="icon-sm"
-            variant="link"
-            onClick={onNewChat}
-            className="cursor-pointer"
-            aria-label="New chat"
-          >
-            <MessageSquarePlus className="text-white size-5" />
-          </Button>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon-sm"
+              variant="link"
+              className="cursor-pointer shrink-0"
+              aria-label="More options"
+            >
+              <MoreVertical className="text-white size-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onNewChat && (
+              <DropdownMenuItem onClick={onNewChat}>
+                <MessageSquarePlus className="size-4" />
+                New chat
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={toggleMute}>
+              {muted ? (
+                <>
+                  <Volume2 className="size-4" />
+                  Unmute notifications
+                </>
+              ) : (
+                <>
+                  <VolumeOff className="size-4" />
+                  Mute notifications
+                </>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {onClose && (
           <Button
             size="icon-sm"
             variant="link"
             onClick={onClose}
-            className="cursor-pointer"
+            className="cursor-pointer shrink-0"
             aria-label="Close chat"
           >
             <X className="text-white size-5" />

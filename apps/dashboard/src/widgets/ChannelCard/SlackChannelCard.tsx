@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@knowbase/ui/components/dialog';
-import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import {
   Select,
@@ -24,6 +23,7 @@ import {
   SelectValue,
 } from '@knowbase/ui/components/select';
 import { toast } from '@knowbase/ui/components/sonner';
+import { cn } from '@knowbase/ui/lib/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { Loader2, LockIcon } from 'lucide-react';
@@ -41,13 +41,18 @@ import type { SlackChannel } from '@/store/useSlackConnection.ts';
 import { useSlackConnection } from '@/store/useSlackConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
-type SlackMode = 'channel' | 'mention' | 'command';
+type SlackMode = 'channel' | 'mention';
 
 interface ConnectionResponse {
   connected: boolean;
   teamName: string | null;
   channels: SlackChannel[];
 }
+
+const MODES: { value: SlackMode; label: string }[] = [
+  { value: 'channel', label: 'Channel' },
+  { value: 'mention', label: 'Mention' },
+];
 
 const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { agentId } = useParams({ strict: false });
@@ -65,13 +70,19 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { connected, slackChannels, setConnection, updateChannelBinding } =
     useSlackConnection();
 
-  const [selectedMode, setSelectedMode] = useState<SlackMode>('channel');
+  // Derive slackConfig early so it can seed initial state below
+  const slackConfigInitial =
+    channelSlack?.additional.type === 'slack'
+      ? (channelSlack.additional.config as { mode?: SlackMode })
+      : undefined;
+
+  const [selectedMode, setSelectedMode] = useState<SlackMode>(
+    slackConfigInitial?.mode ?? 'channel',
+  );
   const [selectedSlackChannelId, setSelectedSlackChannelId] =
     useState<string>('');
-  const [commandName, setCommandName] = useState<string>('');
   const [unassignConfirmOpen, setUnassignConfirmOpen] = useState(false);
 
-  // Fetch connection status if not already in store
   useQuery({
     queryKey: ['slack-connection'],
     queryFn: async () => {
@@ -94,16 +105,14 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       ? (channelSlack.additional.config as {
           mode?: SlackMode;
           slackChannelName?: string;
-          slackCommand?: string;
         })
       : undefined;
 
   const isAssigned =
     channelSlack?.channelStatus === 'active' &&
     channelSlack?.additional.type === 'slack' &&
-    !!(slackConfig?.slackChannelName || slackConfig?.slackCommand);
+    !!slackConfig?.slackChannelName;
 
-  // Channels available to assign (not already bound to another agent)
   const availableChannels = slackChannels.filter(
     (c) => !c.boundToAgentId || c.boundToAgentId === agentId,
   );
@@ -129,25 +138,21 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         channelId = channelSlack.id;
       }
 
-      const sc =
-        selectedMode !== 'command'
-          ? slackChannels.find(
-              (c) => c.slackChannelId === selectedSlackChannelId,
-            )
-          : null;
+      const sc = slackChannels.find(
+        (c) => c.slackChannelId === selectedSlackChannelId,
+      );
 
       const res = await client.post({
         url: '/slack/bind',
         body: {
           channelId,
           mode: selectedMode,
-          ...(selectedMode !== 'command' && sc
+          ...(sc
             ? {
                 slackChannelId: sc.slackChannelId,
                 slackChannelName: sc.slackChannelName,
               }
             : {}),
-          ...(selectedMode === 'command' ? { slackCommand: commandName.trim() } : {}),
         },
         responseType: 'json',
       });
@@ -169,7 +174,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         updateChannelBinding(sc.slackChannelId, agentId, null);
       }
       setSelectedSlackChannelId('');
-      setCommandName('');
       toast.success('Slack channel assigned');
     },
     onError: (error) => {
@@ -193,6 +197,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (sc) {
         updateChannelBinding(sc.slackChannelId, null, null);
       }
+
       setUnassignConfirmOpen(false);
       toast.success('Slack channel unassigned');
     },
@@ -201,7 +206,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
   });
 
-  // Free-plan gate
+  // ── Free-plan gate ──────────────────────────────────────────────────────────
   if (!planLoading && !isPaid) {
     return (
       <Card className="w-full">
@@ -221,7 +226,7 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     );
   }
 
-  // State 1: No Slack connection at org level
+  // ── State 1: No org-level Slack connection ──────────────────────────────────
   if (!connected) {
     return (
       <Card className="w-full">
@@ -240,19 +245,11 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     );
   }
 
-  // State 2: Connected + assigned
+  // ── State 2: Assigned ───────────────────────────────────────────────────────
   if (isAssigned && slackConfig) {
-    const displayLabel =
-      slackConfig.mode === 'command'
-        ? `/${slackConfig.slackCommand}`
-        : `#${slackConfig.slackChannelName}`;
+    const displayLabel = `#${slackConfig.slackChannelName}`;
 
-    const modeLabel =
-      slackConfig.mode === 'channel'
-        ? 'Channel'
-        : slackConfig.mode === 'mention'
-          ? 'Mention'
-          : 'Command';
+    const modeLabel = slackConfig.mode === 'mention' ? 'Mention' : 'Channel';
 
     return (
       <>
@@ -282,7 +279,10 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             </DisabledTooltip>
           </CardContent>
         </Card>
-        <Dialog open={unassignConfirmOpen} onOpenChange={setUnassignConfirmOpen}>
+        <Dialog
+          open={unassignConfirmOpen}
+          onOpenChange={setUnassignConfirmOpen}
+        >
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Unassign Slack channel?</DialogTitle>
@@ -317,11 +317,8 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     );
   }
 
-  // State 3: Connected, not assigned — mode picker + assignment form
-  const canAssign =
-    selectedMode === 'command'
-      ? !!commandName.trim()
-      : !!selectedSlackChannelId;
+  // ── State 3: Connected, not assigned — configuration form ───────────────────
+  const canAssign = !!selectedSlackChannelId;
 
   return (
     <Card className="w-full">
@@ -332,36 +329,36 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Mode selector */}
+        {/* Trigger Mode — segmented buttons */}
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Mode</Label>
-          <Select
-            value={selectedMode}
-            onValueChange={(v) => {
-              setSelectedMode(v as SlackMode);
-              setSelectedSlackChannelId('');
-              setCommandName('');
-            }}
-            disabled={readOnly}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="channel">
-                Channel — respond to all messages in a channel
-              </SelectItem>
-              <SelectItem value="mention">
-                Mention — respond when @mentioned in a channel
-              </SelectItem>
-              <SelectItem value="command">
-                Command — respond to a slash command (/cmd)
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <Label className="text-xs text-muted-foreground">Trigger Mode</Label>
+          <p className="text-xs text-muted-foreground">
+            How this agent listens in Slack
+          </p>
+          <div className="flex rounded-md border overflow-hidden">
+            {MODES.map((m) => (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => {
+                  setSelectedMode(m.value);
+                  setSelectedSlackChannelId('');
+                }}
+                disabled={readOnly}
+                className={cn(
+                  'flex-1 px-3 py-1.5 text-sm border-r last:border-r-0 transition-colors',
+                  selectedMode === m.value
+                    ? 'bg-foreground text-background font-semibold'
+                    : 'bg-background text-foreground hover:bg-muted',
+                )}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Channel picker (channel + mention modes) */}
+        {/* Channel picker — channel + mention modes */}
         {(selectedMode === 'channel' || selectedMode === 'mention') && (
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">
@@ -389,33 +386,6 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        )}
-
-        {/* Command name (command mode) */}
-        {selectedMode === 'command' && (
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
-              Slash Command Name
-            </Label>
-            <div className="flex items-center gap-1">
-              <span className="text-sm text-muted-foreground">/</span>
-              <Input
-                placeholder="ask"
-                value={commandName}
-                onChange={(e) =>
-                  setCommandName(
-                    e.target.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase(),
-                  )
-                }
-                disabled={readOnly}
-                className="flex-1"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Users will type /{commandName || 'command'} followed by their
-              message. Responses are only visible to the sender.
-            </p>
           </div>
         )}
 

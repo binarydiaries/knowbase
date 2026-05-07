@@ -489,6 +489,10 @@ async function processInboundEvent(payload: {
   const slackChannelId = event.channel;
   // Thread anchor: use existing thread_ts if in a thread, otherwise start one from event.ts
   const threadTs = event.thread_ts ?? event.ts;
+  // Strip Slack mention tokens like <@U0B11CJ8Z8A> from the message text
+  const cleanText = (event.text ?? '').replace(/<@[A-Z0-9]+>/g, '').trim();
+
+  if (!cleanText) return;
 
   if (event.type === 'message') {
     const result = await ChannelService.findBySlackChannelId(
@@ -500,7 +504,7 @@ async function processInboundEvent(payload: {
     await ChatService.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: event.text,
+      message: cleanText,
       slackChannelId,
       threadTs,
     });
@@ -514,7 +518,7 @@ async function processInboundEvent(payload: {
     await ChatService.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: event.text,
+      message: cleanText,
       slackChannelId,
       threadTs,
     });

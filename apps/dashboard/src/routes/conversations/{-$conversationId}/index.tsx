@@ -175,7 +175,9 @@ function RouteComponent() {
     const type = channel.additional.type;
     if (type === 'web') return 'Web';
     if (type === 'whatsapp') return 'WhatsApp';
-    return 'Instagram';
+    if (type === 'slack') return 'Slack';
+    if (type === 'instagram') return 'Instagram';
+    return 'Unknown';
   };
 
   return (

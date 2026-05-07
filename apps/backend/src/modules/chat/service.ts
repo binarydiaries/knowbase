@@ -681,6 +681,30 @@ export abstract class ChatService {
       externalId: threadTs,
     });
 
+    // Post typing placeholder before LLM call so users see immediate feedback
+    const slackHeaders = {
+      Authorization: `Bearer ${connection.botToken}`,
+      'Content-Type': 'application/json',
+    };
+    let placeholderTs: string | null = null;
+    try {
+      const placeholderRes = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: '_Thinking…_',
+          thread_ts: threadTs,
+        }),
+      });
+      const placeholderData = (await placeholderRes.json()) as { ok: boolean; ts?: string };
+      if (placeholderData.ok && placeholderData.ts) {
+        placeholderTs = placeholderData.ts;
+      }
+    } catch {
+      // Best-effort — proceed even if placeholder fails
+    }
+
     const { assistantMessage, chunks, finalQuery, toolCalls } =
       await ChatService.generateWhatsAppResponse({
         agentId: channel.agentId,
@@ -691,21 +715,33 @@ export abstract class ChatService {
         ip,
       });
 
-    // Reply in the same thread
-    const replyRes = await fetch('https://slack.com/api/chat.postMessage', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${connection.botToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        channel: slackChannelId,
-        text: assistantMessage,
-        thread_ts: threadTs,
-      }),
-    });
-    if (!replyRes.ok) {
-      console.error('[Slack reply] error:', await replyRes.text());
+    // Update placeholder with real response, or post new message if placeholder failed
+    if (placeholderTs) {
+      const updateRes = await fetch('https://slack.com/api/chat.update', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({
+          channel: slackChannelId,
+          ts: placeholderTs,
+          text: assistantMessage,
+        }),
+      });
+      if (!updateRes.ok) {
+        console.error('[Slack update] error:', await updateRes.text());
+      }
+    } else {
+      const replyRes = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: assistantMessage,
+          thread_ts: threadTs,
+        }),
+      });
+      if (!replyRes.ok) {
+        console.error('[Slack reply] error:', await replyRes.text());
+      }
     }
 
     // Persist conversation

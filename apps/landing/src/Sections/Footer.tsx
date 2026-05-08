@@ -77,6 +77,9 @@ const Footer = () => {
                       FAQ
                     </a>
                   </li>
+                  <li>
+                    <a href="https://blog.agenvik.com" className="hover:text-[#301B69]">Blog</a>
+                  </li>
                 </ul>
               </nav>
 

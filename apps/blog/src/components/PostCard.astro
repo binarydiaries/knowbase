@@ -1,0 +1,88 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  post: CollectionEntry<'blog'>
+}
+
+const { post } = Astro.props
+const { title, date, excerpt, tags, readTime } = post.data
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+const TAG_COLORS = [
+  'bg-[#301B69]/10 text-[#301B69]',
+  'bg-[#B07CD1]/15 text-[#6B3FA0]',
+  'bg-purple-50 text-purple-700',
+]
+---
+
+<article class="group bg-white rounded-2xl border border-[#301B69]/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
+  <!-- Cover gradient -->
+  <div
+    class="h-44 w-full flex-shrink-0"
+    style="background: linear-gradient(135deg, #301B69 0%, #B07CD1 100%);"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Body -->
+  <div class="p-6 flex flex-col flex-1">
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-2 mb-3">
+      {tags.slice(0, 3).map((tag, i) => (
+        <span class={`text-xs px-2.5 py-0.5 rounded-full font-medium ${TAG_COLORS[i % TAG_COLORS.length]}`}>
+          {tag}
+        </span>
+      ))}
+    </div>
+
+    <!-- Title -->
+    <h2 class="text-base font-semibold text-[#301B69] mb-2 leading-snug group-hover:text-[#B07CD1] transition-colors line-clamp-2">
+      {title}
+    </h2>
+
+    <!-- Excerpt -->
+    <p class="text-sm text-[#301B69]/60 leading-relaxed line-clamp-3 flex-1 mb-4">
+      {excerpt}
+    </p>
+
+    <!-- Meta row -->
+    <div class="flex items-center justify-between text-xs text-[#301B69]/50 mb-4">
+      <span class="flex items-center gap-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        {formatDate(date)}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        {readTime}
+      </span>
+    </div>
+
+    <!-- Read more -->
+    <a
+      href={`/${post.slug}`}
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[#301B69] hover:text-[#B07CD1] transition-colors"
+      aria-label={`Read ${title}`}
+    >
+      Read more
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </div>
+</article>

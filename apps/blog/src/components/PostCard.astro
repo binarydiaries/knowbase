@@ -23,7 +23,7 @@ const TAG_COLORS = [
 ]
 ---
 
-<article class="group bg-white rounded-2xl border border-[#301B69]/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
+<article class="group relative bg-white rounded-2xl border border-[#301B69]/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
   <!-- Cover gradient -->
   <div
     class="h-44 w-full flex-shrink-0"
@@ -72,10 +72,10 @@ const TAG_COLORS = [
       </span>
     </div>
 
-    <!-- Read more -->
+    <!-- Read more — stretched to cover entire card -->
     <a
       href={`/${post.slug}`}
-      class="inline-flex items-center gap-1.5 text-sm font-medium text-[#301B69] hover:text-[#B07CD1] transition-colors"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[#301B69] group-hover:text-[#B07CD1] transition-colors after:absolute after:inset-0 after:content-['']"
       aria-label={`Read ${title}`}
     >
       Read more

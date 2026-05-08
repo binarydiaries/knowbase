@@ -4,15 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Unreleased] — 2026-04-22
+## [0.5.0] — 2026-05-08
 
 ### Added
-- **TipTap Rich Editor** — Migrated `RichEditor` from Lexical to TipTap with a redesigned `EditorToolbar` component and updated styles.
+- **Mintlify Docs** — Integrated Mintlify documentation site; added proxy route on the landing page for seamless docs access.
+- **Social Media Presence** — Added official social accounts (X/Twitter, LinkedIn, etc.) wired up to footer links; created a 30-day content calendar.
+- **OG / Social Preview** — Branded Open Graph preview image for social sharing; compressed and expanded title/description metadata.
+- **Notification Tone & Mute** — Chat widget plays a soft Web Audio API tone on new messages; mute/unmute toggle persists preference to `localStorage`.
+- **Suggestion Questions** — Configurable suggestion questions for the web chat widget (dashboard + client).
+- **Amplitude Analytics** — Integrated Amplitude for product analytics in the dashboard.
+- **Bubble Color Customization** — Per-chatbot bubble color setting for the embedded chat widget.
+- **Embedding Cost Tracking** — Records per-request costs for `text-embedding-3-small` in `aiCostEvents`.
+- **TipTap Rich Editor** — Migrated `RichEditor` from Lexical to TipTap with a redesigned `EditorToolbar` and updated styles.
 - **Dark Mode** — Full dark mode support across the dashboard.
 - **Rebranding** — Project rebranded to **Agenvik** with SEO improvements and semantic HTML overhaul on the landing page.
+- **CLAUDE.md** — Added comprehensive codebase documentation for AI-assisted development.
 
 ### Changed
 - **RAG Indexing & Retrieval** — Improved indexing pipeline in `indexing/service.ts` and updated `MarkdownHeaderTextSplitter` for better chunk quality.
+- **Sentry** — Externalised Sentry configuration; added error boundary and user identification in the dashboard.
+- **Chat header** — Replaced individual mute/new-chat buttons with a 3-dot overflow menu; subtitle is now truncated.
+
+### Removed
+- **PostHog** — Removed PostHog analytics integration in favour of Amplitude.
+- **Clerk from landing** — Removed Clerk dependency from the landing page to reduce bundle size.
 
 ---
 

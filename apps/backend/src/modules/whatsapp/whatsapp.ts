@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
@@ -52,8 +53,18 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
   .post(
     '/webhook/whatsapp',
-    async ({ body }) => {
-      console.log('===whatsapp===', JSON.stringify(body));
+    async ({ body, headers, request }) => {
+      const appSecret = process.env.WHATSAPP_APP_SECRET;
+      if (appSecret) {
+        const rawBody = await request.clone().text();
+        const signature = headers['x-hub-signature-256'] ?? '';
+        if (!verifyMetaSignature(signature, rawBody, appSecret)) {
+          return new Response(
+            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } },
+          );
+        }
+      }
       void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },
@@ -316,6 +327,18 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
 
     return { channel: ChannelService.transformChannel(updated) };
   });
+
+// ─── Meta webhook HMAC-SHA256 verification ──────────────────────────────────
+function verifyMetaSignature(signature: string, rawBody: string, appSecret: string): boolean {
+  if (!signature.startsWith('sha256=')) return false;
+  const expected = createHmac('sha256', appSecret).update(rawBody, 'utf8').digest('hex');
+  const received = signature.slice('sha256='.length);
+  try {
+    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(received, 'hex'));
+  } catch {
+    return false;
+  }
+}
 
 // ─── Fire-and-forget: process inbound WhatsApp message ──────────────────────
 async function processInboundMessage(body: unknown) {

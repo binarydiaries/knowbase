@@ -2,8 +2,11 @@ import cors from '@elysiajs/cors';
 import openapi from '@elysiajs/openapi';
 import * as Sentry from '@sentry/elysia';
 import { Elysia } from 'elysia';
+import { helmet } from 'elysia-helmet';
+import { rateLimit } from 'elysia-rate-limit';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
+import { validateEnv } from './utils/env.utils';
 import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
 import { AdminQueue } from './modules/admin/queue';
@@ -23,18 +26,44 @@ import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
 
+validateEnv();
+
 Sentry.init({
-  dsn: 'https://c9a6f1f3bd7cfafb990c1d3ef07c518d@o4505526005399552.ingest.us.sentry.io/4511332466884609',
+  dsn: process.env.SENTRY_DSN,
   environment: process.env.ENV_KEY ?? 'development',
-  sendDefaultPii: true,
+  sendDefaultPii: false,
   enableLogs: true,
   integrations: [
-    Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+    Sentry.consoleLoggingIntegration({ levels: ['warn', 'error'] }),
   ],
   tracesSampleRate: 0.2,
 });
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+  : ['http://localhost:5173', 'http://localhost:3001'];
+
 const app = Sentry.withElysia(new Elysia())
+  .use(
+    helmet({
+      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: false,
+    }),
+  )
+  .use(
+    cors({
+      origin: allowedOrigins,
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    }),
+  )
+  .use(
+    rateLimit({
+      duration: 60_000,
+      max: 120,
+    }),
+  )
   .use(
     openapi({
       path: '/docs',
@@ -60,7 +89,6 @@ const app = Sentry.withElysia(new Elysia())
       },
     }),
   )
-  .use(cors())
   .use(UsageCharts)
   .use(Analytics)
   .use(Chat)

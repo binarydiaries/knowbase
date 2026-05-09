@@ -6,7 +6,6 @@ import { helmet } from 'elysia-helmet';
 import { rateLimit } from 'elysia-rate-limit';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
-import { validateEnv } from './utils/env.utils';
 import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
 import { AdminQueue } from './modules/admin/queue';
@@ -25,6 +24,7 @@ import { Slack } from './modules/slack/slack';
 import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
+import { validateEnv } from './utils/env.utils';
 
 validateEnv();
 
@@ -41,7 +41,7 @@ Sentry.init({
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-  : ['http://localhost:5173', 'http://localhost:3001'];
+  : [];
 
 const app = Sentry.withElysia(new Elysia())
   .use(
@@ -54,7 +54,12 @@ const app = Sentry.withElysia(new Elysia())
     cors({
       origin: allowedOrigins,
       credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'baggage',
+        'sentry-trace',
+      ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   )

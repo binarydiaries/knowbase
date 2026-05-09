@@ -148,7 +148,7 @@ const PricingSection = () => {
                           <GetStartedButton
                             source="pricing"
                             planName={plan.name}
-                            className={`w-full py-2.5 rounded-xl text-sm transition ${
+                            className={`w-full p-2.5 rounded-xl text-sm transition ${
                               plan.highlight
                                 ? 'bg-[#301B69] text-white shadow-md'
                                 : 'bg-white border border-[#301B69]/20 text-[#301B69]'

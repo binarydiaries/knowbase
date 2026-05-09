@@ -58,6 +58,7 @@ import { UsageMeter } from '@/components/UsageMeter/UsageMeter.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
+import { PDFContentWidget } from '@/widgets/PDFContentWidget/PDFContentWidget.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 import type { SubscriptionStatusSchema } from '@/services';
@@ -77,6 +78,7 @@ export const DocumentsWidget = ({
   const queryClient = useQueryClient();
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
+  const [isPdfSheetOpen, setIsPdfSheetOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
@@ -247,6 +249,7 @@ export const DocumentsWidget = ({
                     <AddDocumentDropdown
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
+                      onPdfClick={() => setIsPdfSheetOpen(true)}
                     >
                       <Button variant="outline">Add</Button>
                     </AddDocumentDropdown>
@@ -286,7 +289,9 @@ export const DocumentsWidget = ({
               description={
                 doc.content?.type === 'qna'
                   ? `${doc.content.data.length} questions`
-                  : String(doc.content?.data)
+                  : doc.content?.type === 'pdf'
+                    ? 'PDF document'
+                    : String(doc.content?.data)
               }
               onEdit={() => {
                 setSelectedDocument(doc);
@@ -323,6 +328,7 @@ export const DocumentsWidget = ({
                     <AddDocumentDropdown
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
+                      onPdfClick={() => setIsPdfSheetOpen(true)}
                     >
                       <Button>Add Source</Button>
                     </AddDocumentDropdown>
@@ -486,6 +492,16 @@ export const DocumentsWidget = ({
               setSelectedDocument(undefined);
             }}
             readOnly={readOnly}
+          />
+        )}
+      </Sheet>
+      <Sheet
+        open={isPdfSheetOpen}
+        onOpenChange={setIsPdfSheetOpen}
+      >
+        {isPdfSheetOpen && (
+          <PDFContentWidget
+            onClose={() => setIsPdfSheetOpen(false)}
           />
         )}
       </Sheet>

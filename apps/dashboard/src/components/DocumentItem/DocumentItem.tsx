@@ -27,6 +27,7 @@ import {
   Edit,
   Files,
   FileText,
+  FileUp,
   Loader2,
   MessageSquare,
   MoreHorizontal,
@@ -38,7 +39,7 @@ import type { DocumentSchema } from '@/services';
 import { DisabledTooltip } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 
 interface IDocumentItemProps {
-  type: 'text' | 'qna';
+  type: 'text' | 'qna' | 'pdf';
   title: string;
   description: string;
   lastTrainedAt?: string | null;
@@ -67,6 +68,9 @@ export const DocumentItem = ({
       break;
     case 'text':
       docIcon = <FileText className="h-4 w-4" />;
+      break;
+    case 'pdf':
+      docIcon = <FileUp className="h-4 w-4" />;
       break;
   }
 

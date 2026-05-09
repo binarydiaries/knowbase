@@ -55,15 +55,20 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     '/webhook/whatsapp',
     async ({ body, headers, request }) => {
       const appSecret = process.env.WHATSAPP_APP_SECRET;
-      if (appSecret) {
-        const rawBody = await request.clone().text();
-        const signature = headers['x-hub-signature-256'] ?? '';
-        if (!verifyMetaSignature(signature, rawBody, appSecret)) {
-          return new Response(
-            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-            { status: 403, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
+      if (!appSecret) {
+        console.error('[whatsapp] WHATSAPP_APP_SECRET is not set — rejecting webhook');
+        return new Response(
+          JSON.stringify({ code: 'FORBIDDEN', message: 'Webhook not configured' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      const rawBody = await request.clone().text();
+      const signature = headers['x-hub-signature-256'] ?? '';
+      if (!verifyMetaSignature(signature, rawBody, appSecret)) {
+        return new Response(
+          JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } },
+        );
       }
       void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });

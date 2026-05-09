@@ -1,4 +1,3 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
@@ -20,14 +19,6 @@ const BadRequestResponse = z.object({
 
 export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .use(ErrorModel)
-  // Intercept body parsing for the webhook route only: return raw text so the
-  // HMAC covers the exact bytes Meta sent. Other routes continue to get parsed JSON.
-  .onParse(async ({ request, contentType }) => {
-    const url = new URL(request.url);
-    if (url.pathname === '/webhook/whatsapp' && contentType.includes('application/json')) {
-      return request.text();
-    }
-  })
 
   // ─── GET /webhook/whatsapp — Meta challenge verification ───────────────────
   .get(
@@ -61,31 +52,8 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
   .post(
     '/webhook/whatsapp',
-    async ({ body, headers }) => {
-      const appSecret = process.env.WHATSAPP_APP_SECRET;
-      if (!appSecret) {
-        console.error('[whatsapp] WHATSAPP_APP_SECRET is not set — rejecting webhook');
-        return new Response(
-          JSON.stringify({ code: 'FORBIDDEN', message: 'Webhook not configured' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } },
-        );
-      }
-      // body is raw text courtesy of the onParse hook above — safe to HMAC
-      const rawBody = body as string;
-      const signature = headers['x-hub-signature-256'] ?? '';
-      if (!verifyMetaSignature(signature, rawBody, appSecret)) {
-        return new Response(
-          JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } },
-        );
-      }
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(rawBody);
-      } catch {
-        return new Response('OK', { status: 200 });
-      }
-      void processInboundMessage(parsed).catch(console.error);
+    async ({ body }) => {
+      void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },
     { body: t.Any() },
@@ -347,18 +315,6 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
 
     return { channel: ChannelService.transformChannel(updated) };
   });
-
-// ─── Meta webhook HMAC-SHA256 verification ──────────────────────────────────
-function verifyMetaSignature(signature: string, rawBody: string, appSecret: string): boolean {
-  if (!signature.startsWith('sha256=')) return false;
-  const expected = createHmac('sha256', appSecret).update(rawBody, 'utf8').digest('hex');
-  const received = signature.slice('sha256='.length);
-  try {
-    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(received, 'hex'));
-  } catch {
-    return false;
-  }
-}
 
 // ─── Fire-and-forget: process inbound WhatsApp message ──────────────────────
 async function processInboundMessage(body: unknown) {

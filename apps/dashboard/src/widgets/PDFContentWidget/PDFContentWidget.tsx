@@ -20,7 +20,7 @@ import ReactMarkdown from 'react-markdown';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { client } from '@/services/client.gen.ts';
-import { formDataBodySerializer } from '@/services/client/bodySerializer.gen.ts';
+import { formDataBodySerializer } from '@/services/core/bodySerializer.gen.ts';
 import type { DocumentSchema } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';

@@ -47,6 +47,7 @@ interface IDocumentItemProps {
   onDelete: MouseEventHandler;
   status: DocumentSchema['status'];
   readOnly?: boolean;
+  disableEdit?: boolean;
   disabledReason?: string;
 }
 
@@ -59,6 +60,7 @@ export const DocumentItem = ({
   status,
   lastTrainedAt,
   readOnly = false,
+  disableEdit = false,
   disabledReason,
 }: IDocumentItemProps) => {
   let docIcon = <Files className="h-4 w-4" />;
@@ -153,11 +155,14 @@ export const DocumentItem = ({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-40 ">
-            <DisabledTooltip disabled={readOnly} content={disabledReason}>
+            <DisabledTooltip
+              disabled={readOnly || disableEdit}
+              content={disableEdit ? 'PDF sources cannot be edited. Delete and re-upload to replace.' : disabledReason}
+            >
               <div>
                 <DropdownMenuItem
                   onClick={onEdit}
-                  disabled={readOnly}
+                  disabled={readOnly || disableEdit}
                   className="flex items-center cursor-pointer gap-2"
                 >
                   <Edit className="h-4 w-4" />

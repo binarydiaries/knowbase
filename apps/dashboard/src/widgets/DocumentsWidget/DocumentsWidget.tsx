@@ -297,7 +297,7 @@ export const DocumentsWidget = ({
                 setSelectedDocument(doc);
                 if (doc.content.type === 'text') {
                   setIsTextContentSheetOpen(true);
-                } else {
+                } else if (doc.content.type === 'qna') {
                   setIsQASheetOpen(true);
                 }
               }}
@@ -306,6 +306,7 @@ export const DocumentsWidget = ({
                 setDeleteConfirmDoc({ id: doc.id, title: doc.title });
               }}
               readOnly={readOnly}
+              disableEdit={doc.content.type === 'pdf'}
               disabledReason={AGENT_LOCK_TOOLTIP}
             />
           ))}

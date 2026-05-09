@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { AlertTriangle, FileUp, Loader2 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
@@ -210,12 +211,9 @@ export const PDFContentWidget = ({ onClose }: IPDFContentWidgetProps) => {
 
             <div className="grid gap-2">
               <label className="text-sm font-medium">Extracted text preview</label>
-              <textarea
-                readOnly
-                rows={10}
-                className="w-full resize-none rounded-md border border-input bg-muted/30 px-3 py-2 font-mono text-xs text-muted-foreground focus-visible:outline-none"
-                value={preview.markdown}
-              />
+              <div className="prose prose-sm max-w-none rounded-md border border-input bg-muted/20 px-4 py-3 overflow-auto max-h-72 text-sm text-foreground [&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-medium [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
+                <ReactMarkdown>{preview.markdown}</ReactMarkdown>
+              </div>
             </div>
           </>
         )}

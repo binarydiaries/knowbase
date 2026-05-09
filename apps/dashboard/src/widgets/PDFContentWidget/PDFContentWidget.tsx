@@ -1,6 +1,10 @@
 import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, AlertDescription, AlertTitle } from '@knowbase/ui/components/alert';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@knowbase/ui/components/alert';
 import { Button } from '@knowbase/ui/components/button';
 import {
   SheetClose,
@@ -19,9 +23,12 @@ import { Controller, useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
-import { client } from '@/services/client.gen.ts';
+import {
+  type PdfPreviewResponse,
+  postDocumentsPdf,
+  postDocumentsPdfPreview,
+} from '@/services';
 import { formDataBodySerializer } from '@/services/core/bodySerializer.gen.ts';
-import type { DocumentSchema } from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -35,13 +42,6 @@ const schema = z.object({
     .refine((f) => f.size <= MAX_FILE_BYTES, 'PDF must be under 50 MB'),
 });
 type FormValues = z.infer<typeof schema>;
-
-type PdfPreviewResult = {
-  markdown: string;
-  pages: number;
-  characters: number;
-  truncated: boolean;
-};
 
 type Step = 'select' | 'extracting' | 'preview';
 
@@ -57,7 +57,7 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<Step>('select');
-  const [preview, setPreview] = useState<PdfPreviewResult | null>(null);
+  const [preview, setPreview] = useState<PdfPreviewResponse | null>(null);
   const [extractError, setExtractError] = useState('');
 
   if (!agentId) throw new Error('agentId not available');
@@ -73,27 +73,37 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
     if (!file) return;
     setValue('file', file, { shouldValidate: true });
     if (!titleValue) {
-      setValue('title', file.name.replace(/\.pdf$/i, '').trim() || 'Untitled PDF');
+      setValue(
+        'title',
+        file.name.replace(/\.pdf$/i, '').trim() || 'Untitled PDF',
+      );
     }
     setExtractError('');
   };
 
   const extractMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const { data: result } = await client.post<PdfPreviewResult, unknown>({
-        url: '/documents/pdf/preview',
+      const response = await postDocumentsPdfPreview({
         body: { file: data.file, agentId },
         ...formDataBodySerializer,
-        responseType: 'json',
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      return result;
+      // const { data: result } = await client.post<PdfPreviewResult, unknown>({
+      //   url: '/documents/pdf/preview',
+      //   body: { file: data.file, agentId },
+      //   ...formDataBodySerializer,
+      //   responseType: 'json',
+      // });
+      return response.data;
     },
     onMutate: () => {
       setStep('extracting');
       setExtractError('');
     },
     onSuccess: (result) => {
-      setPreview(result);
+      if (result) {
+        setPreview(result);
+      }
       setStep('preview');
     },
     onError: (error) => {
@@ -105,19 +115,23 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
   const saveMutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (!preview) throw new Error('No preview available');
-      const { data: result } = await client.post<{ document: DocumentSchema }, unknown>({
-        url: '/documents/pdf',
+
+      const result = await postDocumentsPdf({
         body: { agentId, title: data.title, text: preview.markdown },
-        headers: { 'Content-Type': 'application/json' },
-        responseType: 'json',
       });
-      return result;
+
+      return result.data;
     },
-    onSuccess: ({ document: saved }) => {
-      addUpdateDocument(agentId, saved);
+    onSuccess: (result) => {
+      if (result) {
+        addUpdateDocument(agentId, result.document);
+      }
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success('PDF uploaded');
-      amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'pdf' });
+      amplitude.track('Knowledge Source Added', {
+        agent_id: agentId,
+        source_type: 'pdf',
+      });
       onClose?.();
     },
     onError: (error) => {
@@ -162,12 +176,18 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
                     {fileValue ? (
                       <div className="space-y-1">
                         <p className="text-sm font-medium">{fileValue.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatBytes(fileValue.size)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatBytes(fileValue.size)}
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">Drop a PDF here or click to browse</p>
-                        <p className="text-xs text-muted-foreground">Up to 50 MB</p>
+                        <p className="text-sm font-medium">
+                          Drop a PDF here or click to browse
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Up to 50 MB
+                        </p>
                       </div>
                     )}
                     <input
@@ -175,11 +195,15 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
                       type="file"
                       accept=".pdf,application/pdf"
                       className="sr-only"
-                      onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                      onChange={(e) =>
+                        handleFileChange(e.target.files?.[0] ?? null)
+                      }
                     />
                   </label>
                   {fieldState.error && (
-                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                    <p className="text-sm text-destructive">
+                      {fieldState.error.message}
+                    </p>
                   )}
                   {extractError && (
                     <p className="text-sm text-destructive">{extractError}</p>
@@ -214,7 +238,9 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
             />
 
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{preview.pages} {preview.pages === 1 ? 'page' : 'pages'}</span>
+              <span>
+                {preview.pages} {preview.pages === 1 ? 'page' : 'pages'}
+              </span>
               <span>·</span>
               <span>{preview.characters.toLocaleString()} characters</span>
             </div>
@@ -224,7 +250,8 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>PDF truncated</AlertTitle>
                 <AlertDescription>
-                  This PDF exceeds 200,000 characters. Only the first portion will be indexed.
+                  This PDF exceeds 200,000 characters. Only the first portion
+                  will be indexed.
                 </AlertDescription>
               </Alert>
             )}
@@ -261,7 +288,9 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
         {step === 'preview' && (
           <>
             <Button onClick={onSave} disabled={saveMutation.isPending}>
-              {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saveMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Save
             </Button>
             <Button

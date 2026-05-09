@@ -51,9 +51,11 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   )
 
   // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
+  // type:'text' makes Elysia parse the body as a raw string (read once by the
+  // framework) so we can HMAC-verify the exact bytes Meta sent, then JSON.parse.
   .post(
     '/webhook/whatsapp',
-    async ({ request }) => {
+    async ({ body, headers }) => {
       const appSecret = process.env.WHATSAPP_APP_SECRET;
       if (!appSecret) {
         console.error('[whatsapp] WHATSAPP_APP_SECRET is not set — rejecting webhook');
@@ -62,23 +64,25 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
-      // Read raw body before any parsing so the HMAC covers the exact bytes Meta sent
-      const rawBody = await request.text();
-      const signature = request.headers.get('x-hub-signature-256') ?? '';
-      if (!verifyMetaSignature(signature, rawBody, appSecret)) {
+      const signature = headers['x-hub-signature-256'] ?? '';
+      if (!verifyMetaSignature(signature, body, appSecret)) {
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
-      let body: unknown;
+      let parsed: unknown;
       try {
-        body = JSON.parse(rawBody);
+        parsed = JSON.parse(body);
       } catch {
         return new Response('OK', { status: 200 });
       }
-      void processInboundMessage(body).catch(console.error);
+      void processInboundMessage(parsed).catch(console.error);
       return new Response('OK', { status: 200 });
+    },
+    {
+      type: 'text',
+      body: t.String(),
     },
   )
 

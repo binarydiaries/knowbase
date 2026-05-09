@@ -9,7 +9,7 @@ import {
 } from '@knowbase/ui/components/dialog';
 import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
-import { Loader2 } from 'lucide-react';
+import { Check, Copy, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function ArchiveAgentDialog({
@@ -30,10 +30,18 @@ export function ArchiveAgentDialog({
   const isArchiving = currentStatus === 'active';
   const subject = agentName ? `"${agentName}"` : 'This agent';
   const [confirmInput, setConfirmInput] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!open) setConfirmInput('');
   }, [open]);
+
+  function copyAgentName() {
+    if (!agentName) return;
+    navigator.clipboard.writeText(agentName);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
 
   const canConfirm = !isArchiving || !agentName || confirmInput.trim() === agentName;
 
@@ -55,12 +63,24 @@ export function ArchiveAgentDialog({
             <Label>
               Type <strong>{agentName}</strong> to confirm
             </Label>
-            <Input
-              value={confirmInput}
-              onChange={(e) => setConfirmInput(e.target.value)}
-              placeholder={agentName}
-              autoFocus
-            />
+            <div className="flex gap-2">
+              <Input
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder={agentName}
+                autoFocus
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+                onClick={copyAgentName}
+                title="Copy to clipboard"
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         )}
         <DialogFooter>

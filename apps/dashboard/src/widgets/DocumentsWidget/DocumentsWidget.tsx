@@ -38,7 +38,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { FolderIcon } from 'lucide-react';
+import { Check, Copy, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -84,6 +84,7 @@ export const DocumentsWidget = ({
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
   const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+  const [copiedTitle, setCopiedTitle] = useState(false);
 
   if (!agentId) {
     throw new Error('agentId not available');
@@ -442,12 +443,29 @@ export const DocumentsWidget = ({
             <Label>
               Type <strong>{deleteConfirmDoc?.title}</strong> to confirm
             </Label>
-            <Input
-              value={deleteConfirmInput}
-              onChange={(e) => setDeleteConfirmInput(e.target.value)}
-              placeholder={deleteConfirmDoc?.title}
-              autoFocus
-            />
+            <div className="flex gap-2">
+              <Input
+                value={deleteConfirmInput}
+                onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                placeholder={deleteConfirmDoc?.title}
+                autoFocus
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+                onClick={() => {
+                  if (!deleteConfirmDoc?.title) return;
+                  navigator.clipboard.writeText(deleteConfirmDoc.title);
+                  setCopiedTitle(true);
+                  setTimeout(() => setCopiedTitle(false), 1500);
+                }}
+                title="Copy to clipboard"
+              >
+                {copiedTitle ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
           <DialogFooter>
             <Button

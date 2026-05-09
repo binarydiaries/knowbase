@@ -53,7 +53,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
   .post(
     '/webhook/whatsapp',
-    async ({ body, headers, request }) => {
+    async ({ request }) => {
       const appSecret = process.env.WHATSAPP_APP_SECRET;
       if (!appSecret) {
         console.error('[whatsapp] WHATSAPP_APP_SECRET is not set — rejecting webhook');
@@ -62,18 +62,24 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
-      const rawBody = await request.clone().text();
-      const signature = headers['x-hub-signature-256'] ?? '';
+      // Read raw body before any parsing so the HMAC covers the exact bytes Meta sent
+      const rawBody = await request.text();
+      const signature = request.headers.get('x-hub-signature-256') ?? '';
       if (!verifyMetaSignature(signature, rawBody, appSecret)) {
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
+      let body: unknown;
+      try {
+        body = JSON.parse(rawBody);
+      } catch {
+        return new Response('OK', { status: 200 });
+      }
       void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },
-    { body: t.Any() },
   )
 
   // ─── Authenticated endpoints ───────────────────────────────────────────────

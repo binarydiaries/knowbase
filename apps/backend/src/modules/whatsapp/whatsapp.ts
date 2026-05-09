@@ -20,6 +20,14 @@ const BadRequestResponse = z.object({
 
 export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .use(ErrorModel)
+  // Intercept body parsing for the webhook route only: return raw text so the
+  // HMAC covers the exact bytes Meta sent. Other routes continue to get parsed JSON.
+  .onParse(async ({ request, contentType }) => {
+    const url = new URL(request.url);
+    if (url.pathname === '/webhook/whatsapp' && contentType.includes('application/json')) {
+      return request.text();
+    }
+  })
 
   // ─── GET /webhook/whatsapp — Meta challenge verification ───────────────────
   .get(
@@ -51,8 +59,6 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   )
 
   // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
-  // type:'text' makes Elysia parse the body as a raw string (read once by the
-  // framework) so we can HMAC-verify the exact bytes Meta sent, then JSON.parse.
   .post(
     '/webhook/whatsapp',
     async ({ body, headers }) => {
@@ -64,8 +70,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
+      // body is raw text courtesy of the onParse hook above — safe to HMAC
+      const rawBody = body as string;
       const signature = headers['x-hub-signature-256'] ?? '';
-      if (!verifyMetaSignature(signature, body, appSecret)) {
+      if (!verifyMetaSignature(signature, rawBody, appSecret)) {
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
@@ -73,17 +81,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       }
       let parsed: unknown;
       try {
-        parsed = JSON.parse(body);
+        parsed = JSON.parse(rawBody);
       } catch {
         return new Response('OK', { status: 200 });
       }
       void processInboundMessage(parsed).catch(console.error);
       return new Response('OK', { status: 200 });
     },
-    {
-      type: 'text',
-      body: t.String(),
-    },
+    { body: t.Any() },
   )
 
   // ─── Authenticated endpoints ───────────────────────────────────────────────

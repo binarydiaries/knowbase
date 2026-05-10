@@ -144,12 +144,10 @@ export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelQueryParamSchema = {
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelResponseSchema = {

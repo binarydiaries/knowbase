@@ -8,6 +8,7 @@ import { parseChatError } from '@/utils/chatError.ts';
 
 interface IAgentWidgetProps {
   channelSchema: ChannelSchema;
+  parentOrigin?: string;
 }
 
 interface IAgentWidgetContentProps extends IAgentWidgetProps {
@@ -16,6 +17,7 @@ interface IAgentWidgetContentProps extends IAgentWidgetProps {
 
 const AgentWidgetContent = ({
   channelSchema,
+  parentOrigin,
   onNewChat,
 }: IAgentWidgetContentProps) => {
   const channelConfig = channelSchema.additional.config;
@@ -43,6 +45,7 @@ const AgentWidgetContent = ({
             message: messageText?.text,
             conversationId: id,
             channelId: channelSchema?.id,
+            ...(parentOrigin ? { parentOrigin } : {}),
           },
         };
       },
@@ -94,13 +97,14 @@ const AgentWidgetContent = ({
   );
 };
 
-export const AgentWidget = ({ channelSchema }: IAgentWidgetProps) => {
+export const AgentWidget = ({ channelSchema, parentOrigin }: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (
     <AgentWidgetContent
       key={chatKey}
       channelSchema={channelSchema}
+      parentOrigin={parentOrigin}
       onNewChat={() => setChatKey((k) => k + 1)}
     />
   );

@@ -823,6 +823,12 @@ export abstract class ChatService {
         if (parentOrigin) {
           try {
             allowed = allowedDomains.includes(new URL(parentOrigin).hostname);
+          } catch {
+            allowed = false;
+          }
+        }
+        if (!allowed) throw new DomainNotAllowedError();
+      }
     }
 
     return ChatService.send({

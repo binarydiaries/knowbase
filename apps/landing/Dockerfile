@@ -8,14 +8,13 @@ COPY . .
 # Install ALL workspace deps properly
 RUN bun install --frozen-lockfile
 
-# Build landing and blog
-RUN bun run build:landing && cd apps/blog && bunx astro build
+# Build landing only
+RUN bun run build:landing
 
 
 FROM nginx:alpine
 
 COPY --from=builder /app/apps/landing/dist /usr/share/nginx/html
-COPY --from=builder /app/apps/blog/dist /usr/share/nginx/html/blog
 
 RUN echo 'server { \
   listen 3000; \
@@ -34,10 +33,13 @@ RUN echo 'server { \
     add_header Cache-Control "public, max-age=31536000, immutable"; \
   } \
   \
-  # Blog — static Astro build served from /blog. \
+  # Proxy /blog to the Astro blog (deployed at blog.agenvik.com with base=/blog). \
   location /blog { \
-    index index.html; \
-    try_files $uri $uri/index.html /blog/index.html; \
+    proxy_pass https://blog.agenvik.com; \
+    proxy_set_header Host blog.agenvik.com; \
+    proxy_set_header X-Forwarded-Host agenvik.com; \
+    proxy_set_header X-Forwarded-Proto https; \
+    proxy_ssl_server_name on; \
   } \
   \
   # Proxy /docs to Mintlify. \

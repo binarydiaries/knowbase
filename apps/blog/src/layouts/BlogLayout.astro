@@ -47,7 +47,7 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.href
     <meta name="twitter:description" content={ogDescription ?? description} />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/TextLogo.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/TextLogo.svg`} />
   </head>
 
   <body class="bg-[#f8f7fc] min-h-screen flex flex-col">
@@ -55,7 +55,7 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.href
     <header class="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <a href="https://agenvik.com" aria-label="Agenvik home">
-          <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+          <img src={`${base}/TextLogo.svg`} alt="Agenvik" class="h-7 w-auto" />
         </a>
 
         <nav aria-label="Blog navigation" class="hidden md:flex gap-6 text-sm text-[#301B69]/70">
@@ -85,7 +85,7 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.href
         <div class="grid md:grid-cols-3 gap-8 mb-8">
           <div>
             <a href="https://agenvik.com" aria-label="Agenvik home">
-              <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto mb-3" />
+              <img src={`${base}/TextLogo.svg`} alt="Agenvik" class="h-7 w-auto mb-3" />
             </a>
             <p class="text-sm text-[#301B69]/60 leading-relaxed max-w-xs">
               Build powerful AI agents from your knowledge. No coding required.

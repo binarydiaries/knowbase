@@ -144,12 +144,10 @@ export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelQueryParamSchema = {
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelResponseSchema = {
@@ -1643,6 +1641,37 @@ export type GetChatChannelResponses = {
 };
 
 export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
+
+export type PostChatPreviewData = {
+    body: ChatBodySchema;
+    path?: never;
+    query?: never;
+    url: '/chat/preview';
+};
+
+export type PostChatPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostChatPreviewError = PostChatPreviewErrors[keyof PostChatPreviewErrors];
+
+export type PostChatPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: unknown;
+};
 
 export type GetMessagesData = {
     body?: never;

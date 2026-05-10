@@ -13,7 +13,7 @@ import { setupMessageListener } from './listener';
     return;
   }
 
-  const chatUrl = `${import.meta.env.VITE_CLIENT_BASE}?channelId=${config.channelId}&orgId=${config.orgId}`;
+  const chatUrl = `${import.meta.env.VITE_CLIENT_BASE}?channelId=${config.channelId}`;
 
   setupMessageListener();
 

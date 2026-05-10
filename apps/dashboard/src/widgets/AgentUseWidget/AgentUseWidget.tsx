@@ -1,4 +1,3 @@
-import { useAuth } from '@clerk/clerk-react';
 import { Button } from '@knowbase/ui/components/button';
 import {
   Dialog,
@@ -20,7 +19,6 @@ import { useChannels } from '@/store/useChannels.ts';
 
 export const AgentUseWidget = () => {
   const [copiedText, copyToClipboard] = useCopyToClipboard();
-  const { orgId } = useAuth();
 
   const { agentId } = useParams({ strict: false });
   if (!agentId) {
@@ -38,7 +36,6 @@ export const AgentUseWidget = () => {
   const embedUrl = `${import.meta.env.VITE_EMBED_BASE}/embed.js`;
   const embedCode = `<script>
 window.AgenvikChat = {
-  orgId: "${orgId}",
   channelId: "${channelWeb?.id || ''}",
   primaryColor: "${primaryColor || '#000000'}",
 };

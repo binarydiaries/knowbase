@@ -35,8 +35,8 @@ RUN echo 'server { \
   \
   # Proxy /blog to the Astro blog (deployed at blog.agenvik.com with base=/blog). \
   location /blog { \
-    proxy_pass https://blog.agenvik.com; \
-    proxy_set_header Host blog.agenvik.com; \
+    proxy_pass https://blog-stage.agenvik.com; \
+    proxy_set_header Host blog-stage.agenvik.com; \
     proxy_set_header X-Forwarded-Host agenvik.com; \
     proxy_set_header X-Forwarded-Proto https; \
     proxy_ssl_server_name on; \

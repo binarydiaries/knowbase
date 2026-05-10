@@ -60,27 +60,24 @@ export function ArchiveAgentDialog({
         </DialogHeader>
         {isArchiving && agentName && (
           <div className="space-y-1.5">
-            <Label>
-              Type <strong>{agentName}</strong> to confirm
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                value={confirmInput}
-                onChange={(e) => setConfirmInput(e.target.value)}
-                placeholder={agentName}
-                autoFocus
-              />
-              <Button
+            <Label className="flex items-center gap-1 flex-wrap">
+              Type <strong>{agentName}</strong>
+              <button
                 type="button"
-                variant="outline"
-                size="icon"
-                className="shrink-0"
                 onClick={copyAgentName}
                 title="Copy to clipboard"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
               >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              </button>
+              to confirm
+            </Label>
+            <Input
+              value={confirmInput}
+              onChange={(e) => setConfirmInput(e.target.value)}
+              placeholder={agentName}
+              autoFocus
+            />
           </div>
         )}
         <DialogFooter>

@@ -440,32 +440,29 @@ export const DocumentsWidget = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label>
-              Type <strong>{deleteConfirmDoc?.title}</strong> to confirm
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                value={deleteConfirmInput}
-                onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                placeholder={deleteConfirmDoc?.title}
-                autoFocus
-              />
-              <Button
+            <Label className="flex items-center gap-1 flex-wrap">
+              Type <strong>{deleteConfirmDoc?.title}</strong>
+              <button
                 type="button"
-                variant="outline"
-                size="icon"
-                className="shrink-0"
+                title="Copy to clipboard"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => {
                   if (!deleteConfirmDoc?.title) return;
                   navigator.clipboard.writeText(deleteConfirmDoc.title);
                   setCopiedTitle(true);
                   setTimeout(() => setCopiedTitle(false), 1500);
                 }}
-                title="Copy to clipboard"
               >
-                {copiedTitle ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+                {copiedTitle ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              </button>
+              to confirm
+            </Label>
+            <Input
+              value={deleteConfirmInput}
+              onChange={(e) => setDeleteConfirmInput(e.target.value)}
+              placeholder={deleteConfirmDoc?.title}
+              autoFocus
+            />
           </div>
           <DialogFooter>
             <Button

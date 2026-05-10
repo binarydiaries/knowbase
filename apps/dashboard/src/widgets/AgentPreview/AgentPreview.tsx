@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/clerk-react';
 import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
@@ -16,6 +17,7 @@ const AgentPreviewContent = ({
   channelWeb,
   onNewChat,
 }: IAgentPreviewContentProps) => {
+  const { getToken } = useAuth();
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
@@ -38,6 +40,16 @@ const AgentPreviewContent = ({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: `${import.meta.env.VITE_API_BASE}/chat/preview`,
+      fetch: async (url, init) => {
+        const token = await getToken();
+        return fetch(url, {
+          ...init,
+          headers: {
+            ...(init?.headers as Record<string, string>),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+      },
       prepareSendMessagesRequest({ messages, id, body }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find((v) => v.type === 'text');

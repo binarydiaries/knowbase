@@ -7,10 +7,11 @@ import { AgentWidget } from '@/widgets/AgentWidget/AgentWidget.tsx';
 function App() {
   const { params } = useQueryParams();
   const channelId = params.get('channelId');
+  const parentOrigin = params.get('parentOrigin') ?? undefined;
 
   const query = useQuery({
     queryFn: async () => {
-      return getChannel(channelId || '');
+      return getChannel(channelId || '', parentOrigin);
     },
     queryKey: ['channel', channelId],
   });
@@ -20,6 +21,7 @@ function App() {
       {query.data?.channel && (
         <AgentWidget
           channelSchema={query.data?.channel}
+          parentOrigin={parentOrigin}
         />
       )}
 

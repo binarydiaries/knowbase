@@ -800,13 +800,13 @@ export abstract class ChatService {
     channelId,
     conversationId,
     message,
-    origin,
+    parentOrigin,
     ip,
   }: {
     channelId: string;
     message: string;
     conversationId: string;
-    origin?: string;
+    parentOrigin?: string;
     ip?: string;
   }) {
     const channel = await ChannelService.singleById(channelId);
@@ -820,9 +820,9 @@ export abstract class ChatService {
       const allowedDomains = config.allowedDomains ?? [];
       if (allowedDomains.length > 0) {
         let allowed = false;
-        if (origin) {
+        if (parentOrigin) {
           try {
-            allowed = allowedDomains.includes(new URL(origin).hostname);
+            allowed = allowedDomains.includes(new URL(parentOrigin).hostname);
           } catch {
             allowed = false;
           }

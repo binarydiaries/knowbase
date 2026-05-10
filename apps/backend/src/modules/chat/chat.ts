@@ -56,7 +56,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
           conversationId,
           message: message,
           channelId,
-          origin: headers['origin'] as string | undefined,
+          parentOrigin: body.parentOrigin,
           ip,
         });
       } catch (error) {
@@ -74,7 +74,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   )
   .get(
     '/channel',
-    async ({ query, status, headers }) => {
+    async ({ query, status }) => {
       const channel = await ChannelService.singleById(query.channelId);
 
       if (!channel) {
@@ -83,7 +83,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
 
       if (channel.type === 'web') {
         const config = channel.config as IChannelWebConfig;
-        if (!isDomainAllowed(headers['origin'] as string | undefined, config.allowedDomains ?? [])) {
+        if (!isDomainAllowed(query.parentOrigin, config.allowedDomains ?? [])) {
           return status(403, { code: 'FORBIDDEN', message: 'Domain not allowed' });
         }
       }
@@ -132,5 +132,3 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       },
     },
   );
-
-

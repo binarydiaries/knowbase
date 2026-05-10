@@ -6,10 +6,12 @@ const ChatBodySchema = z.object({
   conversationId: z.string(),
   message: z.string(),
   channelId: z.string(),
+  parentOrigin: z.string().optional(),
 });
 
 const ChatChannelQueryParamSchema = z.object({
   channelId: z.string(),
+  parentOrigin: z.string().optional(),
 });
 
 const ChatChannelResponseSchema = z.object({

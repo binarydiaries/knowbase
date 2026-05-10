@@ -13,7 +13,8 @@ import { setupMessageListener } from './listener';
     return;
   }
 
-  const chatUrl = `${import.meta.env.VITE_CLIENT_BASE}?channelId=${config.channelId}`;
+  const parentOrigin = encodeURIComponent(window.location.origin);
+  const chatUrl = `${import.meta.env.VITE_CLIENT_BASE}?channelId=${config.channelId}&parentOrigin=${parentOrigin}`;
 
   setupMessageListener();
 

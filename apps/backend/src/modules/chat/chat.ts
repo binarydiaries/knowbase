@@ -74,7 +74,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   )
   .get(
     '/channel',
-    async ({ query, status, headers }) => {
+    async ({ query, status }) => {
       const channel = await ChannelService.singleById(query.channelId);
 
       if (!channel) {
@@ -132,5 +132,3 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       },
     },
   );
-
-

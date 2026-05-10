@@ -70,7 +70,14 @@ function RouteComponent() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <WhatsAppIntegrationCard />
+          {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' ? (
+            <WhatsAppIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="WhatsApp"
+              description="Send and receive messages via WhatsApp Business."
+            />
+          )}
           {import.meta.env.VITE_SLACK_ENABLED === 'true' ? (
             <SlackIntegrationCard />
           ) : (

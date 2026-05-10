@@ -38,7 +38,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { FolderIcon } from 'lucide-react';
+import { Check, Copy, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -84,6 +84,7 @@ export const DocumentsWidget = ({
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
   const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+  const [copiedTitle, setCopiedTitle] = useState(false);
 
   if (!agentId) {
     throw new Error('agentId not available');
@@ -439,8 +440,22 @@ export const DocumentsWidget = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label>
-              Type <strong>{deleteConfirmDoc?.title}</strong> to confirm
+            <Label className="flex items-center gap-1 flex-wrap">
+              Type <strong>{deleteConfirmDoc?.title}</strong>
+              <button
+                type="button"
+                title="Copy to clipboard"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => {
+                  if (!deleteConfirmDoc?.title) return;
+                  navigator.clipboard.writeText(deleteConfirmDoc.title);
+                  setCopiedTitle(true);
+                  setTimeout(() => setCopiedTitle(false), 1500);
+                }}
+              >
+                {copiedTitle ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              </button>
+              to confirm
             </Label>
             <Input
               value={deleteConfirmInput}

@@ -144,12 +144,10 @@ export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelQueryParamSchema = {
     channelId: string;
-    orgId: string;
 };
 
 export type ChatChannelResponseSchema = {
@@ -183,12 +181,9 @@ export type ChatChannelResponseSchema = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -564,12 +559,9 @@ export type OneAgentResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -777,12 +769,9 @@ export type ChannelSchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
     createdAt: string;
@@ -824,12 +813,9 @@ export type ManyChannelResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -866,12 +852,9 @@ export type CreateChannelBodySchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
 };
@@ -905,12 +888,9 @@ export type UpdateChannelBodySchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
 };
@@ -946,12 +926,9 @@ export type OneChannelResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -2496,12 +2473,9 @@ export type GetSlackConnectionError = GetSlackConnectionErrors[keyof GetSlackCon
 export type PostSlackBindData = {
     body: {
         channelId: string;
-        mode: 'channel' | 'mention' | 'command';
+        mode: 'channel' | 'mention';
         slackChannelId?: string;
         slackChannelName?: string;
-        commandKeyword?: string;
-        commandChannelId?: string;
-        commandChannelName?: string;
     };
     path?: never;
     query?: never;

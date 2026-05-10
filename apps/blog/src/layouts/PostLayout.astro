@@ -9,6 +9,8 @@ interface Props {
 const { post } = Astro.props
 const { title, date, author, authorRole, excerpt, tags, readTime } = post.data
 
+const base = import.meta.env.BASE_URL
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -34,7 +36,7 @@ const TAG_COLORS = [
   <!-- Back link -->
   <div class="max-w-4xl mx-auto px-6 pt-8">
     <a
-      href="/"
+      href={base}
       class="inline-flex items-center gap-1.5 text-sm text-[#301B69]/60 hover:text-[#301B69] transition"
       aria-label="Back to all posts"
     >
@@ -105,6 +107,16 @@ const TAG_COLORS = [
           Get Started →
         </a>
       </div>
+    </div>
+
+    <!-- Back link bottom -->
+    <div class="mt-8 text-center">
+      <a href={base} class="text-sm text-[#301B69]/70 hover:text-[#301B69] transition inline-flex items-center gap-1.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to all posts
+      </a>
     </div>
   </article>
 </BlogLayout>

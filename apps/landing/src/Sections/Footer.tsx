@@ -78,7 +78,7 @@ const Footer = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="https://blog.agenvik.com" className="hover:text-[#301B69]">Blog</a>
+                    <a href="/blog" className="hover:text-[#301B69]">Blog</a>
                   </li>
                 </ul>
               </nav>

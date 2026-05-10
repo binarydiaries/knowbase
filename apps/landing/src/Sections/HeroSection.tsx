@@ -48,7 +48,7 @@ const HeroSection = () => {
               FAQ
             </a>
             <a
-              href="https://blog.agenvik.com"
+              href="/blog"
               className="hover:opacity-80"
             >
               Blog

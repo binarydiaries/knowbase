@@ -19,6 +19,7 @@ const {
   canonicalUrl,
 } = Astro.props
 
+const base = import.meta.env.BASE_URL
 const resolvedCanonical = canonicalUrl ?? Astro.url.href
 ---
 
@@ -61,11 +62,11 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.href
           <a href="https://agenvik.com/#features" class="hover:text-[#301B69] transition">Features</a>
           <a href="https://agenvik.com/#pricing" class="hover:text-[#301B69] transition">Pricing</a>
           <a href="https://agenvik.com/#faq" class="hover:text-[#301B69] transition">FAQ</a>
-          <a href="/" class="text-[#301B69] font-medium transition">Blog</a>
+          <a href={base} class="text-[#301B69] font-medium transition">Blog</a>
         </nav>
 
         <a
-          href={import.meta.env.SITE_APP_URL ?? 'https://app.agenvik.com'}
+          href="https://app.agenvik.com"
           class="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition"
         >
           Get Started
@@ -97,15 +98,15 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.href
               <li><a href="https://agenvik.com" class="hover:text-[#301B69] transition">Home</a></li>
               <li><a href="https://agenvik.com/#features" class="hover:text-[#301B69] transition">Features</a></li>
               <li><a href="https://agenvik.com/#pricing" class="hover:text-[#301B69] transition">Pricing</a></li>
-              <li><a href="/" class="hover:text-[#301B69] transition">Blog</a></li>
+              <li><a href={base} class="hover:text-[#301B69] transition">Blog</a></li>
             </ul>
           </nav>
 
-          <nav aria-label="Support links">
+          <nav aria-label="Resources links">
             <h2 class="text-sm font-semibold text-[#301B69] mb-3">Resources</h2>
             <ul class="space-y-2 text-sm text-[#301B69]/70 list-none">
-              <li><a href="https://docs.agenvik.com/" class="hover:text-[#301B69] transition">Documentation</a></li>
-              <li><a href="https://docs.agenvik.com/help-and-support/overview" class="hover:text-[#301B69] transition">Help & Support</a></li>
+              <li><a href="https://agenvik.com/docs" class="hover:text-[#301B69] transition">Documentation</a></li>
+              <li><a href="https://agenvik.com/docs/help-and-support/overview" class="hover:text-[#301B69] transition">Help & Support</a></li>
               <li><a href="https://agenvik.com/privacy-policy" class="hover:text-[#301B69] transition">Privacy Policy</a></li>
               <li><a href="https://agenvik.com/terms" class="hover:text-[#301B69] transition">Terms & Conditions</a></li>
             </ul>

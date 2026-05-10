@@ -8,13 +8,14 @@ COPY . .
 # Install ALL workspace deps properly
 RUN bun install --frozen-lockfile
 
-# Build
-RUN bun run build:landing
+# Build landing and blog
+RUN bun run build:landing && cd apps/blog && bunx astro build
 
 
 FROM nginx:alpine
 
 COPY --from=builder /app/apps/landing/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/blog/dist /usr/share/nginx/html/blog
 
 RUN echo 'server { \
   listen 3000; \
@@ -31,6 +32,12 @@ RUN echo 'server { \
   # Hashed assets are immutable — cache them aggressively. \
   location /assets/ { \
     add_header Cache-Control "public, max-age=31536000, immutable"; \
+  } \
+  \
+  # Blog — static Astro build served from /blog. \
+  location /blog { \
+    index index.html; \
+    try_files $uri $uri/index.html /blog/index.html; \
   } \
   \
   # Proxy /docs to Mintlify. \

@@ -4,7 +4,8 @@ import sitemap from '@astrojs/sitemap'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  site: 'https://blog.agenvik.com',
+  site: 'https://agenvik.com',
+  base: '/blog',
   output: 'static',
   integrations: [mdx(), sitemap()],
   vite: {

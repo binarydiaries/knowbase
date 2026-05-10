@@ -51,6 +51,10 @@ export const ChannelSchema = z.object({
     .max(500, 'Suggestion questions are too long (max 500 characters)')
     .optional(),
 
+  allowedDomains: z
+    .string()
+    .optional(),
+
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
@@ -87,6 +91,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       welcomeMessage: '',
       inputPlaceholder: '',
       suggestionQuestions: '',
+      allowedDomains: '',
       primaryColor: '#915964',
     },
   });
@@ -99,6 +104,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
         suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join('\n'),
+        allowedDomains: (channelConfig.allowedDomains ?? []).join('\n'),
         primaryColor: channelConfig.primaryColor ?? '#915964',
       });
     }
@@ -115,7 +121,10 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           .map((question) => question.trim())
           .filter((question) => question.length > 0)
           .slice(0, 6),
-        allowedDomains: channelConfig?.allowedDomains ?? [],
+        allowedDomains: (values.allowedDomains ?? '')
+          .split('\n')
+          .map((d) => d.trim().toLowerCase())
+          .filter((d) => d.length > 0),
       };
 
       await patchChannelsById({
@@ -196,6 +205,13 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             control={control}
             label="Suggestion Questions"
             placeholder="One question per line"
+            disabled={readOnly}
+          />
+          <FormTextarea
+            name="allowedDomains"
+            control={control}
+            label="Allowed Domains"
+            placeholder="One domain per line, e.g. example.com"
             disabled={readOnly}
           />
           <FormInputColor

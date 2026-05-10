@@ -49,9 +49,8 @@ const AgentWidgetContent = ({
     }),
     onError(error) {
       const chatError = parseChatError(error);
-      if (!chatError) return;
 
-      if (chatError.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
+      if (chatError?.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
         setIsUsageExhausted(true);
         setAlertMessage(
           'This assistant is temporarily unavailable right now. Please try again later.',
@@ -59,11 +58,9 @@ const AgentWidgetContent = ({
         return;
       }
 
-      if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
-        setAlertMessage(
-          chatError.message || 'Something went wrong. Please try again.',
-        );
-      }
+      setAlertMessage(
+        chatError?.message || 'Something went wrong. Please try again.',
+      );
     },
   });
 

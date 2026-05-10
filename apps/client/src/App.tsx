@@ -28,6 +28,14 @@ function App() {
           <Spinner className="size-6" />
         </div>
       )}
+
+      {query.isError && (
+        <div className="h-full flex justify-center items-center p-6">
+          <p className="text-sm text-center text-muted-foreground">
+            Failed to load. Please try again later.
+          </p>
+        </div>
+      )}
     </>
   );
 }

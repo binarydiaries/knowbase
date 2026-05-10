@@ -53,7 +53,6 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/webhook/whatsapp',
     async ({ body }) => {
-      console.log('===whatsapp===', JSON.stringify(body));
       void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },

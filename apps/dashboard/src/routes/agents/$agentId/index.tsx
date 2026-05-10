@@ -134,7 +134,9 @@ function RouteComponent() {
             <DocumentsWidget readOnly={readOnly} subscription={subscription} />
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
-            <WhatsAppChannelCard readOnly={readOnly} />
+            {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' && (
+              <WhatsAppChannelCard readOnly={readOnly} />
+            )}
             {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
               <SlackChannelCard readOnly={readOnly} />
             )}

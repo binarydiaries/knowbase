@@ -384,6 +384,9 @@ export type DocumentSchema = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
     status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     agentId: string;
@@ -405,6 +408,9 @@ export type CreateDocumentBody = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
 };
 
@@ -419,6 +425,9 @@ export type UpdateDocumentBody = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
 };
 
@@ -435,6 +444,9 @@ export type OneDocumentResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -458,6 +470,9 @@ export type ManyDocumentsResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -482,6 +497,29 @@ export type DocumentContentQna = Array<{
 }>;
 
 export type DocumentContentText = string;
+
+export type UploadPdfBody = {
+    file: Blob | File;
+    agentId: string;
+};
+
+export type SavePdfBody = {
+    agentId: string;
+    title: string;
+    text: string;
+};
+
+export type PdfPreviewResponse = {
+    markdown: string;
+    pages: number;
+    characters: number;
+    truncated: boolean;
+};
+
+export type PdfUploadErrorResponse = {
+    code: 'INVALID_FILE' | 'PDF_ENCRYPTED' | 'PDF_EMPTY';
+    message: string;
+};
 
 export type AgentSchema = {
     id: string;
@@ -521,6 +559,9 @@ export type OneAgentResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -1685,6 +1726,72 @@ export type PostDocumentsResponses = {
 };
 
 export type PostDocumentsResponse = PostDocumentsResponses[keyof PostDocumentsResponses];
+
+export type PostDocumentsPdfPreviewData = {
+    body: UploadPdfBody;
+    path?: never;
+    query?: never;
+    url: '/documents/pdf/preview';
+};
+
+export type PostDocumentsPdfPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+    /**
+     * Response for status 422
+     */
+    422: PdfUploadErrorResponse;
+};
+
+export type PostDocumentsPdfPreviewError = PostDocumentsPdfPreviewErrors[keyof PostDocumentsPdfPreviewErrors];
+
+export type PostDocumentsPdfPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: PdfPreviewResponse;
+};
+
+export type PostDocumentsPdfPreviewResponse = PostDocumentsPdfPreviewResponses[keyof PostDocumentsPdfPreviewResponses];
+
+export type PostDocumentsPdfData = {
+    body: SavePdfBody;
+    path?: never;
+    query?: never;
+    url: '/documents/pdf';
+};
+
+export type PostDocumentsPdfErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: DocumentWriteForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostDocumentsPdfError = PostDocumentsPdfErrors[keyof PostDocumentsPdfErrors];
+
+export type PostDocumentsPdfResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneDocumentResponse;
+};
+
+export type PostDocumentsPdfResponse = PostDocumentsPdfResponses[keyof PostDocumentsPdfResponses];
 
 export type DeleteDocumentsByIdData = {
     body?: never;

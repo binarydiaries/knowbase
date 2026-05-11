@@ -9,7 +9,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog-stage.agenvik.com',
-  // base: '/blog',
+  base: './',
   integrations: [mdx(), sitemap()],
 
   vite: {

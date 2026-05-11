@@ -77,6 +77,30 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     return { webhookUrl, verifyToken };
   })
 
+  // GET /whatsapp/test-connection — validate that the stored token still works against Meta
+  .get('/whatsapp/test-connection', async ({ orgId, status }) => {
+    const connection = await WhatsAppConnectionService.findByOrg(orgId);
+    if (!connection) {
+      return status(404, { code: 'NOT_FOUND', message: 'No WhatsApp connection found' });
+    }
+
+    const res = await fetch(
+      `https://graph.facebook.com/v19.0/${connection.businessAccountId}/phone_numbers?fields=display_phone_number,id`,
+      { headers: { Authorization: `Bearer ${connection.accessToken}` } },
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      return status(400, {
+        code: 'BAD_REQUEST',
+        message: err.error?.message ?? 'Token is invalid or access to this WABA has been revoked',
+      });
+    }
+
+    const data = await res.json() as { data: { id: string; display_phone_number: string }[] };
+    return { ok: true, phoneNumberCount: data.data.length };
+  })
+
   // GET /whatsapp/connection — org's connection status + phone numbers with bindings
   .get('/whatsapp/connection', async ({ orgId }) => {
     const connection = await WhatsAppConnectionService.findByOrg(orgId);

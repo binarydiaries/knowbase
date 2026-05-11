@@ -122,6 +122,22 @@ export function WhatsAppIntegrationCard() {
     },
   });
 
+  const testMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.get({
+        url: '/whatsapp/test-connection',
+        responseType: 'json',
+      });
+      return res.data as { ok: boolean; phoneNumberCount: number };
+    },
+    onSuccess: (data) => {
+      toast.success(`Connection is healthy — ${data.phoneNumberCount} phone number${data.phoneNumberCount === 1 ? '' : 's'} found`);
+    },
+    onError: (error) => {
+      toast.error(`Connection failed: ${getErrorMessage(error)}`);
+    },
+  });
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -314,7 +330,15 @@ export function WhatsAppIntegrationCard() {
             )}
           </div>
           <Separator />
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={testMutation.isPending}
+              onClick={() => testMutation.mutate()}
+            >
+              {testMutation.isPending ? 'Testing…' : 'Test Connection'}
+            </Button>
             <Button
               variant="outline"
               size="sm"

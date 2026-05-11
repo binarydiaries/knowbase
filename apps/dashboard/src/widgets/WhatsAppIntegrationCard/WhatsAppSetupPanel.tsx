@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Separator } from '@knowbase/ui/components/separator';
 import {
@@ -18,10 +17,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import { client } from '@/services/client.gen';
-import {
-  useWhatsAppConnection,
-  type WhatsAppPhoneNumber,
-} from '@/store/useWhatsAppConnection.ts';
+import { useWhatsAppConnection } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const schema = z.object({
@@ -31,8 +27,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
-  const { connected, phoneNumbers, setConnection, clearConnection } =
-    useWhatsAppConnection();
+  const { setConnection } = useWhatsAppConnection();
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -42,13 +37,9 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
   const { data: setupInfo } = useQuery({
     queryKey: ['whatsapp-setup-info'],
     queryFn: async () => {
-      const res = await client.get({
-        url: '/whatsapp/setup-info',
-        responseType: 'json',
-      });
+      const res = await client.get({ url: '/whatsapp/setup-info', responseType: 'json' });
       return res.data as { webhookUrl: string; verifyToken: string };
     },
-    enabled: !connected,
   });
 
   const connectMutation = useMutation({
@@ -66,241 +57,139 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
     onSuccess: (data) => {
       setConnection({
         businessAccountId: data.businessAccountId,
-        phoneNumbers: data.phoneNumbers.map((p) => ({
-          ...p,
-          boundToAgentId: null,
-          agentName: null,
-        })),
+        phoneNumbers: data.phoneNumbers.map((p) => ({ ...p, boundToAgentId: null, agentName: null })),
       });
       reset();
       toast.success('WhatsApp Business Account connected');
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error));
-    },
-  });
-
-  const disconnectMutation = useMutation({
-    mutationFn: async () => {
-      await client.delete({ url: '/whatsapp/connection', responseType: 'json' });
-    },
-    onSuccess: () => {
-      clearConnection();
-      toast.success('WhatsApp disconnected');
       onClose();
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error));
-    },
-  });
-
-  const testMutation = useMutation({
-    mutationFn: async () => {
-      const res = await client.get({ url: '/whatsapp/test-connection', responseType: 'json' });
-      return res.data as { ok: boolean; phoneNumberCount: number };
-    },
-    onSuccess: (data) => {
-      toast.success(
-        `Connection is healthy — ${data.phoneNumberCount} phone number${data.phoneNumberCount === 1 ? '' : 's'} found`,
-      );
-    },
-    onError: (error) => {
-      toast.error(`Connection failed: ${getErrorMessage(error)}`);
-    },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   return (
     <SheetContent className="sm:max-w-lg overflow-y-auto flex flex-col">
       <SheetHeader>
-        <SheetTitle>WhatsApp Business</SheetTitle>
+        <SheetTitle>Connect WhatsApp Business</SheetTitle>
         <SheetDescription>
-          {connected
-            ? 'Manage your connected WhatsApp Business Account.'
-            : 'Follow the steps below to connect your Meta WhatsApp Business Account.'}
+          Follow the steps below to connect your Meta WhatsApp Business Account.
         </SheetDescription>
       </SheetHeader>
 
       <div className="flex-1 space-y-6 px-4 py-4">
-        {/* ── Not connected: setup guide + form ── */}
-        {!connected && (
-          <>
-            <div className="space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Setup guide
-              </p>
+        {/* Setup guide */}
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Setup guide
+          </p>
 
-              <SetupStep number={1} title="Create a Meta App">
-                <p className="text-xs text-muted-foreground">
-                  Go to{' '}
-                  <a
-                    href="https://developers.facebook.com/apps/create/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-0.5 underline underline-offset-2 hover:text-foreground"
-                  >
-                    Meta for Developers
-                    <ExternalLink className="size-2.5" />
-                  </a>{' '}
-                  → Create App → Business type → add the <strong>WhatsApp</strong>{' '}
-                  product. Create or connect a WhatsApp Business Account (WABA) and
-                  add a verified phone number.
-                </p>
-              </SetupStep>
-
-              <SetupStep number={2} title="Configure the Webhook">
-                <p className="text-xs text-muted-foreground mb-2">
-                  In your Meta App → <strong>WhatsApp → Configuration → Webhooks</strong>,
-                  click <em>Edit</em> and enter these values:
-                </p>
-                <div className="space-y-2">
-                  <CopyField
-                    label="Callback URL"
-                    value={setupInfo?.webhookUrl ?? ''}
-                    loading={!setupInfo}
-                  />
-                  <CopyField
-                    label="Verify Token"
-                    value={setupInfo?.verifyToken ?? ''}
-                    loading={!setupInfo}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Click <em>Verify and Save</em>, then subscribe to the{' '}
-                  <strong>messages</strong> webhook field.
-                </p>
-              </SetupStep>
-
-              <SetupStep number={3} title="Get your credentials">
-                <ul className="text-xs text-muted-foreground space-y-1.5 list-none">
-                  <li>
-                    <span className="font-medium text-foreground">Business Account ID</span>{' '}
-                    — Meta Business Manager → Business Settings → Business Info.
-                  </li>
-                  <li>
-                    <span className="font-medium text-foreground">Access Token</span>{' '}
-                    — In your Meta App, go to{' '}
-                    <a
-                      href="https://developers.facebook.com/docs/whatsapp/business-management-api/get-started/system-users"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-0.5 underline underline-offset-2 hover:text-foreground"
-                    >
-                      System Users
-                      <ExternalLink className="size-2.5" />
-                    </a>{' '}
-                    → Create an Admin System User → assign your WABA as an asset →
-                    generate a token with permissions:{' '}
-                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                      whatsapp_business_messaging
-                    </code>{' '}
-                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                      whatsapp_business_management
-                    </code>
-                  </li>
-                </ul>
-                <p className="mt-2 text-xs text-amber-600 dark:text-amber-500">
-                  ⚠ Do not use the temporary token from the API Setup page — it expires
-                  in 24 hours and will silently break your integration.
-                </p>
-              </SetupStep>
-
-              <SetupStep number={4} title="Enter your credentials below" />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div>
-                <FormInput
-                  name="businessAccountId"
-                  control={control}
-                  label="Business Account ID"
-                  placeholder="1234567890"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Found in Meta Business Manager → Business Settings → Business Info
-                </p>
-              </div>
-              <div>
-                <FormInput
-                  name="accessToken"
-                  control={control}
-                  label="Access Token"
-                  type="password"
-                  placeholder="EAAxxxxxxxx…"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Use a System User permanent token — temporary tokens expire in 24 hours
-                </p>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* ── Connected: phone numbers list ── */}
-        {connected && (
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Phone Numbers
+          <SetupStep number={1} title="Create a Meta App">
+            <p className="text-xs text-muted-foreground">
+              Go to{' '}
+              <a
+                href="https://developers.facebook.com/apps/create/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 underline underline-offset-2 hover:text-foreground"
+              >
+                Meta for Developers
+                <ExternalLink className="size-2.5" />
+              </a>{' '}
+              → Create App → Business type → add the <strong>WhatsApp</strong> product.
+              Create or connect a WhatsApp Business Account (WABA) and add a verified phone number.
             </p>
-            {phoneNumbers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No phone numbers found in this account.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {phoneNumbers.map((phone) => (
-                  <PhoneNumberRow key={phone.phoneNumberId} phone={phone} />
-                ))}
-              </div>
-            )}
+          </SetupStep>
+
+          <SetupStep number={2} title="Configure the Webhook">
+            <p className="text-xs text-muted-foreground mb-2">
+              In your Meta App → <strong>WhatsApp → Configuration → Webhooks</strong>, click{' '}
+              <em>Edit</em> and enter these values:
+            </p>
+            <div className="space-y-2">
+              <CopyField label="Callback URL" value={setupInfo?.webhookUrl ?? ''} loading={!setupInfo} />
+              <CopyField label="Verify Token" value={setupInfo?.verifyToken ?? ''} loading={!setupInfo} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Click <em>Verify and Save</em>, then subscribe to the <strong>messages</strong> webhook field.
+            </p>
+          </SetupStep>
+
+          <SetupStep number={3} title="Get your credentials">
+            <ul className="text-xs text-muted-foreground space-y-1.5 list-none">
+              <li>
+                <span className="font-medium text-foreground">Business Account ID</span>{' '}
+                — Meta Business Manager → Business Settings → Business Info.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Access Token</span>{' '}
+                — Go to{' '}
+                <a
+                  href="https://developers.facebook.com/docs/whatsapp/business-management-api/get-started/system-users"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 underline underline-offset-2 hover:text-foreground"
+                >
+                  System Users
+                  <ExternalLink className="size-2.5" />
+                </a>{' '}
+                → Create an Admin System User → assign your WABA as an asset → generate a token
+                with permissions:{' '}
+                <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                  whatsapp_business_messaging
+                </code>{' '}
+                <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                  whatsapp_business_management
+                </code>
+              </li>
+            </ul>
+            <p className="mt-2 text-xs text-amber-600 dark:text-amber-500">
+              ⚠ Do not use the temporary token from the API Setup page — it expires in 24 hours
+              and will silently break your integration.
+            </p>
+          </SetupStep>
+
+          <SetupStep number={4} title="Enter your credentials below" />
+        </div>
+
+        <Separator />
+
+        {/* Credentials form */}
+        <div className="space-y-3">
+          <div>
+            <FormInput
+              name="businessAccountId"
+              control={control}
+              label="Business Account ID"
+              placeholder="1234567890"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Found in Meta Business Manager → Business Settings → Business Info
+            </p>
           </div>
-        )}
+          <div>
+            <FormInput
+              name="accessToken"
+              control={control}
+              label="Access Token"
+              type="password"
+              placeholder="EAAxxxxxxxx…"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Use a System User permanent token — temporary tokens expire in 24 hours
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* ── Footer actions ── */}
       <SheetFooter className="border-t px-4 pt-4">
-        {!connected && (
-          <>
-            <Button
-              disabled={connectMutation.isPending}
-              onClick={handleSubmit((values) => connectMutation.mutate(values))}
-            >
-              {connectMutation.isPending ? 'Connecting…' : 'Connect'}
-            </Button>
-            <SheetClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </SheetClose>
-          </>
-        )}
-
-        {connected && (
-          <>
-            <Button
-              variant="outline"
-              disabled={testMutation.isPending}
-              onClick={() => testMutation.mutate()}
-            >
-              {testMutation.isPending ? 'Testing…' : 'Test Connection'}
-            </Button>
-            <Button
-              variant="outline"
-              className="text-destructive hover:text-destructive"
-              disabled={disconnectMutation.isPending}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    'This will disable all WhatsApp channels across your agents. Continue?',
-                  )
-                ) {
-                  disconnectMutation.mutate();
-                }
-              }}
-            >
-              {disconnectMutation.isPending ? 'Disconnecting…' : 'Disconnect'}
-            </Button>
-          </>
-        )}
+        <Button
+          disabled={connectMutation.isPending}
+          onClick={handleSubmit((values) => connectMutation.mutate(values))}
+        >
+          {connectMutation.isPending ? 'Connecting…' : 'Connect'}
+        </Button>
+        <SheetClose asChild>
+          <Button variant="outline">Cancel</Button>
+        </SheetClose>
       </SheetFooter>
     </SheetContent>
   );
@@ -362,26 +251,9 @@ function CopyField({
           className="shrink-0 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
           aria-label={`Copy ${label}`}
         >
-          {copied ? (
-            <Check className="size-3.5 text-green-500" />
-          ) : (
-            <Copy className="size-3.5" />
-          )}
+          {copied ? <Check className="size-3.5 text-green-500" /> : <Copy className="size-3.5" />}
         </button>
       </div>
-    </div>
-  );
-}
-
-function PhoneNumberRow({ phone }: { phone: WhatsAppPhoneNumber }) {
-  return (
-    <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
-      <span className="font-medium">{phone.displayPhone}</span>
-      {phone.boundToAgentId ? (
-        <Badge variant="secondary">{phone.agentName ?? 'Bound'}</Badge>
-      ) : (
-        <span className="text-xs text-muted-foreground">Unassigned</span>
-      )}
     </div>
   );
 }

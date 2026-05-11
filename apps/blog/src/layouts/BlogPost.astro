@@ -1,86 +1,115 @@
 ---
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
+import BlogLayout from './BlogLayout.astro'
+import type { CollectionEntry } from 'astro:content'
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props {
+  post: CollectionEntry<'blog'>
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { post } = Astro.props
+const { title, date, author, authorRole, excerpt, tags, readTime } = post.data
+
+const base = import.meta.env.BASE_URL
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+const TAG_COLORS = [
+  'bg-[#301B69]/10 text-[#301B69]',
+  'bg-[#B07CD1]/15 text-[#6B3FA0]',
+  'bg-purple-50 text-purple-700',
+]
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
+<BlogLayout
+  title={`${title} — Agenvik Blog`}
+  description={excerpt}
+  ogTitle={title}
+  ogDescription={excerpt}
+  ogType="article"
+>
+  <div class="max-w-4xl mx-auto px-6 pt-8">
+    <a
+      href={base}
+      class="inline-flex items-center gap-1.5 text-sm text-[#301B69]/60 hover:text-[#301B69] transition"
+      aria-label="Back to all posts"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      Back to Blog
+    </a>
+  </div>
 
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+  <article class="max-w-4xl mx-auto px-6 py-8 pb-16">
+    <div class="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
+
+      <header class="mb-10">
+        <div class="flex flex-wrap gap-2 mb-4">
+          {tags.map((tag, i) => (
+            <span class={`text-xs px-2.5 py-0.5 rounded-full font-medium ${TAG_COLORS[i % TAG_COLORS.length]}`}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4 leading-tight">
+          {title}
+        </h1>
+        <p class="text-[#301B69]/70 leading-relaxed mb-6">{excerpt}</p>
+
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#301B69]/50 border-t border-[#301B69]/10 pt-4">
+          <span class="font-medium text-[#301B69]/70">{author}</span>
+          {authorRole && <span>· {authorRole}</span>}
+          <span class="flex items-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            {formatDate(date)}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {readTime}
+          </span>
+        </div>
+      </header>
+
+      <div class="blog-prose">
+        <slot />
+      </div>
+
+      <div class="mt-14 pt-8 border-t border-[#301B69]/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-[#301B69] mb-1">Ready to build your AI agent?</p>
+          <p class="text-sm text-[#301B69]/60">Start free — no credit card required.</p>
+        </div>
+        <a
+          href="https://agenvik.com"
+          class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow hover:opacity-90 transition whitespace-nowrap"
+        >
+          Get Started →
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href={base} class="text-sm text-[#301B69]/70 hover:text-[#301B69] transition inline-flex items-center gap-1.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to all posts
+      </a>
+    </div>
+  </article>
+</BlogLayout>

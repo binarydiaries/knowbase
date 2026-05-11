@@ -5,14 +5,18 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
 
+import node from '@astrojs/node';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://agenvik.com',
   base: '/blog',
   integrations: [mdx(), sitemap()],
+
   vite: {
     plugins: [tailwindcss()],
   },
+
   fonts: [
     {
       provider: fontProviders.local(),
@@ -37,4 +41,8 @@ export default defineConfig({
       },
     },
   ],
+
+  adapter: node({
+    mode: 'standalone',
+  }),
 });

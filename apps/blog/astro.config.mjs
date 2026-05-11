@@ -1,15 +1,14 @@
 // @ts-check
 
 import mdx from '@astrojs/mdx';
+import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
 
-import node from '@astrojs/node';
-
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://agenvik.com',
+  site: 'https://blog-stage.agenvik.com',
   base: '/blog',
   integrations: [mdx(), sitemap()],
 

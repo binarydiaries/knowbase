@@ -1,13 +1,6 @@
 import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
@@ -165,74 +158,68 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   if (!channelWeb) return null;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className={'text-l'}>Channel</CardTitle>
-        <CardDescription>Agent Channel</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSave)}>
-        <CardContent className={'flex-col gap-5 flex'}>
-          <FormInput
-            name="displayName"
-            control={control}
-            label="Display Name"
-            placeholder="Enter a display Name"
-            disabled={readOnly}
-          />
-          <FormInput
-            name="subtitle"
-            control={control}
-            label="Subtitle"
-            placeholder="Enter a subtitle"
-            disabled={readOnly}
-          />
-          <FormTextarea
-            name="welcomeMessage"
-            control={control}
-            label="Welcome Message"
-            placeholder="Enter a welcome message"
-            disabled={readOnly}
-          />
-          <FormInput
-            name="inputPlaceholder"
-            control={control}
-            label="Input Placeholder"
-            placeholder="Enter a input placeholder"
-            disabled={readOnly}
-          />
-          <FormTextarea
-            name="suggestionQuestions"
-            control={control}
-            label="Suggestion Questions"
-            placeholder="One question per line"
-            disabled={readOnly}
-          />
-          <FormTextarea
-            name="allowedDomains"
-            control={control}
-            label="Allowed Domains"
-            placeholder="One domain per line, e.g. example.com"
-            disabled={readOnly}
-          />
-          <FormInputColor
-            control={control}
-            name="primaryColor"
-            label="Primary Color"
-            disabled={readOnly}
-          />
-          <div className="flex justify-end">
-            <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-              <Button
-                type="submit"
-                disabled={readOnly || !isDirty || saveChannelMutation.isPending}
-              >
-                {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
-              </Button>
-            </DisabledTooltip>
-          </div>
-        </CardContent>
-      </form>
-    </Card>
+    <form onSubmit={handleSubmit(onSave)}>
+      <div className="flex-col gap-5 flex">
+        <FormInput
+          name="displayName"
+          control={control}
+          label="Display Name"
+          placeholder="Enter a display Name"
+          disabled={readOnly}
+        />
+        <FormInput
+          name="subtitle"
+          control={control}
+          label="Subtitle"
+          placeholder="Enter a subtitle"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="welcomeMessage"
+          control={control}
+          label="Welcome Message"
+          placeholder="Enter a welcome message"
+          disabled={readOnly}
+        />
+        <FormInput
+          name="inputPlaceholder"
+          control={control}
+          label="Input Placeholder"
+          placeholder="Enter a input placeholder"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="suggestionQuestions"
+          control={control}
+          label="Suggestion Questions"
+          placeholder="One question per line"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="allowedDomains"
+          control={control}
+          label="Allowed Domains"
+          placeholder="One domain per line, e.g. example.com"
+          disabled={readOnly}
+        />
+        <FormInputColor
+          control={control}
+          name="primaryColor"
+          label="Primary Color"
+          disabled={readOnly}
+        />
+        <div className="flex justify-end">
+          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
+            <Button
+              type="submit"
+              disabled={readOnly || !isDirty || saveChannelMutation.isPending}
+            >
+              {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
+            </Button>
+          </DisabledTooltip>
+        </div>
+      </div>
+    </form>
   );
 };
 

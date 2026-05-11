@@ -1,13 +1,6 @@
 import * as amplitude from '@amplitude/unified';
 import { Button } from '@knowbase/ui/components/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -195,42 +188,33 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   // Free-plan gate
   if (!planLoading && !isPaid) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-l flex items-center gap-2">
-            WhatsApp Channel
-            <LockIcon className="size-4 text-muted-foreground" />
-          </CardTitle>
-          <CardDescription>
-            WhatsApp is available on paid plans.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-end">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+          <LockIcon className="size-3.5 shrink-0" />
+          WhatsApp is available on paid plans.
+        </p>
+        <div className="flex justify-end">
           <Button variant="outline" size="sm" asChild>
             <Link to="/subscriptions">Upgrade Plan</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   // State 1: No WABA connected at org level
   if (!connected) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-l">WhatsApp Channel</CardTitle>
-          <CardDescription>
-            Connect your WhatsApp Business Account in Integrations to enable
-            this channel.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-end">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">
+          Connect your WhatsApp Business Account in Integrations to enable this channel.
+        </p>
+        <div className="flex justify-end">
           <Button variant="outline" size="sm" asChild>
             <Link to="/integrations">Go to Integrations</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -238,18 +222,9 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   if (isAssigned) {
     return (
       <>
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-l flex items-center gap-2">
-              WhatsApp Channel
-              <span className="size-2 rounded-full bg-green-500 inline-block" />
-              <span className="text-sm font-normal text-muted-foreground">
-                Active
-              </span>
-            </CardTitle>
-            <CardDescription>{displayPhone}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-end">
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">{displayPhone}</p>
+          <div className="flex justify-end">
             <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button
                 variant="outline"
@@ -260,8 +235,8 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                 Unassign
               </Button>
             </DisabledTooltip>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         <Dialog open={unassignConfirmOpen} onOpenChange={setUnassignConfirmOpen}>
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
@@ -299,14 +274,11 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   // State 3: WABA connected, no number bound — show picker
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-l">WhatsApp Channel</CardTitle>
-        <CardDescription>
-          Assign a phone number from your connected WhatsApp Business Account.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex items-center gap-3">
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-muted-foreground">
+        Assign a phone number from your connected WhatsApp Business Account.
+      </p>
+      <div className="flex items-center gap-3">
         <Select
           value={selectedPhoneNumberId}
           onValueChange={setSelectedPhoneNumberId}
@@ -340,8 +312,8 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             {assignMutation.isPending ? 'Assigning…' : 'Assign'}
           </Button>
         </DisabledTooltip>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

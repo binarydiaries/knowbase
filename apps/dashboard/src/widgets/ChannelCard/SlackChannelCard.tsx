@@ -1,12 +1,5 @@
 import { Button } from '@knowbase/ui/components/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -209,64 +202,48 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   // ── Free-plan gate ──────────────────────────────────────────────────────────
   if (!planLoading && !isPaid) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-l flex items-center gap-2">
-            Slack Channel
-            <LockIcon className="size-4 text-muted-foreground" />
-          </CardTitle>
-          <CardDescription>Slack is available on paid plans.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-end">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+          <LockIcon className="size-3.5 shrink-0" />
+          Slack is available on paid plans.
+        </p>
+        <div className="flex justify-end">
           <Button variant="outline" size="sm" asChild>
             <Link to="/subscriptions">Upgrade Plan</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   // ── State 1: No org-level Slack connection ──────────────────────────────────
   if (!connected) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-l">Slack Channel</CardTitle>
-          <CardDescription>
-            Connect your Slack workspace in Integrations to enable this channel.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-end">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">
+          Connect your Slack workspace in Integrations to enable this channel.
+        </p>
+        <div className="flex justify-end">
           <Button variant="outline" size="sm" asChild>
             <Link to="/integrations">Go to Integrations</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   // ── State 2: Assigned ───────────────────────────────────────────────────────
   if (isAssigned && slackConfig) {
     const displayLabel = `#${slackConfig.slackChannelName}`;
-
     const modeLabel = slackConfig.mode === 'mention' ? 'Mention' : 'Channel';
 
     return (
       <>
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-l flex items-center gap-2">
-              Slack Channel
-              <span className="size-2 rounded-full bg-green-500 inline-block" />
-              <span className="text-sm font-normal text-muted-foreground">
-                Active
-              </span>
-            </CardTitle>
-            <CardDescription>
-              {modeLabel} mode · {displayLabel}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-end">
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            {modeLabel} mode · {displayLabel}
+          </p>
+          <div className="flex justify-end">
             <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button
                 variant="outline"
@@ -277,8 +254,8 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                 Unassign
               </Button>
             </DisabledTooltip>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         <Dialog
           open={unassignConfirmOpen}
           onOpenChange={setUnassignConfirmOpen}
@@ -321,87 +298,75 @@ const SlackChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const canAssign = !!selectedSlackChannelId;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-l">Slack Channel</CardTitle>
-        <CardDescription>
-          Choose how this agent responds in Slack.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Trigger Mode — segmented buttons */}
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Trigger Mode</Label>
+        <p className="text-xs text-muted-foreground">
+          How this agent listens in Slack
+        </p>
+        <div className="flex rounded-md border overflow-hidden">
+          {MODES.map((m) => (
+            <button
+              key={m.value}
+              type="button"
+              onClick={() => {
+                setSelectedMode(m.value);
+                setSelectedSlackChannelId('');
+              }}
+              disabled={readOnly}
+              className={cn(
+                'flex-1 px-3 py-1.5 text-sm border-r last:border-r-0 transition-colors',
+                selectedMode === m.value
+                  ? 'bg-foreground text-background font-semibold'
+                  : 'bg-background text-foreground hover:bg-muted',
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {(selectedMode === 'channel' || selectedMode === 'mention') && (
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Trigger Mode</Label>
-          <p className="text-xs text-muted-foreground">
-            How this agent listens in Slack
-          </p>
-          <div className="flex rounded-md border overflow-hidden">
-            {MODES.map((m) => (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => {
-                  setSelectedMode(m.value);
-                  setSelectedSlackChannelId('');
-                }}
-                disabled={readOnly}
-                className={cn(
-                  'flex-1 px-3 py-1.5 text-sm border-r last:border-r-0 transition-colors',
-                  selectedMode === m.value
-                    ? 'bg-foreground text-background font-semibold'
-                    : 'bg-background text-foreground hover:bg-muted',
-                )}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
+          <Label className="text-xs text-muted-foreground">Slack Channel</Label>
+          <Select
+            value={selectedSlackChannelId}
+            onValueChange={setSelectedSlackChannelId}
+            disabled={readOnly || availableChannels.length === 0}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  availableChannels.length === 0
+                    ? 'No channels available — invite the bot first'
+                    : 'Select a channel…'
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {availableChannels.map((c) => (
+                <SelectItem key={c.slackChannelId} value={c.slackChannelId}>
+                  #{c.slackChannelName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      )}
 
-        {/* Channel picker — channel + mention modes */}
-        {(selectedMode === 'channel' || selectedMode === 'mention') && (
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
-              Slack Channel
-            </Label>
-            <Select
-              value={selectedSlackChannelId}
-              onValueChange={setSelectedSlackChannelId}
-              disabled={readOnly || availableChannels.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    availableChannels.length === 0
-                      ? 'No channels available — invite the bot first'
-                      : 'Select a channel…'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {availableChannels.map((c) => (
-                  <SelectItem key={c.slackChannelId} value={c.slackChannelId}>
-                    #{c.slackChannelName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div className="flex justify-end">
-          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-            <Button
-              size="sm"
-              disabled={readOnly || !canAssign || assignMutation.isPending}
-              onClick={() => assignMutation.mutate()}
-            >
-              {assignMutation.isPending ? 'Assigning…' : 'Assign'}
-            </Button>
-          </DisabledTooltip>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex justify-end">
+        <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
+          <Button
+            size="sm"
+            disabled={readOnly || !canAssign || assignMutation.isPending}
+            onClick={() => assignMutation.mutate()}
+          >
+            {assignMutation.isPending ? 'Assigning…' : 'Assign'}
+          </Button>
+        </DisabledTooltip>
+      </div>
+    </div>
   );
 };
 

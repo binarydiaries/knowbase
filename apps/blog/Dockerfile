@@ -3,26 +3,28 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-# Copy dependency files
 COPY package.json bun.lockb* bun.lock* ./
-
-# Install dependencies
 RUN bun install --frozen-lockfile
 
-# Copy source files
 COPY . .
-
-# Build Astro site
 RUN bun run build
 
 # Production stage
 FROM nginx:alpine
 
-# Copy generated static files
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html/blog
 
-# Expose web port
+RUN echo 'server { \
+  listen 80; \
+  server_name _; \
+  root /usr/share/nginx/html; \
+  \
+  location /blog/ { \
+    index index.html; \
+    try_files $uri $uri/ /blog/index.html; \
+  } \
+}' > /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]

@@ -8,7 +8,10 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://blog-stage.agenvik.com',
+  // Public URL where the blog will be accessed
+  site: 'https://stage.agenvik.com',
+
+  // Build all URLs under /blog
   base: '/blog',
   integrations: [mdx(), sitemap()],
 

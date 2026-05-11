@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import { z } from 'zod';
 
 const TEXT_SOURCE_MAX_CHARACTERS = 10_000;
@@ -41,12 +41,17 @@ const DocumentContentText = z.string().max(TEXT_SOURCE_MAX_CHARACTERS, {
   message: `Text sources can contain up to ${TEXT_SOURCE_MAX_CHARACTERS} characters.`,
 });
 
+const DocumentContentPdf = z.string();
+
 export const DocumentContent = z.discriminatedUnion('type', [
   z.object({ type: z.literal('text'), data: DocumentContentText }).meta({
     title: 'text',
   }),
   z.object({ type: z.literal('qna'), data: DocumentContentQna }).meta({
     title: 'qna',
+  }),
+  z.object({ type: z.literal('pdf'), data: DocumentContentPdf }).meta({
+    title: 'pdf',
   }),
 ]);
 
@@ -99,4 +104,32 @@ export const DocumentModel = new Elysia().model({
   AgentDocumentsParams,
   DocumentContentQna,
   DocumentContentText,
+});
+
+const PdfPreviewResponse = z.object({
+  markdown: z.string(),
+  pages: z.number(),
+  characters: z.number(),
+  truncated: z.boolean(),
+});
+
+const SavePdfBody = z.object({
+  agentId: z.string(),
+  title: z.string().min(1),
+  text: z.string().min(1),
+});
+
+const PdfUploadErrorResponse = z.object({
+  code: z.enum(['INVALID_FILE', 'PDF_ENCRYPTED', 'PDF_EMPTY']),
+  message: z.string(),
+});
+
+export const DocumentPdfModel = new Elysia().model({
+  UploadPdfBody: t.Object({
+    file: t.File({ maxSize: '50m' }),
+    agentId: t.String(),
+  }),
+  SavePdfBody,
+  PdfPreviewResponse,
+  PdfUploadErrorResponse,
 });

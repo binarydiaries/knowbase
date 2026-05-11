@@ -4,7 +4,8 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { AgentService } from '../agent/service';
 import { SubscriptionService } from '../subscription/service';
-import { DocumentModel } from './model';
+import { DocumentModel, DocumentPdfModel } from './model';
+import { pdfToMarkdown } from './pdfUtils';
 import { DocumentService } from './service';
 
 export const Document = new Elysia({
@@ -87,6 +88,107 @@ export const Document = new Elysia({
     {
       response: 'ManyDocumentsResponse',
       query: 'AgentDocumentsParams',
+    },
+  )
+  .use(DocumentPdfModel)
+  .post(
+    '/pdf/preview',
+    async ({ body, orgId, status }) => {
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
+      }
+
+      if (!body.file.type.includes('pdf')) {
+        return status(422, {
+          code: 'INVALID_FILE',
+          message: 'Only PDF files are supported.',
+        });
+      }
+
+      let result: Awaited<ReturnType<typeof pdfToMarkdown>>;
+      try {
+        result = await pdfToMarkdown(new Uint8Array(await body.file.arrayBuffer()));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message.toLowerCase() : '';
+        if (msg.includes('password')) {
+          return status(422, {
+            code: 'PDF_ENCRYPTED',
+            message: 'Password-protected PDFs are not supported.',
+          });
+        }
+        throw err;
+      }
+
+      if (!result.markdown.trim()) {
+        return status(422, {
+          code: 'PDF_EMPTY',
+          message: 'No text found in this PDF. Image-only PDFs are not supported.',
+        });
+      }
+
+      return {
+        markdown: result.markdown,
+        pages: result.pages,
+        characters: result.characters,
+        truncated: result.truncated,
+      };
+    },
+    {
+      body: 'UploadPdfBody',
+      response: {
+        200: 'PdfPreviewResponse',
+        404: 'NotFoundResponse',
+        422: 'PdfUploadErrorResponse',
+      },
+    },
+  )
+  .post(
+    '/pdf',
+    async ({ body, userId, orgId, status }) => {
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'AGENT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeAgentLimit: subscription.activeAgentLimit,
+          activeAgentCount: subscription.activeAgentCount,
+        });
+      }
+
+      if (SubscriptionService.hasReachedKnowledgeSourceLimit(subscription)) {
+        return status(403, {
+          code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED',
+          message: SubscriptionService.getKnowledgeSourceLimitReachedMessage(subscription),
+          plan: subscription.plan,
+          knowledgeSourceLimit: subscription.knowledgeSourceLimit,
+          knowledgeSourceCount: subscription.knowledgeSourceCount,
+        });
+      }
+
+      const document = await DocumentService.create({
+        agentId: body.agentId,
+        title: body.title,
+        contentSerialized: body.text,
+        type: 'pdf',
+        createdBy: userId,
+      });
+
+      return { document: DocumentService.transformDocument(document) };
+    },
+    {
+      body: 'SavePdfBody',
+      response: {
+        200: 'OneDocumentResponse',
+        403: 'DocumentWriteForbiddenResponse',
+        404: 'NotFoundResponse',
+      },
     },
   )
   .guard({

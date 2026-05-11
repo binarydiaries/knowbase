@@ -67,20 +67,22 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="whatsapp" className="px-6">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="size-4 text-muted-foreground shrink-0" />
-              <span>WhatsApp</span>
-              {isWhatsAppActive && (
-                <span className="size-2 rounded-full bg-green-500 inline-block" />
-              )}
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <WhatsAppChannelCard readOnly={readOnly} />
-          </AccordionContent>
-        </AccordionItem>
+        {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' && (
+          <AccordionItem value="whatsapp" className="px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="size-4 text-muted-foreground shrink-0" />
+                <span>WhatsApp</span>
+                {isWhatsAppActive && (
+                  <span className="size-2 rounded-full bg-green-500 inline-block" />
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <WhatsAppChannelCard readOnly={readOnly} />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
           <AccordionItem value="slack" className="px-6">

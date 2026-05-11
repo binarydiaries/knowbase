@@ -1,5 +1,5 @@
-import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
+import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
@@ -10,15 +10,14 @@ import { parseChatError } from '@/utils/chatError.ts';
 
 interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
-  orgId: string | null | undefined;
   onNewChat: () => void;
 }
 
 const AgentPreviewContent = ({
   channelWeb,
-  orgId,
   onNewChat,
 }: IAgentPreviewContentProps) => {
+  const { getToken } = useAuth();
   const initialMessageId = useId();
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
@@ -40,7 +39,17 @@ const AgentPreviewContent = ({
   const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: `${import.meta.env.VITE_API_BASE}/chat`,
+      api: `${import.meta.env.VITE_API_BASE}/chat/preview`,
+      fetch: async (url, init) => {
+        const token = await getToken();
+        return fetch(url, {
+          ...init,
+          headers: {
+            ...(init?.headers as Record<string, string>),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+      },
       prepareSendMessagesRequest({ messages, id, body }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find((v) => v.type === 'text');
@@ -49,16 +58,14 @@ const AgentPreviewContent = ({
             ...body,
             message: messageText?.text,
             conversationId: id,
-            orgId,
           },
         };
       },
     }),
     onError(error) {
       const chatError = parseChatError(error);
-      if (!chatError) return;
 
-      if (chatError.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
+      if (chatError?.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
         setIsUsageExhausted(true);
         setAlertMessage(
           chatError.message ||
@@ -67,11 +74,9 @@ const AgentPreviewContent = ({
         return;
       }
 
-      if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
-        setAlertMessage(
-          chatError.message || 'Something went wrong. Please try again.',
-        );
-      }
+      setAlertMessage(
+        chatError?.message || 'Something went wrong. Please try again.',
+      );
     },
   });
 
@@ -111,7 +116,6 @@ const AgentPreviewContent = ({
 
 export const AgentPreview = () => {
   const { agentId } = useParams({ strict: false });
-  const { orgId } = useAuth();
   const [chatKey, setChatKey] = useState(0);
 
   if (!agentId) {
@@ -132,7 +136,6 @@ export const AgentPreview = () => {
     <AgentPreviewContent
       key={chatKey}
       channelWeb={channelWeb}
-      orgId={orgId}
       onNewChat={() => setChatKey((k) => k + 1)}
     />
   );

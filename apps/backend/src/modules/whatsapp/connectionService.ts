@@ -1,30 +1,41 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { whatsappConnections } from '../../db/schema/whatsappConnections';
+import { decryptToken, encryptToken } from '../../utils/crypto.utils';
+
+function encryptRow(data: { accessToken: string; businessAccountId: string }) {
+  return { ...data, accessToken: encryptToken(data.accessToken) };
+}
+
+function decryptRow<T extends { accessToken: string }>(row: T): T {
+  return { ...row, accessToken: decryptToken(row.accessToken) };
+}
 
 export abstract class WhatsAppConnectionService {
-  static findByOrg(orgId: string) {
-    return db.query.whatsappConnections.findFirst({ where: { orgId } });
+  static async findByOrg(orgId: string) {
+    const row = await db.query.whatsappConnections.findFirst({ where: { orgId } });
+    return row ? decryptRow(row) : row;
   }
 
   static async upsert(
     orgId: string,
     data: { accessToken: string; businessAccountId: string },
   ) {
-    const existing = await WhatsAppConnectionService.findByOrg(orgId);
+    const encrypted = encryptRow(data);
+    const existing = await db.query.whatsappConnections.findFirst({ where: { orgId } });
     if (existing) {
       const [row] = await db
         .update(whatsappConnections)
-        .set(data)
+        .set(encrypted)
         .where(eq(whatsappConnections.orgId, orgId))
         .returning();
-      return row;
+      return decryptRow(row);
     }
     const [row] = await db
       .insert(whatsappConnections)
-      .values({ orgId, ...data })
+      .values({ orgId, ...encrypted })
       .returning();
-    return row;
+    return decryptRow(row);
   }
 
   static async delete(orgId: string) {

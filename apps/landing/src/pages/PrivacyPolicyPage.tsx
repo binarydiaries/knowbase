@@ -265,6 +265,10 @@ const PrivacyPolicyPage = () => {
           <Link to="/terms" className="hover:text-[#301B69]">
             Terms & Conditions
           </Link>
+          {' · '}
+          <Link to="/security-policy" className="hover:text-[#301B69]">
+            Security
+          </Link>
         </p>
       </footer>
     </div>

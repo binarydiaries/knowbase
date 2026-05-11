@@ -1,9 +1,28 @@
+# Build stage
 FROM oven/bun:1 AS builder
+
 WORKDIR /app
 
+# Copy dependency files
+COPY package.json bun.lockb* bun.lock* ./
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
+# Copy source files
 COPY . .
 
-RUN bun install
+# Build Astro site
 RUN bun run build
 
-CMD node ./dist/server/entry.mjs
+# Production stage
+FROM nginx:alpine
+
+# Copy generated static files
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose web port
+EXPOSE 3000
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
-import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { channels } from '../../db/schema/channels';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
@@ -73,7 +73,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   // GET /whatsapp/setup-info — per-org webhook URL and unique verify token for Meta App setup
   .get('/whatsapp/setup-info', ({ orgId }) => {
     const verifyToken = generateOrgVerifyToken(orgId);
-    const webhookUrl = `${process.env.APP_URL}/webhook/whatsapp`;
+    const webhookUrl = `${process.env.API_BASE}/webhook/whatsapp`;
     return { webhookUrl, verifyToken };
   })
 
@@ -81,7 +81,10 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .get('/whatsapp/test-connection', async ({ orgId, status }) => {
     const connection = await WhatsAppConnectionService.findByOrg(orgId);
     if (!connection) {
-      return status(404, { code: 'NOT_FOUND', message: 'No WhatsApp connection found' });
+      return status(404, {
+        code: 'NOT_FOUND',
+        message: 'No WhatsApp connection found',
+      });
     }
 
     const res = await fetch(
@@ -90,14 +93,20 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     );
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      const err = (await res.json().catch(() => ({}))) as {
+        error?: { message?: string };
+      };
       return status(400, {
         code: 'BAD_REQUEST',
-        message: err.error?.message ?? 'Token is invalid or access to this WABA has been revoked',
+        message:
+          err.error?.message ??
+          'Token is invalid or access to this WABA has been revoked',
       });
     }
 
-    const data = await res.json() as { data: { id: string; display_phone_number: string }[] };
+    const data = (await res.json()) as {
+      data: { id: string; display_phone_number: string }[];
+    };
     return { ok: true, phoneNumberCount: data.data.length };
   })
 
@@ -168,11 +177,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/whatsapp/connect',
     async ({ body, orgId, status }) => {
-      const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+      const channelAccess =
+        await SubscriptionService.assertPaidChannelAccess(orgId);
       if (!channelAccess.allowed) {
         return status(403, {
           code: 'PLAN_LIMIT_REACHED',
-          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          message: SubscriptionService.getPaidChannelMessage(
+            channelAccess.plan,
+          ),
         });
       }
 
@@ -266,11 +278,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/whatsapp/bind',
     async ({ body, orgId, status }) => {
-      const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+      const channelAccess =
+        await SubscriptionService.assertPaidChannelAccess(orgId);
       if (!channelAccess.allowed) {
         return status(403, {
           code: 'PLAN_LIMIT_REACHED',
-          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+          message: SubscriptionService.getPaidChannelMessage(
+            channelAccess.plan,
+          ),
         });
       }
 

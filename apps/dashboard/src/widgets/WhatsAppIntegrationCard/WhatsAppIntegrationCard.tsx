@@ -37,9 +37,6 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-const WEBHOOK_URL = `${import.meta.env.VITE_API_BASE}/webhook/whatsapp`;
-const VERIFY_TOKEN: string = import.meta.env.VITE_WHATSAPP_VERIFY_TOKEN ?? '';
-
 export function WhatsAppIntegrationCard() {
   const { connected, phoneNumbers, setConnection, clearConnection } =
     useWhatsAppConnection();
@@ -48,6 +45,18 @@ export function WhatsAppIntegrationCard() {
   const { control, handleSubmit, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { businessAccountId: '', accessToken: '' },
+  });
+
+  const { data: setupInfo } = useQuery({
+    queryKey: ['whatsapp-setup-info'],
+    queryFn: async () => {
+      const res = await client.get({
+        url: '/whatsapp/setup-info',
+        responseType: 'json',
+      });
+      return res.data as { webhookUrl: string; verifyToken: string };
+    },
+    enabled: isPaid && !connected,
   });
 
   const { isLoading } = useQuery({
@@ -195,13 +204,8 @@ export function WhatsAppIntegrationCard() {
                 Webhooks</strong>, click <em>Edit</em> and enter these values:
               </p>
               <div className="space-y-2">
-                <CopyField label="Callback URL" value={WEBHOOK_URL} />
-                <CopyField
-                  label="Verify Token"
-                  value={VERIFY_TOKEN || ''}
-                  missing={!VERIFY_TOKEN}
-                  missingHint="Set VITE_WHATSAPP_VERIFY_TOKEN in your dashboard env"
-                />
+                <CopyField label="Callback URL" value={setupInfo?.webhookUrl ?? ''} loading={!setupInfo} />
+                <CopyField label="Verify Token" value={setupInfo?.verifyToken ?? ''} loading={!setupInfo} />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
                 Click <em>Verify and Save</em>, then subscribe to the{' '}
@@ -362,13 +366,11 @@ function SetupStep({
 function CopyField({
   label,
   value,
-  missing = false,
-  missingHint,
+  loading = false,
 }: {
   label: string;
   value: string;
-  missing?: boolean;
-  missingHint?: string;
+  loading?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -382,30 +384,23 @@ function CopyField({
   return (
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <div
-        className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-mono ${
-          missing ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900' : 'bg-muted/40'
-        }`}
-      >
-        <span
-          className={`flex-1 truncate ${missing ? 'text-red-500 dark:text-red-400 font-sans' : ''}`}
-        >
-          {missing ? missingHint : value}
+      <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-xs font-mono">
+        <span className={`flex-1 truncate ${loading ? 'text-muted-foreground animate-pulse' : ''}`}>
+          {loading ? 'Loading…' : value}
         </span>
-        {!missing && (
-          <button
-            type="button"
-            onClick={copy}
-            className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
-            aria-label={`Copy ${label}`}
-          >
-            {copied ? (
-              <Check className="size-3.5 text-green-500" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={copy}
+          disabled={loading || !value}
+          className="shrink-0 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
+          aria-label={`Copy ${label}`}
+        >
+          {copied ? (
+            <Check className="size-3.5 text-green-500" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
+        </button>
       </div>
     </div>
   );

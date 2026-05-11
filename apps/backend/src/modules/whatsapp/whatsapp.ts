@@ -11,6 +11,7 @@ import { ChannelService } from '../channel/service';
 import { ChatService } from '../chat/service';
 import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from './connectionService';
+import { generateOrgVerifyToken, verifyOrgVerifyToken } from './verifyToken';
 
 const BadRequestResponse = z.object({
   code: z.string(),
@@ -28,11 +29,11 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       const token = query['hub.verify_token'];
       const challenge = query['hub.challenge'];
 
-      if (
-        mode === 'subscribe' &&
-        token === process.env.WHATSAPP_PLATFORM_VERIFY_TOKEN
-      ) {
-        return new Response(challenge ?? '', { status: 200 });
+      if (mode === 'subscribe' && token && challenge) {
+        const orgId = verifyOrgVerifyToken(token);
+        if (orgId) {
+          return new Response(challenge, { status: 200 });
+        }
       }
 
       return new Response(
@@ -67,6 +68,13 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       400: 'BadRequestResponse',
       404: 'NotFoundResponse',
     },
+  })
+
+  // GET /whatsapp/setup-info — per-org webhook URL and unique verify token for Meta App setup
+  .get('/whatsapp/setup-info', ({ orgId }) => {
+    const verifyToken = generateOrgVerifyToken(orgId);
+    const webhookUrl = `${process.env.APP_URL}/webhook/whatsapp`;
+    return { webhookUrl, verifyToken };
   })
 
   // GET /whatsapp/connection — org's connection status + phone numbers with bindings

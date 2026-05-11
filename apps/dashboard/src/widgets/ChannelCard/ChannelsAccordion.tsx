@@ -47,14 +47,14 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
       .slackChannelName;
 
   return (
-    <Card className="w-full py-0 gap-0 overflow-hidden">
+    <Card className="w-full py-0 gap-0">
       <CardHeader className="border-b px-6 py-5">
         <CardTitle className="text-l">Channels</CardTitle>
         <CardDescription>
           Configure how your agent communicates across platforms.
         </CardDescription>
       </CardHeader>
-      <Accordion type="multiple" className="w-full">
+      <Accordion type="multiple" className="w-full" value={['web']}>
         <AccordionItem value="web" className="px-6">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">

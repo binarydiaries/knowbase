@@ -46,7 +46,8 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
   const isInstagramActive =
     channelInstagram?.channelStatus === 'active' &&
     channelInstagram.additional.type === 'instagram' &&
-    !!(channelInstagram.additional.config as { instagramAccountId?: string }).instagramAccountId;
+    !!(channelInstagram.additional.config as { instagramAccountId?: string })
+      .instagramAccountId;
 
   const isWhatsAppActive =
     channelWhatsApp?.channelStatus === 'active' &&
@@ -67,7 +68,7 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
           Configure how your agent communicates across platforms.
         </CardDescription>
       </CardHeader>
-      <Accordion type="multiple" className="w-full" value={['web']}>
+      <Accordion type="multiple" className="w-full" defaultValue={['web']}>
         <AccordionItem value="web" className="px-6">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">

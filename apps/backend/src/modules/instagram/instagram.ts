@@ -283,25 +283,14 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
       });
     }
 
-    const res = await fetch(
-      `https://graph.facebook.com/v19.0/${connection.instagramAccountId}?fields=name,username`,
-      { headers: { Authorization: `Bearer ${connection.pageAccessToken}` } },
-    );
-
-    if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as {
-        error?: { message?: string };
-      };
+    const resolved = await resolveInstagramAccount(connection.pageAccessToken);
+    if (!resolved) {
       return status(400, {
         code: 'BAD_REQUEST',
-        message:
-          err.error?.message ??
-          'Token is invalid or access to this Instagram account has been revoked',
+        message: 'Token is invalid or access to this Instagram account has been revoked',
       });
     }
-
-    const data = (await res.json()) as { id: string; name?: string; username?: string };
-    return { ok: true, username: data.username ?? data.name ?? data.id };
+    return { ok: true, username: resolved.username };
   })
 
   // GET /instagram/connection — org's connection status
@@ -339,7 +328,7 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
     };
   })
 
-  // POST /instagram/connect — manual credential entry
+  // POST /instagram/connect — manual credential entry (token only — account ID resolved automatically)
   .post(
     '/instagram/connect',
     async ({ body, orgId, status }) => {
@@ -351,36 +340,36 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
         });
       }
 
-      const { pageAccessToken, instagramAccountId } = body;
+      const { pageAccessToken } = body;
 
-      // Validate credentials by fetching the Instagram account info
-      const igRes = await fetch(
-        `https://graph.facebook.com/v19.0/${instagramAccountId}?fields=name,username`,
-        { headers: { Authorization: `Bearer ${pageAccessToken}` } },
-      );
-      if (!igRes.ok) {
+      // Resolve Instagram account from the token.
+      // Two token types are accepted:
+      //   - Page Access Token: /me resolves to the Page, instagram_business_account is present
+      //   - System User token (User AT): /me/accounts lists managed pages + their IG accounts
+      const resolved = await resolveInstagramAccount(pageAccessToken);
+      if (!resolved) {
         return status(400, {
           code: 'BAD_REQUEST',
-          message: 'Invalid credentials — could not reach Instagram Business Account',
+          message:
+            'No Instagram Business Account found for this token. ' +
+            'Make sure your Instagram is a Business/Creator account connected to a Facebook Page, ' +
+            'and that the token has instagram_manage_messages permission.',
         });
       }
-      const igData = (await igRes.json()) as { id: string; name?: string; username?: string };
-      const username = igData.username ?? igData.name ?? instagramAccountId;
 
-      await subscribeToWebhooks(instagramAccountId, pageAccessToken);
+      await subscribeToWebhooks(resolved.instagramAccountId, resolved.storedToken);
 
       await InstagramConnectionService.upsert(orgId, {
-        pageAccessToken,
-        instagramAccountId,
-        username,
+        pageAccessToken: resolved.storedToken,
+        instagramAccountId: resolved.instagramAccountId,
+        username: resolved.username,
       });
 
-      return { instagramAccountId, username };
+      return { instagramAccountId: resolved.instagramAccountId, username: resolved.username };
     },
     {
       body: t.Object({
         pageAccessToken: t.String(),
-        instagramAccountId: t.String(),
       }),
     },
   )
@@ -513,6 +502,68 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
   });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Resolves an Instagram Business Account from a token.
+ * Handles both Page Access Tokens and System User (User Access) tokens.
+ * Returns the Instagram account ID, username, and the best token to store
+ * (always a Page Access Token for message sending).
+ */
+async function resolveInstagramAccount(token: string): Promise<{
+  instagramAccountId: string;
+  username: string;
+  storedToken: string;
+} | null> {
+  // Strategy 1: Page Access Token — /me resolves to the Page
+  try {
+    const res = await fetch(
+      `${GRAPH}/me?fields=instagram_business_account{id,name,username}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (res.ok) {
+      const data = (await res.json()) as {
+        instagram_business_account?: { id: string; name?: string; username?: string };
+      };
+      if (data.instagram_business_account?.id) {
+        const ig = data.instagram_business_account;
+        return {
+          instagramAccountId: ig.id,
+          username: ig.username ?? ig.name ?? ig.id,
+          storedToken: token,
+        };
+      }
+    }
+  } catch { /* fall through */ }
+
+  // Strategy 2: System User / User Access Token — list pages and pick the first with IG
+  try {
+    const res = await fetch(
+      `${GRAPH}/me/accounts?fields=id,name,access_token,instagram_business_account{id,name,username}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (res.ok) {
+      const data = (await res.json()) as {
+        data?: {
+          id: string;
+          name: string;
+          access_token: string;
+          instagram_business_account?: { id: string; name?: string; username?: string };
+        }[];
+      };
+      const page = data.data?.find((p) => p.instagram_business_account);
+      if (page?.instagram_business_account) {
+        const ig = page.instagram_business_account;
+        return {
+          instagramAccountId: ig.id,
+          username: ig.username ?? ig.name ?? ig.id,
+          storedToken: page.access_token, // store the Page token, not the user token
+        };
+      }
+    }
+  } catch { /* fall through */ }
+
+  return null;
+}
 
 async function subscribeToWebhooks(instagramAccountId: string, pageAccessToken: string) {
   await fetch(

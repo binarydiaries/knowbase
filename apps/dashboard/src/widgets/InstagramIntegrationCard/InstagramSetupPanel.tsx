@@ -21,8 +21,7 @@ import { useInstagramConnection } from '@/store/useInstagramConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const manualSchema = z.object({
-  instagramAccountId: z.string().min(1, 'Instagram Account ID is required'),
-  pageAccessToken: z.string().min(1, 'Page Access Token is required'),
+  pageAccessToken: z.string().min(1, 'Access Token is required'),
 });
 type ManualFormValues = z.infer<typeof manualSchema>;
 
@@ -45,7 +44,7 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
 
   const { control, handleSubmit, reset } = useForm<ManualFormValues>({
     resolver: zodResolver(manualSchema),
-    defaultValues: { instagramAccountId: '', pageAccessToken: '' },
+    defaultValues: { pageAccessToken: '' },
   });
 
   const { data: setupInfo } = useQuery({
@@ -80,10 +79,10 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
   // ── Manual connect ────────────────────────────────────────────────────────
 
   const manualConnectMutation = useMutation({
-    mutationFn: async ({ pageAccessToken, instagramAccountId }: ManualFormValues) => {
+    mutationFn: async ({ pageAccessToken }: ManualFormValues) => {
       const res = await client.post({
         url: '/instagram/connect',
-        body: { pageAccessToken, instagramAccountId },
+        body: { pageAccessToken },
         responseType: 'json',
       });
       return res.data as { instagramAccountId: string; username: string };
@@ -259,25 +258,17 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                   </p>
                 </SetupStep>
 
-                <SetupStep number={3} title="Get credentials">
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
-                    <li>
-                      <span className="font-medium text-foreground">Instagram Account ID</span>{' '}
-                      — numeric ID of your Instagram Business Account (found via Graph API
-                      Explorer: <code className="rounded bg-muted px-1 py-0.5 text-[10px]">GET /me?fields=id</code> with your Page token).
-                    </li>
-                    <li>
-                      <span className="font-medium text-foreground">Page Access Token</span>{' '}
-                      — create a System User in Meta Business Manager, assign your Page, generate a
-                      permanent token with{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                        instagram_manage_messages
-                      </code>
-                      .
-                    </li>
-                  </ul>
+                <SetupStep number={3} title="Generate your token">
+                  <p className="text-xs text-muted-foreground">
+                    In Meta Business Manager → <strong>System Users</strong> → select your system user →{' '}
+                    <strong>Generate token</strong> → select your app → check{' '}
+                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">instagram_manage_messages</code>{' '}
+                    + <code className="rounded bg-muted px-1 py-0.5 text-[10px]">pages_show_list</code>{' '}
+                    + <code className="rounded bg-muted px-1 py-0.5 text-[10px]">pages_read_engagement</code>.
+                    Copy the token and paste it below.
+                  </p>
                   <p className="mt-2 text-xs text-amber-600 dark:text-amber-500">
-                    ⚠ Use a System User permanent token — temporary tokens expire in hours.
+                    ⚠ The Instagram Account ID is no longer needed — we resolve it automatically from your token.
                   </p>
                 </SetupStep>
               </div>
@@ -287,25 +278,14 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
               <div className="space-y-3">
                 <div>
                   <FormInput
-                    name="instagramAccountId"
-                    control={control}
-                    label="Instagram Account ID"
-                    placeholder="17841400000000000"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Numeric ID of your Instagram Business Account
-                  </p>
-                </div>
-                <div>
-                  <FormInput
                     name="pageAccessToken"
                     control={control}
-                    label="Page Access Token"
+                    label="Access Token"
                     type="password"
                     placeholder="EAAxxxxxxxx…"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    System User permanent token with instagram_manage_messages permission
+                    System User token or Page Access Token — we'll find your Instagram account automatically
                   </p>
                 </div>
               </div>

@@ -11,7 +11,13 @@ import {
 } from '@knowbase/ui/components/sheet';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Check, ChevronDown, ChevronRight, Copy, ExternalLink } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -31,10 +37,6 @@ interface PendingAccount {
   pageName: string;
 }
 
-type OAuthExchangeResult =
-  | { connected: true; instagramAccountId: string; username: string }
-  | { connected: false; pendingKey: string; accounts: PendingAccount[] };
-
 export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
   const { setConnection } = useInstagramConnection();
   const [showManual, setShowManual] = useState(false);
@@ -50,14 +52,19 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
   const { data: setupInfo } = useQuery({
     queryKey: ['instagram-setup-info'],
     queryFn: async () => {
-      const res = await client.get({ url: '/instagram/setup-info', responseType: 'json' });
+      const res = await client.get({
+        url: '/instagram/setup-info',
+        responseType: 'json',
+      });
       return res.data as { webhookUrl: string; verifyToken: string };
     },
   });
 
   // ── Facebook Login ────────────────────────────────────────────────────────
 
-  const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined;
+  const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID as
+    | string
+    | undefined;
   const redirectUri = `${window.location.origin}/integrations`;
 
   const handleFacebookLogin = () => {
@@ -136,7 +143,8 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
         <SheetHeader>
           <SheetTitle>Choose an Instagram Account</SheetTitle>
           <SheetDescription>
-            Multiple Instagram Business Accounts are linked to your Facebook. Pick one to connect.
+            Multiple Instagram Business Accounts are linked to your Facebook.
+            Pick one to connect.
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-3 px-4 py-4">
@@ -152,8 +160,12 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                 <span className="text-xs font-bold text-white">IG</span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">@{account.username}</p>
-                <p className="text-xs text-muted-foreground truncate">{account.pageName}</p>
+                <p className="text-sm font-medium truncate">
+                  @{account.username}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {account.pageName}
+                </p>
               </div>
             </button>
           ))}
@@ -197,8 +209,8 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
             Continue with Facebook
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Automatically finds your Instagram Business Account from your Facebook Pages.
-            No token copy-pasting required.
+            Automatically finds your Instagram Business Account from your
+            Facebook Pages. No token copy-pasting required.
           </p>
         </div>
 
@@ -227,7 +239,10 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
           {showManual && (
             <div className="space-y-4">
               <div className="space-y-3">
-                <SetupStep number={1} title="Prepare your Instagram Business Account">
+                <SetupStep
+                  number={1}
+                  title="Prepare your Instagram Business Account"
+                >
                   <p className="text-xs text-muted-foreground">
                     Your Instagram account must be a{' '}
                     <strong>Business or Creator account</strong> connected to a{' '}
@@ -235,7 +250,10 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                   </p>
                 </SetupStep>
 
-                <SetupStep number={2} title="Create a Meta App & configure webhook">
+                <SetupStep
+                  number={2}
+                  title="Create a Meta App & configure webhook"
+                >
                   <p className="text-xs text-muted-foreground mb-2">
                     Go to{' '}
                     <a
@@ -246,12 +264,21 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                     >
                       Meta for Developers <ExternalLink className="size-2.5" />
                     </a>{' '}
-                    → Create App → Business → add <strong>Instagram Graph API</strong>. Then set
-                    the webhook to:
+                    → Create App → Business → add{' '}
+                    <strong>Instagram Graph API</strong>. Then set the webhook
+                    to:
                   </p>
                   <div className="space-y-2">
-                    <CopyField label="Callback URL" value={setupInfo?.webhookUrl ?? ''} loading={!setupInfo} />
-                    <CopyField label="Verify Token" value={setupInfo?.verifyToken ?? ''} loading={!setupInfo} />
+                    <CopyField
+                      label="Callback URL"
+                      value={setupInfo?.webhookUrl ?? ''}
+                      loading={!setupInfo}
+                    />
+                    <CopyField
+                      label="Verify Token"
+                      value={setupInfo?.verifyToken ?? ''}
+                      loading={!setupInfo}
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
                     Subscribe to the <strong>messages</strong> webhook field.
@@ -260,15 +287,25 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
 
                 <SetupStep number={3} title="Generate your token">
                   <p className="text-xs text-muted-foreground">
-                    In Meta Business Manager → <strong>System Users</strong> → select your system user →{' '}
-                    <strong>Generate token</strong> → select your app → check{' '}
-                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">instagram_manage_messages</code>{' '}
-                    + <code className="rounded bg-muted px-1 py-0.5 text-[10px]">pages_show_list</code>{' '}
-                    + <code className="rounded bg-muted px-1 py-0.5 text-[10px]">pages_read_engagement</code>.
-                    Copy the token and paste it below.
+                    In Meta Business Manager → <strong>System Users</strong> →
+                    select your system user → <strong>Generate token</strong> →
+                    select your app → check{' '}
+                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                      instagram_manage_messages
+                    </code>{' '}
+                    +{' '}
+                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                      pages_show_list
+                    </code>{' '}
+                    +{' '}
+                    <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                      pages_read_engagement
+                    </code>
+                    . Copy the token and paste it below.
                   </p>
                   <p className="mt-2 text-xs text-amber-600 dark:text-amber-500">
-                    ⚠ The Instagram Account ID is no longer needed — we resolve it automatically from your token.
+                    ⚠ The Instagram Account ID is no longer needed — we resolve
+                    it automatically from your token.
                   </p>
                 </SetupStep>
               </div>
@@ -285,7 +322,8 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                     placeholder="EAAxxxxxxxx…"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    System User token or Page Access Token — we'll find your Instagram account automatically
+                    System User token or Page Access Token — we'll find your
+                    Instagram account automatically
                   </p>
                 </div>
               </div>
@@ -298,7 +336,9 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
         <SheetFooter className="border-t px-4 pt-4">
           <Button
             disabled={manualConnectMutation.isPending}
-            onClick={handleSubmit((values) => manualConnectMutation.mutate(values))}
+            onClick={handleSubmit((values) =>
+              manualConnectMutation.mutate(values),
+            )}
           >
             {manualConnectMutation.isPending ? 'Connecting…' : 'Connect'}
           </Button>
@@ -357,7 +397,9 @@ function CopyField({
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-xs font-mono">
-        <span className={`flex-1 truncate ${loading ? 'animate-pulse text-muted-foreground' : ''}`}>
+        <span
+          className={`flex-1 truncate ${loading ? 'animate-pulse text-muted-foreground' : ''}`}
+        >
           {loading ? 'Loading…' : value}
         </span>
         <button
@@ -367,7 +409,11 @@ function CopyField({
           className="shrink-0 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
           aria-label={`Copy ${label}`}
         >
-          {copied ? <Check className="size-3.5 text-green-500" /> : <Copy className="size-3.5" />}
+          {copied ? (
+            <Check className="size-3.5 text-green-500" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
         </button>
       </div>
     </div>
@@ -376,7 +422,11 @@ function CopyField({
 
 function FacebookLogo() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 fill-white" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-4 fill-white"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
     </svg>
   );

@@ -28,6 +28,7 @@ import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 const manualSchema = z.object({
   pageAccessToken: z.string().min(1, 'Access Token is required'),
+  instagramAccountId: z.string().optional(),
 });
 type ManualFormValues = z.infer<typeof manualSchema>;
 
@@ -46,7 +47,7 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
 
   const { control, handleSubmit, reset } = useForm<ManualFormValues>({
     resolver: zodResolver(manualSchema),
-    defaultValues: { pageAccessToken: '' },
+    defaultValues: { pageAccessToken: '', instagramAccountId: '' },
   });
 
   const { data: setupInfo } = useQuery({
@@ -86,10 +87,13 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
   // ── Manual connect ────────────────────────────────────────────────────────
 
   const manualConnectMutation = useMutation({
-    mutationFn: async ({ pageAccessToken }: ManualFormValues) => {
+    mutationFn: async ({ pageAccessToken, instagramAccountId }: ManualFormValues) => {
       const res = await client.post({
         url: '/instagram/connect',
-        body: { pageAccessToken },
+        body: {
+          pageAccessToken,
+          ...(instagramAccountId?.trim() ? { instagramAccountId: instagramAccountId.trim() } : {}),
+        },
         responseType: 'json',
       });
       return res.data as { instagramAccountId: string; username: string };
@@ -322,8 +326,19 @@ export function InstagramSetupPanel({ onClose }: { onClose: () => void }) {
                     placeholder="EAAxxxxxxxx…"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    System User token or Page Access Token — we'll find your
-                    Instagram account automatically
+                    System User token or Page Access Token with instagram_manage_messages permission
+                  </p>
+                </div>
+                <div>
+                  <FormInput
+                    name="instagramAccountId"
+                    control={control}
+                    label="Instagram Account ID (optional)"
+                    placeholder="17841400000000000"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Only needed for System User tokens. Found in Meta Business Manager → Instagram accounts → your account ID.
+                    Leave blank to auto-detect.
                   </p>
                 </div>
               </div>

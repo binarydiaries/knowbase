@@ -340,13 +340,9 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
         });
       }
 
-      const { pageAccessToken } = body;
+      const { pageAccessToken, instagramAccountId } = body;
 
-      // Resolve Instagram account from the token.
-      // Two token types are accepted:
-      //   - Page Access Token: /me resolves to the Page, instagram_business_account is present
-      //   - System User token (User AT): /me/accounts lists managed pages + their IG accounts
-      const resolved = await resolveInstagramAccount(pageAccessToken);
+      const resolved = await resolveInstagramAccount(pageAccessToken, instagramAccountId ?? undefined);
       if (!resolved) {
         return status(400, {
           code: 'BAD_REQUEST',
@@ -370,6 +366,7 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
     {
       body: t.Object({
         pageAccessToken: t.String(),
+        instagramAccountId: t.Optional(t.String()),
       }),
     },
   )
@@ -504,17 +501,40 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /**
- * Resolves an Instagram Business Account from a token.
- * Handles both Page Access Tokens and System User (User Access) tokens.
- * Returns the Instagram account ID, username, and the best token to store
- * (always a Page Access Token for message sending).
+ * Resolves an Instagram Business Account from a token (and optional account ID hint).
+ * Tries multiple strategies to handle Page tokens, regular user tokens, and
+ * Business Manager System User tokens.
  */
-async function resolveInstagramAccount(token: string): Promise<{
+async function resolveInstagramAccount(
+  token: string,
+  instagramAccountIdHint?: string,
+): Promise<{
   instagramAccountId: string;
   username: string;
   storedToken: string;
 } | null> {
-  // Strategy 1: Page Access Token — /me resolves to the Page
+  // Strategy 1: Direct lookup by ID (works for any token type that has
+  // instagram_manage_messages and access to that account).
+  if (instagramAccountIdHint) {
+    try {
+      const res = await fetch(
+        `${GRAPH}/${instagramAccountIdHint}?fields=id,name,username`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { id: string; name?: string; username?: string };
+        if (data.id) {
+          return {
+            instagramAccountId: data.id,
+            username: data.username ?? data.name ?? data.id,
+            storedToken: token,
+          };
+        }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // Strategy 2: Page Access Token — /me resolves to the Page
   try {
     const res = await fetch(
       `${GRAPH}/me?fields=instagram_business_account{id,name,username}`,
@@ -535,7 +555,7 @@ async function resolveInstagramAccount(token: string): Promise<{
     }
   } catch { /* fall through */ }
 
-  // Strategy 2: System User / User Access Token — list pages and pick the first with IG
+  // Strategy 3: Regular user token — list managed pages and find connected IG account
   try {
     const res = await fetch(
       `${GRAPH}/me/accounts?fields=id,name,access_token,instagram_business_account{id,name,username}`,
@@ -556,7 +576,7 @@ async function resolveInstagramAccount(token: string): Promise<{
         return {
           instagramAccountId: ig.id,
           username: ig.username ?? ig.name ?? ig.id,
-          storedToken: page.access_token, // store the Page token, not the user token
+          storedToken: page.access_token,
         };
       }
     }

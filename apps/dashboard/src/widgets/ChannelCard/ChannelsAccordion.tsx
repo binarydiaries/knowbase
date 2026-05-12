@@ -11,9 +11,10 @@ import {
   CardTitle,
 } from '@knowbase/ui/components/card';
 import { useParams } from '@tanstack/react-router';
-import { Globe, Hash, MessageCircle } from 'lucide-react';
+import { Globe, Hash, Instagram, MessageCircle } from 'lucide-react';
 import { useChannels } from '@/store/useChannels.ts';
 import ChannelCard from './ChannelCard.tsx';
+import InstagramChannelCard from './InstagramChannelCard.tsx';
 import SlackChannelCard from './SlackChannelCard.tsx';
 import WhatsAppChannelCard from './WhatsAppChannelCard.tsx';
 
@@ -27,6 +28,13 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
         )
       : undefined,
   );
+  const channelInstagram = useChannels((state) =>
+    agentId
+      ? state.channelsByAgentId[agentId]?.find(
+          (c) => c.additional.type === 'instagram',
+        )
+      : undefined,
+  );
   const channelSlack = useChannels((state) =>
     agentId
       ? state.channelsByAgentId[agentId]?.find(
@@ -34,6 +42,12 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
         )
       : undefined,
   );
+
+  const isInstagramActive =
+    channelInstagram?.channelStatus === 'active' &&
+    channelInstagram.additional.type === 'instagram' &&
+    !!(channelInstagram.additional.config as { instagramAccountId?: string })
+      .instagramAccountId;
 
   const isWhatsAppActive =
     channelWhatsApp?.channelStatus === 'active' &&
@@ -54,7 +68,7 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
           Configure how your agent communicates across platforms.
         </CardDescription>
       </CardHeader>
-      <Accordion type="multiple" className="w-full" value={['web']}>
+      <Accordion type="multiple" className="w-full" defaultValue={['web']}>
         <AccordionItem value="web" className="px-6">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
@@ -66,6 +80,23 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
             <ChannelCard readOnly={readOnly} />
           </AccordionContent>
         </AccordionItem>
+
+        {import.meta.env.VITE_INSTAGRAM_ENABLED === 'true' && (
+          <AccordionItem value="instagram" className="px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Instagram className="size-4 text-muted-foreground shrink-0" />
+                <span>Instagram</span>
+                {isInstagramActive && (
+                  <span className="size-2 rounded-full bg-green-500 inline-block" />
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <InstagramChannelCard readOnly={readOnly} />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' && (
           <AccordionItem value="whatsapp" className="px-6">

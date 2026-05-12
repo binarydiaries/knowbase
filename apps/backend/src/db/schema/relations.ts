@@ -14,6 +14,7 @@ import { orgUsageMonthly } from './orgUsageMonthly';
 import { orgSubscriptions } from './orgSubscriptions';
 import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
+import { instagramConnections } from './instagramConnections';
 
 export const relations = defineRelations(
   {
@@ -32,6 +33,7 @@ export const relations = defineRelations(
     orgSubscriptions,
     whatsappConnections,
     slackConnections,
+    instagramConnections,
   },
   (r) => ({
     agents: {
@@ -122,5 +124,6 @@ export const relations = defineRelations(
     aiCostEvents: {},
     whatsappConnections: {},
     slackConnections: {},
+    instagramConnections: {},
   }),
 );

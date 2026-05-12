@@ -7,7 +7,13 @@ import {
 } from '@knowbase/ui/components/card';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
-import { createFileRoute } from '@tanstack/react-router';
+import { toast } from '@knowbase/ui/components/sonner';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useEffect, useRef, useState } from 'react';
+import { client } from '@/services/client.gen';
+import { useInstagramConnection } from '@/store/useInstagramConnection.ts';
+import { getErrorMessage } from '@/utils/errorHelper.ts';
+import { InstagramIntegrationCard } from '@/widgets/InstagramIntegrationCard/InstagramIntegrationCard.tsx';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
 
@@ -46,7 +52,101 @@ function ComingSoonCard({
   );
 }
 
+// ── Instagram OAuth callback handler ─────────────────────────────────────────
+
+interface PendingAccount {
+  instagramAccountId: string;
+  username: string;
+  pageName: string;
+}
+
+type OAuthExchangeResult =
+  | { connected: true; instagramAccountId: string; username: string }
+  | { connected: false; pendingKey: string; accounts: PendingAccount[] };
+
+function useInstagramOAuthCallback() {
+  const navigate = useNavigate();
+  const { setConnection } = useInstagramConnection();
+  const handledRef = useRef(false);
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [pendingAccounts, setPendingAccounts] = useState<PendingAccount[]>([]);
+  const [exchanging, setExchanging] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const error = params.get('error');
+
+    if (error) {
+      toast.error(`Facebook login cancelled: ${params.get('error_description') ?? error}`);
+      navigate({ to: '/integrations', search: {} });
+      return;
+    }
+
+    if (!code || state !== 'instagram_oauth' || handledRef.current) return;
+    handledRef.current = true;
+
+    const redirectUri = `${window.location.origin}/integrations`;
+
+    setExchanging(true);
+    client
+      .post({ url: '/instagram/oauth/exchange', body: { code, redirectUri }, responseType: 'json' })
+      .then((res) => {
+        const data = res.data as OAuthExchangeResult;
+        if (data.connected) {
+          setConnection({
+            instagramAccountId: data.instagramAccountId,
+            username: data.username,
+            boundToAgentId: null,
+            agentName: null,
+          });
+          toast.success(`Connected as @${data.username}`);
+        } else {
+          // Multiple accounts — show picker
+          setPendingKey(data.pendingKey);
+          setPendingAccounts(data.accounts);
+        }
+      })
+      .catch((err) => {
+        toast.error(`Failed to connect Instagram: ${getErrorMessage(err)}`);
+      })
+      .finally(() => {
+        setExchanging(false);
+        // Strip OAuth params from URL without triggering a navigation
+        window.history.replaceState({}, '', '/integrations');
+      });
+  }, [navigate, setConnection]);
+
+  const confirmAccount = async (instagramAccountId: string) => {
+    try {
+      const res = await client.post({
+        url: '/instagram/oauth/confirm',
+        body: { pendingKey: pendingKey!, instagramAccountId },
+        responseType: 'json',
+      });
+      const data = res.data as { instagramAccountId: string; username: string };
+      setConnection({
+        instagramAccountId: data.instagramAccountId,
+        username: data.username,
+        boundToAgentId: null,
+        agentName: null,
+      });
+      toast.success(`Connected as @${data.username}`);
+      setPendingKey(null);
+      setPendingAccounts([]);
+    } catch (err) {
+      toast.error(`Failed to confirm account: ${getErrorMessage(err)}`);
+    }
+  };
+
+  return { exchanging, pendingKey, pendingAccounts, confirmAccount };
+}
+
 function RouteComponent() {
+  const { exchanging, pendingKey, pendingAccounts, confirmAccount } =
+    useInstagramOAuthCallback();
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -62,6 +162,39 @@ function RouteComponent() {
       <Separator />
 
       <div className="p-6 space-y-6">
+        {/* OAuth exchange banner */}
+        {exchanging && (
+          <div className="rounded-lg border bg-muted/50 px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
+            <span className="size-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
+            Connecting your Instagram account…
+          </div>
+        )}
+
+        {/* Multi-account picker */}
+        {pendingKey && pendingAccounts.length > 0 && (
+          <div className="rounded-lg border px-4 py-4 space-y-3">
+            <p className="text-sm font-medium">Choose an Instagram account to connect:</p>
+            <div className="space-y-2">
+              {pendingAccounts.map((account) => (
+                <button
+                  key={account.instagramAccountId}
+                  type="button"
+                  onClick={() => confirmAccount(account.instagramAccountId)}
+                  className="w-full flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45]">
+                    <span className="text-[10px] font-bold text-white">IG</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">@{account.username}</p>
+                    <p className="text-xs text-muted-foreground truncate">{account.pageName}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <p className="text-sm text-muted-foreground">
             Connect external platforms to your agents. Each integration is
@@ -86,13 +219,17 @@ function RouteComponent() {
               description="Send and receive messages in Slack channels."
             />
           )}
+          {import.meta.env.VITE_INSTAGRAM_ENABLED === 'true' ? (
+            <InstagramIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="Instagram"
+              description="Handle Instagram Direct Message conversations."
+            />
+          )}
           <ComingSoonCard
             name="Discord"
             description="Integrate your agent into Discord servers."
-          />
-          <ComingSoonCard
-            name="Instagram"
-            description="Handle Instagram Direct Message conversations."
           />
         </div>
       </div>

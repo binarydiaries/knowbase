@@ -9,9 +9,10 @@ import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import { SubscriptionService } from '../subscription/service';
-import type { IChannelWebConfig, IChannelWhatsAppConfig, IChannelSlackConfig } from '../channel/model';
+import type { IChannelWebConfig, IChannelWhatsAppConfig, IChannelSlackConfig, IChannelInstagramConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { SlackConnectionService } from '../slack/connectionService';
+import { InstagramConnectionService } from '../instagram/connectionService';
 import { AiCostEventService } from '../admin/costEvent.service';
 import { referenceResolverPrompt } from './prompts';
 import { buildChatContext } from './context';
@@ -648,6 +649,233 @@ export abstract class ChatService {
       finalQuery,
       chunks,
       sentiment: null, // WhatsApp doesn't score sentiment
+    });
+  }
+
+  // ── Instagram — LLM call ─────────────────────────────────────────────────
+
+  static async generateInstagramResponse({
+    agentId,
+    channelId,
+    message,
+    conversationId,
+    orgId,
+    ip,
+  }: {
+    agentId: string;
+    channelId: string;
+    message: string;
+    conversationId?: string;
+    orgId: string;
+    ip?: string;
+  }) {
+    await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
+    await ChatService.getAgent({ agentId, orgId });
+
+    const conversation = conversationId
+      ? await ConversationService.single({ id: conversationId, orgId })
+      : undefined;
+
+    const behavior = await ChatService.getBehaviour(agentId);
+    const finalQuery = await ChatService.getFinalQuery({
+      message,
+      conversation,
+      orgId,
+      agentId,
+      conversationId,
+    });
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
+
+    const enabledActions = await ActionService.getEnabledByAgent(agentId);
+    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+
+    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
+
+    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
+      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
+      : undefined;
+
+    const { tools, systemPrompt, priorMessages } = await buildChatContext({
+      agentId,
+      conversationId,
+      orgId,
+      knowledgeBase,
+      behavior,
+      hasExistingConversation: !!conversation,
+      leadAction,
+      entities,
+      currentDataEntry,
+    });
+
+    const result = await generateText({
+      model,
+      system: systemPrompt,
+      messages: [...priorMessages, { role: 'user', content: finalQuery }],
+      ...(tools ? { tools, maxSteps: 1 } : {}),
+    });
+    await AiCostEventService.recordEvent({
+      orgId,
+      agentId,
+      conversationId,
+      provider: 'openai',
+      model: 'gpt-4.1-mini',
+      usage: result.usage ?? {},
+      metadata: { operation: 'instagram-chat-response' },
+    });
+
+    return {
+      assistantMessage: result.text,
+      chunks,
+      finalQuery,
+      conversation,
+      toolCalls: result.toolCalls ?? [],
+      channelId,
+    };
+  }
+
+  // ── Instagram — full handler ──────────────────────────────────────────────
+
+  static async sendInstagram({
+    channelId,
+    orgId,
+    senderIgsid,
+    message,
+    messageId,
+    ip,
+  }: {
+    channelId: string;
+    orgId: string;
+    senderIgsid: string;
+    message: string;
+    messageId?: string;
+    ip?: string;
+  }) {
+    const channel = await ChannelService.single({ id: channelId, orgId });
+    if (!channel || channel.type !== 'instagram') {
+      throw new NotFoundError('Instagram channel not found');
+    }
+    const config = channel.config as IChannelInstagramConfig;
+    if (!config.instagramAccountId) {
+      throw new NotFoundError('Instagram channel not configured');
+    }
+
+    const connection = await InstagramConnectionService.findByOrg(orgId);
+    if (!connection) {
+      throw new NotFoundError('Instagram not connected for this org');
+    }
+
+    const conversation = await ConversationService.findByExternalId({
+      channelId,
+      externalId: senderIgsid,
+    });
+
+    // Mark message as seen (best-effort)
+    if (messageId) {
+      try {
+        await fetch(
+          `https://graph.facebook.com/v19.0/${config.instagramAccountId}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${connection.pageAccessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              recipient: { id: senderIgsid },
+              sender_action: 'mark_seen',
+            }),
+          },
+        );
+      } catch (e) {
+        console.error('[IG seen] fetch error:', e);
+      }
+    }
+
+    // Typing indicator (best-effort)
+    try {
+      await fetch(
+        `https://graph.facebook.com/v19.0/${config.instagramAccountId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${connection.pageAccessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipient: { id: senderIgsid },
+            sender_action: 'typing_on',
+          }),
+        },
+      );
+    } catch (e) {
+      console.error('[IG typing] fetch error:', e);
+    }
+
+    const { assistantMessage, chunks, finalQuery, toolCalls } =
+      await ChatService.generateInstagramResponse({
+        agentId: channel.agentId,
+        channelId,
+        message,
+        conversationId: conversation?.id,
+        orgId,
+        ip,
+      });
+
+    // Send reply
+    await fetch(
+      `https://graph.facebook.com/v19.0/${config.instagramAccountId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${connection.pageAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipient: { id: senderIgsid },
+          message: { text: assistantMessage },
+        }),
+      },
+    );
+
+    const conversationData = {
+      lastUserQuestion: finalQuery,
+      lastAssistantUtterance: assistantMessage,
+      lastMessageAt: new Date(),
+    };
+
+    let conversationId: string;
+    if (!conversation) {
+      conversationId = createId();
+      await ConversationService.create({
+        id: conversationId,
+        agentId: channel.agentId,
+        channelId,
+        externalId: senderIgsid,
+        ...conversationData,
+      });
+    } else {
+      await ConversationService.update(conversation.id, conversationData);
+      conversationId = conversation.id;
+    }
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    await handleLeadCapture(toolCalls, {
+      agentId: channel.agentId,
+      conversationId,
+      channelId,
+      orgId,
+    });
+
+    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
+
+    await persistMessages({
+      conversationId,
+      userMessage: message,
+      assistantMessage,
+      finalQuery,
+      chunks,
+      sentiment: null,
     });
   }
 

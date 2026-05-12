@@ -30,6 +30,13 @@ export const ChannelSlackConfigSchema = z.object({
 
 export type IChannelSlackConfig = z.infer<typeof ChannelSlackConfigSchema>;
 
+export const ChannelInstagramConfigSchema = z.object({
+  instagramAccountId: z.string().optional(),
+  username: z.string().optional(),
+});
+
+export type IChannelInstagramConfig = z.infer<typeof ChannelInstagramConfigSchema>;
+
 const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
@@ -46,7 +53,7 @@ const ChannelSchemaType = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal('instagram'),
-      config: z.object({}),
+      config: ChannelInstagramConfigSchema,
     })
     .meta({ title: 'instagram' }),
   z

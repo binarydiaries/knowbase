@@ -85,6 +85,23 @@ export abstract class ChannelService {
     return { ...rows[0].channel, agent: rows[0].agent };
   }
 
+  static async findByInstagramAccountId(instagramAccountId: string) {
+    const rows = await db
+      .select({ channel: channels, agent: agents })
+      .from(channels)
+      .innerJoin(agents, eq(channels.agentId, agents.id))
+      .where(
+        and(
+          eq(channels.type, 'instagram'),
+          sql`${channels.config}->>'instagramAccountId' = ${instagramAccountId}`,
+        ),
+      )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, agent: rows[0].agent };
+  }
+
   static transformChannel(
     channel: typeof channels.$inferSelect,
   ): IChannelSchema {

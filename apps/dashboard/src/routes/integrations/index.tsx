@@ -8,6 +8,7 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
+import { InstagramIntegrationCard } from '@/widgets/InstagramIntegrationCard/InstagramIntegrationCard.tsx';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
 
@@ -86,13 +87,17 @@ function RouteComponent() {
               description="Send and receive messages in Slack channels."
             />
           )}
+          {import.meta.env.VITE_INSTAGRAM_ENABLED === 'true' ? (
+            <InstagramIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="Instagram"
+              description="Handle Instagram Direct Message conversations."
+            />
+          )}
           <ComingSoonCard
             name="Discord"
             description="Integrate your agent into Discord servers."
-          />
-          <ComingSoonCard
-            name="Instagram"
-            description="Handle Instagram Direct Message conversations."
           />
         </div>
       </div>

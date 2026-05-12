@@ -23,6 +23,7 @@ import { message } from './modules/message/message';
 import { Slack } from './modules/slack/slack';
 import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
+import { Instagram } from './modules/instagram/instagram';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
 import { validateEnv } from './utils/env.utils';
 
@@ -106,6 +107,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(Channel)
   .use(Subscription)
   .use(WhatsApp)
+  .use(Instagram)
   .use(Slack)
   .use(Action)
   .use(Lead)

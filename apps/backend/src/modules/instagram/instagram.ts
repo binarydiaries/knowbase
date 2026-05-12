@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
@@ -12,6 +13,33 @@ import { ChatService } from '../chat/service';
 import { SubscriptionService } from '../subscription/service';
 import { InstagramConnectionService } from './connectionService';
 import { generateOrgVerifyToken, verifyOrgVerifyToken } from './verifyToken';
+
+// ─── Temporary in-memory store for multi-account OAuth selection ─────────────
+// Keys expire after 10 minutes. Entries are created when a user has multiple
+// Instagram-linked pages and needs to pick one before we store the connection.
+
+interface PendingAccount {
+  instagramAccountId: string;
+  username: string;
+  pageName: string;
+  pageAccessToken: string;
+}
+interface PendingOAuth {
+  orgId: string;
+  accounts: PendingAccount[];
+  expiresAt: number;
+}
+const pendingOAuthStore = new Map<string, PendingOAuth>();
+
+function evictExpiredPending() {
+  const now = Date.now();
+  for (const [key, val] of pendingOAuthStore) {
+    if (val.expiresAt < now) pendingOAuthStore.delete(key);
+  }
+}
+
+// Shared Meta Graph API base
+const GRAPH = 'https://graph.facebook.com/v19.0';
 
 const BadRequestResponse = z.object({
   code: z.string(),
@@ -76,6 +104,174 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
     const webhookUrl = `${process.env.API_BASE}/webhook/instagram`;
     return { webhookUrl, verifyToken };
   })
+
+  // POST /instagram/oauth/exchange — trade OAuth code for connection
+  .post(
+    '/instagram/oauth/exchange',
+    async ({ body, orgId, status }) => {
+      const channelAccess = await SubscriptionService.assertPaidChannelAccess(orgId);
+      if (!channelAccess.allowed) {
+        return status(403, {
+          code: 'PLAN_LIMIT_REACHED',
+          message: SubscriptionService.getPaidChannelMessage(channelAccess.plan),
+        });
+      }
+
+      const appId = process.env.FACEBOOK_APP_ID;
+      const appSecret = process.env.INSTAGRAM_APP_SECRET;
+      if (!appId || !appSecret) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: 'Facebook OAuth is not configured on this server',
+        });
+      }
+
+      const { code, redirectUri } = body;
+
+      // 1. Exchange code for short-lived user token
+      const tokenRes = await fetch(
+        `${GRAPH}/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${appSecret}&code=${encodeURIComponent(code)}`,
+      );
+      if (!tokenRes.ok) {
+        const err = (await tokenRes.json().catch(() => ({}))) as { error?: { message?: string } };
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: err.error?.message ?? 'Failed to exchange OAuth code',
+        });
+      }
+      const { access_token: shortToken } = (await tokenRes.json()) as { access_token: string };
+
+      // 2. Exchange for long-lived user token (60-day)
+      const longTokenRes = await fetch(
+        `${GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${shortToken}`,
+      );
+      if (!longTokenRes.ok) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: 'Failed to get long-lived user token',
+        });
+      }
+      const { access_token: longUserToken } = (await longTokenRes.json()) as { access_token: string };
+
+      // 3. Fetch pages the user manages, each with their Page Access Token and
+      //    linked Instagram Business Account
+      const pagesRes = await fetch(
+        `${GRAPH}/me/accounts?fields=id,name,access_token,instagram_business_account{id,name,username}&access_token=${longUserToken}`,
+      );
+      if (!pagesRes.ok) {
+        return status(400, { code: 'BAD_REQUEST', message: 'Failed to fetch Facebook Pages' });
+      }
+      const pagesData = (await pagesRes.json()) as {
+        data: {
+          id: string;
+          name: string;
+          access_token: string;
+          instagram_business_account?: { id: string; name?: string; username?: string };
+        }[];
+      };
+
+      const linkedAccounts: PendingAccount[] = pagesData.data
+        .filter((p) => !!p.instagram_business_account)
+        .map((p) => ({
+          instagramAccountId: p.instagram_business_account!.id,
+          username: p.instagram_business_account!.username ?? p.instagram_business_account!.name ?? p.instagram_business_account!.id,
+          pageName: p.name,
+          pageAccessToken: p.access_token,
+        }));
+
+      if (linkedAccounts.length === 0) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message:
+            'No Instagram Business Account linked to your Facebook Pages. ' +
+            'Make sure your Instagram account is set to Business/Creator and connected to a Facebook Page.',
+        });
+      }
+
+      // 4a. Exactly one account — store immediately
+      if (linkedAccounts.length === 1) {
+        const account = linkedAccounts[0];
+        await subscribeToWebhooks(account.instagramAccountId, account.pageAccessToken);
+        await InstagramConnectionService.upsert(orgId, {
+          pageAccessToken: account.pageAccessToken,
+          instagramAccountId: account.instagramAccountId,
+          username: account.username,
+        });
+        return {
+          connected: true as const,
+          instagramAccountId: account.instagramAccountId,
+          username: account.username,
+        };
+      }
+
+      // 4b. Multiple accounts — stash tokens, return options for user to pick
+      evictExpiredPending();
+      const pendingKey = randomUUID();
+      pendingOAuthStore.set(pendingKey, {
+        orgId,
+        accounts: linkedAccounts,
+        expiresAt: Date.now() + 10 * 60 * 1000,
+      });
+      return {
+        connected: false as const,
+        pendingKey,
+        accounts: linkedAccounts.map(({ instagramAccountId, username, pageName }) => ({
+          instagramAccountId,
+          username,
+          pageName,
+        })),
+      };
+    },
+    {
+      body: t.Object({
+        code: t.String(),
+        redirectUri: t.String(),
+      }),
+    },
+  )
+
+  // POST /instagram/oauth/confirm — select from multiple accounts returned by /exchange
+  .post(
+    '/instagram/oauth/confirm',
+    async ({ body, orgId, status }) => {
+      const { pendingKey, instagramAccountId } = body;
+
+      evictExpiredPending();
+      const pending = pendingOAuthStore.get(pendingKey);
+
+      if (!pending || pending.orgId !== orgId || pending.expiresAt < Date.now()) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: 'OAuth session expired or invalid. Please connect again.',
+        });
+      }
+
+      const account = pending.accounts.find((a) => a.instagramAccountId === instagramAccountId);
+      if (!account) {
+        return status(400, { code: 'BAD_REQUEST', message: 'Account not found in session' });
+      }
+
+      pendingOAuthStore.delete(pendingKey);
+
+      await subscribeToWebhooks(account.instagramAccountId, account.pageAccessToken);
+      await InstagramConnectionService.upsert(orgId, {
+        pageAccessToken: account.pageAccessToken,
+        instagramAccountId: account.instagramAccountId,
+        username: account.username,
+      });
+
+      return {
+        instagramAccountId: account.instagramAccountId,
+        username: account.username,
+      };
+    },
+    {
+      body: t.Object({
+        pendingKey: t.String(),
+        instagramAccountId: t.String(),
+      }),
+    },
+  )
 
   // GET /instagram/test-connection — validate stored token against Meta
   .get('/instagram/test-connection', async ({ orgId, status }) => {
@@ -171,14 +367,7 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
       const igData = (await igRes.json()) as { id: string; name?: string; username?: string };
       const username = igData.username ?? igData.name ?? instagramAccountId;
 
-      // Subscribe to webhooks (best-effort)
-      await fetch(
-        `https://graph.facebook.com/v19.0/${instagramAccountId}/subscribed_apps?subscribed_fields=messages`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${pageAccessToken}` },
-        },
-      ).catch(() => {});
+      await subscribeToWebhooks(instagramAccountId, pageAccessToken);
 
       await InstagramConnectionService.upsert(orgId, {
         pageAccessToken,
@@ -322,6 +511,18 @@ export const Instagram = new Elysia({ tags: ['Instagram'] })
 
     return { channel: ChannelService.transformChannel(updated) };
   });
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+async function subscribeToWebhooks(instagramAccountId: string, pageAccessToken: string) {
+  await fetch(
+    `${GRAPH}/${instagramAccountId}/subscribed_apps?subscribed_fields=messages`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${pageAccessToken}` },
+    },
+  ).catch(() => {});
+}
 
 // ─── Fire-and-forget: process inbound Instagram DM ──────────────────────────
 async function processInboundMessage(body: unknown) {

@@ -35,11 +35,11 @@ import {
   Trash2,
 } from 'lucide-react';
 import { type MouseEventHandler, useMemo } from 'react';
-import type { DocumentSchema } from '@/services';
 import { DisabledTooltip } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import type { DocumentSchema } from '@/services';
 
 interface IDocumentItemProps {
-  type: 'text' | 'qna' | 'pdf';
+  type: 'text' | 'qna' | 'pdf' | 'url';
   title: string;
   description: string;
   lastTrainedAt?: string | null;
@@ -157,7 +157,11 @@ export const DocumentItem = ({
           <DropdownMenuContent align="end" className="w-40 ">
             <DisabledTooltip
               disabled={readOnly || disableEdit}
-              content={disableEdit ? 'PDF sources cannot be edited. Delete and re-upload to replace.' : disabledReason}
+              content={
+                disableEdit
+                  ? 'PDF sources cannot be edited. Delete and re-upload to replace.'
+                  : disabledReason
+              }
             >
               <div>
                 <DropdownMenuItem

@@ -4,13 +4,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@knowbase/ui/components/dropdown-menu';
-import { FileText, FileUp, MessageSquare } from 'lucide-react';
+import { FileText, FileUp, Globe, MessageSquare } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 
 interface IAddDocumentDropdownProps {
   onTextClick: () => void;
   onQaClick: () => void;
   onPdfClick: () => void;
+  onUrlClick: () => void;
   disabled?: boolean;
 }
 export const AddDocumentDropdown = ({
@@ -18,6 +19,7 @@ export const AddDocumentDropdown = ({
   onQaClick,
   onTextClick,
   onPdfClick,
+  onUrlClick,
   disabled = false,
 }: PropsWithChildren<IAddDocumentDropdownProps>) => {
   return (
@@ -47,6 +49,14 @@ export const AddDocumentDropdown = ({
         >
           <FileUp className="h-4 w-4" />
           PDF
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={onUrlClick}
+          disabled={disabled}
+          className="flex items-center gap-2"
+        >
+          <Globe className="h-4 w-4" />
+          Website URL
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

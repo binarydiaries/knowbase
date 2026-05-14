@@ -113,8 +113,8 @@ export interface FileRoutesByFullPath {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
-  '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
+  '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -130,8 +130,8 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
   '/admin/costs': typeof AdminCostsIndexRoute
-  '/admin/queue': typeof AdminQueueIndexRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsIndexRoute
+  '/admin/queue': typeof AdminQueueIndexRoute
   '/admin/subscriptions': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -148,8 +148,8 @@ export interface FileRoutesById {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
-  '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
+  '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -167,8 +167,8 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
-    | '/admin/queue/'
     | '/admin/feature-flags/'
+    | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
@@ -184,8 +184,8 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/usage'
     | '/admin/costs'
-    | '/admin/queue'
     | '/admin/feature-flags'
+    | '/admin/queue'
     | '/admin/subscriptions'
     | '/agents/$agentId'
     | '/conversations/{-$conversationId}'
@@ -201,8 +201,8 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
-    | '/admin/queue/'
     | '/admin/feature-flags/'
+    | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
@@ -219,8 +219,8 @@ export interface RootRouteChildren {
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
-  AdminQueueIndexRoute: typeof AdminQueueIndexRoute
   AdminFeatureFlagsIndexRoute: typeof AdminFeatureFlagsIndexRoute
+  AdminQueueIndexRoute: typeof AdminQueueIndexRoute
   AdminSubscriptionsIndexRoute: typeof AdminSubscriptionsIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -347,8 +347,8 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,
   AdminCostsIndexRoute: AdminCostsIndexRoute,
-  AdminQueueIndexRoute: AdminQueueIndexRoute,
   AdminFeatureFlagsIndexRoute: AdminFeatureFlagsIndexRoute,
+  AdminQueueIndexRoute: AdminQueueIndexRoute,
   AdminSubscriptionsIndexRoute: AdminSubscriptionsIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:

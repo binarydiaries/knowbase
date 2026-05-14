@@ -25,6 +25,17 @@ export abstract class ChannelService {
     });
   }
 
+  static async singleById(id: string) {
+    const rows = await db
+      .select({ channel: channels, orgId: agents.orgId })
+      .from(channels)
+      .innerJoin(agents, eq(channels.agentId, agents.id))
+      .where(eq(channels.id, id))
+      .limit(1);
+    if (!rows[0]) return null;
+    return { ...rows[0].channel, orgId: rows[0].orgId };
+  }
+
   static async create(data: typeof channels.$inferInsert) {
     const [channel] = await db.insert(channels).values(data).returning();
     return channel;

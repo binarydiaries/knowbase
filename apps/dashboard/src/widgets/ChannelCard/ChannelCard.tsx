@@ -1,13 +1,6 @@
 import * as amplitude from '@amplitude/unified';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@knowbase/ui/components/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@knowbase/ui/components/card';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
@@ -51,6 +44,10 @@ export const ChannelSchema = z.object({
     .max(500, 'Suggestion questions are too long (max 500 characters)')
     .optional(),
 
+  allowedDomains: z
+    .string()
+    .optional(),
+
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
@@ -87,6 +84,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       welcomeMessage: '',
       inputPlaceholder: '',
       suggestionQuestions: '',
+      allowedDomains: '',
       primaryColor: '#915964',
     },
   });
@@ -99,6 +97,7 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
         suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join('\n'),
+        allowedDomains: (channelConfig.allowedDomains ?? []).join('\n'),
         primaryColor: channelConfig.primaryColor ?? '#915964',
       });
     }
@@ -115,7 +114,10 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           .map((question) => question.trim())
           .filter((question) => question.length > 0)
           .slice(0, 6),
-        allowedDomains: channelConfig?.allowedDomains ?? [],
+        allowedDomains: (values.allowedDomains ?? '')
+          .split('\n')
+          .map((d) => d.trim().toLowerCase())
+          .filter((d) => d.length > 0),
       };
 
       await patchChannelsById({
@@ -156,67 +158,68 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   if (!channelWeb) return null;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className={'text-l'}>Channel</CardTitle>
-        <CardDescription>Agent Channel</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSave)}>
-        <CardContent className={'flex-col gap-5 flex'}>
-          <FormInput
-            name="displayName"
-            control={control}
-            label="Display Name"
-            placeholder="Enter a display Name"
-            disabled={readOnly}
-          />
-          <FormInput
-            name="subtitle"
-            control={control}
-            label="Subtitle"
-            placeholder="Enter a subtitle"
-            disabled={readOnly}
-          />
-          <FormTextarea
-            name="welcomeMessage"
-            control={control}
-            label="Welcome Message"
-            placeholder="Enter a welcome message"
-            disabled={readOnly}
-          />
-          <FormInput
-            name="inputPlaceholder"
-            control={control}
-            label="Input Placeholder"
-            placeholder="Enter a input placeholder"
-            disabled={readOnly}
-          />
-          <FormTextarea
-            name="suggestionQuestions"
-            control={control}
-            label="Suggestion Questions"
-            placeholder="One question per line"
-            disabled={readOnly}
-          />
-          <FormInputColor
-            control={control}
-            name="primaryColor"
-            label="Primary Color"
-            disabled={readOnly}
-          />
-          <div className="flex justify-end">
-            <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
-              <Button
-                type="submit"
-                disabled={readOnly || !isDirty || saveChannelMutation.isPending}
-              >
-                {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
-              </Button>
-            </DisabledTooltip>
-          </div>
-        </CardContent>
-      </form>
-    </Card>
+    <form onSubmit={handleSubmit(onSave)}>
+      <div className="flex-col gap-5 flex">
+        <FormInput
+          name="displayName"
+          control={control}
+          label="Display Name"
+          placeholder="Enter a display Name"
+          disabled={readOnly}
+        />
+        <FormInput
+          name="subtitle"
+          control={control}
+          label="Subtitle"
+          placeholder="Enter a subtitle"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="welcomeMessage"
+          control={control}
+          label="Welcome Message"
+          placeholder="Enter a welcome message"
+          disabled={readOnly}
+        />
+        <FormInput
+          name="inputPlaceholder"
+          control={control}
+          label="Input Placeholder"
+          placeholder="Enter a input placeholder"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="suggestionQuestions"
+          control={control}
+          label="Suggestion Questions"
+          placeholder="One question per line"
+          disabled={readOnly}
+        />
+        <FormTextarea
+          name="allowedDomains"
+          control={control}
+          label="Allowed Domains"
+          placeholder="One domain per line, e.g. example.com"
+          disabled={readOnly}
+        />
+        <FormInputColor
+          control={control}
+          name="primaryColor"
+          label="Primary Color"
+          disabled={readOnly}
+        />
+        <div className="flex justify-end">
+          <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
+            <Button
+              type="submit"
+              disabled={readOnly || !isDirty || saveChannelMutation.isPending}
+            >
+              {saveChannelMutation.isPending ? 'Saving…' : 'Save'}
+            </Button>
+          </DisabledTooltip>
+        </div>
+      </div>
+    </form>
   );
 };
 

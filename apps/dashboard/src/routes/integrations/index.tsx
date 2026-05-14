@@ -73,7 +73,14 @@ function RouteComponent() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <WhatsAppIntegrationCard />
+          {flags?.whatsapp ? (
+            <WhatsAppIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="WhatsApp"
+              description="Send and receive messages via WhatsApp Business."
+            />
+          )}
           {flags?.slack ? (
             <SlackIntegrationCard />
           ) : (

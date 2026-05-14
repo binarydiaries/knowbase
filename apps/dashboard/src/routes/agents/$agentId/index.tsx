@@ -33,11 +33,8 @@ import { AgentMenuActions } from '@/widgets/AgentMenuActions/AgentMenuActions.ts
 import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
 import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
 import BehaviourCard from '@/widgets/BehaviourCard/BehaviourCard.tsx';
-import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
-import SlackChannelCard from '@/widgets/ChannelCard/SlackChannelCard.tsx';
-import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
+import ChannelsAccordion from '@/widgets/ChannelCard/ChannelsAccordion.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 export const Route = createFileRoute('/agents/$agentId/')({
   component: RouteComponent,
@@ -45,7 +42,6 @@ export const Route = createFileRoute('/agents/$agentId/')({
 
 function RouteComponent() {
   const { agentId } = Route.useParams();
-  const { data: flags } = useFeatureFlags();
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);
@@ -135,11 +131,7 @@ function RouteComponent() {
             <SubscriptionLimitBanner subscription={subscription} />
             <DocumentsWidget readOnly={readOnly} subscription={subscription} />
             {behaviour && <BehaviourCard readOnly={readOnly} />}
-            <ChannelCard readOnly={readOnly} />
-            <WhatsAppChannelCard readOnly={readOnly} />
-            {flags?.slack && (
-              <SlackChannelCard readOnly={readOnly} />
-            )}
+            <ChannelsAccordion readOnly={readOnly} />
             <ActionsCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex overflow-hidden">

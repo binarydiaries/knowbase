@@ -8,7 +8,7 @@ import { parseChatError } from '@/utils/chatError.ts';
 
 interface IAgentWidgetProps {
   channelSchema: ChannelSchema;
-  orgId: string;
+  parentOrigin?: string;
 }
 
 interface IAgentWidgetContentProps extends IAgentWidgetProps {
@@ -17,7 +17,7 @@ interface IAgentWidgetContentProps extends IAgentWidgetProps {
 
 const AgentWidgetContent = ({
   channelSchema,
-  orgId,
+  parentOrigin,
   onNewChat,
 }: IAgentWidgetContentProps) => {
   const channelConfig = channelSchema.additional.config;
@@ -45,16 +45,15 @@ const AgentWidgetContent = ({
             message: messageText?.text,
             conversationId: id,
             channelId: channelSchema?.id,
-            orgId,
+            ...(parentOrigin ? { parentOrigin } : {}),
           },
         };
       },
     }),
     onError(error) {
       const chatError = parseChatError(error);
-      if (!chatError) return;
 
-      if (chatError.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
+      if (chatError?.code === 'MESSAGE_LIMIT_REACHED' && !isUsageExhausted) {
         setIsUsageExhausted(true);
         setAlertMessage(
           'This assistant is temporarily unavailable right now. Please try again later.',
@@ -62,11 +61,9 @@ const AgentWidgetContent = ({
         return;
       }
 
-      if (chatError.code && chatError.code !== 'MESSAGE_LIMIT_REACHED') {
-        setAlertMessage(
-          chatError.message || 'Something went wrong. Please try again.',
-        );
-      }
+      setAlertMessage(
+        chatError?.message || 'Something went wrong. Please try again.',
+      );
     },
   });
 
@@ -100,14 +97,14 @@ const AgentWidgetContent = ({
   );
 };
 
-export const AgentWidget = ({ channelSchema, orgId }: IAgentWidgetProps) => {
+export const AgentWidget = ({ channelSchema, parentOrigin }: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (
     <AgentWidgetContent
       key={chatKey}
       channelSchema={channelSchema}
-      orgId={orgId}
+      parentOrigin={parentOrigin}
       onNewChat={() => setChatKey((k) => k + 1)}
     />
   );

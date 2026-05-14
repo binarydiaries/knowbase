@@ -46,10 +46,10 @@ export abstract class IndexingService {
       const result = await IndexingService.generateEmbeddings(chunks);
       generatedEmbeddings = result.embeddings;
       totalTokens = result.tokens;
-    } else if (documentContent.type === 'text') {
+    } else if (documentContent.type === 'text' || documentContent.type === 'pdf') {
       const chunks = await IndexingService.chunkText({
         title: document.title,
-        content: documentContent.data,
+        content: documentContent.data as string,
       });
       const result = await IndexingService.generateEmbeddings(chunks);
       generatedEmbeddings = result.embeddings;

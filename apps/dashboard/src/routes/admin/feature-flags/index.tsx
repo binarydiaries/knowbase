@@ -1,4 +1,5 @@
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
+import { client } from '@/services/client.gen.ts';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
@@ -50,7 +51,6 @@ export const Route = createFileRoute('/admin/feature-flags/')({
 });
 
 function RouteComponent() {
-  const { getToken } = useAuth();
   const { user } = useUser();
   const queryClient = useQueryClient();
   const email = user?.primaryEmailAddress?.emailAddress;
@@ -64,40 +64,30 @@ function RouteComponent() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [confirmDeleteFlag, setConfirmDeleteFlag] = useState<string | null>(null);
 
-  const apiBase = import.meta.env.VITE_API_BASE as string;
-
-  async function authFetch(path: string, options: RequestInit = {}) {
-    const token = await getToken();
-    const res = await fetch(`${apiBase}${path}`, {
-      ...options,
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-        ...(options.headers ?? {}),
-      },
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }
-
   const flagsQuery = useQuery<FlagRow[]>({
     queryKey: ['admin-feature-flags'],
-    queryFn: () => authFetch('/admin/feature-flags'),
+    queryFn: async () => {
+      const { data } = await client.get<FlagRow[]>({ url: '/admin/feature-flags', responseType: 'json' });
+      return data!;
+    },
     enabled: canAccessAdmin,
   });
 
   const orgsQuery = useQuery<OrgOverrideRow[]>({
     queryKey: ['admin-feature-flags-orgs', managingFlag?.flag],
-    queryFn: () => authFetch(`/admin/feature-flags/${managingFlag!.flag}/orgs`),
+    queryFn: async () => {
+      const { data } = await client.get<OrgOverrideRow[]>({
+        url: `/admin/feature-flags/${managingFlag!.flag}/orgs`,
+        responseType: 'json',
+      });
+      return data!;
+    },
     enabled: !!managingFlag,
   });
 
   const setGlobalMutation = useMutation({
     mutationFn: ({ flag, globalEnabled }: { flag: string; globalEnabled: boolean }) =>
-      authFetch(`/admin/feature-flags/${flag}`, {
-        method: 'PUT',
-        body: JSON.stringify({ globalEnabled }),
-      }),
+      client.put({ url: `/admin/feature-flags/${flag}`, body: { globalEnabled }, responseType: 'json' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
     },
@@ -108,10 +98,7 @@ function RouteComponent() {
 
   const createFlagMutation = useMutation({
     mutationFn: ({ flag, description }: { flag: string; description: string }) =>
-      authFetch(`/admin/feature-flags/${flag}`, {
-        method: 'PUT',
-        body: JSON.stringify({ globalEnabled: false, description }),
-      }),
+      client.put({ url: `/admin/feature-flags/${flag}`, body: { globalEnabled: false, description }, responseType: 'json' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
       setCreateFlag('');
@@ -126,7 +113,7 @@ function RouteComponent() {
 
   const deleteFlagMutation = useMutation({
     mutationFn: (flag: string) =>
-      authFetch(`/admin/feature-flags/${flag}`, { method: 'DELETE' }),
+      client.delete({ url: `/admin/feature-flags/${flag}` }),
     onSuccess: (_, flag) => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
       setConfirmDeleteFlag(null);
@@ -139,10 +126,7 @@ function RouteComponent() {
 
   const addOrgMutation = useMutation({
     mutationFn: ({ flag, orgIds, enabled }: { flag: string; orgIds: string[]; enabled: boolean }) =>
-      authFetch(`/admin/feature-flags/${flag}/orgs`, {
-        method: 'PUT',
-        body: JSON.stringify({ orgIds, enabled }),
-      }),
+      client.put({ url: `/admin/feature-flags/${flag}/orgs`, body: { orgIds, enabled }, responseType: 'json' }),
     onSuccess: (_, { flag }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags-orgs', flag] });
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
@@ -156,7 +140,7 @@ function RouteComponent() {
 
   const removeOrgMutation = useMutation({
     mutationFn: ({ flag, orgId }: { flag: string; orgId: string }) =>
-      authFetch(`/admin/feature-flags/${flag}/orgs/${orgId}`, { method: 'DELETE' }),
+      client.delete({ url: `/admin/feature-flags/${flag}/orgs/${orgId}` }),
     onSuccess: (_, { flag }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags-orgs', flag] });
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });

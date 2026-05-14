@@ -28,5 +28,5 @@ package-lock.json
 
 *.tsbuildinfo
 
-.claude
+.claude/settings.local.json
 .codex

@@ -65,9 +65,9 @@ const HeroSection = () => {
         </h1>
 
         <p className="text-[#301B69] mb-8">
-          Turn your documents, notes, and data into powerful AI
-          agents—instantly.
-          <br /> No coding required. Deploy anywhere.
+          Upload your PDFs, paste your FAQ, or point it at your website — your
+          AI agent goes live in minutes.
+          <br /> No coding required. Deploy on your site, WhatsApp, or Slack.
         </p>
 
         <div className="flex justify-center gap-4 flex-wrap">

@@ -11,7 +11,7 @@ const faqs = [
     {
         question: "What kind of data can I use?",
         answer:
-            "You can currently add text content and structured FAQs to train your agent with precise information. Support for PDFs and additional formats is coming soon as we continue expanding supported sources.",
+            "You can upload PDFs, paste plain text, or add structured Q&A pairs to train your agent. All three formats are supported today. Website URL crawling is coming soon.",
     },
     {
         question: "Do I need coding skills to use Agenvik?",
@@ -41,7 +41,7 @@ const faqs = [
     {
         question: "Where can I use my agent?",
         answer:
-            "You can currently use your agent within Agenvik. Embedding and third-party integrations are coming soon, with future support for websites, apps, and APIs so your agent can be accessible everywhere.",
+            "On your website via an embed widget, on WhatsApp, and on Slack — all three channels are live today. Add a chat widget to your site in one line of code, or connect your WhatsApp business number and your agent handles customer messages automatically.",
     },
     {
         question: "How does pricing work?",
@@ -51,7 +51,7 @@ const faqs = [
     {
         question: "What's coming next?",
         answer:
-            "We are actively building new features including PDF support, integrations, APIs, and analytics. Our goal is to make Agenvik the most complete AI agent platform for individuals, teams, and enterprises.",
+            "Website URL crawling (point your agent at any public page), lead capture webhooks for CRM integration, REST API access, and a human handoff inbox so your team can take over conversations when needed. We ship new features every week.",
     },
 ];
 

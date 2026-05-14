@@ -9,7 +9,7 @@ import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import { SubscriptionService } from '../subscription/service';
-import type { IChannelWhatsAppConfig, IChannelSlackConfig } from '../channel/model';
+import type { IChannelWebConfig, IChannelWhatsAppConfig, IChannelSlackConfig } from '../channel/model';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { SlackConnectionService } from '../slack/connectionService';
 import { AiCostEventService } from '../admin/costEvent.service';
@@ -40,6 +40,13 @@ export class MessageLimitReachedError extends Error {
   ) {
     super(SubscriptionService.getMessageLimitReachedMessage(payload));
     this.name = 'MessageLimitReachedError';
+  }
+}
+
+export class DomainNotAllowedError extends Error {
+  constructor() {
+    super('Domain not allowed');
+    this.name = 'DomainNotAllowedError';
   }
 }
 
@@ -793,19 +800,35 @@ export abstract class ChatService {
     channelId,
     conversationId,
     message,
-    orgId,
+    parentOrigin,
     ip,
   }: {
     channelId: string;
     message: string;
     conversationId: string;
-    orgId: string;
+    parentOrigin?: string;
     ip?: string;
   }) {
-    const channel = await ChannelService.single({ id: channelId, orgId });
+    const channel = await ChannelService.singleById(channelId);
 
     if (!channel) {
       throw new NotFoundError('Channel not found');
+    }
+
+    if (channel.type === 'web') {
+      const config = channel.config as IChannelWebConfig;
+      const allowedDomains = config.allowedDomains ?? [];
+      if (allowedDomains.length > 0) {
+        let allowed = false;
+        if (parentOrigin) {
+          try {
+            allowed = allowedDomains.includes(new URL(parentOrigin).hostname);
+          } catch {
+            allowed = false;
+          }
+        }
+        if (!allowed) throw new DomainNotAllowedError();
+      }
     }
 
     return ChatService.send({
@@ -813,7 +836,7 @@ export abstract class ChatService {
       conversationId,
       channelId,
       message,
-      orgId,
+      orgId: channel.orgId,
       ip,
     });
   }

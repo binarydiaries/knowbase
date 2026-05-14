@@ -38,7 +38,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { FolderIcon } from 'lucide-react';
+import { Check, Copy, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
@@ -58,6 +58,7 @@ import { UsageMeter } from '@/components/UsageMeter/UsageMeter.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
+import { PDFContentWidget } from '@/widgets/PDFContentWidget/PDFContentWidget.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 import type { SubscriptionStatusSchema } from '@/services';
@@ -77,11 +78,13 @@ export const DocumentsWidget = ({
   const queryClient = useQueryClient();
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
+  const [isPdfSheetOpen, setIsPdfSheetOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
   const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+  const [copiedTitle, setCopiedTitle] = useState(false);
 
   if (!agentId) {
     throw new Error('agentId not available');
@@ -247,6 +250,7 @@ export const DocumentsWidget = ({
                     <AddDocumentDropdown
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
+                      onPdfClick={() => setIsPdfSheetOpen(true)}
                     >
                       <Button variant="outline">Add</Button>
                     </AddDocumentDropdown>
@@ -286,13 +290,15 @@ export const DocumentsWidget = ({
               description={
                 doc.content?.type === 'qna'
                   ? `${doc.content.data.length} questions`
-                  : String(doc.content?.data)
+                  : doc.content?.type === 'pdf'
+                    ? 'PDF document'
+                    : String(doc.content?.data)
               }
               onEdit={() => {
                 setSelectedDocument(doc);
                 if (doc.content.type === 'text') {
                   setIsTextContentSheetOpen(true);
-                } else {
+                } else if (doc.content.type === 'qna') {
                   setIsQASheetOpen(true);
                 }
               }}
@@ -301,6 +307,7 @@ export const DocumentsWidget = ({
                 setDeleteConfirmDoc({ id: doc.id, title: doc.title });
               }}
               readOnly={readOnly}
+              disableEdit={doc.content.type === 'pdf'}
               disabledReason={AGENT_LOCK_TOOLTIP}
             />
           ))}
@@ -323,6 +330,7 @@ export const DocumentsWidget = ({
                     <AddDocumentDropdown
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
+                      onPdfClick={() => setIsPdfSheetOpen(true)}
                     >
                       <Button>Add Source</Button>
                     </AddDocumentDropdown>
@@ -432,8 +440,22 @@ export const DocumentsWidget = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label>
-              Type <strong>{deleteConfirmDoc?.title}</strong> to confirm
+            <Label className="flex items-center gap-1 flex-wrap">
+              Type <strong>{deleteConfirmDoc?.title}</strong>
+              <button
+                type="button"
+                title="Copy to clipboard"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => {
+                  if (!deleteConfirmDoc?.title) return;
+                  navigator.clipboard.writeText(deleteConfirmDoc.title);
+                  setCopiedTitle(true);
+                  setTimeout(() => setCopiedTitle(false), 1500);
+                }}
+              >
+                {copiedTitle ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              </button>
+              to confirm
             </Label>
             <Input
               value={deleteConfirmInput}
@@ -486,6 +508,16 @@ export const DocumentsWidget = ({
               setSelectedDocument(undefined);
             }}
             readOnly={readOnly}
+          />
+        )}
+      </Sheet>
+      <Sheet
+        open={isPdfSheetOpen}
+        onOpenChange={setIsPdfSheetOpen}
+      >
+        {isPdfSheetOpen && (
+          <PDFContentWidget
+            onClose={() => setIsPdfSheetOpen(false)}
           />
         )}
       </Sheet>

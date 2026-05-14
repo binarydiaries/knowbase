@@ -13,6 +13,7 @@ import { Link } from '@tanstack/react-router';
 import {
   Bot,
   CreditCard,
+  Flag,
   Gauge,
   LifeBuoy,
   LineChart,
@@ -53,6 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? [
         { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
         { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
+        { name: 'Feature Flags', url: '/admin/feature-flags', icon: Flag },
         {
           name: 'Admin Subscriptions',
           url: '/admin/subscriptions',

@@ -144,12 +144,12 @@ export type ChatBodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
-    orgId: string;
+    parentOrigin?: string;
 };
 
 export type ChatChannelQueryParamSchema = {
     channelId: string;
-    orgId: string;
+    parentOrigin?: string;
 };
 
 export type ChatChannelResponseSchema = {
@@ -183,12 +183,9 @@ export type ChatChannelResponseSchema = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -389,6 +386,9 @@ export type DocumentSchema = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
     status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     agentId: string;
@@ -410,6 +410,9 @@ export type CreateDocumentBody = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
 };
 
@@ -424,6 +427,9 @@ export type UpdateDocumentBody = {
             question: string;
             answer: string;
         }>;
+    } | {
+        type: 'pdf';
+        data: string;
     };
 };
 
@@ -440,6 +446,9 @@ export type OneDocumentResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -463,6 +472,9 @@ export type ManyDocumentsResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -487,6 +499,29 @@ export type DocumentContentQna = Array<{
 }>;
 
 export type DocumentContentText = string;
+
+export type UploadPdfBody = {
+    file: Blob | File;
+    agentId: string;
+};
+
+export type SavePdfBody = {
+    agentId: string;
+    title: string;
+    text: string;
+};
+
+export type PdfPreviewResponse = {
+    markdown: string;
+    pages: number;
+    characters: number;
+    truncated: boolean;
+};
+
+export type PdfUploadErrorResponse = {
+    code: 'INVALID_FILE' | 'PDF_ENCRYPTED' | 'PDF_EMPTY';
+    message: string;
+};
 
 export type AgentSchema = {
     id: string;
@@ -526,6 +561,9 @@ export type OneAgentResponse = {
                 question: string;
                 answer: string;
             }>;
+        } | {
+            type: 'pdf';
+            data: string;
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -564,12 +602,9 @@ export type OneAgentResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -777,12 +812,9 @@ export type ChannelSchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
     createdAt: string;
@@ -824,12 +856,9 @@ export type ManyChannelResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -866,12 +895,9 @@ export type CreateChannelBodySchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
 };
@@ -905,12 +931,9 @@ export type UpdateChannelBodySchema = {
     } | {
         type: 'slack';
         config: {
-            mode?: 'channel' | 'mention' | 'command';
+            mode?: 'channel' | 'mention';
             slackChannelId?: string;
             slackChannelName?: string;
-            commandKeyword?: string;
-            commandChannelId?: string;
-            commandChannelName?: string;
         };
     };
 };
@@ -946,12 +969,9 @@ export type OneChannelResponse = {
         } | {
             type: 'slack';
             config: {
-                mode?: 'channel' | 'mention' | 'command';
+                mode?: 'channel' | 'mention';
                 slackChannelId?: string;
                 slackChannelName?: string;
-                commandKeyword?: string;
-                commandChannelId?: string;
-                commandChannelName?: string;
             };
         };
         createdAt: string;
@@ -1624,6 +1644,37 @@ export type GetChatChannelResponses = {
 
 export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
 
+export type PostChatPreviewData = {
+    body: ChatBodySchema;
+    path?: never;
+    query?: never;
+    url: '/chat/preview';
+};
+
+export type PostChatPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostChatPreviewError = PostChatPreviewErrors[keyof PostChatPreviewErrors];
+
+export type PostChatPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: unknown;
+};
+
 export type GetMessagesData = {
     body?: never;
     path?: never;
@@ -1708,6 +1759,72 @@ export type PostDocumentsResponses = {
 };
 
 export type PostDocumentsResponse = PostDocumentsResponses[keyof PostDocumentsResponses];
+
+export type PostDocumentsPdfPreviewData = {
+    body: UploadPdfBody;
+    path?: never;
+    query?: never;
+    url: '/documents/pdf/preview';
+};
+
+export type PostDocumentsPdfPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+    /**
+     * Response for status 422
+     */
+    422: PdfUploadErrorResponse;
+};
+
+export type PostDocumentsPdfPreviewError = PostDocumentsPdfPreviewErrors[keyof PostDocumentsPdfPreviewErrors];
+
+export type PostDocumentsPdfPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: PdfPreviewResponse;
+};
+
+export type PostDocumentsPdfPreviewResponse = PostDocumentsPdfPreviewResponses[keyof PostDocumentsPdfPreviewResponses];
+
+export type PostDocumentsPdfData = {
+    body: SavePdfBody;
+    path?: never;
+    query?: never;
+    url: '/documents/pdf';
+};
+
+export type PostDocumentsPdfErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: DocumentWriteForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostDocumentsPdfError = PostDocumentsPdfErrors[keyof PostDocumentsPdfErrors];
+
+export type PostDocumentsPdfResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneDocumentResponse;
+};
+
+export type PostDocumentsPdfResponse = PostDocumentsPdfResponses[keyof PostDocumentsPdfResponses];
 
 export type DeleteDocumentsByIdData = {
     body?: never;
@@ -2306,6 +2423,46 @@ export type PostWebhookWhatsappData = {
     url: '/webhook/whatsapp';
 };
 
+export type GetWhatsappSetupInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/setup-info';
+};
+
+export type GetWhatsappSetupInfoErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappSetupInfoError = GetWhatsappSetupInfoErrors[keyof GetWhatsappSetupInfoErrors];
+
+export type GetWhatsappTestConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/test-connection';
+};
+
+export type GetWhatsappTestConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappTestConnectionError = GetWhatsappTestConnectionErrors[keyof GetWhatsappTestConnectionErrors];
+
 export type DeleteWhatsappConnectionData = {
     body?: never;
     path?: never;
@@ -2496,12 +2653,9 @@ export type GetSlackConnectionError = GetSlackConnectionErrors[keyof GetSlackCon
 export type PostSlackBindData = {
     body: {
         channelId: string;
-        mode: 'channel' | 'mention' | 'command';
+        mode: 'channel' | 'mention';
         slackChannelId?: string;
         slackChannelName?: string;
-        commandKeyword?: string;
-        commandChannelId?: string;
-        commandChannelName?: string;
     };
     path?: never;
     query?: never;
@@ -2694,6 +2848,22 @@ export type GetLeadsResponses = {
 
 export type GetLeadsResponse = GetLeadsResponses[keyof GetLeadsResponses];
 
+export type GetFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/feature-flags/';
+};
+
+export type GetFeatureFlagsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetFeatureFlagsError = GetFeatureFlagsErrors[keyof GetFeatureFlagsErrors];
+
 export type GetAdminCostsByOrganizationData = {
     body?: never;
     path?: never;
@@ -2718,6 +2888,119 @@ export type GetAdminCostsByOrganizationResponses = {
 };
 
 export type GetAdminCostsByOrganizationResponse = GetAdminCostsByOrganizationResponses[keyof GetAdminCostsByOrganizationResponses];
+
+export type GetAdminFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/feature-flags/';
+};
+
+export type GetAdminFeatureFlagsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsError = GetAdminFeatureFlagsErrors[keyof GetAdminFeatureFlagsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagError = DeleteAdminFeatureFlagsByFlagErrors[keyof DeleteAdminFeatureFlagsByFlagErrors];
+
+export type PutAdminFeatureFlagsByFlagData = {
+    body: {
+        globalEnabled: boolean;
+        description?: string;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type PutAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagError = PutAdminFeatureFlagsByFlagErrors[keyof PutAdminFeatureFlagsByFlagErrors];
+
+export type GetAdminFeatureFlagsByFlagOrgsData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsError = GetAdminFeatureFlagsByFlagOrgsErrors[keyof GetAdminFeatureFlagsByFlagOrgsErrors];
+
+export type PutAdminFeatureFlagsByFlagOrgsData = {
+    body: {
+        orgIds: Array<string>;
+        enabled: boolean;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsError = PutAdminFeatureFlagsByFlagOrgsErrors[keyof PutAdminFeatureFlagsByFlagOrgsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdData = {
+    body?: never;
+    path: {
+        flag: string;
+        orgId: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs/{orgId}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdError = DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors[keyof DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors];
 
 export type GetAdminQueueCountsData = {
     body?: never;

@@ -52,10 +52,10 @@ export async function handleLeadCapture(
     orgId: string;
   },
 ) {
-  // Skip lead capture entirely for free plan — best-effort, never break chat
+  // Skip lead capture if feature flag or plan disallows it — best-effort, never break chat
   try {
-    const plan = await SubscriptionService.getPlan(ctx.orgId);
-    if (!SubscriptionService.planHasLeadGeneration(plan)) return;
+    const { allowed } = await SubscriptionService.assertLeadGenerationAccess(ctx.orgId);
+    if (!allowed) return;
   } catch {
     return;
   }

@@ -2423,6 +2423,46 @@ export type PostWebhookWhatsappData = {
     url: '/webhook/whatsapp';
 };
 
+export type GetWhatsappSetupInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/setup-info';
+};
+
+export type GetWhatsappSetupInfoErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappSetupInfoError = GetWhatsappSetupInfoErrors[keyof GetWhatsappSetupInfoErrors];
+
+export type GetWhatsappTestConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/test-connection';
+};
+
+export type GetWhatsappTestConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappTestConnectionError = GetWhatsappTestConnectionErrors[keyof GetWhatsappTestConnectionErrors];
+
 export type DeleteWhatsappConnectionData = {
     body?: never;
     path?: never;
@@ -2808,6 +2848,22 @@ export type GetLeadsResponses = {
 
 export type GetLeadsResponse = GetLeadsResponses[keyof GetLeadsResponses];
 
+export type GetFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/feature-flags/';
+};
+
+export type GetFeatureFlagsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetFeatureFlagsError = GetFeatureFlagsErrors[keyof GetFeatureFlagsErrors];
+
 export type GetAdminCostsByOrganizationData = {
     body?: never;
     path?: never;
@@ -2832,6 +2888,119 @@ export type GetAdminCostsByOrganizationResponses = {
 };
 
 export type GetAdminCostsByOrganizationResponse = GetAdminCostsByOrganizationResponses[keyof GetAdminCostsByOrganizationResponses];
+
+export type GetAdminFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/feature-flags/';
+};
+
+export type GetAdminFeatureFlagsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsError = GetAdminFeatureFlagsErrors[keyof GetAdminFeatureFlagsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagError = DeleteAdminFeatureFlagsByFlagErrors[keyof DeleteAdminFeatureFlagsByFlagErrors];
+
+export type PutAdminFeatureFlagsByFlagData = {
+    body: {
+        globalEnabled: boolean;
+        description?: string;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type PutAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagError = PutAdminFeatureFlagsByFlagErrors[keyof PutAdminFeatureFlagsByFlagErrors];
+
+export type GetAdminFeatureFlagsByFlagOrgsData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsError = GetAdminFeatureFlagsByFlagOrgsErrors[keyof GetAdminFeatureFlagsByFlagOrgsErrors];
+
+export type PutAdminFeatureFlagsByFlagOrgsData = {
+    body: {
+        orgIds: Array<string>;
+        enabled: boolean;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsError = PutAdminFeatureFlagsByFlagOrgsErrors[keyof PutAdminFeatureFlagsByFlagOrgsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdData = {
+    body?: never;
+    path: {
+        flag: string;
+        orgId: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs/{orgId}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdError = DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors[keyof DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors];
 
 export type GetAdminQueueCountsData = {
     body?: never;

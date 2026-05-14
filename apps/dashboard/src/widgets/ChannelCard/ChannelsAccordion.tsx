@@ -12,6 +12,7 @@ import {
 } from '@knowbase/ui/components/card';
 import { useParams } from '@tanstack/react-router';
 import { Globe, Hash, MessageCircle } from 'lucide-react';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useChannels } from '@/store/useChannels.ts';
 import ChannelCard from './ChannelCard.tsx';
 import SlackChannelCard from './SlackChannelCard.tsx';
@@ -19,6 +20,7 @@ import WhatsAppChannelCard from './WhatsAppChannelCard.tsx';
 
 const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { agentId } = useParams({ strict: false });
+  const { data: flags } = useFeatureFlags();
 
   const channelWhatsApp = useChannels((state) =>
     agentId
@@ -67,7 +69,7 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
           </AccordionContent>
         </AccordionItem>
 
-        {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' && (
+        {flags?.whatsapp && (
           <AccordionItem value="whatsapp" className="px-6">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-2">
@@ -84,7 +86,7 @@ const ChannelsAccordion = ({ readOnly = false }: { readOnly?: boolean }) => {
           </AccordionItem>
         )}
 
-        {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
+        {flags?.slack && (
           <AccordionItem value="slack" className="px-6">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-2">

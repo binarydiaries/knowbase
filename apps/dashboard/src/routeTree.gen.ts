@@ -22,6 +22,7 @@ import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } fr
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
 import { Route as AdminSubscriptionsIndexRouteImport } from './routes/admin/subscriptions/index'
 import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
+import { Route as AdminFeatureFlagsIndexRouteImport } from './routes/admin/feature-flags/index'
 import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -90,6 +91,11 @@ const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
   path: '/admin/queue/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFeatureFlagsIndexRoute = AdminFeatureFlagsIndexRouteImport.update({
+  id: '/admin/feature-flags/',
+  path: '/admin/feature-flags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
   id: '/admin/costs/',
   path: '/admin/costs/',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
+  '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/usage': typeof UsageIndexRoute
   '/admin/costs': typeof AdminCostsIndexRoute
+  '/admin/feature-flags': typeof AdminFeatureFlagsIndexRoute
   '/admin/queue': typeof AdminQueueIndexRoute
   '/admin/subscriptions': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
+  '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
+    | '/admin/feature-flags/'
     | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/usage'
     | '/admin/costs'
+    | '/admin/feature-flags'
     | '/admin/queue'
     | '/admin/subscriptions'
     | '/agents/$agentId'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
     | '/usage/'
     | '/admin/costs/'
+    | '/admin/feature-flags/'
     | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   UsageIndexRoute: typeof UsageIndexRoute
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
+  AdminFeatureFlagsIndexRoute: typeof AdminFeatureFlagsIndexRoute
   AdminQueueIndexRoute: typeof AdminQueueIndexRoute
   AdminSubscriptionsIndexRoute: typeof AdminSubscriptionsIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueueIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/feature-flags/': {
+      id: '/admin/feature-flags/'
+      path: '/admin/feature-flags'
+      fullPath: '/admin/feature-flags/'
+      preLoaderRoute: typeof AdminFeatureFlagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/costs/': {
       id: '/admin/costs/'
       path: '/admin/costs'
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   UsageIndexRoute: UsageIndexRoute,
   AdminCostsIndexRoute: AdminCostsIndexRoute,
+  AdminFeatureFlagsIndexRoute: AdminFeatureFlagsIndexRoute,
   AdminQueueIndexRoute: AdminQueueIndexRoute,
   AdminSubscriptionsIndexRoute: AdminSubscriptionsIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,

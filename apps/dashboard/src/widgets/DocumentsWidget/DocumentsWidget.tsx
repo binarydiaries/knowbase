@@ -61,6 +61,7 @@ import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdo
 import { PDFContentWidget } from '@/widgets/PDFContentWidget/PDFContentWidget.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
+import { URLContentWidget } from '@/widgets/URLContentWidget/URLContentWidget.tsx';
 import type { SubscriptionStatusSchema } from '@/services';
 
 dayjs.extend(utc);
@@ -79,6 +80,7 @@ export const DocumentsWidget = ({
   const [isTextContentSheetOpen, setIsTextContentSheetOpen] = useState(false);
   const [isQASheetOpen, setIsQASheetOpen] = useState(false);
   const [isPdfSheetOpen, setIsPdfSheetOpen] = useState(false);
+  const [isUrlSheetOpen, setIsUrlSheetOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
@@ -251,6 +253,7 @@ export const DocumentsWidget = ({
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
                       onPdfClick={() => setIsPdfSheetOpen(true)}
+                      onUrlClick={() => setIsUrlSheetOpen(true)}
                     >
                       <Button variant="outline">Add</Button>
                     </AddDocumentDropdown>
@@ -292,7 +295,9 @@ export const DocumentsWidget = ({
                   ? `${doc.content.data.length} questions`
                   : doc.content?.type === 'pdf'
                     ? 'PDF document'
-                    : String(doc.content?.data)
+                    : doc.content?.type === 'url'
+                      ? (doc.content.data as { url: string }).url
+                      : String(doc.content?.data)
               }
               onEdit={() => {
                 setSelectedDocument(doc);
@@ -307,7 +312,7 @@ export const DocumentsWidget = ({
                 setDeleteConfirmDoc({ id: doc.id, title: doc.title });
               }}
               readOnly={readOnly}
-              disableEdit={doc.content.type === 'pdf'}
+              disableEdit={doc.content.type === 'pdf' || doc.content.type === 'url'}
               disabledReason={AGENT_LOCK_TOOLTIP}
             />
           ))}
@@ -331,6 +336,7 @@ export const DocumentsWidget = ({
                       onTextClick={() => setIsTextContentSheetOpen(true)}
                       onQaClick={() => setIsQASheetOpen(true)}
                       onPdfClick={() => setIsPdfSheetOpen(true)}
+                      onUrlClick={() => setIsUrlSheetOpen(true)}
                     >
                       <Button>Add Source</Button>
                     </AddDocumentDropdown>
@@ -518,6 +524,16 @@ export const DocumentsWidget = ({
         {isPdfSheetOpen && (
           <PDFContentWidget
             onClose={() => setIsPdfSheetOpen(false)}
+          />
+        )}
+      </Sheet>
+      <Sheet
+        open={isUrlSheetOpen}
+        onOpenChange={setIsUrlSheetOpen}
+      >
+        {isUrlSheetOpen && (
+          <URLContentWidget
+            onClose={() => setIsUrlSheetOpen(false)}
           />
         )}
       </Sheet>

@@ -389,6 +389,13 @@ export type DocumentSchema = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
     status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     agentId: string;
@@ -413,6 +420,13 @@ export type CreateDocumentBody = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
 };
 
@@ -430,6 +444,13 @@ export type UpdateDocumentBody = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
 };
 
@@ -449,6 +470,13 @@ export type OneDocumentResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -475,6 +503,13 @@ export type ManyDocumentsResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -523,6 +558,30 @@ export type PdfUploadErrorResponse = {
     message: string;
 };
 
+export type UrlPreviewBody = {
+    agentId: string;
+    url: string;
+};
+
+export type UrlPreviewResponse = {
+    title: string;
+    charCount: number;
+    preview: string;
+    rawText: string;
+};
+
+export type SaveUrlBody = {
+    agentId: string;
+    title: string;
+    url: string;
+    rawText: string;
+};
+
+export type UrlErrorResponse = {
+    code: 'INVALID_URL' | 'FETCH_FAILED' | 'FETCH_TIMEOUT' | 'NOT_HTML' | 'PRIVATE_HOST' | 'DNS_FAILED' | 'PAGE_EMPTY';
+    message: string;
+};
+
 export type AgentSchema = {
     id: string;
     name: string;
@@ -564,6 +623,13 @@ export type OneAgentResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -1825,6 +1891,72 @@ export type PostDocumentsPdfResponses = {
 };
 
 export type PostDocumentsPdfResponse = PostDocumentsPdfResponses[keyof PostDocumentsPdfResponses];
+
+export type PostDocumentsUrlPreviewData = {
+    body: UrlPreviewBody;
+    path?: never;
+    query?: never;
+    url: '/documents/url/preview';
+};
+
+export type PostDocumentsUrlPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+    /**
+     * Response for status 422
+     */
+    422: UrlErrorResponse;
+};
+
+export type PostDocumentsUrlPreviewError = PostDocumentsUrlPreviewErrors[keyof PostDocumentsUrlPreviewErrors];
+
+export type PostDocumentsUrlPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: UrlPreviewResponse;
+};
+
+export type PostDocumentsUrlPreviewResponse = PostDocumentsUrlPreviewResponses[keyof PostDocumentsUrlPreviewResponses];
+
+export type PostDocumentsUrlData = {
+    body: SaveUrlBody;
+    path?: never;
+    query?: never;
+    url: '/documents/url';
+};
+
+export type PostDocumentsUrlErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: DocumentWriteForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostDocumentsUrlError = PostDocumentsUrlErrors[keyof PostDocumentsUrlErrors];
+
+export type PostDocumentsUrlResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneDocumentResponse;
+};
+
+export type PostDocumentsUrlResponse = PostDocumentsUrlResponses[keyof PostDocumentsUrlResponses];
 
 export type DeleteDocumentsByIdData = {
     body?: never;

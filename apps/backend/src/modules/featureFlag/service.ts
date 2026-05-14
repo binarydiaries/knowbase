@@ -108,6 +108,11 @@ export abstract class FeatureFlagService {
       .where(and(eq(orgFeatureFlags.flag, flag), eq(orgFeatureFlags.orgId, orgId)));
   }
 
+  static async deleteFlag(flag: string) {
+    await db.delete(orgFeatureFlags).where(eq(orgFeatureFlags.flag, flag));
+    await db.delete(featureFlagDefinitions).where(eq(featureFlagDefinitions.flag, flag));
+  }
+
   static async getForOrg(orgId: string): Promise<Record<string, boolean>> {
     const definitions = await db.query.featureFlagDefinitions.findMany();
     const overrides = await db.query.orgFeatureFlags.findMany({

@@ -58,4 +58,14 @@ export const AdminFeatureFlags = new Elysia({
     {
       params: t.Object({ flag: t.String(), orgId: t.String() }),
     },
+  )
+  .delete(
+    '/:flag',
+    async ({ params }) => {
+      await FeatureFlagService.deleteFlag(params.flag);
+      return { success: true };
+    },
+    {
+      params: t.Object({ flag: t.String() }),
+    },
   );

@@ -62,6 +62,7 @@ function RouteComponent() {
   const [createFlag, setCreateFlag] = useState('');
   const [createDescription, setCreateDescription] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [confirmDeleteFlag, setConfirmDeleteFlag] = useState<string | null>(null);
 
   const apiBase = import.meta.env.VITE_API_BASE as string;
 
@@ -120,6 +121,19 @@ function RouteComponent() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Failed to create flag');
+    },
+  });
+
+  const deleteFlagMutation = useMutation({
+    mutationFn: (flag: string) =>
+      authFetch(`/admin/feature-flags/${flag}`, { method: 'DELETE' }),
+    onSuccess: (_, flag) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
+      setConfirmDeleteFlag(null);
+      toast.success(`Flag "${flag}" deleted`);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to delete flag');
     },
   });
 
@@ -297,13 +311,47 @@ function RouteComponent() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setManagingFlag(flag)}
-                              >
-                                Manage Orgs
-                              </Button>
+                              {confirmDeleteFlag === flag.flag ? (
+                                <div className="flex items-center justify-end gap-2">
+                                  <span className="text-xs text-muted-foreground">Delete flag?</span>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={deleteFlagMutation.isPending}
+                                    onClick={() => deleteFlagMutation.mutate(flag.flag)}
+                                  >
+                                    {deleteFlagMutation.isPending ? (
+                                      <Loader2 className="size-3.5 animate-spin" />
+                                    ) : null}
+                                    Yes, delete
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setConfirmDeleteFlag(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setManagingFlag(flag)}
+                                  >
+                                    Manage Orgs
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-8 text-muted-foreground hover:text-destructive"
+                                    onClick={() => setConfirmDeleteFlag(flag.flag)}
+                                  >
+                                    <Trash2 className="size-3.5" />
+                                  </Button>
+                                </div>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}

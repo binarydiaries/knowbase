@@ -22,6 +22,7 @@ import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } fr
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
 import { Route as AdminSubscriptionsIndexRouteImport } from './routes/admin/subscriptions/index'
 import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
+import { Route as AdminFeatureFlagsIndexRouteImport } from './routes/admin/feature-flags/index'
 import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -90,6 +91,11 @@ const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
   path: '/admin/queue/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFeatureFlagsIndexRoute = AdminFeatureFlagsIndexRouteImport.update({
+  id: '/admin/feature-flags/',
+  path: '/admin/feature-flags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCostsIndexRoute = AdminCostsIndexRouteImport.update({
   id: '/admin/costs/',
   path: '/admin/costs/',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
+  '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/usage': typeof UsageIndexRoute
   '/admin/costs': typeof AdminCostsIndexRoute
   '/admin/queue': typeof AdminQueueIndexRoute
+  '/admin/feature-flags': typeof AdminFeatureFlagsIndexRoute
   '/admin/subscriptions': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/usage/': typeof UsageIndexRoute
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
+  '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
   '/conversations/{-$conversationId}/': typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/usage/'
     | '/admin/costs/'
     | '/admin/queue/'
+    | '/admin/feature-flags/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/usage'
     | '/admin/costs'
     | '/admin/queue'
+    | '/admin/feature-flags'
     | '/admin/subscriptions'
     | '/agents/$agentId'
     | '/conversations/{-$conversationId}'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/usage/'
     | '/admin/costs/'
     | '/admin/queue/'
+    | '/admin/feature-flags/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
     | '/conversations/{-$conversationId}/'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   UsageIndexRoute: typeof UsageIndexRoute
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
   AdminQueueIndexRoute: typeof AdminQueueIndexRoute
+  AdminFeatureFlagsIndexRoute: typeof AdminFeatureFlagsIndexRoute
   AdminSubscriptionsIndexRoute: typeof AdminSubscriptionsIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
   ConversationsChar123ConversationIdChar125IndexRoute: typeof ConversationsChar123ConversationIdChar125IndexRoute
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueueIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/feature-flags/': {
+      id: '/admin/feature-flags/'
+      path: '/admin/feature-flags'
+      fullPath: '/admin/feature-flags/'
+      preLoaderRoute: typeof AdminFeatureFlagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/costs/': {
       id: '/admin/costs/'
       path: '/admin/costs'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsageIndexRoute: UsageIndexRoute,
   AdminCostsIndexRoute: AdminCostsIndexRoute,
   AdminQueueIndexRoute: AdminQueueIndexRoute,
+  AdminFeatureFlagsIndexRoute: AdminFeatureFlagsIndexRoute,
   AdminSubscriptionsIndexRoute: AdminSubscriptionsIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,
   ConversationsChar123ConversationIdChar125IndexRoute:

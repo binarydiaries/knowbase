@@ -6,8 +6,10 @@ import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
 import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
+import { AdminFeatureFlags } from './modules/admin/featureFlags';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
+import { FeatureFlag } from './modules/featureFlag/featureFlag';
 import { Agent } from './modules/agent/agent';
 import { Analytics } from './modules/analytics/analytics';
 import { Behaviour } from './modules/behaviour/behaviour';
@@ -76,7 +78,9 @@ const app = Sentry.withElysia(new Elysia())
   .use(Slack)
   .use(Action)
   .use(Lead)
+  .use(FeatureFlag)
   .use(Admin)
+  .use(AdminFeatureFlags)
   .use(AdminQueue)
   .use(AdminSubscriptions)
   .listen(process.env.PORT ?? 3000);

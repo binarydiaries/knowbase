@@ -37,6 +37,7 @@ import ChannelCard from '@/widgets/ChannelCard/ChannelCard.tsx';
 import SlackChannelCard from '@/widgets/ChannelCard/SlackChannelCard.tsx';
 import WhatsAppChannelCard from '@/widgets/ChannelCard/WhatsAppChannelCard.tsx';
 import { DocumentsWidget } from '@/widgets/DocumentsWidget/DocumentsWidget.tsx';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 export const Route = createFileRoute('/agents/$agentId/')({
   component: RouteComponent,
@@ -44,6 +45,7 @@ export const Route = createFileRoute('/agents/$agentId/')({
 
 function RouteComponent() {
   const { agentId } = Route.useParams();
+  const { data: flags } = useFeatureFlags();
   const setDocuments = useDocuments((state) => state.setDocuments);
   const setChannels = useChannels((state) => state.setChannels);
   const setBehaviour = useBehaviour((state) => state.setBehaviour);
@@ -135,7 +137,7 @@ function RouteComponent() {
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelCard readOnly={readOnly} />
             <WhatsAppChannelCard readOnly={readOnly} />
-            {import.meta.env.VITE_SLACK_ENABLED === 'true' && (
+            {flags?.slack && (
               <SlackChannelCard readOnly={readOnly} />
             )}
             <ActionsCard readOnly={readOnly} />

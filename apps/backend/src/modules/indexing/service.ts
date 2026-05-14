@@ -46,6 +46,15 @@ export abstract class IndexingService {
       const result = await IndexingService.generateEmbeddings(chunks);
       generatedEmbeddings = result.embeddings;
       totalTokens = result.tokens;
+    } else if (documentContent.type === 'url') {
+      const urlData = documentContent.data as { url: string; rawText: string; crawledAt: string };
+      const chunks = await IndexingService.chunkText({
+        title: document.title,
+        content: urlData.rawText,
+      });
+      const result = await IndexingService.generateEmbeddings(chunks);
+      generatedEmbeddings = result.embeddings;
+      totalTokens = result.tokens;
     } else if (documentContent.type === 'text' || documentContent.type === 'pdf') {
       const chunks = await IndexingService.chunkText({
         title: document.title,

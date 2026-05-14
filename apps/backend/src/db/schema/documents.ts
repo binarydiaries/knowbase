@@ -30,7 +30,7 @@ export const documents = pgTable(
     title: text().notNull(),
     contentSerialized: jsonb().notNull(),
     version: integer().notNull().default(1),
-    type: text().$type<'text' | 'qna' | 'pdf'>().notNull(),
+    type: text().$type<'text' | 'qna' | 'pdf' | 'url'>().notNull(),
     status: documentStatus().notNull().default('ready'),
     lastIndexedVersion: integer(),
     lastTrainedAt: timestamp({ withTimezone: true }),

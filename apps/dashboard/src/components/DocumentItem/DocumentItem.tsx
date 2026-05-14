@@ -159,7 +159,8 @@ export const DocumentItem = ({
               disabled={readOnly || disableEdit}
               content={
                 disableEdit
-                  ? 'PDF sources cannot be edited. Delete and re-upload to replace.'
+                  ? // TODO: We need to differenacte pdf and url
+                    'PDF sources cannot be edited. Delete and re-upload to replace.'
                   : disabledReason
               }
             >

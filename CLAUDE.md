@@ -272,3 +272,48 @@ The backend ships two Dockerfiles (multi-stage Bun builds targeting distroless):
 | `apps/backend/Worker.Dockerfile` | BullMQ worker (`worker-server` binary) |
 
 Database migrations run automatically during the Docker build step.
+
+---
+
+## gstack
+
+Use the `/browse` skill from gstack for all web browsing. **Never use `mcp__claude-in-chrome__*` tools.**
+
+Available gstack skills:
+
+| Skill | Purpose |
+|-------|---------|
+| `/office-hours` | Async Q&A and coaching session |
+| `/plan-ceo-review` | CEO-level plan review |
+| `/plan-eng-review` | Engineering plan review |
+| `/plan-design-review` | Design plan review |
+| `/design-consultation` | Design consultation session |
+| `/design-shotgun` | Rapid design exploration |
+| `/design-html` | HTML/CSS design output |
+| `/review` | Code review |
+| `/ship` | Ship a feature end-to-end |
+| `/land-and-deploy` | Land and deploy changes |
+| `/canary` | Canary deployment |
+| `/benchmark` | Performance benchmarking |
+| `/browse` | Headless browser for web browsing and QA |
+| `/connect-chrome` | Connect to a Chrome browser instance |
+| `/qa` | Full QA pass |
+| `/qa-only` | QA without setup steps |
+| `/design-review` | Visual design review |
+| `/setup-browser-cookies` | Configure browser cookies |
+| `/setup-deploy` | Configure deployment pipeline |
+| `/setup-gbrain` | Configure gbrain |
+| `/retro` | Retrospective |
+| `/investigate` | Investigate a bug or issue |
+| `/document-release` | Document a release |
+| `/codex` | Codex agent task |
+| `/cso` | CSO-level security review |
+| `/autoplan` | Automatically generate a plan |
+| `/plan-devex-review` | Developer experience plan review |
+| `/devex-review` | Developer experience review |
+| `/careful` | Careful/cautious mode for risky changes |
+| `/freeze` | Freeze the codebase |
+| `/guard` | Guard mode |
+| `/unfreeze` | Unfreeze the codebase |
+| `/gstack-upgrade` | Upgrade gstack |
+| `/learn` | Learning and onboarding session |

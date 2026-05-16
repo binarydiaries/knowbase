@@ -14,7 +14,7 @@
     "start": "bun run start:app & bun run start:worker",
     "db:push": "npx drizzle-kit push",
     "db:generate": "npx drizzle-kit generate",
-    "db:migrate": "npx drizzle-kit migrate",
+    "db:migrate": "npx drizzle-kit migrate --ignore-conflicts",
     "studio": "npx drizzle-kit studio"
   },
   "dependencies": {

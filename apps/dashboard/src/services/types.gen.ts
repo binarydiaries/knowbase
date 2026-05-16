@@ -582,6 +582,28 @@ export type UrlErrorResponse = {
     message: string;
 };
 
+export type UrlCrawlingDisabledResponse = {
+    code: 'FORBIDDEN';
+    message: string;
+};
+
+export type DocumentUrlWriteForbiddenResponse = {
+    code: 'AGENT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeAgentLimit: number;
+    activeAgentCount: number;
+} | {
+    code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+} | {
+    code: 'FORBIDDEN';
+    message: string;
+};
+
 export type AgentSchema = {
     id: string;
     name: string;
@@ -1284,6 +1306,14 @@ export type DeleteActionResponse = {
     success: boolean;
 };
 
+export type CreateDemoBookingSchema = {
+    name: string;
+    email: string;
+    company: string;
+    phone?: string;
+    message?: string;
+};
+
 export type LeadSchema = {
     id: string;
     agentId: string;
@@ -1905,6 +1935,10 @@ export type PostDocumentsUrlPreviewErrors = {
      */
     401: UnauthorizedSchema;
     /**
+     * Response for status 403
+     */
+    403: UrlCrawlingDisabledResponse;
+    /**
      * Response for status 404
      */
     404: NotFoundResponse;
@@ -1940,7 +1974,7 @@ export type PostDocumentsUrlErrors = {
     /**
      * Response for status 403
      */
-    403: DocumentWriteForbiddenResponse;
+    403: DocumentUrlWriteForbiddenResponse;
     /**
      * Response for status 404
      */
@@ -2947,6 +2981,13 @@ export type PatchAgentActionsByIdResponses = {
 
 export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
 
+export type PostDemoData = {
+    body: CreateDemoBookingSchema;
+    path?: never;
+    query?: never;
+    url: '/demo/';
+};
+
 export type GetLeadsData = {
     body?: never;
     path?: never;
@@ -3293,3 +3334,19 @@ export type PostAdminSubscriptionsBulkSyncErrors = {
 };
 
 export type PostAdminSubscriptionsBulkSyncError = PostAdminSubscriptionsBulkSyncErrors[keyof PostAdminSubscriptionsBulkSyncErrors];
+
+export type GetAdminDemoBookingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/demo-bookings/';
+};
+
+export type GetAdminDemoBookingsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminDemoBookingsError = GetAdminDemoBookingsErrors[keyof GetAdminDemoBookingsErrors];

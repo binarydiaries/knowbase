@@ -28,6 +28,17 @@ CREATE TABLE "org_feature_flags" (
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "slack_connections" (
+	"id" text PRIMARY KEY,
+	"orgId" varchar(64) NOT NULL UNIQUE,
+	"botToken" text NOT NULL,
+	"teamId" varchar(64) NOT NULL,
+	"teamName" text NOT NULL,
+	"botUserId" text NOT NULL,
+	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+	"createdAt" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 ALTER TABLE "org_subscriptions" ADD COLUMN "currentPeriodStart" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "org_subscriptions" ADD COLUMN "lastPaymentId" text;--> statement-breakpoint
 ALTER TABLE "org_subscriptions" DROP COLUMN "scheduledPlan";--> statement-breakpoint
@@ -38,3 +49,4 @@ CREATE UNIQUE INDEX "ffd_flag_unique" ON "feature_flag_definitions" ("flag");-->
 CREATE UNIQUE INDEX "off_flag_org_unique" ON "org_feature_flags" ("flag","orgId");--> statement-breakpoint
 CREATE INDEX "off_flag_idx" ON "org_feature_flags" ("flag");--> statement-breakpoint
 CREATE INDEX "off_org_idx" ON "org_feature_flags" ("orgId");--> statement-breakpoint
+CREATE INDEX "slack_connections_org_idx" ON "slack_connections" ("orgId");

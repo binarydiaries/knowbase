@@ -65,9 +65,8 @@ function RouteComponent() {
   const bookingsQuery = useQuery<BookingsResponse>({
     queryKey: ['admin-demo-bookings', page],
     queryFn: async () => {
-      const { data } = await getAdminDemoBookings({
-        query: { page, limit: PAGE_SIZE },
-      } as Parameters<typeof getAdminDemoBookings>[0]);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await getAdminDemoBookings({ query: { page, limit: PAGE_SIZE } } as any);
       return data as BookingsResponse;
     },
     enabled: canAccessAdmin,

@@ -118,7 +118,10 @@ Feature flags are managed at runtime via the admin dashboard (**Admin → System
 
 | Flag key | Default | Purpose |
 |----------|---------|---------|
-| `url_crawling` | `false` | Allows organisations to add website URLs as knowledge sources. When disabled, the "Website URL" option is hidden in the dashboard and the `/documents/url/preview` and `/documents/url` API endpoints return 403. Enable globally or per-org from the admin panel. |
+| `url_crawling` | `false` | Allows organisations to add website URLs as knowledge sources. When disabled, the "Website URL" option is hidden in the dashboard and the `/documents/url/preview` and `/documents/url` API endpoints return 403. |
+| `lead_generation` | `false` | Enables the lead capture action type. When disabled, lead capture is skipped on the backend even if an agent has the action configured, and the Lead Generation card is hidden in the dashboard. |
+| `whatsapp` | `false` | Shows the WhatsApp integration option in the dashboard channel settings and integrations page. |
+| `slack` | `false` | Shows the Slack integration option in the dashboard channel settings and integrations page. |
 
 ### Adding a new flag
 

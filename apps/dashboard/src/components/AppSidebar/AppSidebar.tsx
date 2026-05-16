@@ -12,6 +12,7 @@ import {
 import { Link } from '@tanstack/react-router';
 import {
   Bot,
+  CalendarCheck,
   CreditCard,
   Flag,
   Gauge,
@@ -59,6 +60,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           name: 'Admin Subscriptions',
           url: '/admin/subscriptions',
           icon: CreditCard,
+        },
+        {
+          name: 'Demo Bookings',
+          url: '/admin/demo-bookings',
+          icon: CalendarCheck,
         },
       ]
     : [];

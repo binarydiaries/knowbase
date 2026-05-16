@@ -1,5 +1,6 @@
 import { defineRelations } from 'drizzle-orm';
 import { aiCostEvents } from './aiCostEvents';
+import { demoBookings } from './demoBookings';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
 import { agentActions } from './agentActions';
@@ -21,6 +22,7 @@ export const relations = defineRelations(
   {
     aiCostEvents,
     agents,
+    demoBookings,
     channels,
     behaviors,
     agentActions,
@@ -128,5 +130,6 @@ export const relations = defineRelations(
     slackConnections: {},
     featureFlagDefinitions: {},
     orgFeatureFlags: {},
+    demoBookings: {},
   }),
 );

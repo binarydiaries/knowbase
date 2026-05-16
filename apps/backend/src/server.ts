@@ -8,6 +8,7 @@ import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
 import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
+import { AdminDemoBookings } from './modules/admin/demoBookings';
 import { AdminFeatureFlags } from './modules/admin/featureFlags';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
@@ -20,6 +21,7 @@ import { Chat } from './modules/chat/chat';
 import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
 import { Indexing } from './modules/indexing/indexing';
+import { Demo } from './modules/demo/demo';
 import { Lead } from './modules/lead/lead';
 import { message } from './modules/message/message';
 import { Slack } from './modules/slack/slack';
@@ -110,12 +112,14 @@ const app = Sentry.withElysia(new Elysia())
   .use(WhatsApp)
   .use(Slack)
   .use(Action)
+  .use(Demo)
   .use(Lead)
   .use(FeatureFlag)
   .use(Admin)
   .use(AdminFeatureFlags)
   .use(AdminQueue)
   .use(AdminSubscriptions)
+  .use(AdminDemoBookings)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

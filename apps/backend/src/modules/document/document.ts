@@ -3,11 +3,14 @@ import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { AgentService } from '../agent/service';
+import { FeatureFlagService } from '../featureFlag/service';
 import { SubscriptionService } from '../subscription/service';
 import { DocumentModel, DocumentPdfModel, DocumentUrlModel } from './model';
 import { pdfToMarkdown } from './pdfUtils';
 import { DocumentService } from './service';
 import { urlToText } from './urlUtils';
+
+const URL_CRAWLING_FLAG = 'url_crawling';
 
 export const Document = new Elysia({
   prefix: '/documents',
@@ -196,6 +199,11 @@ export const Document = new Elysia({
   .post(
     '/url/preview',
     async ({ body, orgId, status }) => {
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      if (!urlCrawlingEnabled) {
+        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+      }
+
       const agent = await AgentService.single({ id: body.agentId, orgId });
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
@@ -238,6 +246,7 @@ export const Document = new Elysia({
       body: 'UrlPreviewBody',
       response: {
         200: 'UrlPreviewResponse',
+        403: 'UrlCrawlingDisabledResponse',
         404: 'NotFoundResponse',
         422: 'UrlErrorResponse',
       },
@@ -246,6 +255,11 @@ export const Document = new Elysia({
   .post(
     '/url',
     async ({ body, userId, orgId, status }) => {
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      if (!urlCrawlingEnabled) {
+        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+      }
+
       const agent = await AgentService.single({ id: body.agentId, orgId });
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
@@ -285,7 +299,7 @@ export const Document = new Elysia({
       body: 'SaveUrlBody',
       response: {
         200: 'OneDocumentResponse',
-        403: 'DocumentWriteForbiddenResponse',
+        403: 'DocumentUrlWriteForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },

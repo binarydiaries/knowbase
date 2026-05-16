@@ -112,6 +112,24 @@ docker build -f apps/backend/Dockerfile -t agenvik-api .
 docker build -f apps/backend/Worker.Dockerfile -t agenvik-worker .
 ```
 
+## Feature Flags
+
+Feature flags are managed at runtime via the admin dashboard (**Admin → System → Feature Flags**) and support per-organisation overrides. Use `FeatureFlagService.isEnabled(flag, orgId)` in the backend to check them.
+
+| Flag key | Default | Purpose |
+|----------|---------|---------|
+| `url_crawling` | `false` | Allows organisations to add website URLs as knowledge sources. When disabled, the "Website URL" option is hidden in the dashboard and the `/documents/url/preview` and `/documents/url` API endpoints return 403. |
+| `lead_generation` | `false` | Enables the lead capture action type. When disabled, lead capture is skipped on the backend even if an agent has the action configured, and the Lead Generation card is hidden in the dashboard. |
+| `whatsapp` | `false` | Shows the WhatsApp integration option in the dashboard channel settings and integrations page. |
+| `slack` | `false` | Shows the Slack integration option in the dashboard channel settings and integrations page. |
+
+### Adding a new flag
+
+1. In the admin dashboard go to **Feature Flags** and create the flag with a description and global default.
+2. Call `FeatureFlagService.isEnabled('your_flag', orgId)` in the relevant backend route handler.
+3. Optionally read the flag in the dashboard via the `useFeatureFlags()` hook (`src/hooks/useFeatureFlags.ts`) and conditionally render UI.
+4. Document the flag in the table above.
+
 ## Contributing
 
 See `apps/docs/CONTRIBUTING.md` for writing and development guidelines.

@@ -1,4 +1,5 @@
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
+import { getAdminDemoBookings } from '@/services';
 import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
@@ -55,35 +56,19 @@ export const Route = createFileRoute('/admin/demo-bookings/')({
 });
 
 function RouteComponent() {
-  const { getToken } = useAuth();
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
   const canAccessAdmin = isAdminEmail(email);
 
   const [page, setPage] = useState(1);
 
-  const apiBase = import.meta.env.VITE_API_BASE as string;
-
-  async function authFetch(path: string) {
-    const token = await getToken();
-    const res = await fetch(`${apiBase}${path}`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }
-
   const bookingsQuery = useQuery<BookingsResponse>({
     queryKey: ['admin-demo-bookings', page],
-    queryFn: () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(PAGE_SIZE),
-      });
-      return authFetch(`/admin/demo-bookings?${params}`);
+    queryFn: async () => {
+      const { data } = await getAdminDemoBookings({
+        query: { page, limit: PAGE_SIZE },
+      } as Parameters<typeof getAdminDemoBookings>[0]);
+      return data as BookingsResponse;
     },
     enabled: canAccessAdmin,
   });

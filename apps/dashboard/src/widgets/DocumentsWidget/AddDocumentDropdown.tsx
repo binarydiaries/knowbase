@@ -13,6 +13,7 @@ interface IAddDocumentDropdownProps {
   onPdfClick: () => void;
   onUrlClick: () => void;
   disabled?: boolean;
+  showUrlOption?: boolean;
 }
 export const AddDocumentDropdown = ({
   children,
@@ -21,6 +22,7 @@ export const AddDocumentDropdown = ({
   onPdfClick,
   onUrlClick,
   disabled = false,
+  showUrlOption = true,
 }: PropsWithChildren<IAddDocumentDropdownProps>) => {
   return (
     <DropdownMenu>
@@ -50,14 +52,16 @@ export const AddDocumentDropdown = ({
           <FileUp className="h-4 w-4" />
           PDF
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={onUrlClick}
-          disabled={disabled}
-          className="flex items-center gap-2"
-        >
-          <Globe className="h-4 w-4" />
-          Website URL
-        </DropdownMenuItem>
+        {showUrlOption && (
+          <DropdownMenuItem
+            onClick={onUrlClick}
+            disabled={disabled}
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            Website URL
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

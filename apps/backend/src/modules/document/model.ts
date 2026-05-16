@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
+import { DocumentWriteForbiddenResponse } from '../../common/models/error';
 
 const TEXT_SOURCE_MAX_CHARACTERS = 10_000;
 const QNA_SOURCE_MAX_CHARACTERS = 20_000;
@@ -167,9 +168,21 @@ const UrlErrorResponse = z.object({
   message: z.string(),
 });
 
+const UrlCrawlingDisabledResponse = z.object({
+  code: z.enum(['FORBIDDEN']),
+  message: z.string(),
+});
+
+const DocumentUrlWriteForbiddenResponse = z.union([
+  DocumentWriteForbiddenResponse,
+  UrlCrawlingDisabledResponse,
+]);
+
 export const DocumentUrlModel = new Elysia().model({
   UrlPreviewBody,
   UrlPreviewResponse,
   SaveUrlBody,
   UrlErrorResponse,
+  UrlCrawlingDisabledResponse,
+  DocumentUrlWriteForbiddenResponse,
 });

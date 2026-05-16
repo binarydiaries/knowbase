@@ -112,6 +112,35 @@ docker build -f apps/backend/Dockerfile -t agenvik-api .
 docker build -f apps/backend/Worker.Dockerfile -t agenvik-worker .
 ```
 
+## Feature Flags
+
+Agenvik has two types of feature flags:
+
+### Environment-based flags
+
+Set these in the relevant `.env` file before starting the server. They are evaluated at boot time.
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `LEAD_GENERATION_ENABLED` | backend | Enables the lead capture action type and lead notification emails. When `false`, lead capture is skipped even if an agent has the action configured. |
+| `VITE_LEAD_GENERATION_ENABLED` | dashboard | Shows/hides the Lead Generation action card in the dashboard UI. Should match the backend flag. |
+| `VITE_SLACK_ENABLED` | dashboard | Shows/hides the Slack integration option in the dashboard. Set to `false` if Slack credentials are not configured. |
+
+### Database-driven flags
+
+These flags are managed at runtime via the admin dashboard (**Admin → System → Feature Flags**) and support per-organisation overrides. Use `FeatureFlagService.isEnabled(flag, orgId)` in the backend to check them.
+
+| Flag key | Default | Purpose |
+|----------|---------|---------|
+| `url_crawling` | `false` | Allows organisations to add website URLs as knowledge sources. When disabled, the "Website URL" option is hidden in the dashboard and the `/documents/url/preview` and `/documents/url` API endpoints return 403. Enable globally or per-org from the admin panel. |
+
+#### Adding a new database flag
+
+1. In the admin dashboard go to **Feature Flags** and create the flag with a description and global default.
+2. Call `FeatureFlagService.isEnabled('your_flag', orgId)` in the relevant backend route handler.
+3. Optionally read the flag in the dashboard via the `useFeatureFlags()` hook (`src/hooks/useFeatureFlags.ts`) and conditionally render UI.
+4. Document the flag in this table.
+
 ## Contributing
 
 See `apps/docs/CONTRIBUTING.md` for writing and development guidelines.

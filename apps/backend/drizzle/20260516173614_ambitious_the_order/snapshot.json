@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "ca9fe531-9957-4251-9947-6c3d6ff8bb7d",
+  "id": "73fbad5f-e7c4-40b2-a035-46d02265d285",
   "prevIds": [
-    "784b5cc8-829d-417a-8965-d53d0d3a075a"
+    "0c2d0d9b-2294-4fb6-8306-b0cd262b53e0"
   ],
   "ddl": [
     {
@@ -123,6 +123,12 @@
     },
     {
       "isRlsEnabled": false,
+      "name": "demo_bookings",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
       "name": "documents",
       "entityType": "tables",
       "schema": "public"
@@ -135,6 +141,12 @@
     },
     {
       "isRlsEnabled": false,
+      "name": "feature_flag_definitions",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
       "name": "leads",
       "entityType": "tables",
       "schema": "public"
@@ -142,6 +154,18 @@
     {
       "isRlsEnabled": false,
       "name": "messages",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "org_feature_flags",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "org_subscriptions",
       "entityType": "tables",
       "schema": "public"
     },
@@ -973,6 +997,110 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "company",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "phone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "message",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
       "table": "documents"
     },
     {
@@ -1233,6 +1361,84 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "flag",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "globalEnabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "feature_flag_definitions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
       "table": "leads"
     },
     {
@@ -1481,6 +1687,240 @@
       "entityType": "columns",
       "schema": "public",
       "table": "messages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "flag",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "enabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "orgId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'free'",
+      "generated": null,
+      "identity": null,
+      "name": "plan",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'razorpay'",
+      "generated": null,
+      "identity": null,
+      "name": "provider",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "providerSubscriptionId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "providerCustomerId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'free'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "currentPeriodStart",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "currentPeriodEnd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastPaymentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "org_subscriptions"
     },
     {
       "type": "text",
@@ -2055,6 +2495,27 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "email",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "demo_bookings_email_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "demo_bookings"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "agentId",
           "isExpression": false,
           "asc": true,
@@ -2123,6 +2584,27 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "embeddings"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "flag",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ffd_flag_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "feature_flag_definitions"
     },
     {
       "nameExplicit": true,
@@ -2214,6 +2696,139 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "messages"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "flag",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "off_flag_org_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "flag",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "off_flag_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "off_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_feature_flags"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_org_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "providerSubscriptionId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_provider_sub_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "orgId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "org_subscriptions_org_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "org_subscriptions"
     },
     {
       "nameExplicit": true,
@@ -2607,6 +3222,16 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "demo_bookings_pkey",
+      "schema": "public",
+      "table": "demo_bookings",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "documents_pkey",
       "schema": "public",
       "table": "documents",
@@ -2627,6 +3252,16 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "feature_flag_definitions_pkey",
+      "schema": "public",
+      "table": "feature_flag_definitions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "leads_pkey",
       "schema": "public",
       "table": "leads",
@@ -2640,6 +3275,26 @@
       "name": "messages_pkey",
       "schema": "public",
       "table": "messages",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "org_feature_flags_pkey",
+      "schema": "public",
+      "table": "org_feature_flags",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "org_subscriptions_pkey",
+      "schema": "public",
+      "table": "org_subscriptions",
       "entityType": "pks"
     },
     {

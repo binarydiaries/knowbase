@@ -49,6 +49,11 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
     const grid = document.getElementById('pricing-grid');
     if (!grid) return;
 
+    if (!apiBase) {
+      grid.innerHTML = '<li class="col-span-4 text-center text-[#301B69]/60 py-8">Pricing information coming soon.</li>';
+      return;
+    }
+
     try {
       const res = await fetch(`${apiBase}/subscriptions/plans`);
       const data = await res.json();

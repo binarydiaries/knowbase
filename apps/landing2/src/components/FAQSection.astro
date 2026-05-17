@@ -70,14 +70,12 @@ const faqs = [
           </p>
         </div>
 
-        <dl class="space-y-4">
+        <div class="space-y-4">
           {faqs.map((faq, index) => (
             <div class="rounded-xl border border-[#301B69]/10 bg-white/80 backdrop-blur overflow-hidden">
               <details class="group" {...(index === 1 ? { open: true } : {})}>
                 <summary class="flex w-full justify-between items-center text-left cursor-pointer p-4 list-none [&::-webkit-details-marker]:hidden">
-                  <dt>
-                    <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>
-                  </dt>
+                  <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>
                   <svg
                     class="w-5 h-5 text-[#301B69] transition-transform flex-shrink-0 group-open:rotate-180"
                     xmlns="http://www.w3.org/2000/svg"
@@ -92,13 +90,13 @@ const faqs = [
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </summary>
-                <dd class="px-4 pb-4 text-sm text-[#301B69]/70 leading-relaxed">
+                <p class="px-4 pb-4 text-sm text-[#301B69]/70 leading-relaxed">
                   {faq.answer}
-                </dd>
+                </p>
               </details>
             </div>
           ))}
-        </dl>
+        </div>
       </div>
     </div>
   </div>

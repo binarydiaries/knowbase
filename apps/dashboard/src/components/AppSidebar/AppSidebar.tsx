@@ -12,6 +12,7 @@ import {
 import { Link } from '@tanstack/react-router';
 import {
   Bot,
+  CalendarCheck,
   CreditCard,
   Flag,
   Gauge,
@@ -23,6 +24,7 @@ import {
   Shield,
   // UserRound, // LEAD_GENERATION_DISABLED: uncomment to restore
 } from 'lucide-react';
+import { NavAdmin } from '@/components/NavAdmin/NavAdmin.tsx';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
 import { isAdminEmail } from '@/utils/adminAccess';
@@ -48,20 +50,32 @@ const footerNav = [
   },
 ];
 
+const adminGroups = [
+  {
+    label: 'Finance',
+    items: [
+      { name: 'Costs', url: '/admin/costs', icon: Shield },
+      { name: 'Subscriptions', url: '/admin/subscriptions', icon: CreditCard },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { name: 'Queue', url: '/admin/queue', icon: ListOrdered },
+      { name: 'Feature Flags', url: '/admin/feature-flags', icon: Flag },
+    ],
+  },
+  {
+    label: 'CRM',
+    items: [
+      { name: 'Demo Bookings', url: '/admin/demo-bookings', icon: CalendarCheck },
+    ],
+  },
+];
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
-  const adminNav = isAdminEmail(user?.primaryEmailAddress?.emailAddress)
-    ? [
-        { name: 'Admin Costs', url: '/admin/costs', icon: Shield },
-        { name: 'Admin Queue', url: '/admin/queue', icon: ListOrdered },
-        { name: 'Feature Flags', url: '/admin/feature-flags', icon: Flag },
-        {
-          name: 'Admin Subscriptions',
-          url: '/admin/subscriptions',
-          icon: CreditCard,
-        },
-      ]
-    : [];
+  const isAdmin = isAdminEmail(user?.primaryEmailAddress?.emailAddress);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -92,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={mainNav} title="Platform" />
         <NavMain items={inboxNav} title="Inbox" />
-        {adminNav.length > 0 && <NavMain items={adminNav} title="Admin" />}
+        {isAdmin && <NavAdmin groups={adminGroups} />}
       </SidebarContent>
       <SidebarFooter>
         <NavMain items={footerNav} />

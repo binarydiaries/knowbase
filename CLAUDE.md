@@ -248,6 +248,24 @@ There is currently no test suite. The backend `test` script is a placeholder.
 
 ---
 
+## Feature Flags
+
+Feature flags are managed at runtime via the admin dashboard (**Admin → System → Feature Flags**) and support per-organisation overrides.
+
+**Backend**: use `FeatureFlagService.isEnabled(flag, orgId)` in route handlers.  
+**Dashboard**: use the `useFeatureFlags()` hook (`src/hooks/useFeatureFlags.ts`) and read `flags?.['flag_key']`.
+
+| Flag key | Default | Purpose |
+|----------|---------|---------|
+| `url_crawling` | `false` | Enables URL knowledge sources. Gates `/documents/url/preview` and `/documents/url` (403 when off); hides "Website URL" in the knowledge-source dropdown. |
+| `lead_generation` | `false` | Enables lead capture action type. Skips lead capture on the backend when off; hides the Lead Generation action card in the dashboard. |
+| `whatsapp` | `false` | Shows WhatsApp integration in channel settings and integrations page. |
+| `slack` | `false` | Shows Slack integration in channel settings and integrations page. |
+
+When adding a new flag: create it in the admin panel, gate the backend route with `FeatureFlagService.isEnabled`, conditionally render UI via `useFeatureFlags()`, and add a row to this table and the README table.
+
+---
+
 ## Git & Branch Conventions
 
 | Aspect | Convention |
@@ -272,3 +290,48 @@ The backend ships two Dockerfiles (multi-stage Bun builds targeting distroless):
 | `apps/backend/Worker.Dockerfile` | BullMQ worker (`worker-server` binary) |
 
 Database migrations run automatically during the Docker build step.
+
+---
+
+## gstack
+
+Use the `/browse` skill from gstack for all web browsing. **Never use `mcp__claude-in-chrome__*` tools.**
+
+Available gstack skills:
+
+| Skill | Purpose |
+|-------|---------|
+| `/office-hours` | Async Q&A and coaching session |
+| `/plan-ceo-review` | CEO-level plan review |
+| `/plan-eng-review` | Engineering plan review |
+| `/plan-design-review` | Design plan review |
+| `/design-consultation` | Design consultation session |
+| `/design-shotgun` | Rapid design exploration |
+| `/design-html` | HTML/CSS design output |
+| `/review` | Code review |
+| `/ship` | Ship a feature end-to-end |
+| `/land-and-deploy` | Land and deploy changes |
+| `/canary` | Canary deployment |
+| `/benchmark` | Performance benchmarking |
+| `/browse` | Headless browser for web browsing and QA |
+| `/connect-chrome` | Connect to a Chrome browser instance |
+| `/qa` | Full QA pass |
+| `/qa-only` | QA without setup steps |
+| `/design-review` | Visual design review |
+| `/setup-browser-cookies` | Configure browser cookies |
+| `/setup-deploy` | Configure deployment pipeline |
+| `/setup-gbrain` | Configure gbrain |
+| `/retro` | Retrospective |
+| `/investigate` | Investigate a bug or issue |
+| `/document-release` | Document a release |
+| `/codex` | Codex agent task |
+| `/cso` | CSO-level security review |
+| `/autoplan` | Automatically generate a plan |
+| `/plan-devex-review` | Developer experience plan review |
+| `/devex-review` | Developer experience review |
+| `/careful` | Careful/cautious mode for risky changes |
+| `/freeze` | Freeze the codebase |
+| `/guard` | Guard mode |
+| `/unfreeze` | Unfreeze the codebase |
+| `/gstack-upgrade` | Upgrade gstack |
+| `/learn` | Learning and onboarding session |

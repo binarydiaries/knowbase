@@ -1,0 +1,251 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const apiBase = import.meta.env.PUBLIC_API_BASE || '';
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+---
+<Layout
+  title="Book a Demo — Agenvik"
+  description="Schedule a personalised walkthrough of Agenvik. See how to build AI agents from your own data and deploy across web, WhatsApp, and Slack."
+>
+  <div class="min-h-screen bg-[#f8f7fc]">
+    <header class="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <a href="/" aria-label="Agenvik home">
+          <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+        </a>
+        <a href="/" class="text-sm text-[#301B69]/70 hover:text-[#301B69] transition">
+          ← Back to Home
+        </a>
+      </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-6 py-16">
+      <!-- Success state (hidden initially) -->
+      <div id="success-state" class="hidden bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14 text-center">
+        <div class="text-5xl mb-6">🎉</div>
+        <h1 class="text-2xl font-bold text-[#301B69] mb-3">Thanks! We'll be in touch shortly.</h1>
+        <p class="text-[#301B69]/60 mb-8">
+          We've received your details and will reach out within one business day to schedule your personalised demo.
+        </p>
+        <a href="/" class="inline-block px-6 py-2.5 bg-[#301B69] text-white rounded-xl text-sm font-medium hover:opacity-90 transition">
+          Back to Home
+        </a>
+      </div>
+
+      <!-- Form state -->
+      <div id="form-state" class="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-[#301B69] mb-2">Book a Demo</h1>
+          <p class="text-[#301B69]/60 text-sm">
+            See how Agenvik can work for your team. Fill in your details and we'll reach out to schedule a personalised walkthrough.
+          </p>
+        </div>
+
+        <form id="demo-form" novalidate class="space-y-5">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="name">
+              Full Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="name" name="name" type="text" placeholder="Jane Smith" autocomplete="name"
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition"
+            />
+            <p class="text-xs text-red-600 hidden" data-error="name"></p>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="email">
+              Work Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="email" name="email" type="email" placeholder="jane@company.com" autocomplete="email"
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition"
+            />
+            <p class="text-xs text-red-600 hidden" data-error="email"></p>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="company">
+              Company <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="company" name="company" type="text" placeholder="Acme Inc." autocomplete="organization"
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition"
+            />
+            <p class="text-xs text-red-600 hidden" data-error="company"></p>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="phone">Phone</label>
+            <input
+              id="phone" name="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel"
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="category">
+              What are you looking to build? <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="category" name="category"
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none bg-white appearance-none focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition cursor-pointer"
+            >
+              <option value="" disabled selected>Select a category…</option>
+              <option value="Customer Support">Customer Support</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="HR & Internal Tools">HR &amp; Internal Tools</option>
+              <option value="Sales & Lead Generation">Sales &amp; Lead Generation</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Education">Education</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Other">Other</option>
+            </select>
+            <p class="text-xs text-red-600 hidden" data-error="category"></p>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-[#301B69]/70" for="message">
+              What do you want to use Agenvik for?
+            </label>
+            <textarea
+              id="message" name="message" rows="4"
+              placeholder="E.g. customer support bot for our e-commerce store, internal HR FAQ assistant..."
+              class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition resize-none"
+            ></textarea>
+          </div>
+
+          <p id="server-error" class="text-sm text-red-600 hidden"></p>
+
+          <button
+            type="submit"
+            id="submit-btn"
+            class="w-full py-3 bg-[#301B69] text-white rounded-xl text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+          >
+            Request a Demo →
+          </button>
+
+          {recaptchaSiteKey && (
+            <p class="text-center text-xs text-[#301B69]/40">
+              Protected by reCAPTCHA —{' '}
+              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#301B69]/60">Privacy</a>
+              {' '}&{' '}
+              <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#301B69]/60">Terms</a>
+            </p>
+          )}
+        </form>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+{recaptchaSiteKey && (
+  <script
+    src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`}
+    async
+    defer
+  ></script>
+)}
+
+<script define:vars={{ apiBase, recaptchaSiteKey }}>
+  const form = document.getElementById('demo-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const serverError = document.getElementById('server-error');
+  const formState = document.getElementById('form-state');
+  const successState = document.getElementById('success-state');
+
+  function showError(field, msg) {
+    const el = form.querySelector(`[data-error="${field}"]`);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    const input = form.elements[field];
+    if (input) input.classList.add('border-red-400');
+  }
+
+  function clearErrors() {
+    form.querySelectorAll('[data-error]').forEach((el) => {
+      el.classList.add('hidden');
+      el.textContent = '';
+    });
+    form.querySelectorAll('input, select, textarea').forEach((el) => {
+      el.classList.remove('border-red-400');
+    });
+    serverError.classList.add('hidden');
+    serverError.textContent = '';
+  }
+
+  function validate(data) {
+    const errors = {};
+    if (!data.name.trim()) errors.name = 'Name is required';
+    if (!data.email.trim()) errors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+      errors.email = 'Enter a valid email';
+    if (!data.company.trim()) errors.company = 'Company is required';
+    if (!data.category) errors.category = 'Please select a category';
+    return errors;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const fd = new FormData(form);
+    const data = {
+      name: fd.get('name') || '',
+      email: fd.get('email') || '',
+      company: fd.get('company') || '',
+      phone: fd.get('phone') || '',
+      category: fd.get('category') || '',
+      message: fd.get('message') || '',
+    };
+
+    const errors = validate(data);
+    if (Object.keys(errors).length > 0) {
+      Object.entries(errors).forEach(([k, v]) => showError(k, v));
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      let captchaToken = '';
+      if (recaptchaSiteKey && window.grecaptcha) {
+        captchaToken = await new Promise((resolve) =>
+          window.grecaptcha.ready(async () => {
+            resolve(await window.grecaptcha.execute(recaptchaSiteKey, { action: 'book_demo' }));
+          })
+        );
+      }
+
+      const payload = {
+        name: data.name.trim(),
+        email: data.email.trim(),
+        company: data.company.trim(),
+        category: data.category,
+        captchaToken,
+      };
+      if (data.phone.trim()) payload.phone = data.phone.trim();
+      if (data.message.trim()) payload.message = data.message.trim();
+
+      const res = await fetch(`${apiBase}/demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Something went wrong. Please try again.');
+
+      formState.classList.add('hidden');
+      successState.classList.remove('hidden');
+    } catch (err) {
+      serverError.textContent = err instanceof Error ? err.message : 'Something went wrong.';
+      serverError.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Request a Demo →';
+    }
+  });
+</script>

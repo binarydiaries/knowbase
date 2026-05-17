@@ -1,11 +1,24 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+
+const CATEGORIES = [
+  'Customer Support',
+  'E-commerce',
+  'HR & Internal Tools',
+  'Sales & Lead Generation',
+  'Healthcare',
+  'Education',
+  'Real Estate',
+  'Other',
+] as const;
 
 type FormState = {
   name: string;
   email: string;
   company: string;
   phone: string;
+  category: string;
   message: string;
 };
 
@@ -18,15 +31,18 @@ function validate(data: FormState): FieldErrors {
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
     errors.email = 'Enter a valid email';
   if (!data.company.trim()) errors.company = 'Company is required';
+  if (!data.category) errors.category = 'Please select a category';
   return errors;
 }
 
-const BookDemoPage = () => {
+function BookDemoForm() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [form, setForm] = useState<FormState>({
     name: '',
     email: '',
     company: '',
     phone: '',
+    category: '',
     message: '',
   });
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -35,7 +51,7 @@ const BookDemoPage = () => {
   const [serverError, setServerError] = useState('');
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -44,42 +60,52 @@ const BookDemoPage = () => {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const fieldErrors = validate(form);
-    if (Object.keys(fieldErrors).length > 0) {
-      setErrors(fieldErrors);
-      return;
-    }
-    setSubmitting(true);
-    setServerError('');
-    try {
-      const payload: Record<string, string> = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        company: form.company.trim(),
-      };
-      if (form.phone.trim()) payload.phone = form.phone.trim();
-      if (form.message.trim()) payload.message = form.message.trim();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const fieldErrors = validate(form);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+        return;
+      }
+      if (!executeRecaptcha) {
+        setServerError('CAPTCHA not ready. Please try again.');
+        return;
+      }
+      setSubmitting(true);
+      setServerError('');
+      try {
+        const captchaToken = await executeRecaptcha('book_demo');
+        const payload: Record<string, string> = {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          company: form.company.trim(),
+          category: form.category,
+          captchaToken,
+        };
+        if (form.phone.trim()) payload.phone = form.phone.trim();
+        if (form.message.trim()) payload.message = form.message.trim();
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE as string}/demo`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
-      );
-      if (!res.ok) throw new Error('Something went wrong. Please try again.');
-      setSubmitted(true);
-    } catch (err) {
-      setServerError(
-        err instanceof Error ? err.message : 'Something went wrong.',
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE as string}/demo`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (!res.ok) throw new Error('Something went wrong. Please try again.');
+        setSubmitted(true);
+      } catch (err) {
+        setServerError(
+          err instanceof Error ? err.message : 'Something went wrong.',
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [executeRecaptcha, form],
+  );
 
   return (
     <div className="min-h-screen bg-[#f8f7fc]">
@@ -128,11 +154,7 @@ const BookDemoPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              <Field
-                label="Full Name"
-                required
-                error={errors.name}
-              >
+              <Field label="Full Name" required error={errors.name}>
                 <input
                   type="text"
                   name="name"
@@ -143,11 +165,7 @@ const BookDemoPage = () => {
                 />
               </Field>
 
-              <Field
-                label="Work Email"
-                required
-                error={errors.email}
-              >
+              <Field label="Work Email" required error={errors.email}>
                 <input
                   type="email"
                   name="email"
@@ -158,11 +176,7 @@ const BookDemoPage = () => {
                 />
               </Field>
 
-              <Field
-                label="Company"
-                required
-                error={errors.company}
-              >
+              <Field label="Company" required error={errors.company}>
                 <input
                   type="text"
                   name="company"
@@ -182,6 +196,28 @@ const BookDemoPage = () => {
                   placeholder="+91 98765 43210"
                   className={inputCls(false)}
                 />
+              </Field>
+
+              <Field
+                label="What are you looking to build?"
+                required
+                error={errors.category}
+              >
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className={selectCls(!!errors.category)}
+                >
+                  <option value="" disabled>
+                    Select a category…
+                  </option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </Field>
 
               <Field
@@ -209,18 +245,49 @@ const BookDemoPage = () => {
               >
                 {submitting ? 'Submitting…' : 'Request a Demo →'}
               </button>
+
+              <p className="text-center text-xs text-[#301B69]/40">
+                Protected by reCAPTCHA —{' '}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-[#301B69]/60"
+                >
+                  Privacy
+                </a>{' '}
+                &{' '}
+                <a
+                  href="https://policies.google.com/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-[#301B69]/60"
+                >
+                  Terms
+                </a>
+              </p>
             </form>
           </div>
         )}
       </main>
     </div>
   );
-};
+}
 
 function inputCls(hasError: boolean) {
   return [
     'w-full rounded-xl border px-4 py-2.5 text-sm text-[#301B69] outline-none',
     'placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 transition',
+    hasError
+      ? 'border-red-400 focus:border-red-400'
+      : 'border-[#301B69]/15 focus:border-[#301B69]/40',
+  ].join(' ');
+}
+
+function selectCls(hasError: boolean) {
+  return [
+    'w-full rounded-xl border px-4 py-2.5 text-sm text-[#301B69] outline-none bg-white appearance-none',
+    'focus:ring-2 focus:ring-[#301B69]/20 transition cursor-pointer',
     hasError
       ? 'border-red-400 focus:border-red-400'
       : 'border-[#301B69]/15 focus:border-[#301B69]/40',
@@ -249,5 +316,13 @@ function Field({
     </div>
   );
 }
+
+const BookDemoPage = () => (
+  <GoogleReCaptchaProvider
+    reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY as string}
+  >
+    <BookDemoForm />
+  </GoogleReCaptchaProvider>
+);
 
 export default BookDemoPage;

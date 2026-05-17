@@ -9,6 +9,7 @@ export const demoBookings = pgTable(
     email: text().notNull(),
     company: text().notNull(),
     phone: text(),
+    category: text(),
     message: text(),
     ...timestamps,
   },

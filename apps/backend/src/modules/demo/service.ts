@@ -8,6 +8,7 @@ export abstract class DemoBookingService {
     email: string;
     company: string;
     phone?: string;
+    category?: string;
     message?: string;
   }) {
     const [row] = await db.insert(demoBookings).values(data).returning();

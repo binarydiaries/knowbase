@@ -248,6 +248,24 @@ There is currently no test suite. The backend `test` script is a placeholder.
 
 ---
 
+## Feature Flags
+
+Feature flags are managed at runtime via the admin dashboard (**Admin → System → Feature Flags**) and support per-organisation overrides.
+
+**Backend**: use `FeatureFlagService.isEnabled(flag, orgId)` in route handlers.  
+**Dashboard**: use the `useFeatureFlags()` hook (`src/hooks/useFeatureFlags.ts`) and read `flags?.['flag_key']`.
+
+| Flag key | Default | Purpose |
+|----------|---------|---------|
+| `url_crawling` | `false` | Enables URL knowledge sources. Gates `/documents/url/preview` and `/documents/url` (403 when off); hides "Website URL" in the knowledge-source dropdown. |
+| `lead_generation` | `false` | Enables lead capture action type. Skips lead capture on the backend when off; hides the Lead Generation action card in the dashboard. |
+| `whatsapp` | `false` | Shows WhatsApp integration in channel settings and integrations page. |
+| `slack` | `false` | Shows Slack integration in channel settings and integrations page. |
+
+When adding a new flag: create it in the admin panel, gate the backend route with `FeatureFlagService.isEnabled`, conditionally render UI via `useFeatureFlags()`, and add a row to this table and the README table.
+
+---
+
 ## Git & Branch Conventions
 
 | Aspect | Convention |

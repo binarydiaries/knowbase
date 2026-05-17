@@ -57,6 +57,7 @@ import {
 import { UsageMeter } from '@/components/UsageMeter/UsageMeter.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { PDFContentWidget } from '@/widgets/PDFContentWidget/PDFContentWidget.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
@@ -172,6 +173,9 @@ export const DocumentsWidget = ({
     refetchInterval: 3000,
   });
 
+  const { data: featureFlags } = useFeatureFlags();
+  const showUrlOption = !!featureFlags?.['url_crawling'];
+
   useEffect(() => {
     if (indexStatusQuery.data?.data) {
       setIsPollingActive(indexStatusQuery.data?.data.isPollingActive);
@@ -254,6 +258,7 @@ export const DocumentsWidget = ({
                       onQaClick={() => setIsQASheetOpen(true)}
                       onPdfClick={() => setIsPdfSheetOpen(true)}
                       onUrlClick={() => setIsUrlSheetOpen(true)}
+                      showUrlOption={showUrlOption}
                     >
                       <Button variant="outline">Add</Button>
                     </AddDocumentDropdown>
@@ -337,6 +342,7 @@ export const DocumentsWidget = ({
                       onQaClick={() => setIsQASheetOpen(true)}
                       onPdfClick={() => setIsPdfSheetOpen(true)}
                       onUrlClick={() => setIsUrlSheetOpen(true)}
+                      showUrlOption={showUrlOption}
                     >
                       <Button>Add Source</Button>
                     </AddDocumentDropdown>

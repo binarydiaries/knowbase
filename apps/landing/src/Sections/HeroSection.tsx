@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import GetStartedButton from '../components/GetStartedButton';
 import amplitude from '../lib/amplitude';
 
@@ -47,6 +48,9 @@ const HeroSection = () => {
             >
               FAQ
             </a>
+            <Link to="/book-demo" className="hover:opacity-80">
+              Book a Demo
+            </Link>
           </nav>
 
           <GetStartedButton source="hero_nav" className="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm">
@@ -74,13 +78,13 @@ const HeroSection = () => {
           <GetStartedButton source="hero_body" className="px-6 py-3 bg-[#301B69] text-white rounded-xl">
             Get Started →
           </GetStartedButton>
-          <a
-            href="mailto:hello@agenvik.com"
+          <Link
+            to="/book-demo"
             className="px-6 py-3 text-[#301B69] bg-white rounded-xl"
-            onClick={() => amplitude.track('Contact Us Clicked', { source: 'hero' })}
+            onClick={() => amplitude.track('Book Demo Clicked', { source: 'hero' })}
           >
-            Contact Us
-          </a>
+            Book a Demo
+          </Link>
         </div>
       </div>
 

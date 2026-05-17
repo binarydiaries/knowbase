@@ -1,4 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
+import coreBgSrc from '../assets/images/core-bg.png';
+
+const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const features = [
@@ -28,7 +32,7 @@ const features = [
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden"
-      style="background-image: url('/core-bg.png')"
+      style={`background-image: url(${coreBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
       <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#301B69]/20 blur-[120px] opacity-30" aria-hidden="true"></div>

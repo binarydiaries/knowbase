@@ -1,35 +1,41 @@
 ---
+import { Image, getImage } from 'astro:assets';
+import howBgSrc from '../assets/images/how-bg.png';
+import step1Src from '../assets/images/step1.png';
+import step2Src from '../assets/images/step2.png';
+import step3Src from '../assets/images/step3.png';
+import step4Src from '../assets/images/step4.png';
+import step5Src from '../assets/images/step5.png';
+
+const howBg = await getImage({ src: howBgSrc, format: 'webp', quality: 80 });
+const stepImages = [step1Src, step2Src, step3Src, step4Src, step5Src];
+
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const steps = [
   {
     title: 'Set Up Your Account',
     desc: 'Create your workspace and get started in seconds. Sign up with minimal friction and access your dashboard instantly. No complex onboarding—just a smooth entry into building AI agents. Everything is ready right out of the box.',
-    image: '/step1.png',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   },
   {
     title: 'Create Your Agent',
     desc: "Define your agent's purpose, name, and identity. Whether it's for support, learning, or internal use—set the intent clearly. Each agent is independent and fully customizable. You can create multiple agents for different use cases.",
-    image: '/step2.png',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>`,
   },
   {
     title: 'Add Knowledge',
     desc: 'Upload your content or add structured FAQs. Train your agent using real data that matters to you. Your agent learns context, not just keywords. Continuously update its knowledge as your needs evolve.',
-    image: '/step3.png',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
   },
   {
     title: 'Customize Behavior',
     desc: 'Control how your agent thinks and responds. Adjust tone, personality, and response style. Fine-tune outputs to match your brand or use case. Make your AI feel truly yours.',
-    image: '/step4.png',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`,
   },
   {
     title: 'Embed & Share',
     desc: 'Deploy your agent wherever your users are. Embed it on websites or use it internally with your team. Share access instantly—no complex integrations required. Your AI is ready to assist, anywhere.',
-    image: '/step5.png',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
   },
 ];
@@ -38,7 +44,7 @@ const steps = [
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/how-bg.png')"
+      style={`background-image: url(${howBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 
@@ -69,7 +75,7 @@ const steps = [
                   <div class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#301B69]/10 shadow relative z-10 text-[#301B69]" aria-hidden="true" set:html={step.icon} />
                   <div class="w-full md:w-1/2">
                     <div class="rounded-3xl overflow-hidden shadow-md border border-[#301B69]/10 bg-white">
-                      <img src={step.image} alt={`Step ${index + 1}: ${step.title}`} class="w-full h-auto" />
+                      <Image src={stepImages[index]} alt={`Step ${index + 1}: ${step.title}`} class="w-full h-auto" loading="lazy" />
                     </div>
                   </div>
                 </li>

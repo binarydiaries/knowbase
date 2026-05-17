@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
+import logoSrc from '../assets/images/TextLogo.svg';
 
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
@@ -12,7 +14,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     <header class="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <a href="/" aria-label="Agenvik home">
-          <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+          <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="eager" />
         </a>
         <a href="/" class="text-sm text-[#301B69]/70 hover:text-[#301B69] transition">
           ← Back to Home

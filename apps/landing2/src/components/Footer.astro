@@ -1,10 +1,15 @@
 ---
+import { Image, getImage } from 'astro:assets';
+import logoSrc from '../assets/images/TextLogo.svg';
+import footerBgSrc from '../assets/images/footer-bg.png';
+
+const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 });
 ---
 <footer class="px-6" aria-label="Site footer">
   <div class="w-full mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/footer-bg.png')"
+      style={`background-image: url(${footerBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 
@@ -13,7 +18,7 @@
           <!-- Logo -->
           <div class="col-span-1">
             <a href="/" aria-label="Agenvik home">
-              <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+              <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="lazy" />
             </a>
           </div>
 

@@ -1,4 +1,9 @@
 ---
+import { getImage } from 'astro:assets';
+import faqBgSrc from '../assets/images/faq-bg.png';
+
+const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
+
 const faqs = [
   {
     question: 'What is Agenvik?',
@@ -46,7 +51,7 @@ const faqs = [
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/faq-bg.png')"
+      style={`background-image: url(${faqBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 

@@ -1,4 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
+import usecaseBgSrc from '../assets/images/usecase-bg.png';
+
+const usecaseBg = await getImage({ src: usecaseBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const useCases = [
@@ -28,7 +32,7 @@ const useCases = [
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/usecase-bg.png')"
+      style={`background-image: url(${usecaseBg.src})`}
     >
       <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
 

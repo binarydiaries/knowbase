@@ -1,4 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
+import pricingBgSrc from '../assets/images/pricing-bg.png';
+
+const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
@@ -6,7 +10,7 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/pricing-bg.png')"
+      style={`background-image: url(${pricingBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 

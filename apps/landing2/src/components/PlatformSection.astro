@@ -1,4 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
+import platformBgSrc from '../assets/images/platform-bg.png';
+
+const platformBg = await getImage({ src: platformBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const platformFeatures = [
@@ -28,7 +32,7 @@ const platformFeatures = [
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style="background-image: url('/platform-bg.png')"
+      style={`background-image: url(${platformBg.src})`}
     >
       <div class="absolute inset-0 bg-white/45 backdrop-blur-[2px]" aria-hidden="true"></div>
 

@@ -1,17 +1,23 @@
 ---
+import { Image, getImage } from 'astro:assets';
+import logoSrc from '../assets/images/TextLogo.svg';
+import dashboardSrc from '../assets/images/hero-dashboard.png';
+import heroBgSrc from '../assets/images/hero-bg.png';
+
+const heroBg = await getImage({ src: heroBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
 <section
   aria-label="Hero"
   class="relative w-full overflow-hidden bg-cover bg-center"
-  style="background-image: url('/hero-bg.png')"
+  style={`background-image: url(${heroBg.src})`}
 >
   <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
 
   <header class="relative z-20 max-w-6xl mx-auto px-6 pt-6">
     <div class="flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl">
       <a href="/" aria-label="Agenvik home">
-        <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+        <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="eager" />
       </a>
 
       <nav aria-label="Main navigation" class="hidden md:flex gap-8 text-sm text-[#301B69]">
@@ -67,10 +73,11 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
   </div>
 
   <div class="relative z-10 max-w-5xl mx-auto px-6 -mt-16 pb-10">
-    <img
-      src="/hero-dashboard.png"
+    <Image
+      src={dashboardSrc}
       alt="Agenvik platform dashboard showing AI agent creation and management interface"
       class="rounded-2xl shadow-2xl w-full opacity-90"
+      loading="eager"
     />
     <div
       class="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent rounded-2xl"

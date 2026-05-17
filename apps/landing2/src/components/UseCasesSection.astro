@@ -1,0 +1,75 @@
+---
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+
+const useCases = [
+  {
+    title: 'Customer Support Agents',
+    desc: 'Automate repetitive queries and reduce support load. Provide instant, 24/7 assistance without growing your team.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  },
+  {
+    title: 'Study Assistants',
+    desc: 'Convert your notes into an interactive tutor. Ask questions and learn faster with AI-guided explanations.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+  },
+  {
+    title: 'Internal Knowledge Agents',
+    desc: 'Help teams find answers across internal docs instantly. Reduce reliance on individuals and improve overall productivity.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+  },
+  {
+    title: 'Product Assistants',
+    desc: 'Guide users through your product with AI-powered help. Boost conversions with contextual, real-time recommendations.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+  },
+];
+---
+<section aria-labelledby="usecases-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
+      style="background-image: url('/usecase-bg.png')"
+    >
+      <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
+          ✦ USE CASES
+        </div>
+
+        <h2 id="usecases-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+          Built for Every Use Case
+        </h2>
+
+        <p class="text-[#301B69]/70 max-w-2xl mb-10 text-sm md:text-base">
+          From personal productivity to enterprise automation—Agenvik adapts to your needs.
+        </p>
+
+        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
+          {useCases.map((item) => (
+            <li class="flex gap-4">
+              <div class="mt-1 text-[#301B69]" aria-hidden="true" set:html={item.icon} />
+              <div>
+                <h3 class="font-semibold text-[#301B69] mb-1 text-sm md:text-base">{item.title}</h3>
+                <p class="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
+              </div>
+            </li>
+          ))}
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true"></div>
+          <div class="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true"></div>
+        </ul>
+
+        <div class="mt-12">
+          <a
+            href={appURL}
+            data-get-started
+            data-source="use_cases"
+            class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition"
+          >
+            Get Started →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

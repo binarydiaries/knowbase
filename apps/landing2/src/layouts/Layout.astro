@@ -1,26 +1,82 @@
 ---
-import "../styles/global.css";
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = 'Agenvik — Build Your AI Agent',
+  description = 'Upload your PDFs, paste your FAQ, or point it at your website — your AI agent goes live in minutes. No coding required. Deploy on your site, WhatsApp, or Slack.',
+  ogImage = '/og-image.png',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site);
+const amplitudeKey = import.meta.env.PUBLIC_AMPLITUDE_API_KEY;
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@agenvik" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <slot />
+  </body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+{amplitudeKey && (
+  <script type="module" define:vars={{ amplitudeKey, appURL }}>
+    import * as amplitude from 'https://cdn.amplitude.com/libs/unified/1.1.0/amplitude.esm.min.js';
+    amplitude.initAll(amplitudeKey, { analytics: { autocapture: true } });
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-get-started]');
+      if (!btn) return;
+      amplitude.analytics.track('Get Started Clicked', {
+        source: btn.dataset.source || 'unknown',
+        ...(btn.dataset.plan ? { plan_name: btn.dataset.plan } : {}),
+      });
+    });
+
+    window.__amplitude = amplitude;
+    window.__appURL = appURL;
+  </script>
+)}
+
+<style is:global>
+  html {
+    scroll-behavior: smooth;
+  }
 </style>

@@ -1,0 +1,75 @@
+---
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+
+const platformFeatures = [
+  {
+    title: 'Usage Insights',
+    desc: 'Track agent usage, queries, and performance over time. Understand exactly how users interact with your AI.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`,
+  },
+  {
+    title: 'Knowledge Management',
+    desc: 'Organize, update, and control your knowledge base from one place. Keep your agents accurate and always up to date.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+  },
+  {
+    title: 'Custom Agent Settings',
+    desc: 'Customize tone, behavior, and response style for each agent. Fine-tune outputs to match your brand or use case.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`,
+  },
+  {
+    title: 'Secure & Scalable',
+    desc: 'Your data stays private and is handled securely. Built to scale from personal projects to enterprise deployments.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  },
+];
+---
+<section aria-labelledby="platform-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
+      style="background-image: url('/platform-bg.png')"
+    >
+      <div class="absolute inset-0 bg-white/45 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
+          ✦ PLATFORM
+        </div>
+
+        <h2 id="platform-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+          Manage and Scale Your AI Agents Effortlessly
+        </h2>
+
+        <p class="text-[#301B69]/70 max-w-2xl mb-10 text-sm md:text-base">
+          Track usage, manage knowledge, and improve responses—all from a single dashboard.
+        </p>
+
+        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
+          {platformFeatures.map((item) => (
+            <li class="flex gap-4">
+              <div class="mt-1 text-[#301B69]" aria-hidden="true" set:html={item.icon} />
+              <div>
+                <h3 class="font-semibold text-[#301B69] mb-1 text-sm md:text-base">{item.title}</h3>
+                <p class="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
+              </div>
+            </li>
+          ))}
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true"></div>
+          <div class="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true"></div>
+        </ul>
+
+        <div class="mt-12">
+          <a
+            href={appURL}
+            data-get-started
+            data-source="platform"
+            class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition"
+          >
+            Get Started →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,100 @@
+---
+const faqs = [
+  {
+    question: 'What is Agenvik?',
+    answer: 'Agenvik is a platform that lets you create AI-powered agents using your own data. Instead of generic answers, your agent responds based on your knowledge sources. It works for personal use, teams, and businesses—no coding required.',
+  },
+  {
+    question: 'What kind of data can I use?',
+    answer: 'You can upload PDFs, paste plain text, or add structured Q&A pairs to train your agent. All three formats are supported today. Website URL crawling is coming soon.',
+  },
+  {
+    question: 'Do I need coding skills to use Agenvik?',
+    answer: 'No. Agenvik is built for everyone. You can create and manage agents without writing a single line of code. The interface is intuitive and beginner-friendly, with advanced features available for power users.',
+  },
+  {
+    question: 'Can I create multiple agents?',
+    answer: 'Yes. You can create multiple agents for different use cases. Each agent has its own knowledge base and behavior, making it ideal for teams, products, or distinct workflows. The number of agents depends on your selected plan.',
+  },
+  {
+    question: 'How accurate are the responses?',
+    answer: 'Responses are generated directly from your provided data, making them far more relevant than generic AI answers. Accuracy improves as you add well-structured knowledge, and you stay in full control of what your agent knows.',
+  },
+  {
+    question: 'Is my data secure?',
+    answer: 'Yes. Your data is private and scoped to your account. We do not expose your data publicly, and only you and your configured agents can access it. More advanced security controls are coming soon.',
+  },
+  {
+    question: 'Can I customize how the agent behaves?',
+    answer: 'Yes. You can control tone, style, and response behavior to match your brand voice or use case. Make your agent formal, friendly, or task-focused to deliver a consistent and on-brand experience.',
+  },
+  {
+    question: 'Where can I use my agent?',
+    answer: 'On your website via an embed widget, on WhatsApp, and on Slack — all three channels are live today. Add a chat widget to your site in one line of code, or connect your WhatsApp business number and your agent handles customer messages automatically.',
+  },
+  {
+    question: 'How does pricing work?',
+    answer: 'Agenvik offers straightforward subscription-based pricing with plans based on usage, agent limits, and features. You can start for free and upgrade as you grow—no hidden charges.',
+  },
+  {
+    question: "What's coming next?",
+    answer: 'Website URL crawling (point your agent at any public page), lead capture webhooks for CRM integration, REST API access, and a human handoff inbox so your team can take over conversations when needed. We ship new features every week.',
+  },
+];
+---
+<section id="faq" aria-labelledby="faq-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
+      style="background-image: url('/faq-bg.png')"
+    >
+      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="text-center mb-12">
+          <div class="inline-flex px-4 py-1 text-xs rounded-full gap-2 bg-white/80 text-[#301B69] mb-4" aria-hidden="true">
+            <span class="px-1 rounded-full border border-[#301B69]">?</span> Frequently Asked Questions
+          </div>
+
+          <h2 id="faq-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+            Common Questions About Agenvik
+          </h2>
+
+          <p class="text-[#301B69]/70 text-sm md:text-base max-w-xl mx-auto">
+            Find answers to the most frequently asked questions about Agenvik—features, security, pricing, and more.
+          </p>
+        </div>
+
+        <dl class="space-y-4">
+          {faqs.map((faq, index) => (
+            <div class="rounded-xl border border-[#301B69]/10 bg-white/80 backdrop-blur overflow-hidden">
+              <details class="group" {...(index === 1 ? { open: true } : {})}>
+                <summary class="flex w-full justify-between items-center text-left cursor-pointer p-4 list-none [&::-webkit-details-marker]:hidden">
+                  <dt>
+                    <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>
+                  </dt>
+                  <svg
+                    class="w-5 h-5 text-[#301B69] transition-transform flex-shrink-0 group-open:rotate-180"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </summary>
+                <dd class="px-4 pb-4 text-sm text-[#301B69]/70 leading-relaxed">
+                  {faq.answer}
+                </dd>
+              </details>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>

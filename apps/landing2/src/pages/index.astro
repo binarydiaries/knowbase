@@ -1,11 +1,26 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import HeroSection from '../components/HeroSection.astro';
+import CoreValueSection from '../components/CoreValueSection.astro';
+import UseCasesSection from '../components/UseCasesSection.astro';
+import PlatformSection from '../components/PlatformSection.astro';
+import HowItWorksSection from '../components/HowItWorksSection.astro';
+import PricingSection from '../components/PricingSection.astro';
+import FAQSection from '../components/FAQSection.astro';
+import Footer from '../components/Footer.astro';
 ---
-
-<Layout>
-	<Welcome />
+<Layout
+  title="Agenvik — The Fastest Way to Build Your AI Agent"
+  description="Upload your PDFs, paste your FAQ, or point it at your website — your AI agent goes live in minutes. No coding required. Deploy on your site, WhatsApp, or Slack."
+>
+  <HeroSection />
+  <main>
+    <CoreValueSection />
+    <UseCasesSection />
+    <PlatformSection />
+    <HowItWorksSection />
+    <PricingSection />
+    <FAQSection />
+  </main>
+  <Footer />
 </Layout>

@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+<div class="min-h-screen bg-[#f8f7fc]">
+  <header class="px-6 py-4 border-b border-[#301B69]/10 bg-white/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="/" aria-label="Agenvik home">
+        <img src="/TextLogo.svg" alt="Agenvik" class="h-7 w-auto" />
+      </a>
+      <a href="/" class="text-sm text-[#301B69]/70 hover:text-[#301B69] transition">
+        ← Back to Home
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-16">
+    <div class="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
+      <slot />
+    </div>
+  </main>
+
+  <footer class="text-center text-sm text-[#301B69]/50 py-8">
+    <p>
+      © 2026 Agenvik. All rights reserved. ·{' '}
+      <a href="/privacy-policy" class="hover:text-[#301B69]">Privacy Policy</a>
+      {' · '}
+      <a href="/terms" class="hover:text-[#301B69]">Terms &amp; Conditions</a>
+      {' · '}
+      <a href="/security-policy" class="hover:text-[#301B69]">Security</a>
+    </p>
+  </footer>
+</div>

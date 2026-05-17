@@ -7,6 +7,7 @@ import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://agenvik.com',
+  outputDir: 'static',
   integrations: [sitemap()],
 
   vite: {

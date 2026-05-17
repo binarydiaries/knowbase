@@ -199,14 +199,11 @@ export const Document = new Elysia({
   .post(
     '/url/preview',
     async ({ body, orgId, status }) => {
-<<<<<<< HEAD
-=======
       const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
       if (!urlCrawlingEnabled) {
         return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
       }
 
->>>>>>> origin/main
       const agent = await AgentService.single({ id: body.agentId, orgId });
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
@@ -249,10 +246,7 @@ export const Document = new Elysia({
       body: 'UrlPreviewBody',
       response: {
         200: 'UrlPreviewResponse',
-<<<<<<< HEAD
-=======
         403: 'UrlCrawlingDisabledResponse',
->>>>>>> origin/main
         404: 'NotFoundResponse',
         422: 'UrlErrorResponse',
       },
@@ -261,14 +255,11 @@ export const Document = new Elysia({
   .post(
     '/url',
     async ({ body, userId, orgId, status }) => {
-<<<<<<< HEAD
-=======
       const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
       if (!urlCrawlingEnabled) {
         return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
       }
 
->>>>>>> origin/main
       const agent = await AgentService.single({ id: body.agentId, orgId });
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
@@ -308,11 +299,7 @@ export const Document = new Elysia({
       body: 'SaveUrlBody',
       response: {
         200: 'OneDocumentResponse',
-<<<<<<< HEAD
-        403: 'DocumentWriteForbiddenResponse',
-=======
         403: 'DocumentUrlWriteForbiddenResponse',
->>>>>>> origin/main
         404: 'NotFoundResponse',
       },
     },

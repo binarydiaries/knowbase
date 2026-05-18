@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import PostCard from '../../components/PostCard.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 
 const allPosts = await getCollection('blog');
 const posts = allPosts
@@ -15,8 +16,12 @@ const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags)));
   title="Agenvik Blog — AI Agents, Tutorials & Insights"
   description="Explore the Agenvik blog for guides on AI agents, knowledge base building, customer support automation, and more."
 >
+  <div class="max-w-6xl mx-auto px-6 pt-6">
+    <Breadcrumb items={[{ label: 'Blog' }]} />
+  </div>
+
   <!-- Hero -->
-  <section class="max-w-6xl mx-auto px-6 pt-16 pb-10 text-center">
+  <section class="max-w-6xl mx-auto px-6 pt-10 pb-10 text-center">
     <div
       class="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 border border-[#301B69]/10 text-[#301B69] mb-4"
       aria-hidden="true"

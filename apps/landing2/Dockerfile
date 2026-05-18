@@ -9,12 +9,12 @@ COPY . .
 RUN bun install --frozen-lockfile
 
 # Build
-RUN bun run build:blog
+RUN bun run build:landing
 
 
 FROM nginx:alpine
 
-COPY --from=builder /app/apps/blog/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/landing/dist /usr/share/nginx/html
 
 RUN echo 'server { \
   listen 3000; \
@@ -31,6 +31,15 @@ RUN echo 'server { \
   # Hashed assets are immutable — cache them aggressively. \
   location /assets/ { \
     add_header Cache-Control "public, max-age=31536000, immutable"; \
+  } \
+  \
+  # Proxy /docs to Mintlify. \
+  location /docs { \
+    proxy_pass https://arokart.mintlify.dev; \
+    proxy_set_header Host arokart.mintlify.dev; \
+    proxy_set_header X-Forwarded-Host agenvik.com; \
+    proxy_set_header X-Forwarded-Proto https; \
+    proxy_ssl_server_name on; \
   } \
   \
   # SPA fallback for client-side routes. \

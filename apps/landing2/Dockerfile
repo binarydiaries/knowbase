@@ -1,16 +1,12 @@
 FROM oven/bun:1 AS builder
 
 WORKDIR /app
-
-# Copy everything FIRST (important for workspaces)
+COPY package*.json ./
+RUN bun install
 COPY . .
-
-# Install ALL workspace deps properly
-RUN bun install --frozen-lockfile
-
-# Build
 RUN bun run build
 
-FROM httpd:2.4 AS runtime
-COPY --from=build /app/dist /usr/local/apache2/htdocs/
-EXPOSE 80
+FROM nginx:alpine AS runtime
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 8080

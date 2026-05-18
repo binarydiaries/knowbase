@@ -48,12 +48,6 @@ const HeroSection = () => {
             >
               FAQ
             </a>
-            <a
-              href="/blog"
-              className="hover:opacity-80"
-            >
-              Blog
-            </a>
             <Link to="/book-demo" className="hover:opacity-80">
               Book a Demo
             </Link>

@@ -77,9 +77,6 @@ const Footer = () => {
                       FAQ
                     </a>
                   </li>
-                  <li>
-                    <a href="/blog" className="hover:text-[#301B69]">Blog</a>
-                  </li>
                 </ul>
               </nav>
 

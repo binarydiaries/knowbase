@@ -46,7 +46,21 @@ const faqs = [
     answer: 'Lead capture webhooks for CRM integration, REST API access, and a human handoff inbox so your team can take over conversations when needed. We ship new features every week.',
   },
 ];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(faq => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 ---
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 <section id="faq" aria-labelledby="faq-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
     <div

@@ -1,6 +1,5 @@
 ---
 import { Image, getImage } from 'astro:assets';
-import logoSrc from '../assets/images/TextLogo.svg';
 import dashboardSrc from '../assets/images/hero-dashboard.png';
 import heroBgSrc from '../assets/images/hero-bg.png';
 
@@ -9,35 +8,10 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
 <section
   aria-label="Hero"
-  class="relative w-full overflow-hidden bg-cover bg-center"
+  class="relative w-full overflow-hidden bg-cover bg-center pt-[68px]"
   style={`background-image: url(${heroBg.src})`}
 >
   <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
-
-  <header class="relative z-20 max-w-6xl mx-auto px-6 pt-6">
-    <div class="flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl">
-      <a href="/" aria-label="Agenvik home">
-        <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="eager" />
-      </a>
-
-      <nav aria-label="Main navigation" class="hidden md:flex gap-8 text-sm text-[#301B69]">
-        <a href="#features" class="hover:opacity-80">Features</a>
-        <a href="#how-it-works" class="hover:opacity-80">How it Works</a>
-        <a href="#pricing" class="hover:opacity-80">Pricing</a>
-        <a href="#faq" class="hover:opacity-80">FAQ</a>
-        <a href="/book-demo" class="hover:opacity-80">Book a Demo</a>
-      </nav>
-
-      <a
-        href={appURL}
-        data-get-started
-        data-source="hero_nav"
-        class="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm"
-      >
-        Get Started
-      </a>
-    </div>
-  </header>
 
   <div class="relative z-10 text-center max-w-4xl mx-auto px-6 pt-16 pb-28">
     <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">

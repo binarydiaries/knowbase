@@ -175,6 +175,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@astrojs/cloudflare": "12.6.13",
+        "@astrojs/mdx": "^4.0.0",
         "@astrojs/sitemap": "^3.7.2",
         "@tailwindcss/vite": "^4.1.18",
         "astro": "^6.3.3",

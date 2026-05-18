@@ -9,7 +9,7 @@ COPY . .
 RUN bun install --frozen-lockfile
 
 # Build
-RUN bun run build:landing
+RUN bun run build
 
 FROM httpd:2.4 AS runtime
 COPY --from=build /app/dist /usr/local/apache2/htdocs/

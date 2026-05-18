@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { z } from 'zod';
+import { DocumentWriteForbiddenResponse } from '../../common/models/error';
 
 const TEXT_SOURCE_MAX_CHARACTERS = 10_000;
 const QNA_SOURCE_MAX_CHARACTERS = 20_000;
@@ -43,6 +44,12 @@ const DocumentContentText = z.string().max(TEXT_SOURCE_MAX_CHARACTERS, {
 
 const DocumentContentPdf = z.string();
 
+const DocumentContentUrl = z.object({
+  url: z.string().url(),
+  rawText: z.string(),
+  crawledAt: z.string().datetime(),
+});
+
 export const DocumentContent = z.discriminatedUnion('type', [
   z.object({ type: z.literal('text'), data: DocumentContentText }).meta({
     title: 'text',
@@ -52,6 +59,9 @@ export const DocumentContent = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('pdf'), data: DocumentContentPdf }).meta({
     title: 'pdf',
+  }),
+  z.object({ type: z.literal('url'), data: DocumentContentUrl }).meta({
+    title: 'url',
   }),
 ]);
 
@@ -132,4 +142,47 @@ export const DocumentPdfModel = new Elysia().model({
   SavePdfBody,
   PdfPreviewResponse,
   PdfUploadErrorResponse,
+});
+
+const UrlPreviewBody = z.object({
+  agentId: z.string(),
+  url: z.string().url(),
+});
+
+const UrlPreviewResponse = z.object({
+  title: z.string(),
+  charCount: z.number(),
+  preview: z.string(),
+  rawText: z.string(),
+});
+
+const SaveUrlBody = z.object({
+  agentId: z.string(),
+  title: z.string().min(1),
+  url: z.string().url(),
+  rawText: z.string().min(1),
+});
+
+const UrlErrorResponse = z.object({
+  code: z.enum(['INVALID_URL', 'FETCH_FAILED', 'FETCH_TIMEOUT', 'NOT_HTML', 'PRIVATE_HOST', 'DNS_FAILED', 'PAGE_EMPTY']),
+  message: z.string(),
+});
+
+const UrlCrawlingDisabledResponse = z.object({
+  code: z.enum(['FORBIDDEN']),
+  message: z.string(),
+});
+
+const DocumentUrlWriteForbiddenResponse = z.union([
+  DocumentWriteForbiddenResponse,
+  UrlCrawlingDisabledResponse,
+]);
+
+export const DocumentUrlModel = new Elysia().model({
+  UrlPreviewBody,
+  UrlPreviewResponse,
+  SaveUrlBody,
+  UrlErrorResponse,
+  UrlCrawlingDisabledResponse,
+  DocumentUrlWriteForbiddenResponse,
 });

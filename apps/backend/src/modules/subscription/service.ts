@@ -5,6 +5,7 @@ import { documents } from '../../db/schema/documents';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
 import { PLANS, type PlanName } from './plans';
+import { FeatureFlagService } from '../featureFlag/service';
 export type { PlanName } from './plans';
 
 const PLAN_NAMES = new Set<PlanName>(['free', 'starter', 'growth', 'pro']);
@@ -165,14 +166,15 @@ export abstract class SubscriptionService {
   }
 
   static planHasLeadGeneration(plan: PlanName): boolean {
-    // LEAD_GENERATION_DISABLED: change condition back to `plan !== 'free'` to restore
-    if (process.env.LEAD_GENERATION_ENABLED !== 'true') return false;
     return plan !== 'free';
   }
 
   static async assertLeadGenerationAccess(orgId: string) {
-    const plan = await this.getPlan(orgId);
-    const allowed = this.planHasLeadGeneration(plan);
+    const [plan, flagEnabled] = await Promise.all([
+      this.getPlan(orgId),
+      FeatureFlagService.isEnabled('lead_generation', orgId),
+    ]);
+    const allowed = flagEnabled && this.planHasLeadGeneration(plan);
     return { allowed, plan };
   }
 

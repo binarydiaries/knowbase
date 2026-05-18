@@ -10,6 +10,7 @@ import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 export const Route = createFileRoute('/integrations/')({
   component: RouteComponent,
@@ -47,6 +48,8 @@ function ComingSoonCard({
 }
 
 function RouteComponent() {
+  const { data: flags } = useFeatureFlags();
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -70,7 +73,7 @@ function RouteComponent() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {import.meta.env.VITE_WHATSAPP_ENABLED === 'true' ? (
+          {flags?.whatsapp ? (
             <WhatsAppIntegrationCard />
           ) : (
             <ComingSoonCard
@@ -78,7 +81,7 @@ function RouteComponent() {
               description="Send and receive messages via WhatsApp Business."
             />
           )}
-          {import.meta.env.VITE_SLACK_ENABLED === 'true' ? (
+          {flags?.slack ? (
             <SlackIntegrationCard />
           ) : (
             <ComingSoonCard

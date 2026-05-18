@@ -389,6 +389,13 @@ export type DocumentSchema = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
     status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
     agentId: string;
@@ -413,6 +420,13 @@ export type CreateDocumentBody = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
 };
 
@@ -430,6 +444,13 @@ export type UpdateDocumentBody = {
     } | {
         type: 'pdf';
         data: string;
+    } | {
+        type: 'url';
+        data: {
+            url: string;
+            rawText: string;
+            crawledAt: string;
+        };
     };
 };
 
@@ -449,6 +470,13 @@ export type OneDocumentResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -475,6 +503,13 @@ export type ManyDocumentsResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -523,6 +558,52 @@ export type PdfUploadErrorResponse = {
     message: string;
 };
 
+export type UrlPreviewBody = {
+    agentId: string;
+    url: string;
+};
+
+export type UrlPreviewResponse = {
+    title: string;
+    charCount: number;
+    preview: string;
+    rawText: string;
+};
+
+export type SaveUrlBody = {
+    agentId: string;
+    title: string;
+    url: string;
+    rawText: string;
+};
+
+export type UrlErrorResponse = {
+    code: 'INVALID_URL' | 'FETCH_FAILED' | 'FETCH_TIMEOUT' | 'NOT_HTML' | 'PRIVATE_HOST' | 'DNS_FAILED' | 'PAGE_EMPTY';
+    message: string;
+};
+
+export type UrlCrawlingDisabledResponse = {
+    code: 'FORBIDDEN';
+    message: string;
+};
+
+export type DocumentUrlWriteForbiddenResponse = {
+    code: 'AGENT_LOCKED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    activeAgentLimit: number;
+    activeAgentCount: number;
+} | {
+    code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED';
+    message: string;
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    knowledgeSourceLimit: number;
+    knowledgeSourceCount: number;
+} | {
+    code: 'FORBIDDEN';
+    message: string;
+};
+
 export type AgentSchema = {
     id: string;
     name: string;
@@ -564,6 +645,13 @@ export type OneAgentResponse = {
         } | {
             type: 'pdf';
             data: string;
+        } | {
+            type: 'url';
+            data: {
+                url: string;
+                rawText: string;
+                crawledAt: string;
+            };
         };
         status: 'ready' | 'queue' | 'indexing' | 'indexed' | 'failed';
         agentId: string;
@@ -1218,6 +1306,14 @@ export type DeleteActionResponse = {
     success: boolean;
 };
 
+export type CreateDemoBookingSchema = {
+    name: string;
+    email: string;
+    company: string;
+    phone?: string;
+    message?: string;
+};
+
 export type LeadSchema = {
     id: string;
     agentId: string;
@@ -1826,6 +1922,76 @@ export type PostDocumentsPdfResponses = {
 
 export type PostDocumentsPdfResponse = PostDocumentsPdfResponses[keyof PostDocumentsPdfResponses];
 
+export type PostDocumentsUrlPreviewData = {
+    body: UrlPreviewBody;
+    path?: never;
+    query?: never;
+    url: '/documents/url/preview';
+};
+
+export type PostDocumentsUrlPreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: UrlCrawlingDisabledResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+    /**
+     * Response for status 422
+     */
+    422: UrlErrorResponse;
+};
+
+export type PostDocumentsUrlPreviewError = PostDocumentsUrlPreviewErrors[keyof PostDocumentsUrlPreviewErrors];
+
+export type PostDocumentsUrlPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: UrlPreviewResponse;
+};
+
+export type PostDocumentsUrlPreviewResponse = PostDocumentsUrlPreviewResponses[keyof PostDocumentsUrlPreviewResponses];
+
+export type PostDocumentsUrlData = {
+    body: SaveUrlBody;
+    path?: never;
+    query?: never;
+    url: '/documents/url';
+};
+
+export type PostDocumentsUrlErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: DocumentUrlWriteForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostDocumentsUrlError = PostDocumentsUrlErrors[keyof PostDocumentsUrlErrors];
+
+export type PostDocumentsUrlResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneDocumentResponse;
+};
+
+export type PostDocumentsUrlResponse = PostDocumentsUrlResponses[keyof PostDocumentsUrlResponses];
+
 export type DeleteDocumentsByIdData = {
     body?: never;
     path: {
@@ -2423,6 +2589,46 @@ export type PostWebhookWhatsappData = {
     url: '/webhook/whatsapp';
 };
 
+export type GetWhatsappSetupInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/setup-info';
+};
+
+export type GetWhatsappSetupInfoErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappSetupInfoError = GetWhatsappSetupInfoErrors[keyof GetWhatsappSetupInfoErrors];
+
+export type GetWhatsappTestConnectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/whatsapp/test-connection';
+};
+
+export type GetWhatsappTestConnectionErrors = {
+    /**
+     * Response for status 400
+     */
+    400: BadRequestResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWhatsappTestConnectionError = GetWhatsappTestConnectionErrors[keyof GetWhatsappTestConnectionErrors];
+
 export type DeleteWhatsappConnectionData = {
     body?: never;
     path?: never;
@@ -2775,6 +2981,13 @@ export type PatchAgentActionsByIdResponses = {
 
 export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
 
+export type PostDemoData = {
+    body: CreateDemoBookingSchema;
+    path?: never;
+    query?: never;
+    url: '/demo/';
+};
+
 export type GetLeadsData = {
     body?: never;
     path?: never;
@@ -2808,6 +3021,22 @@ export type GetLeadsResponses = {
 
 export type GetLeadsResponse = GetLeadsResponses[keyof GetLeadsResponses];
 
+export type GetFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/feature-flags/';
+};
+
+export type GetFeatureFlagsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+};
+
+export type GetFeatureFlagsError = GetFeatureFlagsErrors[keyof GetFeatureFlagsErrors];
+
 export type GetAdminCostsByOrganizationData = {
     body?: never;
     path?: never;
@@ -2832,6 +3061,119 @@ export type GetAdminCostsByOrganizationResponses = {
 };
 
 export type GetAdminCostsByOrganizationResponse = GetAdminCostsByOrganizationResponses[keyof GetAdminCostsByOrganizationResponses];
+
+export type GetAdminFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/feature-flags/';
+};
+
+export type GetAdminFeatureFlagsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsError = GetAdminFeatureFlagsErrors[keyof GetAdminFeatureFlagsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagError = DeleteAdminFeatureFlagsByFlagErrors[keyof DeleteAdminFeatureFlagsByFlagErrors];
+
+export type PutAdminFeatureFlagsByFlagData = {
+    body: {
+        globalEnabled: boolean;
+        description?: string;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}';
+};
+
+export type PutAdminFeatureFlagsByFlagErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagError = PutAdminFeatureFlagsByFlagErrors[keyof PutAdminFeatureFlagsByFlagErrors];
+
+export type GetAdminFeatureFlagsByFlagOrgsData = {
+    body?: never;
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminFeatureFlagsByFlagOrgsError = GetAdminFeatureFlagsByFlagOrgsErrors[keyof GetAdminFeatureFlagsByFlagOrgsErrors];
+
+export type PutAdminFeatureFlagsByFlagOrgsData = {
+    body: {
+        orgIds: Array<string>;
+        enabled: boolean;
+    };
+    path: {
+        flag: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs';
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type PutAdminFeatureFlagsByFlagOrgsError = PutAdminFeatureFlagsByFlagOrgsErrors[keyof PutAdminFeatureFlagsByFlagOrgsErrors];
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdData = {
+    body?: never;
+    path: {
+        flag: string;
+        orgId: string;
+    };
+    query?: never;
+    url: '/admin/feature-flags/{flag}/orgs/{orgId}';
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type DeleteAdminFeatureFlagsByFlagOrgsByOrgIdError = DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors[keyof DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors];
 
 export type GetAdminQueueCountsData = {
     body?: never;
@@ -2992,3 +3334,19 @@ export type PostAdminSubscriptionsBulkSyncErrors = {
 };
 
 export type PostAdminSubscriptionsBulkSyncError = PostAdminSubscriptionsBulkSyncErrors[keyof PostAdminSubscriptionsBulkSyncErrors];
+
+export type GetAdminDemoBookingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/demo-bookings/';
+};
+
+export type GetAdminDemoBookingsErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminDemoBookingsError = GetAdminDemoBookingsErrors[keyof GetAdminDemoBookingsErrors];

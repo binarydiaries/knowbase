@@ -3,10 +3,14 @@ import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { AgentService } from '../agent/service';
+import { FeatureFlagService } from '../featureFlag/service';
 import { SubscriptionService } from '../subscription/service';
-import { DocumentModel, DocumentPdfModel } from './model';
+import { DocumentModel, DocumentPdfModel, DocumentUrlModel } from './model';
 import { pdfToMarkdown } from './pdfUtils';
 import { DocumentService } from './service';
+import { urlToText } from './urlUtils';
+
+const URL_CRAWLING_FLAG = 'url_crawling';
 
 export const Document = new Elysia({
   prefix: '/documents',
@@ -91,6 +95,7 @@ export const Document = new Elysia({
     },
   )
   .use(DocumentPdfModel)
+  .use(DocumentUrlModel)
   .post(
     '/pdf/preview',
     async ({ body, orgId, status }) => {
@@ -187,6 +192,114 @@ export const Document = new Elysia({
       response: {
         200: 'OneDocumentResponse',
         403: 'DocumentWriteForbiddenResponse',
+        404: 'NotFoundResponse',
+      },
+    },
+  )
+  .post(
+    '/url/preview',
+    async ({ body, orgId, status }) => {
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      if (!urlCrawlingEnabled) {
+        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+      }
+
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
+      }
+
+      let result: Awaited<ReturnType<typeof urlToText>>;
+      try {
+        result = await urlToText(body.url);
+      } catch (err) {
+        const code = (err as { code?: string }).code ?? 'FETCH_FAILED';
+        const messages: Record<string, string> = {
+          INVALID_URL: 'Please enter a valid public URL (starting with https://).',
+          PRIVATE_HOST: 'Only public URLs are supported.',
+          DNS_FAILED: 'Could not resolve this domain. Please check the URL.',
+          FETCH_TIMEOUT: 'The page took too long to load. Try a different URL.',
+          FETCH_FAILED: 'Could not fetch this page. The site may be blocking bots.',
+          NOT_HTML: 'This URL does not return a web page.',
+        };
+        return status(422, {
+          code: code as 'INVALID_URL' | 'FETCH_FAILED' | 'FETCH_TIMEOUT' | 'NOT_HTML' | 'PRIVATE_HOST' | 'DNS_FAILED' | 'PAGE_EMPTY',
+          message: messages[code] ?? 'Could not fetch this page.',
+        });
+      }
+
+      if (result.charCount < 50) {
+        return status(422, {
+          code: 'PAGE_EMPTY' as const,
+          message: 'Very little text was found on this page. Try a different URL.',
+        });
+      }
+
+      return {
+        title: result.title,
+        charCount: result.charCount,
+        preview: result.text.slice(0, 500),
+        rawText: result.text,
+      };
+    },
+    {
+      body: 'UrlPreviewBody',
+      response: {
+        200: 'UrlPreviewResponse',
+        403: 'UrlCrawlingDisabledResponse',
+        404: 'NotFoundResponse',
+        422: 'UrlErrorResponse',
+      },
+    },
+  )
+  .post(
+    '/url',
+    async ({ body, userId, orgId, status }) => {
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      if (!urlCrawlingEnabled) {
+        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+      }
+
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
+      }
+
+      const subscription = await SubscriptionService.getStatus(orgId);
+      if (subscription.isOverLimit) {
+        return status(403, {
+          code: 'AGENT_LOCKED',
+          message: SubscriptionService.getLockedMessage(subscription),
+          plan: subscription.plan,
+          activeAgentLimit: subscription.activeAgentLimit,
+          activeAgentCount: subscription.activeAgentCount,
+        });
+      }
+
+      if (SubscriptionService.hasReachedKnowledgeSourceLimit(subscription)) {
+        return status(403, {
+          code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED',
+          message: SubscriptionService.getKnowledgeSourceLimitReachedMessage(subscription),
+          plan: subscription.plan,
+          knowledgeSourceLimit: subscription.knowledgeSourceLimit,
+          knowledgeSourceCount: subscription.knowledgeSourceCount,
+        });
+      }
+
+      const document = await DocumentService.create({
+        agentId: body.agentId,
+        title: body.title,
+        contentSerialized: { url: body.url, rawText: body.rawText, crawledAt: new Date().toISOString() },
+        type: 'url',
+        createdBy: userId,
+      });
+      return { document: DocumentService.transformDocument(document) };
+    },
+    {
+      body: 'SaveUrlBody',
+      response: {
+        200: 'OneDocumentResponse',
+        403: 'DocumentUrlWriteForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },

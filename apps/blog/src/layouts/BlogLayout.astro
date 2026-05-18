@@ -1,0 +1,40 @@
+---
+import BaseHead from '../components/BaseHead.astro'
+import Header from '../components/Header.astro'
+import Footer from '../components/Footer.astro'
+
+interface Props {
+  title: string
+  description: string
+  ogTitle?: string
+  ogDescription?: string
+  ogType?: string
+  canonicalUrl?: string
+}
+
+const { title, description, ogTitle, ogDescription, ogType, canonicalUrl } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      ogTitle={ogTitle}
+      ogDescription={ogDescription}
+      ogType={ogType}
+      canonicalUrl={canonicalUrl}
+    />
+  </head>
+
+  <body class="bg-[#f8f7fc] min-h-screen flex flex-col">
+    <Header />
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

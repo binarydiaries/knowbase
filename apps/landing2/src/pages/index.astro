@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HeroSection from '../components/HeroSection.astro';
+import CoreValueSection from '../components/CoreValueSection.astro';
+import UseCasesSection from '../components/UseCasesSection.astro';
+import PlatformSection from '../components/PlatformSection.astro';
+import HowItWorksSection from '../components/HowItWorksSection.astro';
+import PricingSection from '../components/PricingSection.astro';
+import FAQSection from '../components/FAQSection.astro';
+import Footer from '../components/Footer.astro';
+
+const softwareAppSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': 'https://agenvik.com/#software',
+  name: 'Agenvik',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: 'https://app.agenvik.com',
+  description:
+    'Build AI-powered agents trained on your own data. Upload PDFs, paste FAQs, or point at your website. Deploy on web, WhatsApp, or Slack — no coding required.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free plan available. Paid plans start from $0/month.',
+  },
+  publisher: { '@id': 'https://agenvik.com/#organization' },
+  featureList: [
+    'Upload PDF knowledge sources',
+    'Paste FAQ and plain text',
+    'Website URL crawling',
+    'No-code AI agent builder',
+    'Website chat widget embed',
+    'WhatsApp integration',
+    'Slack integration',
+    'Custom agent behavior and tone',
+    'Usage analytics',
+  ],
+};
+---
+<Layout
+  title="Agenvik — The Fastest Way to Build Your AI Agent"
+  description="Upload your PDFs, paste your FAQ, or point it at your website — your AI agent goes live in minutes. No coding required. Deploy on your site, WhatsApp, or Slack."
+  jsonLd={softwareAppSchema}
+>
+  <main id="main-content">
+    <HeroSection />
+    <CoreValueSection />
+    <UseCasesSection />
+    <PlatformSection />
+    <HowItWorksSection />
+    <PricingSection />
+    <FAQSection />
+  </main>
+  <Footer />
+</Layout>

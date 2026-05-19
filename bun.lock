@@ -129,6 +129,7 @@
       "name": "landing",
       "version": "0.0.1",
       "dependencies": {
+        "@amplitude/unified": "^1.1.7",
         "@astrojs/mdx": "^4.0.0",
         "@astrojs/sitemap": "^3.7.2",
         "@tailwindcss/vite": "^4.1.18",

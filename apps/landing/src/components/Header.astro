@@ -39,3 +39,21 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
     </a>
   </div>
 </header>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.querySelector('header [data-get-started]');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: 'header' });
+      });
+    }
+
+    var bookDemo = document.querySelector('header a[href="/book-demo"]');
+    if (bookDemo) {
+      bookDemo.addEventListener('click', function () {
+        window.amplitude?.track('Book Demo Clicked', { source: 'header' });
+      });
+    }
+  });
+</script>

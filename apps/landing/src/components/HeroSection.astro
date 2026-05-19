@@ -59,3 +59,21 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
     ></div>
   </div>
 </section>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    var getStarted = document.querySelector('[aria-label="Hero"] [data-get-started]');
+    if (getStarted) {
+      getStarted.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: 'hero' });
+      });
+    }
+
+    var bookDemo = document.querySelector('[aria-label="Hero"] a[href="/book-demo"]');
+    if (bookDemo) {
+      bookDemo.addEventListener('click', function () {
+        window.amplitude?.track('Book Demo Clicked', { source: 'hero' });
+      });
+    }
+  });
+</script>

@@ -108,5 +108,18 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
     }
   }
 
-  loadPricing();
+  loadPricing().then(function () {
+    var grid = document.getElementById('pricing-grid');
+    if (grid) {
+      grid.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-get-started]');
+        if (btn) {
+          window.amplitude?.track('Get Started Clicked', {
+            source: 'pricing',
+            plan_name: btn.dataset.plan || '',
+          });
+        }
+      });
+    }
+  });
 </script>

@@ -197,6 +197,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
       Object.entries(errors).forEach(([k, v]) => showError(k, v));
+      window.amplitude?.track('Demo Request Failed', {
+        error_reason: 'validation',
+        fields_with_errors: Object.keys(errors),
+      });
       return;
     }
 
@@ -231,11 +235,20 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
       if (!res.ok) throw new Error('Something went wrong. Please try again.');
 
+      window.amplitude?.track('Demo Requested', {
+        category: data.category,
+        company: data.company.trim(),
+      });
+
       formState.classList.add('hidden');
       successState.classList.remove('hidden');
     } catch (err) {
       serverError.textContent = err instanceof Error ? err.message : 'Something went wrong.';
       serverError.classList.remove('hidden');
+      window.amplitude?.track('Demo Request Failed', {
+        error_reason: 'api_error',
+        fields_with_errors: [],
+      });
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Request a Demo →';

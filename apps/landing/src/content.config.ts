@@ -13,6 +13,7 @@ const blog = defineCollection({
     readTime: z.string(),
     published: z.boolean().default(true),
     image: z.string().optional(),
+    updatedAt: z.string().optional(), // ISO date, used as dateModified in schema
   }),
 });
 

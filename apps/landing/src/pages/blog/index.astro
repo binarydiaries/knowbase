@@ -10,11 +10,33 @@ const posts = allPosts
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
 const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags)));
+
+const siteURL = 'https://agenvik.com';
+const blogSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  '@id': `${siteURL}/blog`,
+  name: 'Agenvik Blog',
+  description: 'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
+  url: `${siteURL}/blog`,
+  publisher: { '@id': `${siteURL}/#organization` },
+  inLanguage: 'en-US',
+  blogPost: posts.slice(0, 10).map((p) => ({
+    '@type': 'BlogPosting',
+    headline: p.data.title,
+    description: p.data.excerpt,
+    url: `${siteURL}/blog/${p.id.replace(/\.mdx?$/, '')}`,
+    datePublished: new Date(p.data.date).toISOString(),
+    author: { '@type': 'Person', name: p.data.author },
+    ...(p.data.image ? { image: `${siteURL}${p.data.image}` } : {}),
+  })),
+};
 ---
 
 <BlogLayout
   title="Agenvik Blog — AI Agents, Tutorials & Insights"
   description="Explore the Agenvik blog for guides on AI agents, knowledge base building, customer support automation, and more."
+  jsonLd={blogSchema}
 >
   <div class="max-w-6xl mx-auto px-6 pt-6">
     <Breadcrumb items={[{ label: 'Blog' }]} />

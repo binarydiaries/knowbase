@@ -8,7 +8,41 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, date, author, authorRole, excerpt, tags, readTime, image } = post.data;
+const { title, date, updatedAt, author, authorRole, excerpt, tags, readTime, image } = post.data;
+
+const siteURL = 'https://agenvik.com';
+const slug = post.id.replace(/\.mdx?$/, '');
+const postURL = `${siteURL}/blog/${slug}`;
+const dateISO = new Date(date).toISOString();
+const modifiedISO = updatedAt ? new Date(updatedAt).toISOString() : dateISO;
+const imageURL = image ? `${siteURL}${image}` : `${siteURL}/og-image.png`;
+
+const blogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  '@id': postURL,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postURL },
+  headline: title,
+  description: excerpt,
+  image: {
+    '@type': 'ImageObject',
+    url: imageURL,
+    width: image ? 1600 : 1200,
+    height: image ? 840 : 630,
+  },
+  author: {
+    '@type': 'Person',
+    name: author,
+    ...(authorRole ? { jobTitle: authorRole } : {}),
+  },
+  publisher: { '@id': `${siteURL}/#organization` },
+  datePublished: dateISO,
+  dateModified: modifiedISO,
+  keywords: tags,
+  articleSection: tags[0] ?? 'Blog',
+  inLanguage: 'en-US',
+  url: postURL,
+};
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -29,7 +63,15 @@ const TAG_COLORS = [
   title={`${title} — Agenvik Blog`}
   description={excerpt}
   ogImage={image ?? '/og-image.png'}
+  ogImageWidth={image ? '1600' : '1200'}
+  ogImageHeight={image ? '840' : '630'}
   ogType="article"
+  jsonLd={blogPostingSchema}
+  articlePublishedTime={dateISO}
+  articleModifiedTime={modifiedISO}
+  articleAuthor={author}
+  articleTags={tags}
+  articleSection={tags[0] ?? 'Blog'}
 >
   <!-- Breadcrumb -->
   <div class="max-w-4xl mx-auto px-6 pt-8">

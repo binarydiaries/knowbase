@@ -39,6 +39,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
 const amplitudeKey = import.meta.env.PUBLIC_AMPLITUDE_API_KEY;
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+const isStaging = import.meta.env.PUBLIC_ENV === 'stage';
+const robotsContent = isStaging
+  ? 'noindex, nofollow'
+  : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1';
 
 const siteURL = 'https://agenvik.com';
 
@@ -84,7 +88,7 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="robots" content={robotsContent} />
     <meta name="theme-color" content="#301B69" />
 
     <title>{title}</title>

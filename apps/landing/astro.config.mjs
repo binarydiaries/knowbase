@@ -11,7 +11,9 @@ const {LANDING_URL} = loadEnv(process.env.NODE_ENV, process.cwd(), "");
 export default defineConfig({
   site: LANDING_URL,
   outputDir: 'static',
-  integrations: [sitemap(), mdx()],
+  integrations: [sitemap({
+    filter: (page) => !page.includes('/dashboard/')
+  }), mdx()],
 
   vite: {
     plugins: [tailwindcss()]

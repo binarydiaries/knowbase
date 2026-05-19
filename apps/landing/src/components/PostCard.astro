@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { post } = Astro.props
-const { title, date, excerpt, tags, readTime } = post.data
+const { title, date, excerpt, tags, readTime, image } = post.data
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -24,12 +24,22 @@ const TAG_COLORS = [
 ---
 
 <article class="group relative bg-white rounded-2xl border border-[#301B69]/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
-  <!-- Cover gradient -->
-  <div
-    class="h-44 w-full flex-shrink-0"
-    style="background: linear-gradient(135deg, #301B69 0%, #B07CD1 100%);"
-    aria-hidden="true"
-  ></div>
+  <!-- Cover image / gradient fallback -->
+  {image ? (
+    <img
+      src={image}
+      alt={title}
+      class="h-44 w-full flex-shrink-0 object-cover"
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div
+      class="h-44 w-full flex-shrink-0"
+      style="background: linear-gradient(135deg, #301B69 0%, #B07CD1 100%);"
+      aria-hidden="true"
+    ></div>
+  )}
 
   <!-- Body -->
   <div class="p-6 flex flex-col flex-1">

@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, date, author, authorRole, excerpt, tags, readTime } = post.data;
+const { title, date, author, authorRole, excerpt, tags, readTime, image } = post.data;
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -28,7 +28,7 @@ const TAG_COLORS = [
 <BlogLayout
   title={`${title} — Agenvik Blog`}
   description={excerpt}
-  ogImage="/og-image.png"
+  ogImage={image ?? '/og-image.png'}
   ogType="article"
 >
   <!-- Breadcrumb -->
@@ -77,6 +77,19 @@ const TAG_COLORS = [
           </span>
         </div>
       </header>
+
+      <!-- Cover image -->
+      {image && (
+        <div class="mb-10 -mx-10 md:-mx-14 overflow-hidden">
+          <img
+            src={image}
+            alt={title}
+            class="w-full max-h-[480px] object-cover"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+      )}
 
       <!-- MDX content -->
       <div class="blog-prose">

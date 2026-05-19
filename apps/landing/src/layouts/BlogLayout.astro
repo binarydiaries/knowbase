@@ -1,0 +1,26 @@
+---
+import Layout from './Layout.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogImageWidth?: string;
+  ogImageHeight?: string;
+  ogType?: string;
+  jsonLd?: object | object[];
+  articlePublishedTime?: string;
+  articleModifiedTime?: string;
+  articleAuthor?: string;
+  articleTags?: string[];
+  articleSection?: string;
+}
+---
+
+<Layout {...Astro.props} activePage="blog">
+  <div class="bg-[#f8f7fc] min-h-screen pt-[68px]">
+    <slot />
+  </div>
+  <Footer />
+</Layout>

@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import logoSrc from '../assets/images/TextLogo.svg';
+
+interface Props {
+  activePage?: 'blog';
+  base?: string;
+}
+
+const { activePage, base = '' } = Astro.props;
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 px-6 pt-4 pb-0">
+  <div class:list={[
+    'flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl',
+    'max-w-6xl mx-auto',
+  ]}>
+    <a href="/" aria-label="Agenvik home">
+      <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="eager" />
+    </a>
+
+    <nav aria-label="Main navigation" class="hidden md:flex gap-8 text-sm text-[#301B69]">
+      <a href={`${base}#features`} class="hover:opacity-80">Features</a>
+      <a href={`${base}#how-it-works`} class="hover:opacity-80">How it Works</a>
+      <a href={`${base}#pricing`} class="hover:opacity-80">Pricing</a>
+      <a href={`${base}#faq`} class="hover:opacity-80">FAQ</a>
+      <a href="/book-demo" class="hover:opacity-80">Book a Demo</a>
+      <a href="/blog" class="hover:opacity-80">Blog</a>
+    </nav>
+
+    <a
+      href={appURL}
+      data-get-started
+      data-source="header"
+      class="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm"
+    >
+      Get Started
+    </a>
+  </div>
+</header>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.querySelector('header [data-get-started]');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: 'header' });
+      });
+    }
+
+    var bookDemo = document.querySelector('header a[href="/book-demo"]');
+    if (bookDemo) {
+      bookDemo.addEventListener('click', function () {
+        window.amplitude?.track('Book Demo Clicked', { source: 'header' });
+      });
+    }
+  });
+</script>

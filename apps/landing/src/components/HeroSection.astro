@@ -1,0 +1,79 @@
+---
+import { Image, getImage } from 'astro:assets';
+import dashboardSrc from '../assets/images/hero-dashboard.png';
+import heroBgSrc from '../assets/images/hero-bg.png';
+
+const heroBg = await getImage({ src: heroBgSrc, format: 'webp', quality: 80 });
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<section
+  aria-label="Hero"
+  class="relative w-full overflow-hidden bg-cover bg-center pt-[68px]"
+  style={`background-image: url(${heroBg.src})`}
+>
+  <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+  <div class="relative z-10 text-center max-w-4xl mx-auto px-6 pt-16 pb-28">
+    <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">
+      <span class="bg-gradient-to-b from-[#301B69] to-[#B07CD1] bg-clip-text text-transparent">
+        The Fastest Way to
+      </span>
+      <br />
+      <span class="text-[#301B69]">Build Your AI Agent</span>
+    </h1>
+
+    <p class="text-[#301B69] mb-8">
+      Upload your PDFs, paste your FAQ, or point it at your website — your
+      AI agent goes live in minutes.
+      <br /> No coding required. Deploy on your site, WhatsApp, or Slack.
+    </p>
+
+    <div class="flex justify-center gap-4 flex-wrap">
+      <a
+        href={appURL}
+        data-get-started
+        data-source="hero_body"
+        class="px-6 py-3 bg-[#301B69] text-white rounded-xl"
+      >
+        Get Started →
+      </a>
+      <a
+        href="/book-demo"
+        class="px-6 py-3 text-[#301B69] bg-white rounded-xl"
+      >
+        Book a Demo
+      </a>
+    </div>
+  </div>
+
+  <div class="relative z-10 max-w-5xl mx-auto px-6 -mt-16 pb-10">
+    <Image
+      src={dashboardSrc}
+      alt="Agenvik platform dashboard showing AI agent creation and management interface"
+      class="rounded-2xl shadow-2xl w-full opacity-90"
+      loading="eager"
+    />
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent rounded-2xl"
+      aria-hidden="true"
+    ></div>
+  </div>
+</section>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    var getStarted = document.querySelector('[aria-label="Hero"] [data-get-started]');
+    if (getStarted) {
+      getStarted.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: 'hero' });
+      });
+    }
+
+    var bookDemo = document.querySelector('[aria-label="Hero"] a[href="/book-demo"]');
+    if (bookDemo) {
+      bookDemo.addEventListener('click', function () {
+        window.amplitude?.track('Book Demo Clicked', { source: 'hero' });
+      });
+    }
+  });
+</script>

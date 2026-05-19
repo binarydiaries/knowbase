@@ -1,0 +1,80 @@
+---
+import { getImage } from 'astro:assets';
+import coreBgSrc from '../assets/images/core-bg.png';
+
+const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+
+const features = [
+  {
+    title: 'Knowledge Sources',
+    desc: "Import data from text, FAQs, and documents. Continuously expand your agent's knowledge as your needs grow.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
+  },
+  {
+    title: 'Instant Agent Creation',
+    desc: 'Spin up AI agents in seconds with zero setup. No coding, no config—just define your agent and go live.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  },
+  {
+    title: 'Real-time Responses',
+    desc: 'Deliver fast, accurate answers instantly. Optimized for low latency and high relevance.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
+  },
+  {
+    title: 'Smart Retrieval',
+    desc: 'AI intelligently fetches answers from your data, providing context-aware responses that are always on point.',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  },
+];
+---
+<section id="features" aria-labelledby="features-heading" class="px-6 pt-6">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden"
+      style={`background-image: url(${coreBg.src})`}
+    >
+      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#301B69]/20 blur-[120px] opacity-30" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-4 py-1 text-sm rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
+          ✦ CORE VALUE
+        </div>
+
+        <h2 id="features-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">
+          AI Agents Built on Your Knowledge
+        </h2>
+
+        <p class="text-[#301B69] max-w-2xl mb-10 leading-relaxed">
+          Agenvik lets you build intelligent agents trained on your own data—so every response is accurate, contextual, and genuinely useful.
+        </p>
+
+        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
+          {features.map((item) => (
+            <li class="flex gap-4">
+              <div class="mt-1 text-[#301B69]" aria-hidden="true" set:html={item.icon} />
+              <div>
+                <h3 class="font-semibold text-[#301B69] mb-1">{item.title}</h3>
+                <p class="text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
+              </div>
+            </li>
+          ))}
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true"></div>
+          <div class="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true"></div>
+        </ul>
+
+        <div class="mt-12">
+          <a
+            href={appURL}
+            data-get-started
+            data-source="core_value"
+            class="bg-[#301B69] text-white px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition"
+          >
+            Create Your First Agent →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

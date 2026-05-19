@@ -1,31 +1,32 @@
-# Logs
-logs
-*.log
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# environment variables
 .env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+.wrangler
 
 # Amplitude wizard
 .amplitude/dashboard.json
+.amplitude/dashboard-plan.json
 .amplitude-events.json
 .amplitude-dashboard.json
 amplitude-setup-report.previous.md
@@ -33,5 +34,5 @@ amplitude-setup-report.previous.md
 .claude/skills/add-analytics-instrumentation/
 .claude/skills/amplitude-chart-dashboard-plan/
 .claude/skills/amplitude-quickstart-taxonomy-agent/
+.claude/skills/discover-analytics-patterns/
 .claude/skills/wizard-prompt-supplement/
-.env.local

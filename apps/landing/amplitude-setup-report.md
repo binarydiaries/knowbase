@@ -1,66 +1,66 @@
 <wizard-report>
 # Amplitude post-wizard report
 
-The wizard has completed a deep integration of Amplitude analytics into the **Agenvik landing page** (`apps/landing`). The `@amplitude/unified` SDK (v1.1.0) was installed and initialized with autocapture enabled, automatically tracking page views, element clicks, form interactions, and sessions from the moment users visit the site.
+The wizard has completed a full Amplitude integration for the Agenvik landing site (`apps/landing`), an Astro static site (SSG).
 
-## Integration summary
+## What was changed
 
-- **SDK**: `@amplitude/unified` — unified browser SDK with autocapture
-- **Init location**: `src/lib/amplitude.ts` (imported as a side-effect in `src/main.tsx`)
-- **API key**: loaded from `VITE_AMPLITUDE_API_KEY` env var (set in `.env.local`)
-- **Autocapture**: enabled — captures `[Amplitude] Page Viewed`, `[Amplitude] Element Clicked`, `[Amplitude] Form Started/Submitted` automatically
+| File | Change |
+|------|--------|
+| `src/components/amplitude.astro` | **Created** — initialises `@amplitude/unified` via `initAll()` with full autocapture and Session Replay. Exposes `window.amplitude` for inline scripts. |
+| `src/layouts/Layout.astro` | **Updated** — imports and renders `<Amplitude />` inside `<head>` on every page. |
+| `src/env.d.ts` | **Created** — TypeScript declaration for `window.amplitude`. |
+| `src/components/Header.astro` | **Updated** — tracks `Get Started Clicked` (source: header) and `Book Demo Clicked` (source: header). |
+| `src/components/HeroSection.astro` | **Updated** — tracks `Get Started Clicked` (source: hero) and `Book Demo Clicked` (source: hero). |
+| `src/components/PricingSection.astro` | **Updated** — tracks `Get Started Clicked` (source: pricing, plan_name) via event delegation on the dynamically-rendered pricing grid. |
+| `src/pages/book-demo.astro` | **Updated** — tracks `Demo Requested` on successful API submission and `Demo Request Failed` on validation errors or API errors. |
+| `package.json` | **Updated** — `@amplitude/unified` added as a dependency. |
 
 ## Instrumented events
 
 | Event | Description | File |
-|---|---|---|
-| `Get Started Clicked` | User clicks any Get Started CTA button on the landing page | `src/components/GetStartedButton.tsx` |
-| `Pricing Plan Viewed` | Pricing plans finish loading and become visible to the user | `src/Sections/PricingSection.tsx` |
-| `FAQ Item Expanded` | User expands a FAQ accordion item to read the answer | `src/Sections/FAQSection.tsx` |
-| `Contact Us Clicked` | User clicks the Contact Us link to open their email client | `src/Sections/HeroSection.tsx` |
+|-------|-------------|------|
+| `Get Started Clicked` | User clicked a "Get Started" CTA — `source` property distinguishes header / hero / pricing. `plan_name` included when clicked from a pricing card. | `Header.astro`, `HeroSection.astro`, `PricingSection.astro` |
+| `Book Demo Clicked` | User clicked "Book a Demo" — `source` distinguishes header vs hero. | `Header.astro`, `HeroSection.astro` |
+| `Demo Requested` | User successfully submitted the demo request form. Properties: `category`, `company`. | `book-demo.astro` |
+| `Demo Request Failed` | Demo form submission failed. Properties: `error_reason` (validation \| api_error), `fields_with_errors`. | `book-demo.astro` |
 
-### Event properties
+## Autocapture (no extra code needed)
 
-- **Get Started Clicked**: `source` (`hero_nav` | `hero_body` | `pricing` | `how_it_works`), `plan_name` (pricing CTA only), `is_signed_in`
-- **Pricing Plan Viewed**: `plan_count`, `plan_names[]`
-- **FAQ Item Expanded**: `question`, `question_index`
-- **Contact Us Clicked**: `source`
+The Unified SDK with full autocapture is enabled. The following data is collected automatically:
+
+- **Page views** — `[Amplitude] Page Viewed` on every page load and navigation
+- **Sessions** — `[Amplitude] Start Session` / `[Amplitude] End Session`
+- **Form interactions** — `[Amplitude] Form Started` / `[Amplitude] Form Submitted`
+- **Element clicks** — `[Amplitude] Element Clicked` on all interactive elements
+- **Frustration signals** — rage clicks, dead clicks
+- **Web vitals** — LCP, INP, CLS reported on page hide
+- **Network requests** — XHR / fetch events
+- **Attribution** — UTM params and referrer captured on session start
 
 ## Analytics dashboard
 
-We've built a dashboard and 4 charts tied to your landing page flows:
+A dashboard plan has been saved and will be created automatically by `amplitude-wizard dashboard` once events start ingesting. The planned charts are:
 
-**Dashboard**: [Agenvik Landing Analytics — 2026](https://app.amplitude.com/analytics/agenvik/dashboard/0u9cx59k)
+| Chart | Type | Event |
+|-------|------|-------|
+| CTA Conversion Funnel | Funnel | Get Started Clicked |
+| Get Started Clicks by Source | Bar | Get Started Clicked |
+| Demo Requests Over Time | Line | Demo Requested |
+| Demo Booking Funnel | Funnel | Book Demo Clicked → Demo Requested |
+| Demo Request Failures | Bar | Demo Request Failed |
 
-| Chart | Type | URL |
-|---|---|---|
-| Top Pages by Volume (Autocapture) | Line | [Open](https://app.amplitude.com/analytics/agenvik/chart/38niy86x) |
-| Top Clicked Elements (Autocapture) | Line | [Open](https://app.amplitude.com/analytics/agenvik/chart/nkt5cjwv) |
-| Daily Active Visitors | Line | [Open](https://app.amplitude.com/analytics/agenvik/chart/w09glj44) |
-| Visitor Retention (Return to Site) | Retention | [Open](https://app.amplitude.com/analytics/agenvik/chart/13izoptm) |
-
-The following charts use Autocapture and will populate as soon as any user visits the app (no additional instrumentation required):
-- **Top Pages by Volume** — shows which landing page sections get the most traffic
-- **Top Clicked Elements** — shows which CTA text and links users click most
-- **Daily Active Visitors** — total unique visitors per day
-
-The following charts rely on custom events and will populate once those flows are triggered:
-- **Visitor Retention** — tracks return visits; populates once real users visit the deployed app
+Run `amplitude-wizard dashboard` after deploying and triggering at least one of these events to build the dashboard.
 
 ## Next steps
 
 ### Environment variable configuration
 
-`VITE_AMPLITUDE_API_KEY` has been set in `.env.local` (git-ignored). Before going to production, add this variable to your deployment platform:
+`PUBLIC_AMPLITUDE_API_KEY` is already set in `apps/landing/.env`. For production deployments, ensure this variable is set in your hosting platform's environment settings (Netlify, Vercel, or your CI pipeline). The `PUBLIC_` prefix exposes it to the browser bundle at build time — it must be present during `astro build`.
 
-- **Docker / self-hosted**: Add `VITE_AMPLITUDE_API_KEY=<your-amplitude-api-key>` to your container environment or CI/CD secrets
-- **Vercel**: Settings → Environment Variables → add `VITE_AMPLITUDE_API_KEY`
-- **Netlify**: Site settings → Build & deploy → Environment → add `VITE_AMPLITUDE_API_KEY`
-
-Note: this is a **public browser key** (Amplitude's design) — it is safe to commit to environment files, but using `.env.local` keeps it out of the tracked `.env` template.
+No `AMPLITUDE_SERVER_URL` is needed for this static site; the Unified SDK defaults to the correct US endpoint.
 
 ### Agent skill
 
-We've left an agent skill folder in your project at `.claude/skills/`. You can use this context for further agent development when using Claude Code.
-
+The `.claude/skills/` folder contains the wizard skill context used during this run. You can use it for further instrumentation with Claude Code.
 </wizard-report>

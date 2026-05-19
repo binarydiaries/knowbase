@@ -1,18 +1,18 @@
 [
   {
     "name": "Get Started Clicked",
-    "description": "User clicks any Get Started CTA button on the landing page."
+    "description": "User clicked a 'Get Started' CTA button — tracks which placement drove the signup intent (header, hero, or pricing card). Autocapture covers clicks but can't extract the business context (source, plan name) from data-attributes."
   },
   {
-    "name": "Pricing Plan Viewed",
-    "description": "Pricing plans finish loading and become visible to the user."
+    "name": "Book Demo Clicked",
+    "description": "User clicked a 'Book a Demo' link from the hero or nav — indicates high-intent users interested in a guided walkthrough before signing up."
   },
   {
-    "name": "FAQ Item Expanded",
-    "description": "User expands a FAQ accordion item to read the answer."
+    "name": "Demo Requested",
+    "description": "User successfully submitted the Book a Demo form — the primary conversion event on the marketing site. Fires after the API call succeeds and the success state is shown. Properties: category (use case), company."
   },
   {
-    "name": "Contact Us Clicked",
-    "description": "User clicks the Contact Us link to open their email client."
+    "name": "Demo Request Failed",
+    "description": "The demo form submission failed (validation error or API error) — helps identify friction in the conversion flow. Properties: error_reason (validation | api_error), fields_with_errors."
   }
 ]

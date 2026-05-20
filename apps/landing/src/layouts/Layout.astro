@@ -150,6 +150,14 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     </a>
     <Header activePage={activePage} base={activePage === 'blog' ? '/' : ''} />
     <slot />
+
+    <script>
+      window.AgenvikChat = {
+        channelId: "puh1ds4ejx477pcp4ojm8rv1",
+        primaryColor: "#301B69",
+      };
+    </script>
+    <script src="https://embed.agenvik.com/embed.js" async></script>
   </body>
 </html>
 <style is:global>

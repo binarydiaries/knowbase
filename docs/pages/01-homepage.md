@@ -42,10 +42,15 @@ Upload a PDF, paste your FAQ, or point it at your website. Your agent goes live 
 [PLACEHOLDER: "Trusted by 200+ businesses" + 5 star icons + "★★★★★ on G2"]
 *Until reviews exist, use:* "Free plan. No credit card required. Cancel anytime."
 
-### Hero visual
-[ILLUSTRATION: Product demo — show the agent answering a real customer question. Split view: left side shows a WhatsApp-style conversation where a customer asks "What's your return policy?" and the agent replies with the exact text from the uploaded PDF. Right side shows the Agenvik dashboard with that document in the knowledge base. This is the "before/after" that makes the product instantly legible.]
+### Hero background
+White base with a subtle CSS grid pattern (48 × 48 px, brand purple at 7% opacity). The grid fades out via a bottom mask so it doesn't compete with the dashboard screenshot. A faint radial highlight at top-center lifts the heading area. No background image file — pure CSS.
 
-**Critical:** Do NOT fade or gradient-overlay the product screenshot. Show the whole thing.
+> **Design note:** Grid pattern references Linear / Vercel-style hero treatment. Keep it subtle — the copy and screenshot are the focus.
+
+### Hero visual
+Full-width product screenshot of the Agenvik dashboard (`hero-dashboard.png`). No gradient overlay. Clean `rounded-2xl shadow-2xl` with a `ring-1 ring-[#301B69]/15` border.
+
+> **Implementation note:** `loading="eager" fetchpriority="high"` on the `<Image>` component — this is the LCP element, so it gets browser priority.
 
 ---
 
@@ -115,17 +120,24 @@ Three steps. Ten minutes. Done.
 **Step 1 — Add your knowledge**
 Upload PDFs, paste your FAQ, drop in a website URL, or type plain text. Your agent learns from whatever you already have — there's nothing new to write.
 
-[ILLUSTRATION: Upload UI showing 3 files being dragged in: "shipping-policy.pdf", "product-manual.pdf", and a URL field with "help.yoursite.com" typed in. Visual feel: clean, simple, fast.]
+[MOCKUP — built in HTML/CSS, no image file needed]
+Dashed drop-zone with upload icon ("Drop files here"). Two file chips below: "shipping-policy.pdf" and "product-faq.pdf", each with a green "Trained" badge. A URL row showing "help.yoursite.com" with a globe icon.
 
 **Step 2 — Configure your agent**
 Give your agent a name, a tone (friendly, formal, direct), and tell it which channels to live on. It takes 2 minutes. You can change anything later.
 
-[ILLUSTRATION: Agent settings panel. Fields visible: Agent name "Aria", Tone dropdown set to "Friendly", Channel toggles showing Website ✓, WhatsApp ✓, Slack ✗. Simple form, not overwhelming.]
+[MOCKUP — built in HTML/CSS, no image file needed]
+Settings panel with three fields: Agent name input showing "Aria" with a blinking cursor; Tone dropdown set to "Friendly"; Channels section with toggle rows — Website ✓, WhatsApp ✓, Slack ✗.
 
 **Step 3 — Go live**
 Copy one line of code to embed on your website. Connect your WhatsApp business number. Link your Slack workspace. Your agent is live and handling queries immediately.
 
-[ILLUSTRATION: Three outputs side by side: (1) a website chat bubble in bottom-right corner labeled "Aria · Powered by Agenvik", (2) a WhatsApp conversation thread, (3) a Slack channel with /ask-aria. All three showing the same agent answering different questions consistently.]
+[MOCKUP — built in HTML/CSS, no image file needed]
+Three stacked channel previews: (1) Website — chat bubble with "Aria · Agenvik" greeting; (2) WhatsApp — green thread showing "What's your return policy?" → "Returns accepted within 30 days… Source: Returns Policy.pdf"; (3) Slack — dark panel with "Aria APP" answering a pricing question.
+
+> **Design note:** No product screenshots in this section. All step visuals are coded HTML/CSS mockups — no external image files required. This keeps the section fast and easy to update. Do NOT add arrow/line connectors between the cards; they look cluttered and have been intentionally removed.
+
+> **Container note:** Section uses `bg-white border border-[#301B69]/10 shadow-sm rounded-3xl` — same card style as the Comparison section above it. Padding: `p-10 md:p-14`.
 
 ### Bottom CTA
 **Text:** Start building — it's free
@@ -267,8 +279,10 @@ No hidden fees. No lock-in. Downgrade or cancel anytime.
 
 **Purpose:** Handle the 3-4 objections that stop people from clicking "Start free". Short. Not the full FAQ.
 
+> **SEO note:** H2 is "Frequently asked questions" — matches the high-volume search query directly. The section also maps to the `FAQPage` JSON-LD schema in `index.astro`.
+
 ### H2
-Quick answers
+Frequently asked questions
 
 ### 4 questions max on homepage
 
@@ -307,6 +321,38 @@ No credit card. No engineering team. No complex setup. Just your documents and 1
 
 ### Trust row (small text beneath buttons)
 Free plan · No credit card required · Cancel anytime · Data stays private
+
+---
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+These decisions are intentional. Don't change them without understanding why.
+
+### Structured data (JSON-LD)
+Three schemas are emitted on the homepage via `index.astro`:
+1. **`SoftwareApplication`** — describes Agenvik as a product with price, features, publisher.
+2. **`HowTo`** — 3-step setup flow (matches Section 4). Step image URLs omitted intentionally — only include once real step screenshots exist at known public URLs.
+3. **`FAQPage`** — the 4 homepage FAQ answers (from `src/data/faqs.ts → homepageFaqs`). This is a subset; the full FAQ lives at `/faq`.
+
+`Organization` + `WebSite` schemas are emitted on every page via `Layout.astro`.
+
+### Section heading hierarchy
+- One `<h1>` per page (hero). All section titles are `<h2>`. All card/feature titles inside sections are `<h3>`. Never break this order.
+
+### Hero LCP
+`hero-dashboard.png` uses `loading="eager" fetchpriority="high"`. Do not change to `loading="lazy"` — this is the Largest Contentful Paint element.
+
+### Preconnect hints (Layout.astro)
+`<link rel="preconnect" href="https://app.agenvik.com">` and `embed.agenvik.com` are set globally. DNS prefetch for Amplitude CDN. These reduce connection latency measured in Google's CrUX field data.
+
+### Section container consistency
+All homepage sections (except Hero, Problem, FinalCTA which have unique backgrounds) use `rounded-3xl p-10 md:p-14` with either:
+- `bg-white border border-[#301B69]/10 shadow-sm` — clean white (Comparison, HowItWorks)
+- `bg-cover bg-center` + `bg-white/50 backdrop-blur-[2px]` overlay — textured (Features, UseCases, Pricing, FAQ)
+
+Do not mix these patterns within a single section.
 
 ---
 

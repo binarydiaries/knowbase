@@ -2,6 +2,12 @@
 
 **Purpose:** Convert support teams and business owners who are searching for ways to reduce support ticket volume. High-intent page — they already have the problem, they need to trust the solution.
 
+> **See also — vertical-specific sub-pages:**
+> - `05a-use-case-real-estate.md` → `/use-cases/real-estate` — Real estate agents, WhatsApp-first, property query flood
+> - `05b-use-case-clinic.md` → `/use-cases/clinic` — Clinics and hospitals, call/WhatsApp deflection, front-desk relief
+>
+> These two pages are the primary customer-support targets for Agenvik's current go-to-market. This generic Customer Support page remains useful for search traffic hitting broader queries like "AI customer support agent", but the real estate and clinic pages are more specific and higher-converting for the actual ICP.
+
 **Meta title:** AI Agent for Customer Support — Automate Tier-1 Queries with Agenvik
 **Meta description:** Handle repetitive customer questions automatically — returns, shipping, passwords, pricing — with an AI agent trained on your own docs. No scripts. No hiring. Live in 30 minutes.
 

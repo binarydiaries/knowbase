@@ -1,5 +1,7 @@
 # Use Case: E-commerce — `/use-cases/ecommerce`
 
+> **⚠️ DEPRIORITISED** — This vertical is no longer in the primary Solutions nav dropdown. The page exists and the URL should not 404, but active content development is paused. Priority verticals are: Real Estate, Clinics & Hospitals, Internal Teams, Coaches & Educators. Revisit if e-commerce customers become a meaningful portion of signups.
+
 **Purpose:** Convert e-commerce store owners who are drowning in repetitive customer queries. Speak to the specific pain of running a lean team with a high message volume.
 
 **Meta title:** AI Chatbot for E-commerce — Automate Customer Queries on WhatsApp & Website

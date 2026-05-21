@@ -1,9 +1,11 @@
-# Use Case: Internal Knowledge Base — `/use-cases/internal-knowledge`
+# Use Case: Internal Teams / Company Playbook — `/use-cases/internal-knowledge`
 
-**Purpose:** Target team leads, ops managers, and founders who are losing time to repetitive internal questions — onboarding, SOPs, policies, "where is the X doc?"
+**Purpose:** Target team leads, ops managers, and founders who are losing time to repetitive internal questions — onboarding, SOPs, policies, "where is the X doc?" The core angle is the **company playbook**: institutional knowledge that lives in documents (or in people's heads) and needs to be findable by anyone, anytime, without interrupting a senior person.
 
-**Meta title:** AI Knowledge Base for Teams — Stop Answering the Same Internal Questions
-**Meta description:** Turn your internal docs, SOPs, and onboarding guides into an AI agent your team can ask anything, anytime — on Slack or a private web portal. No IT team required.
+**Meta title:** AI Agent for Internal Teams — Turn Your Company Playbook Into an Instant Answer Machine
+**Meta description:** Stop being the person your team DMs for things that should be written down. Build an AI agent on Slack trained on your SOPs, playbook, and policies. Knowledge stays — even when people leave.
+
+**Priority:** 🔴 High — primary target vertical
 
 ---
 
@@ -18,14 +20,13 @@ Same as homepage.
 ✦ INTERNAL TEAMS
 
 ### H1
-"Where is the onboarding doc?"
-"What's our leave policy again?"
-"Who do I contact for [X]?"
+Your team keeps asking questions that are already answered somewhere.
+Your playbook should answer them.
 
-Your team asks these every week. Now the answer is instant.
+> **Design note:** Two-line headline. Line 1 lighter weight. Line 2 bolder.
 
 ### Subhead
-Build an internal AI agent trained on your company docs, SOPs, and knowledge base. Deploy it in Slack. Every team member gets accurate answers in seconds — without pinging a senior person, opening Notion, or waiting for a reply.
+Build an internal AI agent trained on your company playbook — SOPs, policies, onboarding guides, process docs. Deploy it in Slack. Every team member gets an accurate answer in seconds, without pinging a senior person or searching Notion for 10 minutes.
 
 ### CTAs
 - **Primary:** Start free → (links to `app.agenvik.com`)
@@ -49,6 +50,8 @@ And the person being asked? They start to gate-keep. Or they burn out. Or they l
 1. New hires ask the same questions your team has answered 50 times
 2. Institutional knowledge lives in one person's head (and they're always busy)
 3. Your docs exist but nobody can find the right one fast enough
+
+> **Playbook angle:** The deepest version of this problem is attrition. When a senior person leaves, they take years of institutional knowledge with them. If that knowledge was never written into a playbook — and even if it was, if the playbook isn't findable — the cost of their departure is far higher than their replacement hire. An internal agent forces the playbook to be written, and makes it perpetually accessible.
 
 ---
 

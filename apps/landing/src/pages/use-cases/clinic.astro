@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<Layout
+  title="AI Agent for Clinics & Hospitals — Automate Patient FAQs on WhatsApp & Website | Agenvik"
+  description="Stop tying up your front desk with calls about hours, services, and insurance. Agenvik answers common patient questions 24/7 — on your website and WhatsApp."
+  activePage="use-cases"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
+      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4">
+        CLINICS & HOSPITALS
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
+        Your receptionist answers 60 calls a day. Half of them ask the same things.
+      </h1>
+      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
+        Agenvik handles appointment info, service questions, insurance queries, and opening hours — so your front desk focuses on patients who are actually in front of them.
+      </p>
+      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
+        Build your clinic agent →
+      </a>
+    </section>
+  </main>
+  <Footer />
+</Layout>

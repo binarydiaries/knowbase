@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<Layout
+  title="AI Agent for Coaches & Educators — Answer Student Questions 24/7 | Agenvik"
+  description="Turn your course material into an AI agent that answers student questions at any hour. Agenvik scales your expertise without scaling your time."
+  activePage="use-cases"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
+      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4">
+        COACHES & EDUCATORS
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
+        Your students have questions at midnight. You can't be available at midnight.
+      </h1>
+      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
+        Agenvik reads your course material, workbooks, and coaching notes — and answers student questions in your voice, any time of day. You stay focused on the sessions that need you.
+      </p>
+      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
+        Build your coaching agent →
+      </a>
+    </section>
+  </main>
+  <Footer />
+</Layout>

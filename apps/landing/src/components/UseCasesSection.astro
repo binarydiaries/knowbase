@@ -1,37 +1,38 @@
 ---
 import { getImage } from 'astro:assets';
 import usecaseBgSrc from '../assets/images/usecase-bg.png';
+import { Home, Hospital, Users, GraduationCap } from 'lucide-astro';
 
 const usecaseBg = await getImage({ src: usecaseBgSrc, format: 'webp', quality: 80 });
 
 const useCases = [
   {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
-    title: 'E-commerce & Retail',
-    headline: 'Fewer support tickets. Happier customers.',
-    desc: 'Shipping status, return policy, size guides, product questions — your agent handles tier-1 support automatically so your team focuses on the hard stuff.',
-    href: '/use-cases/ecommerce',
+    Icon: Home,
+    title: 'Real Estate',
+    headline: 'Stop answering the same property questions on WhatsApp.',
+    desc: 'Property prices, availability, documents needed, process overview — your agent handles the flood of WhatsApp messages 24/7. You focus on leads who are ready to move.',
+    href: '/use-cases/real-estate',
   },
   {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
-    title: 'SaaS & Tech Products',
-    headline: 'Answer product questions without a CS call.',
-    desc: 'Guide new users to their first "aha moment". Answer integration questions. Explain pricing. Your agent knows your docs better than most new hires.',
-    href: '/use-cases/saas',
+    Icon: Hospital,
+    title: 'Clinics & Hospitals',
+    headline: 'Free your front desk from repetitive calls.',
+    desc: 'Hours, services, insurance accepted, appointment process — your agent handles the queries that tie up your staff, so they can focus on patients in front of them.',
+    href: '/use-cases/clinic',
   },
   {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    Icon: Users,
     title: 'Internal Teams',
     headline: 'New hire asks Slack. Gets the answer. Done.',
     desc: "Stop being the person everyone DMs for things that should be written down. Your agent knows your SOPs, processes, and company docs. Knowledge stops leaving when people do.",
     href: '/use-cases/internal-knowledge',
   },
   {
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+    Icon: GraduationCap,
     title: 'Coaches & Educators',
     headline: 'Your expertise. Available 24/7.',
     desc: 'Turn your course material, workbooks, or coaching notes into an agent your students can ask anything, anytime. Personalised answers at scale.',
-    href: null,
+    href: '/use-cases/education',
   },
 ];
 ---
@@ -56,7 +57,9 @@ const useCases = [
           {useCases.map((item) => (
             <div class="rounded-2xl bg-white/80 border border-[#301B69]/10 p-6">
               <div class="flex items-start gap-3 mb-3">
-                <div class="mt-0.5 text-[#301B69] flex-shrink-0" aria-hidden="true" set:html={item.icon} />
+                <div class="mt-0.5 text-[#301B69] flex-shrink-0" aria-hidden="true">
+                  <item.Icon size={20} strokeWidth={1.75} />
+                </div>
                 <div>
                   <p class="text-xs text-[#301B69]/50 uppercase tracking-widest mb-0.5">{item.title}</p>
                   <h3 class="font-semibold text-[#301B69]">{item.headline}</h3>

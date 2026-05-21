@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<Layout
+  title="AI Agent for Real Estate Agents — Handle WhatsApp Queries Automatically | Agenvik"
+  description="Stop answering the same property questions on WhatsApp. Agenvik trains on your listings and FAQs — handles price, availability, process queries 24/7, so you focus on closings."
+  activePage="use-cases"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
+      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4">
+        REAL ESTATE
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
+        Your phone never stops buzzing. Most messages ask the same 5 questions.
+      </h1>
+      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
+        Agenvik answers property queries on WhatsApp — prices, availability, documents needed, next steps — instantly, accurately, 24/7. You only step in when a lead is ready to move.
+      </p>
+      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
+        Build your real estate agent →
+      </a>
+    </section>
+  </main>
+  <Footer />
+</Layout>

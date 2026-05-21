@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logoSrc from '../assets/images/TextLogo.svg';
+import { Home, Hospital, Users, GraduationCap, ChevronDown, Menu, X } from 'lucide-astro';
 
 type ActivePage = 'home' | 'features' | 'pricing' | 'blog' | 'use-cases';
 
@@ -14,28 +15,28 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const solutions = [
   {
-    icon: '🎧',
-    label: 'Customer Support',
-    desc: 'Automate tier-1 queries, 24/7',
-    href: '/use-cases/customer-support',
+    Icon: Home,
+    label: 'Real Estate',
+    desc: 'Handle property queries on WhatsApp, 24/7',
+    href: '/use-cases/real-estate',
   },
   {
-    icon: '🛍',
-    label: 'E-commerce',
-    desc: 'Handle shipping & returns automatically',
-    href: '/use-cases/ecommerce',
+    Icon: Hospital,
+    label: 'Clinics & Hospitals',
+    desc: 'Answer patient FAQs, free up your front desk',
+    href: '/use-cases/clinic',
   },
   {
-    icon: '🏢',
+    Icon: Users,
     label: 'Internal Teams',
-    desc: 'Company knowledge, always findable',
+    desc: 'Company playbook, always findable on Slack',
     href: '/use-cases/internal-knowledge',
   },
   {
-    icon: '⚡',
-    label: 'SaaS & Product',
-    desc: 'Reduce support, improve activation',
-    href: '/use-cases/saas',
+    Icon: GraduationCap,
+    label: 'Coaches & Educators',
+    desc: 'Scale your expertise without scaling your time',
+    href: '/use-cases/education',
   },
 ];
 ---
@@ -64,7 +65,9 @@ const solutions = [
           class:list={['flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer', activePage === 'use-cases' && 'font-semibold']}
         >
           Solutions
-          <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          <span class="transition-transform group-hover:rotate-180" aria-hidden="true">
+            <ChevronDown size={14} strokeWidth={2.5} />
+          </span>
         </button>
 
         <div
@@ -77,7 +80,9 @@ const solutions = [
               role="menuitem"
               class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 transition-colors"
             >
-              <span class="text-lg leading-none mt-0.5" aria-hidden="true">{item.icon}</span>
+              <span class="text-[#301B69] flex-shrink-0 mt-0.5" aria-hidden="true">
+                <item.Icon size={17} strokeWidth={1.75} />
+              </span>
               <div>
                 <div class="font-medium text-[#301B69] text-sm">{item.label}</div>
                 <div class="text-xs text-[#301B69]/60 mt-0.5">{item.desc}</div>
@@ -129,8 +134,8 @@ const solutions = [
         aria-controls="mobile-menu"
         class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-[#301B69] hover:bg-[#301B69]/10 transition-colors ml-1"
       >
-        <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        <svg id="close-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <span id="hamburger-icon" aria-hidden="true"><Menu size={20} strokeWidth={2} /></span>
+        <span id="close-icon" class="hidden" aria-hidden="true"><X size={20} strokeWidth={2} /></span>
       </button>
     </div>
   </div>
@@ -156,12 +161,14 @@ const solutions = [
           class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium"
         >
           Solutions
-          <svg id="solutions-chevron" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          <span id="solutions-chevron" class="transition-transform" aria-hidden="true"><ChevronDown size={16} strokeWidth={2} /></span>
         </button>
         <div id="solutions-submenu" class="hidden pl-4 mt-1 space-y-1">
           {solutions.map((item) => (
             <a href={item.href} class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#301B69]/5 text-[#301B69]/80">
-              <span aria-hidden="true">{item.icon}</span>
+              <span class="text-[#301B69]/70 flex-shrink-0" aria-hidden="true">
+                <item.Icon size={15} strokeWidth={1.75} />
+              </span>
               {item.label}
             </a>
           ))}

@@ -1,7 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 import coreBgSrc from '../assets/images/core-bg.png';
-import { FileText, Sparkles, Share2, BarChart2 } from 'lucide-astro';
+import { FileText, Sparkles, Share2, BarChart2 } from '@lucide/astro';
 
 const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';

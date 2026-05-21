@@ -2,7 +2,7 @@
 import { getImage } from 'astro:assets';
 import faqBgSrc from '../assets/images/faq-bg.png';
 import { homepageFaqs } from '../data/faqs';
-import { ChevronDown } from 'lucide-astro';
+import { ChevronDown } from '@lucide/astro';
 
 const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
 ---

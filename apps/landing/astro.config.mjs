@@ -18,7 +18,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     resolve: {
-      noExternal: ['lucide-astro'],
+      noExternal: ['@lucide/astro'],
     },
   }
 });

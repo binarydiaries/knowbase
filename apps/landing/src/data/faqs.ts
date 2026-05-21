@@ -5,15 +5,15 @@ export const homepageFaqs = [
   },
   {
     question: 'Will my customers know it\'s AI?',
-    answer: 'Only if you want them to. You control the agent\'s name, tone, and avatar. Many businesses run it as "Aria from [Company]" with no mention of AI at all.',
+    answer: 'Yes. We believe that\'s a good thing — customers don\'t mind AI when it actually helps them.',
   },
   {
     question: 'What if it gives a wrong answer?',
     answer: 'Agenvik only answers from content you provide. If the information isn\'t in your knowledge base, the agent says so rather than guessing. You can also see every conversation and add knowledge to fill gaps.',
   },
   {
-    question: 'How long does setup take?',
-    answer: 'Most users are live in under 30 minutes on their first agent. Upload your documents, configure your agent, copy the embed code. That\'s it.',
+    question: 'Do I need coding skills to set it up?',
+    answer: 'No. Upload your documents, configure your agent, and you\'re live in under 10 minutes. No technical knowledge needed.',
   },
 ];
 

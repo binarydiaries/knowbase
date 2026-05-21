@@ -290,13 +290,13 @@ Frequently asked questions
 A: No. Most chatbot builders make you write scripts and decision trees. Agenvik learns from your actual documents and answers in natural language — so you upload your content once and it handles the rest.
 
 **Q: Will my customers know it's AI?**
-A: Only if you want them to. You control the agent's name, tone, and avatar. Many businesses run it as "Aria from [Company]" with no mention of AI at all.
+A: Yes. We believe that's a good thing — customers don't mind AI when it actually helps them.
 
 **Q: What if it gives a wrong answer?**
 A: Agenvik only answers from content you provide. If the information isn't in your knowledge base, the agent says so rather than guessing. You can also see every conversation and add knowledge to fill gaps.
 
-**Q: How long does setup take?**
-A: Most users are live in under 30 minutes on their first agent. Upload your documents, configure your agent, copy the embed code. That's it.
+**Q: Do I need coding skills to set it up?**
+A: No. Upload your documents, configure your agent, and you're live in under 10 minutes. No technical knowledge needed.
 
 ### Link
 **Text:** More questions? See all FAQs →

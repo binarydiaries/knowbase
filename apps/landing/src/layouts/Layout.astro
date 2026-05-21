@@ -11,7 +11,7 @@ interface Props {
   ogImageHeight?: string;
   ogType?: string;
   jsonLd?: object | object[];
-  activePage?: 'blog';
+  activePage?: 'home' | 'features' | 'pricing' | 'blog' | 'use-cases';
   // article:* OG tags (used when ogType="article")
   articlePublishedTime?: string;
   articleModifiedTime?: string;
@@ -123,6 +123,11 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
     <meta name="twitter:image:alt" content={title} />
+
+    <!-- Preconnect to external origins -->
+    <link rel="preconnect" href="https://app.agenvik.com" />
+    <link rel="preconnect" href="https://embed.agenvik.com" />
+    <link rel="dns-prefetch" href="https://cdn.amplitude.com" />
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

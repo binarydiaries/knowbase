@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<Layout
+  title="AI Agent for Internal Teams — Agenvik"
+  description="Give your team instant answers from company SOPs, processes, and docs. Stop being the person everyone DMs. Knowledge stops leaving when employees do."
+  activePage="use-cases"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
+      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4" aria-hidden="true">
+        🏢 INTERNAL TEAMS
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
+        New hire asks Slack. Gets the answer. Done.
+      </h1>
+      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
+        Stop being the person everyone DMs for things that should be written down. Your agent knows your SOPs, processes, and company docs. Knowledge stops leaving when people do.
+      </p>
+      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
+        Start for free →
+      </a>
+    </section>
+  </main>
+  <Footer />
+</Layout>

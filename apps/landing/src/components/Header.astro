@@ -2,52 +2,229 @@
 import { Image } from 'astro:assets';
 import logoSrc from '../assets/images/TextLogo.svg';
 
+type ActivePage = 'home' | 'features' | 'pricing' | 'blog' | 'use-cases';
+
 interface Props {
-  activePage?: 'blog';
+  activePage?: ActivePage;
   base?: string;
 }
 
-const { activePage, base = '' } = Astro.props;
+const { activePage } = Astro.props;
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+
+const solutions = [
+  {
+    icon: '🎧',
+    label: 'Customer Support',
+    desc: 'Automate tier-1 queries, 24/7',
+    href: '/use-cases/customer-support',
+  },
+  {
+    icon: '🛍',
+    label: 'E-commerce',
+    desc: 'Handle shipping & returns automatically',
+    href: '/use-cases/ecommerce',
+  },
+  {
+    icon: '🏢',
+    label: 'Internal Teams',
+    desc: 'Company knowledge, always findable',
+    href: '/use-cases/internal-knowledge',
+  },
+  {
+    icon: '⚡',
+    label: 'SaaS & Product',
+    desc: 'Reduce support, improve activation',
+    href: '/use-cases/saas',
+  },
+];
 ---
 
 <header class="fixed top-0 left-0 right-0 z-50 px-6 pt-4 pb-0">
-  <div class:list={[
-    'flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl',
-    'max-w-6xl mx-auto',
-  ]}>
+  <div class="flex items-center justify-between bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl max-w-6xl mx-auto">
     <a href="/" aria-label="Agenvik home">
       <Image src={logoSrc} alt="Agenvik" class="h-7 w-auto" loading="eager" />
     </a>
 
-    <nav aria-label="Main navigation" class="hidden md:flex gap-8 text-sm text-[#301B69]">
-      <a href={`${base}#features`} class="hover:opacity-80">Features</a>
-      <a href={`${base}#how-it-works`} class="hover:opacity-80">How it Works</a>
-      <a href={`${base}#pricing`} class="hover:opacity-80">Pricing</a>
-      <a href={`${base}#faq`} class="hover:opacity-80">FAQ</a>
-      <a href="/book-demo" class="hover:opacity-80">Book a Demo</a>
-      <a href="/blog" class="hover:opacity-80">Blog</a>
+    <!-- Desktop nav -->
+    <nav aria-label="Main navigation" class="hidden md:flex items-center gap-8 text-sm text-[#301B69]">
+      <a
+        href="/features"
+        class:list={['hover:opacity-80 transition-opacity', activePage === 'features' && 'font-semibold underline underline-offset-4']}
+      >
+        Features
+      </a>
+
+      <!-- Solutions dropdown -->
+      <div class="relative group">
+        <button
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          class:list={['flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer', activePage === 'use-cases' && 'font-semibold']}
+        >
+          Solutions
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <div
+          role="menu"
+          class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#301B69]/10 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150"
+        >
+          {solutions.map((item) => (
+            <a
+              href={item.href}
+              role="menuitem"
+              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 transition-colors"
+            >
+              <span class="text-lg leading-none mt-0.5" aria-hidden="true">{item.icon}</span>
+              <div>
+                <div class="font-medium text-[#301B69] text-sm">{item.label}</div>
+                <div class="text-xs text-[#301B69]/60 mt-0.5">{item.desc}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <a
+        href="/pricing"
+        class:list={['hover:opacity-80 transition-opacity', activePage === 'pricing' && 'font-semibold underline underline-offset-4']}
+      >
+        Pricing
+      </a>
+      <a
+        href="/blog"
+        class:list={['hover:opacity-80 transition-opacity', activePage === 'blog' && 'font-semibold underline underline-offset-4']}
+      >
+        Blog
+      </a>
     </nav>
 
-    <a
-      href={appURL}
-      data-get-started
-      data-source="header"
-      class="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm"
-    >
-      Get Started
-    </a>
+    <div class="flex items-center gap-3">
+      <!-- Book a Demo — outlined, hidden on smallest screens -->
+      <a
+        href="/book-demo"
+        class="hidden sm:inline-flex px-4 py-2 rounded-lg text-sm border border-[#301B69] text-[#301B69] hover:bg-[#301B69]/5 transition-colors"
+      >
+        Book a Demo
+      </a>
+
+      <!-- Get Started — always visible -->
+      <a
+        href={appURL}
+        data-get-started
+        data-source="header"
+        class="bg-[#301B69] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity"
+      >
+        Get Started
+      </a>
+
+      <!-- Hamburger — mobile only -->
+      <button
+        id="mobile-menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-[#301B69] hover:bg-[#301B69]/10 transition-colors ml-1"
+      >
+        <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="close-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden mt-2 bg-white/95 backdrop-blur-md rounded-2xl border border-[#301B69]/10 shadow-xl overflow-hidden"
+    role="dialog"
+    aria-label="Mobile navigation"
+  >
+    <nav class="p-4 space-y-1 text-sm text-[#301B69]">
+      <a href="/features" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
+        Features
+      </a>
+
+      <!-- Solutions accordion -->
+      <div>
+        <button
+          id="solutions-toggle"
+          type="button"
+          aria-expanded="false"
+          class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium"
+        >
+          Solutions
+          <svg id="solutions-chevron" class="w-4 h-4 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="solutions-submenu" class="hidden pl-4 mt-1 space-y-1">
+          {solutions.map((item) => (
+            <a href={item.href} class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#301B69]/5 text-[#301B69]/80">
+              <span aria-hidden="true">{item.icon}</span>
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <a href="/pricing" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
+        Pricing
+      </a>
+      <a href="/blog" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
+        Blog
+      </a>
+      <a href="/book-demo" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
+        Book a Demo
+      </a>
+
+      <div class="pt-2 pb-1">
+        <a
+          href={appURL}
+          data-get-started
+          data-source="mobile_menu"
+          class="block w-full text-center bg-[#301B69] text-white px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+        >
+          Get Started →
+        </a>
+      </div>
+    </nav>
   </div>
 </header>
 
 <script is:inline>
   document.addEventListener('DOMContentLoaded', function () {
-    var btn = document.querySelector('header [data-get-started]');
-    if (btn) {
-      btn.addEventListener('click', function () {
-        window.amplitude?.track('Get Started Clicked', { source: 'header' });
+    var toggle = document.getElementById('mobile-menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    var hamburger = document.getElementById('hamburger-icon');
+    var closeIcon = document.getElementById('close-icon');
+
+    if (toggle && menu) {
+      toggle.addEventListener('click', function () {
+        var isOpen = menu.classList.toggle('hidden');
+        toggle.setAttribute('aria-expanded', String(!isOpen));
+        hamburger.classList.toggle('hidden', !isOpen);
+        closeIcon.classList.toggle('hidden', isOpen);
       });
     }
+
+    var solutionsToggle = document.getElementById('solutions-toggle');
+    var solutionsSubmenu = document.getElementById('solutions-submenu');
+    var solutionsChevron = document.getElementById('solutions-chevron');
+
+    if (solutionsToggle && solutionsSubmenu) {
+      solutionsToggle.addEventListener('click', function () {
+        var isOpen = solutionsSubmenu.classList.toggle('hidden');
+        solutionsToggle.setAttribute('aria-expanded', String(!isOpen));
+        if (solutionsChevron) solutionsChevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+      });
+    }
+
+    document.querySelectorAll('[data-get-started]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: btn.dataset.source || 'header' });
+      });
+    });
 
     var bookDemo = document.querySelector('header a[href="/book-demo"]');
     if (bookDemo) {

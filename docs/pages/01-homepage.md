@@ -65,24 +65,38 @@ You don't need more staff. You need an agent that knows your business cold — a
 
 ---
 
-## SECTION 3 — Product Proof (What it does in one shot)
+## SECTION 3 — Comparison (Why Agenvik vs. alternatives)
 
-**Purpose:** Show a concrete before/after. One real example beats five feature bullets.
+**Purpose:** Answer the "why not just use X?" objection before visitors ask it. Targets comparison-intent search queries and AEO/GEO citation opportunities. Replaces the earlier "SEE IT WORK" 3-panel section, which was redundant with Section 4 (How It Works).
 
 ### Eyebrow
-✦ SEE IT WORK
+✦ WHY AGENVIK
 
 ### H2
-From document to deployed agent — in under 10 minutes
+Why not just use ChatGPT?
 
-### Content: 3-panel visual sequence
-[ILLUSTRATION: 3 horizontal panels, like a comic strip]
-1. **Panel 1 — Upload:** User drags a PDF called "Refund Policy.pdf" into Agenvik dashboard
-2. **Panel 2 — Train:** Dashboard shows "Processing... 47 chunks indexed" with a progress indicator
-3. **Panel 3 — Answer:** Chat widget on a website. Customer types "Can I return my order after 30 days?" Agent replies: "Our return window is 30 days from delivery. Items must be unused and in original packaging. Here's how to start a return: [link]" — with a small "Source: Refund Policy.pdf" citation below it.
+### Subhead
+Generic AI makes things up. Chatbot builders make you write scripts. Agenvik reads your documents and answers from them — accurately, every time.
 
-### Callout text beneath panels
-No prompt engineering. No fine-tuning. No infrastructure. You uploaded a document — your customers got accurate answers.
+### Comparison table
+
+| Feature | Chatbot builder | Generic AI (ChatGPT etc.) | Agenvik |
+|---|---|---|---|
+| Learns directly from your documents | ✗ (uses decision trees) | ✗ (uses general training) | ✓ |
+| Cites the source for every answer | ✗ | ✗ | ✓ |
+| Says "I don't know" instead of guessing | ✗ (gives scripted fallback) | ✗ (may confidently hallucinate) | ✓ |
+| One setup — same knowledge across all channels | ✗ (separate per channel) | ✗ (no deployment) | ✓ |
+| No scripts or decision trees to write | ✗ | ✓ | ✓ |
+| Live in under 10 minutes | ✗ (scripting takes time) | ✓ | ✓ |
+
+**Accuracy notes:**
+- Chatbot builders (Tidio, ManyChat, etc.) do support multiple channels, but require separate configuration per channel and use decision trees — not document learning.
+- Generic AI (ChatGPT, Gemini, etc.) has broad knowledge but cannot be grounded in your specific documents without RAG; hallucination is a real risk.
+- Rows 1–4 are Agenvik's unique differentiators; rows 5–6 show parity with modern AI but advantage over traditional chatbots.
+
+### CTA
+**Button:** Try Agenvik free → (links to `app.agenvik.com`)
+**Subtext:** No credit card. Live in 10 minutes.
 
 ---
 

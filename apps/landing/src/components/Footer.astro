@@ -5,7 +5,7 @@ import footerBgSrc from '../assets/images/footer-bg.png';
 
 const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 });
 ---
-<footer class="px-6" aria-label="Site footer">
+<footer class="px-6 pb-6" aria-label="Site footer">
   <div class="w-full mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
@@ -14,7 +14,7 @@ const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 
       <div class="relative z-10">
-        <div class="grid md:grid-cols-5 gap-10">
+        <div class="grid md:grid-cols-5 gap-10 mb-12">
           <!-- Logo -->
           <div class="col-span-1">
             <a href="/" aria-label="Agenvik home">
@@ -22,92 +22,94 @@ const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 
             </a>
           </div>
 
-          <!-- Quick Links -->
-          <nav aria-label="Quick links">
-            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Quick Links</h3>
+          <!-- Product -->
+          <nav aria-label="Product links">
+            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Product</h3>
             <ul class="space-y-2 text-sm text-[#301B69]/70 list-none">
-              <li><a href="/" class="hover:text-[#301B69]">Home</a></li>
-              <li><a href="#features" class="hover:text-[#301B69]">Features</a></li>
-              <li><a href="#how-it-works" class="hover:text-[#301B69]">How it Works</a></li>
-              <li><a href="#pricing" class="hover:text-[#301B69]">Pricing</a></li>
-              <li><a href="#faq" class="hover:text-[#301B69]">FAQ</a></li>
+              <li><a href="/features" class="hover:text-[#301B69] transition-colors">Features</a></li>
+              <li><a href="/#how-it-works" class="hover:text-[#301B69] transition-colors">How it Works</a></li>
+              <li><a href="/pricing" class="hover:text-[#301B69] transition-colors">Pricing</a></li>
+              <li><a href="/changelog" class="hover:text-[#301B69] transition-colors">Changelog</a></li>
             </ul>
           </nav>
 
-          <!-- Support -->
-          <nav aria-label="Support links">
-            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Support</h3>
+          <!-- Use Cases -->
+          <nav aria-label="Use case links">
+            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Use Cases</h3>
             <ul class="space-y-2 text-sm text-[#301B69]/70 list-none">
-              <li>
-                <a href="https://agenvik.com/docs" class="hover:text-[#301B69]">User guide</a>
-              </li>
-              <li>
-                <a href="https://agenvik.com/docs/developer-guide/overview" class="hover:text-[#301B69]">Developer Guide</a>
-              </li>
-              <li>
-                <a href="https://agenvik.com/docs/help-and-support/overview" class="hover:text-[#301B69]">Help &amp; Support</a>
-              </li>
+              <li><a href="/use-cases/customer-support" class="hover:text-[#301B69] transition-colors">Customer Support</a></li>
+              <li><a href="/use-cases/ecommerce" class="hover:text-[#301B69] transition-colors">E-commerce</a></li>
+              <li><a href="/use-cases/internal-knowledge" class="hover:text-[#301B69] transition-colors">Internal Teams</a></li>
+              <li><a href="/use-cases/saas" class="hover:text-[#301B69] transition-colors">SaaS & Product</a></li>
             </ul>
           </nav>
 
-          <!-- Contact -->
-          <address class="not-italic">
-            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Contact Us</h3>
-            <ul class="space-y-3 text-sm text-[#301B69]/70 list-none">
-              <li class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <a href="mailto:hello@agenvik.com" class="hover:text-[#301B69]">hello@agenvik.com</a>
-              </li>
+          <!-- Resources -->
+          <nav aria-label="Resource links">
+            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Resources</h3>
+            <ul class="space-y-2 text-sm text-[#301B69]/70 list-none">
+              <li><a href="/blog" class="hover:text-[#301B69] transition-colors">Blog</a></li>
+              <li><a href="https://agenvik.com/docs" class="hover:text-[#301B69] transition-colors">Documentation</a></li>
+              <li><a href="https://agenvik.com/docs/developer-guide/overview" class="hover:text-[#301B69] transition-colors">Developer Guide</a></li>
+              <li><a href="/faq" class="hover:text-[#301B69] transition-colors">Help &amp; Support</a></li>
             </ul>
-          </address>
+          </nav>
 
-          <!-- Social -->
+          <!-- Company -->
           <div>
-            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Social</h3>
-            <ul class="flex gap-3 list-none">
+            <h3 class="text-sm font-semibold text-[#301B69] mb-4">Company</h3>
+            <ul class="space-y-2 text-sm text-[#301B69]/70 list-none mb-4">
+              <li><a href="/about" class="hover:text-[#301B69] transition-colors">About</a></li>
+              <li><a href="/book-demo" class="hover:text-[#301B69] transition-colors">Book a Demo</a></li>
+              <li>
+                <a href="mailto:hello@agenvik.com" class="hover:text-[#301B69] transition-colors">
+                  hello@agenvik.com
+                </a>
+              </li>
+            </ul>
+
+            <!-- Social -->
+            <ul class="flex gap-2 list-none">
               <li>
                 <a
                   href="https://x.com/agenvik"
                   aria-label="Agenvik on Twitter / X"
-                  class="w-9 h-9 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-md hover:opacity-90 transition"
+                  class="w-8 h-8 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-sm hover:opacity-90 transition-opacity"
                 >
-                  <!-- X / Twitter -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </a>
               </li>
               <li>
                 <a
                   href="https://linkedin.com/company/agenvik"
                   aria-label="Agenvik on LinkedIn"
-                  class="w-9 h-9 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-md hover:opacity-90 transition"
+                  class="w-8 h-8 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-sm hover:opacity-90 transition-opacity"
                 >
-                  <!-- LinkedIn -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                 </a>
               </li>
               <li>
                 <a
                   href="https://instagram.com/agenvik"
                   aria-label="Agenvik on Instagram"
-                  class="w-9 h-9 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-md hover:opacity-90 transition"
+                  class="w-8 h-8 flex items-center justify-center rounded-full bg-[#301B69] text-white shadow-sm hover:opacity-90 transition-opacity"
                 >
-                  <!-- Instagram -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div class="mt-12 border-t border-[#301B69]/10"></div>
+        <div class="border-t border-[#301B69]/10"></div>
 
         <p class="text-center text-sm text-[#301B69]/70 mt-6">
           © 2026 Agenvik. All rights reserved. ·{' '}
-          <a href="/privacy-policy" class="hover:text-[#301B69]">Privacy Policy</a>
+          <a href="/privacy-policy" class="hover:text-[#301B69] transition-colors">Privacy Policy</a>
           {' · '}
-          <a href="/terms" class="hover:text-[#301B69]">Terms &amp; Conditions</a>
+          <a href="/terms" class="hover:text-[#301B69] transition-colors">Terms &amp; Conditions</a>
           {' · '}
-          <a href="/security-policy" class="hover:text-[#301B69]">Security</a>
+          <a href="/security-policy" class="hover:text-[#301B69] transition-colors">Security</a>
         </p>
       </div>
     </div>

@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<Layout
+  title="AI Agent for Customer Support — Agenvik"
+  description="Automate tier-1 support queries 24/7 with an AI agent trained on your own documentation. Reduce ticket volume, speed up response times, and free your team for complex issues."
+  activePage="use-cases"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
+      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4" aria-hidden="true">
+        🎧 CUSTOMER SUPPORT
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
+        Automate tier-1 queries. Answer customers 24/7.
+      </h1>
+      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
+        Your support team shouldn't spend their day on repeat questions. Deploy an Agenvik agent trained on your policies, FAQs, and product docs — and let it handle the first line instantly, around the clock.
+      </p>
+      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
+        Start for free →
+      </a>
+    </section>
+  </main>
+  <Footer />
+</Layout>

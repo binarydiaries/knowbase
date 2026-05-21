@@ -1,14 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import HeroSection from '../components/HeroSection.astro';
+import ProblemSection from '../components/ProblemSection.astro';
+import ComparisonSection from '../components/ComparisonSection.astro';
+import HowItWorksSection from '../components/HowItWorksSection.astro';
 import CoreValueSection from '../components/CoreValueSection.astro';
 import UseCasesSection from '../components/UseCasesSection.astro';
-import PlatformSection from '../components/PlatformSection.astro';
-import HowItWorksSection from '../components/HowItWorksSection.astro';
+import SocialProofSection from '../components/SocialProofSection.astro';
 import PricingSection from '../components/PricingSection.astro';
 import FAQSection from '../components/FAQSection.astro';
+import FinalCTASection from '../components/FinalCTASection.astro';
 import Footer from '../components/Footer.astro';
-import { faqSchema } from '../data/faqs';
+import { faqSchema, homepageFaqs } from '../data/faqs';
 
 const softwareAppSchema = {
   '@context': 'https://schema.org',
@@ -24,7 +27,7 @@ const softwareAppSchema = {
     '@type': 'Offer',
     price: '0',
     priceCurrency: 'INR',
-    description: 'Free plan available. Paid plans start from ₹0/month.',
+    description: 'Free plan available. Paid plans start from ₹499/month.',
   },
   publisher: { '@id': 'https://agenvik.com/#organization' },
   featureList: [
@@ -45,7 +48,7 @@ const howToSchema = {
   '@type': 'HowTo',
   '@id': 'https://agenvik.com/#howto',
   name: 'How to Build and Deploy an AI Agent with Agenvik',
-  description: 'Follow these simple steps to build, train, and deploy your AI agent — no technical expertise required.',
+  description: 'Follow these three steps to build, train, and deploy your AI agent — no technical expertise required.',
   totalTime: 'PT10M',
   estimatedCost: {
     '@type': 'MonetaryAmount',
@@ -56,54 +59,53 @@ const howToSchema = {
     {
       '@type': 'HowToStep',
       position: 1,
-      name: 'Set Up Your Account',
-      text: 'Create your workspace and get started in seconds. Sign up with minimal friction and access your dashboard instantly. No complex onboarding — just a smooth entry into building AI agents.',
-      image: 'https://agenvik.com/step1.png',
+      name: 'Add Your Knowledge',
+      text: 'Upload PDFs, paste your FAQ, drop in a website URL, or type plain text. Your agent learns from whatever you already have — there\'s nothing new to write.',
     },
     {
       '@type': 'HowToStep',
       position: 2,
-      name: 'Create Your Agent',
-      text: 'Define your agent\'s purpose, name, and identity. Whether it\'s for support, learning, or internal use — set the intent clearly. Each agent is independent and fully customizable.',
-      image: 'https://agenvik.com/step2.png',
+      name: 'Configure Your Agent',
+      text: 'Give your agent a name, a tone (friendly, formal, direct), and tell it which channels to live on. It takes 2 minutes. You can change anything later.',
     },
     {
       '@type': 'HowToStep',
       position: 3,
-      name: 'Add Knowledge',
-      text: 'Upload your content or add structured FAQs. Train your agent using real data that matters to you. Your agent learns context, not just keywords. Continuously update its knowledge as your needs evolve.',
-      image: 'https://agenvik.com/step3.png',
-    },
-    {
-      '@type': 'HowToStep',
-      position: 4,
-      name: 'Customize Behavior',
-      text: 'Control how your agent thinks and responds. Adjust tone, personality, and response style. Fine-tune outputs to match your brand or use case.',
-      image: 'https://agenvik.com/step4.png',
-    },
-    {
-      '@type': 'HowToStep',
-      position: 5,
-      name: 'Embed and Share',
-      text: 'Deploy your agent wherever your users are. Embed it on websites or use it internally with your team. Share access instantly — no complex integrations required.',
-      image: 'https://agenvik.com/step5.png',
+      name: 'Go Live',
+      text: 'Copy one line of code to embed on your website. Connect your WhatsApp business number. Link your Slack workspace. Your agent is live and handling queries immediately.',
     },
   ],
 };
+
+const homepageFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: homepageFaqs.map(faq => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 ---
 <Layout
-  title="Agenvik — The Fastest Way to Build Your AI Agent"
-  description="Upload your PDFs, paste your FAQ, or point it at your website — your AI agent goes live in minutes. No coding required. Deploy on your site, WhatsApp, or Slack."
-  jsonLd={[softwareAppSchema, faqSchema, howToSchema]}
+  title="Agenvik — AI Agent That Answers From Your Own Docs"
+  description="Upload a PDF, paste your FAQ, or point it at your website. Your AI agent goes live on your site, WhatsApp, or Slack in 10 minutes. No coding. No hallucinations. Start free."
+  jsonLd={[softwareAppSchema, homepageFaqSchema, howToSchema]}
 >
   <main id="main-content">
     <HeroSection />
+    <ProblemSection />
+    <ComparisonSection />
+    <HowItWorksSection />
     <CoreValueSection />
     <UseCasesSection />
-    <PlatformSection />
-    <HowItWorksSection />
+    <SocialProofSection />
     <PricingSection />
     <FAQSection />
+    <FinalCTASection />
   </main>
   <Footer />
 </Layout>

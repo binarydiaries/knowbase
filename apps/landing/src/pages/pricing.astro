@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+const apiBase = import.meta.env.PUBLIC_API_BASE || '';
+---
+<Layout
+  title="Pricing — Agenvik"
+  description="Simple, transparent pricing that scales with you. Start free and upgrade as you grow. No hidden fees. Plans from ₹0/month."
+  activePage="pricing"
+>
+  <main id="main-content" class="pt-[68px]">
+    <section aria-labelledby="pricing-page-heading" class="px-6 pt-16 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4" aria-hidden="true">
+            ✦ PRICING
+          </div>
+          <h1 id="pricing-page-heading" class="text-3xl md:text-5xl font-bold text-[#301B69] mb-4">
+            Simple, transparent pricing<br />that scales with you
+          </h1>
+          <p class="text-[#301B69]/70 max-w-2xl mx-auto text-base md:text-lg">
+            Start for free and upgrade as your usage grows. No hidden fees, no complicated tiers — just clear limits and real value.
+          </p>
+        </div>
+
+        <ul id="pricing-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 list-none">
+          <li class="rounded-2xl bg-[#301B69]/5 animate-pulse h-80"></li>
+          <li class="rounded-2xl bg-[#301B69]/5 animate-pulse h-80"></li>
+          <li class="rounded-2xl bg-[#301B69]/5 animate-pulse h-80"></li>
+          <li class="rounded-2xl bg-[#301B69]/5 animate-pulse h-80"></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<script define:vars={{ apiBase, appURL }}>
+  async function loadPricing() {
+    var grid = document.getElementById('pricing-grid');
+    if (!grid) return;
+
+    if (!apiBase) {
+      grid.innerHTML = '<li class="col-span-4 text-center text-[#301B69]/60 py-8">Pricing information coming soon.</li>';
+      return;
+    }
+
+    try {
+      var res = await fetch(apiBase + '/subscriptions/plans');
+      var data = await res.json();
+      var plans = data.plans || [];
+
+      if (plans.length === 0) {
+        grid.innerHTML = '<li class="col-span-4 text-center text-[#301B69]/60 py-8">No plans available at this time.</li>';
+        return;
+      }
+
+      grid.innerHTML = plans.map(function (plan) {
+        var isFree = plan.priceMonthlyPaise === 0;
+        var cardClass = plan.highlight
+          ? 'rounded-2xl p-6 border shadow-lg border-[#301B69]/20 bg-white'
+          : 'rounded-2xl p-6 border shadow-sm border-[#301B69]/10 bg-white/80';
+        var btnClass = plan.highlight
+          ? 'w-full p-2.5 rounded-xl text-sm bg-[#301B69] text-white shadow-md'
+          : 'w-full p-2.5 rounded-xl text-sm bg-white border border-[#301B69]/20 text-[#301B69]';
+
+        var featuresHTML = plan.features.map(function (f) {
+          return '<li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#301B69] flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span class="text-sm text-[#301B69]/80">' + f + '</span></li>';
+        }).join('');
+
+        return '<li class="' + cardClass + '"><article aria-label="' + plan.name + ' plan"><div class="mb-4 flex items-start justify-between"><h2 class="text-xl font-semibold text-[#301B69]">' + plan.name + '</h2>' + (plan.highlight ? '<span class="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-[#301B69]/10 text-[#301B69]">✦ Most Popular ✦</span>' : '') + '</div><div class="mb-6"><span class="text-3xl font-bold text-[#301B69]">' + plan.priceDisplay + '</span><span class="text-sm text-[#301B69]/70">' + (isFree ? ' forever' : ' ' + plan.period) + '</span></div><div class="border-t border-[#301B69]/10 mb-6"></div><ul class="space-y-3 mb-6 list-none">' + featuresHTML + '</ul><div><a href="' + appURL + '" data-get-started data-source="pricing_page" data-plan="' + plan.name + '" class="' + btnClass + '">' + (isFree ? 'Get Started Free' : 'Get Started') + '</a></div></article></li>';
+      }).join('');
+    } catch (e) {
+      if (grid) grid.innerHTML = '<li class="col-span-4 text-center text-[#301B69]/60 py-8">Unable to load pricing. Please try again later.</li>';
+    }
+  }
+
+  loadPricing();
+</script>

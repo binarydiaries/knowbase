@@ -1,3 +1,22 @@
+export const homepageFaqs = [
+  {
+    question: 'Is this just another chatbot builder?',
+    answer: 'No. Most chatbot builders make you write scripts and decision trees. Agenvik learns from your actual documents and answers in natural language — so you upload your content once and it handles the rest.',
+  },
+  {
+    question: 'Will my customers know it\'s AI?',
+    answer: 'Only if you want them to. You control the agent\'s name, tone, and avatar. Many businesses run it as "Aria from [Company]" with no mention of AI at all.',
+  },
+  {
+    question: 'What if it gives a wrong answer?',
+    answer: 'Agenvik only answers from content you provide. If the information isn\'t in your knowledge base, the agent says so rather than guessing. You can also see every conversation and add knowledge to fill gaps.',
+  },
+  {
+    question: 'How long does setup take?',
+    answer: 'Most users are live in under 30 minutes on their first agent. Upload your documents, configure your agent, copy the embed code. That\'s it.',
+  },
+];
+
 export const faqs = [
   {
     question: 'What is Agenvik?',

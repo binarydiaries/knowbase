@@ -8,10 +8,16 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
 <section
   aria-label="Hero"
-  class="relative w-full overflow-hidden bg-cover bg-center pt-[68px]"
-  style={`background-image: url(${heroBg.src})`}
+  class="relative w-full overflow-hidden bg-white pt-[68px]"
 >
-  <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
+  <!-- Grid pattern -->
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%);"
+    aria-hidden="true"
+  ></div>
+  <!-- Soft radial highlight so the grid doesn't feel flat -->
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none" aria-hidden="true"></div>
 
   <div class="relative z-10 text-center max-w-4xl mx-auto px-6 pt-16 pb-28">
     <p class="inline-block text-sm text-[#301B69]/70 mb-5 tracking-wide">
@@ -53,7 +59,7 @@ const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
     <Image
       src={dashboardSrc}
       alt="Agenvik platform dashboard showing AI agent creation and management interface"
-      class="rounded-2xl shadow-2xl w-full"
+      class="rounded-2xl shadow-2xl ring-1 ring-[#301B69]/15 w-full"
       loading="eager"
       fetchpriority="high"
     />

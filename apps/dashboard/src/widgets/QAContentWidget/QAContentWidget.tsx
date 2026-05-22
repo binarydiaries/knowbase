@@ -35,6 +35,7 @@ type IQAContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: DocumentSchema;
   onClose?: () => void;
+  onSuccess?: () => void;
   readOnly?: boolean;
 };
 
@@ -65,6 +66,7 @@ export const QAContentWidget = ({
   mode = 'add',
   document,
   onClose,
+  onSuccess,
   readOnly = false,
 }: IQAContentWidgetProps) => {
   const { addUpdateDocument } = useDocuments();
@@ -123,6 +125,7 @@ export const QAContentWidget = ({
           agent_id: agentId,
           source_type: 'qna',
         });
+        onSuccess?.();
       }
       onClose?.();
     },

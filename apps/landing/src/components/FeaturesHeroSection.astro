@@ -1,0 +1,44 @@
+---
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+---
+<section class="relative overflow-hidden bg-white pt-[68px]">
+  <!-- Grid pattern -->
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%);"
+    aria-hidden="true"
+  ></div>
+  <!-- Radial highlight -->
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none" aria-hidden="true"></div>
+
+  <div class="relative z-10 text-center max-w-4xl mx-auto px-6 pt-20 pb-20">
+    <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-5" aria-hidden="true">
+      ✦ FEATURES
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold text-[#301B69] mb-5 leading-tight tracking-tight">
+      Everything you need to build an AI agent that actually knows your business
+    </h1>
+    <p class="text-[#301B69]/70 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+      No prompt engineering. No infrastructure. No AI expertise required. Just your content, your brand, and the channels your customers already use.
+    </p>
+    <a
+      href={appURL}
+      data-get-started
+      data-source="features_hero"
+      class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+    >
+      Start for free →
+    </a>
+  </div>
+</section>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.querySelector('[data-source="features_hero"]');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        window.amplitude?.track('Get Started Clicked', { source: 'features_hero' });
+      });
+    }
+  });
+</script>

@@ -1,41 +1,29 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import CoreValueSection from '../components/CoreValueSection.astro';
+import FeaturesHeroSection from '../components/FeaturesHeroSection.astro';
+import KnowledgeSection from '../components/KnowledgeSection.astro';
+import AgentBuilderSection from '../components/AgentBuilderSection.astro';
+import ChannelsSection from '../components/ChannelsSection.astro';
+import CustomisationSection from '../components/CustomisationSection.astro';
+import AnalyticsSection from '../components/AnalyticsSection.astro';
+import ComingSoonSection from '../components/ComingSoonSection.astro';
+import FinalCTASection from '../components/FinalCTASection.astro';
 import Footer from '../components/Footer.astro';
-
-const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---
 <Layout
-  title="Features — Agenvik"
-  description="Agenvik gives you accurate AI answers grounded in your own documents — with your tone, on three channels. No hallucinations. No prompt engineering."
+  title="Agenvik Features — Knowledge Base, Multi-Channel, Analytics & More"
+  description="See every feature Agenvik offers — upload PDFs, crawl websites, deploy on WhatsApp and Slack, customise agent behaviour, and track every conversation."
   activePage="features"
 >
-  <main id="main-content" class="pt-[68px]">
-    <section class="px-6 pt-16 pb-4 text-center max-w-4xl mx-auto">
-      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4" aria-hidden="true">
-        ✦ WHAT YOU GET
-      </div>
-      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-4">
-        Built to give accurate answers, not impressive-sounding ones
-      </h1>
-      <p class="text-[#301B69]/70 text-base md:text-lg mb-4">
-        Every feature in Agenvik is designed around one goal: your customers get the right answer, every time.
-      </p>
-    </section>
-
-    <CoreValueSection />
-
-    <section class="px-6 pt-16 pb-16 text-center">
-      <div class="max-w-2xl mx-auto">
-        <h2 class="text-2xl md:text-3xl font-bold text-[#301B69] mb-4">Ready to see it in action?</h2>
-        <a
-          href={appURL}
-          class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
-        >
-          Start for free →
-        </a>
-      </div>
-    </section>
+  <main id="main-content">
+    <FeaturesHeroSection />
+    <KnowledgeSection />
+    <AgentBuilderSection />
+    <ChannelsSection />
+    <CustomisationSection />
+    <AnalyticsSection />
+    <ComingSoonSection />
+    <FinalCTASection />
   </main>
   <Footer />
 </Layout>

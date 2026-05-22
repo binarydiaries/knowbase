@@ -1,0 +1,103 @@
+---
+import { User, LayoutGrid, Zap } from '@lucide/astro';
+---
+<section id="agent-builder" aria-labelledby="agent-builder-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+      <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[#301B69] blur-[120px] opacity-40" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#B07CD1]/20 blur-[100px]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/10 text-white/80 mb-4" aria-hidden="true">
+          ✦ AGENT BUILDER
+        </div>
+        <h2 id="agent-builder-heading" class="text-3xl md:text-4xl font-bold text-white mb-10">
+          Build your agent in minutes. No code, no config files.
+        </h2>
+
+        <div class="grid md:grid-cols-3 gap-6">
+
+          <!-- Agent Identity -->
+          <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
+                <User size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-white text-lg mb-2">Give your agent a name and a face</h3>
+              <p class="text-sm text-white/60 leading-relaxed">Set your agent's name, upload an avatar, and write a short description of what it does. Make it feel like part of your team, not a generic AI.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-white/10 bg-white/5 p-4 space-y-3 mt-auto">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 flex-shrink-0 border border-dashed border-white/20">
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </div>
+                <div class="flex-1 bg-white/10 rounded-lg border border-white/10 px-3 py-1.5 flex items-center justify-between">
+                  <span class="text-xs text-white font-medium">Aria</span>
+                  <span class="w-0.5 h-3.5 bg-white/60 rounded animate-pulse" aria-hidden="true"></span>
+                </div>
+              </div>
+              <div>
+                <p class="text-[9px] text-white/30 uppercase tracking-wider mb-1 font-medium">Description</p>
+                <div class="bg-white/10 rounded-lg border border-white/10 px-3 py-2">
+                  <p class="text-[10px] text-white/60">Aria helps customers with orders, returns, and product questions.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Multi-Agent Support -->
+          <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
+                <LayoutGrid size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-white text-lg mb-2">Run different agents for different purposes</h3>
+              <p class="text-sm text-white/60 leading-relaxed">Your public support agent, your internal knowledge base, and your sales qualifier can all be different agents — each with its own knowledge, tone, and channels.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-white/10 bg-white/5 p-3 space-y-2 mt-auto">
+              {[
+                { name: 'Customer Support — Aria', msgs: '2.4k msgs' },
+                { name: 'Internal HR Bot', msgs: '312 msgs' },
+                { name: 'Sales Assistant', msgs: '890 msgs' },
+              ].map((agent) => (
+                <div class="flex items-center justify-between bg-white/10 rounded-xl px-3 py-2.5 border border-white/10">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></div>
+                    <span class="text-[10px] text-white/80 font-medium">{agent.name}</span>
+                  </div>
+                  <span class="text-[9px] text-white/30">{agent.msgs}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Instant Deployment -->
+          <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
+                <Zap size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-white text-lg mb-2">Go live the moment you're ready</h3>
+              <p class="text-sm text-white/60 leading-relaxed">No approval process. No review queue. As soon as you've added knowledge and configured your agent, it's live. Deploy to your website with a one-line embed code, or connect WhatsApp/Slack with a guided OAuth flow.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-white/10 bg-[#0d0a1a] p-4 mt-auto">
+              <p class="text-[9px] text-white/30 uppercase tracking-wider mb-2 font-medium">Copy to deploy</p>
+              <code class="text-[9px] text-emerald-400 leading-relaxed block">
+                {'<script src="https://embed.agenvik.com'}
+                <br />
+                {'  /embed.js" data-channel-id='}
+                <br />
+                {'  "your-channel-id"></script>'}
+              </code>
+              <div class="flex items-center gap-1.5 mt-3 pt-3 border-t border-white/10">
+                <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                <span class="text-[9px] text-white/40">Live on your website</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

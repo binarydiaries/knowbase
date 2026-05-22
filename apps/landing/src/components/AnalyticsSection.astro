@@ -1,0 +1,128 @@
+---
+import { getImage } from 'astro:assets';
+import coreBgSrc from '../assets/images/core-bg.png';
+import { MessageSquare, TrendingUp, BarChart2 } from '@lucide/astro';
+
+const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
+---
+<section id="analytics" aria-labelledby="analytics-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden"
+      style={`background-image: url(${coreBg.src})`}
+    >
+      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+      <div class="absolute -top-20 right-1/4 w-[500px] h-[300px] bg-[#301B69]/20 blur-[120px] opacity-30" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-4" aria-hidden="true">
+          ✦ ANALYTICS
+        </div>
+        <h2 id="analytics-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-10">
+          See what your customers are actually asking
+        </h2>
+
+        <div class="grid md:grid-cols-3 gap-6">
+
+          <!-- Conversation Log -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <MessageSquare size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Every conversation, searchable and readable</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">Every chat session is logged in full. See the exact questions asked, the answers given, and whether the agent answered from your knowledge base or hit a fallback. Filter by channel, date, or search for specific queries.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-white overflow-hidden mt-auto">
+              <div class="grid grid-cols-3 bg-[#301B69]/[0.03] px-3 py-2 border-b border-[#301B69]/8">
+                <span class="text-[8px] text-[#301B69]/40 font-semibold uppercase tracking-wider">Channel</span>
+                <span class="text-[8px] text-[#301B69]/40 font-semibold uppercase tracking-wider">Message</span>
+                <span class="text-[8px] text-[#301B69]/40 font-semibold uppercase tracking-wider">Outcome</span>
+              </div>
+              {[
+                { channel: 'Website', msg: 'Shipping to US?', outcome: 'Answered', ok: true },
+                { channel: 'WhatsApp', msg: 'Store hours?', outcome: 'Answered', ok: true },
+                { channel: 'Slack', msg: 'Leave policy?', outcome: 'Fallback', ok: false },
+                { channel: 'Website', msg: 'Cancel order?', outcome: 'Answered', ok: true },
+              ].map((row) => (
+                <div class="grid grid-cols-3 px-3 py-2 border-b border-[#301B69]/5 last:border-0">
+                  <span class="text-[9px] text-[#301B69]/50">{row.channel}</span>
+                  <span class="text-[9px] text-[#301B69]/70 truncate">{row.msg}</span>
+                  <span class:list={['text-[8px] px-1.5 py-0.5 rounded-full font-medium w-fit', row.ok ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700']}>{row.outcome}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Top Questions -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <TrendingUp size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Know what your customers can't find on their own</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">The most-asked questions are surfaced automatically. These are the gaps in your product, docs, or support content — prioritise answering them to reduce tickets and improve your knowledge base.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-3 space-y-2 mt-auto">
+              <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider font-medium px-1 mb-1">Top questions this week</p>
+              {[
+                { q: 'How do I reset my password?', n: 47 },
+                { q: "What's the refund policy?", n: 31 },
+                { q: 'Do you ship to [city]?', n: 28 },
+              ].map((item, i) => (
+                <div class="flex items-start gap-2 bg-white rounded-lg px-3 py-2 border border-[#301B69]/8">
+                  <span class="text-[9px] font-bold text-[#301B69]/30 w-4 flex-shrink-0 mt-0.5">{i + 1}.</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-[10px] text-[#301B69]/80 leading-snug">{item.q}</p>
+                    <p class="text-[8px] text-[#301B69]/40 mt-0.5">{item.n} times this week</p>
+                  </div>
+                  <button type="button" class="text-[8px] text-[#301B69]/50 border border-[#301B69]/15 rounded px-1.5 py-0.5 hover:bg-[#301B69]/5 transition-colors flex-shrink-0">
+                    Add
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Channel Performance -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <BarChart2 size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">See which channels drive the most conversations</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">Track conversation volume, message count, and fallback rate by channel. Understand where your customers prefer to ask questions, and where your agent needs more knowledge.</p>
+            </div>
+            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 mt-auto">
+              <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider font-medium mb-4">Conversations by channel</p>
+              <div class="space-y-3">
+                {[
+                  { label: 'Website', pct: 60, convs: '1,240' },
+                  { label: 'WhatsApp', pct: 30, convs: '620' },
+                  { label: 'Slack', pct: 10, convs: '207' },
+                ].map((ch) => (
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-[10px] text-[#301B69]/70 font-medium">{ch.label}</span>
+                      <span class="text-[9px] text-[#301B69]/40">{ch.convs} convs</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-[#301B69]/8 overflow-hidden">
+                      <div class="h-full rounded-full bg-[#301B69]" style={`width: ${ch.pct}%`}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur border border-[#301B69]/10 text-sm text-[#301B69]/70">
+          <svg class="w-4 h-4 text-[#301B69]/40 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Available on Growth and Pro plans
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

@@ -13,10 +13,16 @@ export const AdminFeatureFlags = new Elysia({
   .put(
     '/:flag',
     async ({ params, body }) => {
-      await FeatureFlagService.setGlobal(params.flag, body.globalEnabled, body.description);
+      await FeatureFlagService.setGlobal(
+        params.flag,
+        body.globalEnabled,
+        body.description,
+      );
       const all = await FeatureFlagService.listAll();
       const updated = all.find((f) => f.flag === params.flag);
-      return updated ?? { flag: params.flag, globalEnabled: body.globalEnabled };
+      return (
+        updated ?? { flag: params.flag, globalEnabled: body.globalEnabled }
+      );
     },
     {
       params: t.Object({ flag: t.String() }),
@@ -38,7 +44,11 @@ export const AdminFeatureFlags = new Elysia({
   .put(
     '/:flag/orgs',
     async ({ params, body }) => {
-      await FeatureFlagService.setOrgOverrides(params.flag, body.orgIds, body.enabled);
+      await FeatureFlagService.setOrgOverrides(
+        params.flag,
+        body.orgIds,
+        body.enabled,
+      );
       return { success: true, count: body.orgIds.length };
     },
     {

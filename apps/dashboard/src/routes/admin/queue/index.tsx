@@ -1,9 +1,15 @@
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { toast } from '@knowbase/ui/components/sonner';
 import {
   Table,
   TableBody,
@@ -12,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
-import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -47,7 +52,13 @@ type QueueCounts = {
   completed: number;
 };
 
-type StatusFilter = 'all' | 'waiting' | 'active' | 'delayed' | 'failed' | 'completed';
+type StatusFilter =
+  | 'all'
+  | 'waiting'
+  | 'active'
+  | 'delayed'
+  | 'failed'
+  | 'completed';
 
 const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
   { label: 'All', value: 'all' },
@@ -58,7 +69,13 @@ const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
   { label: 'Completed', value: 'completed' },
 ];
 
-const STATE_BADGE: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
+const STATE_BADGE: Record<
+  string,
+  {
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    label: string;
+  }
+> = {
   waiting: { variant: 'secondary', label: 'Waiting' },
   active: { variant: 'default', label: 'Active' },
   delayed: { variant: 'outline', label: 'Delayed' },
@@ -73,13 +90,25 @@ function formatTs(ts: number | null) {
   return new Date(ts).toLocaleString();
 }
 
-function StatCard({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function StatCard({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: number;
+  highlight?: boolean;
+}) {
   return (
     <Card>
       <CardHeader className="pb-1">
-        <CardTitle className="text-xs text-muted-foreground font-normal">{label}</CardTitle>
+        <CardTitle className="text-xs text-muted-foreground font-normal">
+          {label}
+        </CardTitle>
       </CardHeader>
-      <CardContent className={`text-2xl font-semibold ${highlight && value > 0 ? 'text-destructive' : ''}`}>
+      <CardContent
+        className={`text-2xl font-semibold ${highlight && value > 0 ? 'text-destructive' : ''}`}
+      >
         {value}
       </CardContent>
     </Card>
@@ -129,7 +158,10 @@ function RouteComponent() {
   const jobsQuery = useQuery<QueueJobsResponse>({
     queryKey: ['admin-queue-jobs', statusFilter, page],
     queryFn: () => {
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(page) });
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        page: String(page),
+      });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       return authFetch(`/admin/queue/jobs?${params}`);
     },
@@ -138,7 +170,8 @@ function RouteComponent() {
   });
 
   const retryMutation = useMutation({
-    mutationFn: (jobId: string) => authFetch(`/admin/queue/jobs/${jobId}/retry`, { method: 'POST' }),
+    mutationFn: (jobId: string) =>
+      authFetch(`/admin/queue/jobs/${jobId}/retry`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-queue-jobs'] });
       queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
@@ -150,7 +183,8 @@ function RouteComponent() {
   });
 
   const executeMutation = useMutation({
-    mutationFn: (jobId: string) => authFetch(`/admin/queue/jobs/${jobId}/execute`, { method: 'POST' }),
+    mutationFn: (jobId: string) =>
+      authFetch(`/admin/queue/jobs/${jobId}/execute`, { method: 'POST' }),
     onSuccess: () => {
       // Poll every 2 s for 30 s to catch the async moveToCompleted update
       setFastPoll(true);
@@ -182,7 +216,10 @@ function RouteComponent() {
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
           <h1 className="text-sm font-medium">Admin Queue</h1>
         </div>
         <div className="px-4">
@@ -191,7 +228,9 @@ function RouteComponent() {
             size="sm"
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ['admin-queue-jobs'] });
-              queryClient.invalidateQueries({ queryKey: ['admin-queue-counts'] });
+              queryClient.invalidateQueries({
+                queryKey: ['admin-queue-counts'],
+              });
             }}
           >
             Refresh
@@ -246,7 +285,9 @@ function RouteComponent() {
                 <CardTitle>
                   Jobs
                   {jobsQuery.isFetching && (
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">Loading…</span>
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      Loading…
+                    </span>
                   )}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -277,9 +318,13 @@ function RouteComponent() {
               </CardHeader>
               <CardContent className="p-0">
                 {jobsQuery.error ? (
-                  <p className="p-4 text-sm text-destructive">Failed to load queue jobs.</p>
+                  <p className="p-4 text-sm text-destructive">
+                    Failed to load queue jobs.
+                  </p>
                 ) : jobs.length === 0 && !jobsQuery.isFetching ? (
-                  <p className="p-4 text-sm text-muted-foreground">No jobs found.</p>
+                  <p className="p-4 text-sm text-muted-foreground">
+                    No jobs found.
+                  </p>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
@@ -300,13 +345,22 @@ function RouteComponent() {
                       </TableHeader>
                       <TableBody>
                         {jobs.map((job) => {
-                          const badge = STATE_BADGE[job.state] ?? { variant: 'outline' as const, label: job.state };
-                          const canRetry = job.state === 'failed' || job.state === 'delayed';
-                          const canExecute = job.state !== 'active' && job.state !== 'completed';
-                          const isActing = retryMutation.isPending || executeMutation.isPending;
+                          const badge = STATE_BADGE[job.state] ?? {
+                            variant: 'outline' as const,
+                            label: job.state,
+                          };
+                          const canRetry =
+                            job.state === 'failed' || job.state === 'delayed';
+                          const canExecute =
+                            job.state !== 'active' && job.state !== 'completed';
+                          const isActing =
+                            retryMutation.isPending ||
+                            executeMutation.isPending;
                           return (
                             <TableRow key={job.id}>
-                              <TableCell className="font-mono text-xs">{job.id}</TableCell>
+                              <TableCell className="font-mono text-xs">
+                                {job.id}
+                              </TableCell>
                               <TableCell className="font-mono text-xs max-w-[160px] truncate">
                                 {job.data.documentId || '—'}
                               </TableCell>
@@ -317,12 +371,22 @@ function RouteComponent() {
                                 {job.data.version ?? '—'}
                               </TableCell>
                               <TableCell>
-                                <Badge variant={badge.variant}>{badge.label}</Badge>
+                                <Badge variant={badge.variant}>
+                                  {badge.label}
+                                </Badge>
                               </TableCell>
-                              <TableCell className="text-right">{job.attemptsMade}</TableCell>
-                              <TableCell className="text-xs whitespace-nowrap">{formatTs(job.timestamp)}</TableCell>
-                              <TableCell className="text-xs whitespace-nowrap">{formatTs(job.processedOn)}</TableCell>
-                              <TableCell className="text-xs whitespace-nowrap">{formatTs(job.finishedOn)}</TableCell>
+                              <TableCell className="text-right">
+                                {job.attemptsMade}
+                              </TableCell>
+                              <TableCell className="text-xs whitespace-nowrap">
+                                {formatTs(job.timestamp)}
+                              </TableCell>
+                              <TableCell className="text-xs whitespace-nowrap">
+                                {formatTs(job.processedOn)}
+                              </TableCell>
+                              <TableCell className="text-xs whitespace-nowrap">
+                                {formatTs(job.finishedOn)}
+                              </TableCell>
                               <TableCell className="text-xs max-w-[180px] truncate text-destructive">
                                 {job.failedReason ?? '—'}
                               </TableCell>
@@ -333,9 +397,13 @@ function RouteComponent() {
                                       size="sm"
                                       variant="outline"
                                       disabled={isActing}
-                                      onClick={() => retryMutation.mutate(job.id)}
+                                      onClick={() =>
+                                        retryMutation.mutate(job.id)
+                                      }
                                     >
-                                      {job.state === 'delayed' ? 'Promote' : 'Retry'}
+                                      {job.state === 'delayed'
+                                        ? 'Promote'
+                                        : 'Retry'}
                                     </Button>
                                   )}
                                   {canExecute && (
@@ -343,7 +411,9 @@ function RouteComponent() {
                                       size="sm"
                                       variant="default"
                                       disabled={isActing}
-                                      onClick={() => executeMutation.mutate(job.id)}
+                                      onClick={() =>
+                                        executeMutation.mutate(job.id)
+                                      }
                                     >
                                       Execute Now
                                     </Button>

@@ -1,4 +1,10 @@
-import { boolean, index, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  pgTable,
+  uniqueIndex,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 
 export const orgFeatureFlags = pgTable(

@@ -1,10 +1,15 @@
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
+import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from '@knowbase/ui/components/chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, XAxis, YAxis } from 'recharts';
@@ -23,7 +28,11 @@ type Props = {
   endDate: string;
 };
 
-export function CountryDistributionChart({ agentId, startDate, endDate }: Props) {
+export function CountryDistributionChart({
+  agentId,
+  startDate,
+  endDate,
+}: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['analytics-country', agentId, startDate, endDate],
     queryFn: async () => {
@@ -61,7 +70,13 @@ export function CountryDistributionChart({ agentId, startDate, endDate }: Props)
               layout="vertical"
               margin={{ left: 8, right: 16 }}
             >
-              <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
+              <XAxis
+                type="number"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 11 }}
+                allowDecimals={false}
+              />
               <YAxis
                 dataKey="country"
                 type="category"

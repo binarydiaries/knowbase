@@ -11,11 +11,11 @@ import { useParams } from '@tanstack/react-router';
 import { Archive, ArchiveRestore, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { ArchiveAgentDialog } from '@/components/ArchiveAgentDialog/ArchiveAgentDialog.tsx';
-import { patchAgentsById } from '@/services';
 import {
   AGENT_LIMIT_TOOLTIP,
   DisabledTooltip,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import { patchAgentsById } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
 export const AgentMenuActions = ({

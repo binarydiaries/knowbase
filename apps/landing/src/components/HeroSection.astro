@@ -1,7 +1,7 @@
 ---
-import { Image, getImage } from 'astro:assets';
-import dashboardSrc from '../assets/images/hero-dashboard.png';
+import { getImage, Image } from 'astro:assets';
 import heroBgSrc from '../assets/images/hero-bg.png';
+import dashboardSrc from '../assets/images/hero-dashboard.png';
 
 const heroBg = await getImage({ src: heroBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';

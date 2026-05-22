@@ -1,8 +1,8 @@
-import { SidebarInset, SidebarProvider } from '@knowbase/ui/components/sidebar';
 import * as amplitude from '@amplitude/unified';
+import { useUser } from '@clerk/clerk-react';
+import { SidebarInset, SidebarProvider } from '@knowbase/ui/components/sidebar';
 import * as Sentry from '@sentry/react';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { useUser } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 import { AppSidebar } from '@/components/AppSidebar/AppSidebar.tsx';
 

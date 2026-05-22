@@ -33,8 +33,8 @@ import { ConversationListItem } from '@/components/Conversations/ConversationLis
 import { ConversationMessageItem } from '@/components/Conversations/ConversationMessageItem';
 import { ConversationThreadMeta } from '@/components/Conversations/ConversationThreadMeta';
 import {
-  getChannels,
   getAgents,
+  getChannels,
   getConversations,
   getMessages,
 } from '@/services';
@@ -137,7 +137,9 @@ function RouteComponent() {
 
   useEffect(() => {
     if (conversationId) {
-      amplitude.track('Conversation Viewed', { conversation_id: conversationId });
+      amplitude.track('Conversation Viewed', {
+        conversation_id: conversationId,
+      });
     }
   }, [conversationId]);
 
@@ -163,9 +165,7 @@ function RouteComponent() {
   ]);
 
   const agentNameById = (id: string) => {
-    return (
-      agents.find((agent) => agent.id === id)?.name ?? 'Unknown agent'
-    );
+    return agents.find((agent) => agent.id === id)?.name ?? 'Unknown agent';
   };
 
   const channelLabelById = (id: string) => {
@@ -203,7 +203,10 @@ function RouteComponent() {
               agentIdFilter={agentIdFilter}
               onAgentIdFilterChange={(value) => {
                 setAgentIdFilter(value);
-                amplitude.track('Conversation Filter Applied', { filter_type: 'agent', agent_id: value });
+                amplitude.track('Conversation Filter Applied', {
+                  filter_type: 'agent',
+                  agent_id: value,
+                });
                 void navigate({
                   from: '/conversations/{-$conversationId}/',
                   search: (prev) => ({ ...prev, page: 1 }),

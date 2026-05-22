@@ -1,5 +1,5 @@
-import type { PaymentProvider } from './types';
 import { RazorpayProvider } from './razorpay';
+import type { PaymentProvider } from './types';
 
 const PROVIDERS: Record<string, PaymentProvider> = {
   razorpay: new RazorpayProvider(),
@@ -15,4 +15,9 @@ export function getDefaultProvider(): PaymentProvider {
   return getProvider(process.env.PAYMENT_PROVIDER ?? 'razorpay');
 }
 
-export type { PaymentProvider, CheckoutResult, WebhookEvent, PaidPlanName } from './types';
+export type {
+  CheckoutResult,
+  PaidPlanName,
+  PaymentProvider,
+  WebhookEvent,
+} from './types';

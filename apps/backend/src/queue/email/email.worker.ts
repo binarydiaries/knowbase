@@ -27,7 +27,11 @@ export const emailWorker = new Worker(
     if (data.type === 'lead-notification') {
       const [agent, leads] = await Promise.all([
         AgentService.single({ id: data.agentId, orgId: data.orgId }),
-        LeadService.list({ orgId: data.orgId, agentId: data.agentId, limit: 1 }),
+        LeadService.list({
+          orgId: data.orgId,
+          agentId: data.agentId,
+          limit: 1,
+        }),
       ]);
 
       if (!agent?.createdBy) return;
@@ -56,9 +60,15 @@ export const emailWorker = new Worker(
     if (!to) return;
 
     if (data.type === 'document-indexed') {
-      await EmailService.sendDocumentIndexed({ to, documentTitle: data.documentTitle });
+      await EmailService.sendDocumentIndexed({
+        to,
+        documentTitle: data.documentTitle,
+      });
     } else {
-      await EmailService.sendDocumentFailed({ to, documentTitle: data.documentTitle });
+      await EmailService.sendDocumentFailed({
+        to,
+        documentTitle: data.documentTitle,
+      });
     }
   },
   { connection },

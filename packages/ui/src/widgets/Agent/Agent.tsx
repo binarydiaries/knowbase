@@ -8,7 +8,15 @@ import {
 } from '@knowbase/ui/components/dropdown-menu';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, MessageSquarePlus, MoreVertical, SendHorizonal, Volume2, VolumeOff, X } from 'lucide-react';
+import {
+  Ellipsis,
+  MessageSquarePlus,
+  MoreVertical,
+  SendHorizonal,
+  Volume2,
+  VolumeOff,
+  X,
+} from 'lucide-react';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Agent.types';
 import { ChatMessage } from './ChatMessage';
@@ -69,7 +77,9 @@ export const Agent = ({
   ...otherProps
 }: IAgentProps) => {
   const [input, setInput] = useState('');
-  const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === 'true');
+  const [muted, setMuted] = useState(
+    () => localStorage.getItem(MUTE_KEY) === 'true',
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // Initialise with the current count so the welcome message never triggers a tone.
@@ -96,7 +106,8 @@ export const Agent = ({
 
   // Play tone when a new system message arrives and not muted.
   useEffect(() => {
-    const systemCount = messages?.filter((m) => m.type === 'system').length ?? 0;
+    const systemCount =
+      messages?.filter((m) => m.type === 'system').length ?? 0;
     if (systemCount > prevSystemCountRef.current && !muted) {
       playNotificationTone();
     }

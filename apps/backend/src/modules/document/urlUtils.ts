@@ -48,7 +48,10 @@ export async function assertPublicUrl(rawUrl: string): Promise<void> {
   }
 }
 
-async function fetchFollowingRedirects(url: string, hopsLeft = MAX_REDIRECTS): Promise<Response> {
+async function fetchFollowingRedirects(
+  url: string,
+  hopsLeft = MAX_REDIRECTS,
+): Promise<Response> {
   let res: Response;
   try {
     res = await fetch(url, {
@@ -59,7 +62,9 @@ async function fetchFollowingRedirects(url: string, hopsLeft = MAX_REDIRECTS): P
   } catch (err) {
     const msg = err instanceof Error ? err.message : '';
     if (msg.includes('timeout') || msg.includes('aborted')) {
-      throw Object.assign(new Error('FETCH_TIMEOUT'), { code: 'FETCH_TIMEOUT' });
+      throw Object.assign(new Error('FETCH_TIMEOUT'), {
+        code: 'FETCH_TIMEOUT',
+      });
     }
     throw Object.assign(new Error('FETCH_FAILED'), { code: 'FETCH_FAILED' });
   }
@@ -80,22 +85,33 @@ async function fetchFollowingRedirects(url: string, hopsLeft = MAX_REDIRECTS): P
   return res;
 }
 
-export async function urlToText(rawUrl: string): Promise<{ text: string; title: string; charCount: number }> {
+export async function urlToText(
+  rawUrl: string,
+): Promise<{ text: string; title: string; charCount: number }> {
   await assertPublicUrl(rawUrl);
 
   const res = await fetchFollowingRedirects(rawUrl);
 
   if (!res.ok) {
-    throw Object.assign(new Error(`HTTP_${res.status}`), { code: 'FETCH_FAILED', httpStatus: res.status });
+    throw Object.assign(new Error(`HTTP_${res.status}`), {
+      code: 'FETCH_FAILED',
+      httpStatus: res.status,
+    });
   }
 
   const contentLength = res.headers.get('content-length');
-  if (contentLength && Number.parseInt(contentLength, 10) > RESPONSE_BODY_LIMIT_BYTES) {
+  if (
+    contentLength &&
+    Number.parseInt(contentLength, 10) > RESPONSE_BODY_LIMIT_BYTES
+  ) {
     throw Object.assign(new Error('FETCH_FAILED'), { code: 'FETCH_FAILED' });
   }
 
   const contentType = res.headers.get('content-type') ?? '';
-  if (!contentType.includes('text/html') && !contentType.includes('text/plain')) {
+  if (
+    !contentType.includes('text/html') &&
+    !contentType.includes('text/plain')
+  ) {
     throw Object.assign(new Error('NOT_HTML'), { code: 'NOT_HTML' });
   }
 
@@ -103,13 +119,18 @@ export async function urlToText(rawUrl: string): Promise<{ text: string; title: 
   const root = htmlParse(html);
 
   // Remove noise elements
-  for (const el of root.querySelectorAll('script, style, nav, footer, header, noscript, [aria-hidden="true"]')) {
+  for (const el of root.querySelectorAll(
+    'script, style, nav, footer, header, noscript, [aria-hidden="true"]',
+  )) {
     el.remove();
   }
 
   const title = root.querySelector('title')?.text.trim() ?? rawUrl;
-  const text = (root.querySelector('main') ?? root.querySelector('body') ?? root)
-    .text
+  const text = (
+    root.querySelector('main') ??
+    root.querySelector('body') ??
+    root
+  ).text
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, URL_MAX_TEXT_CHARS);

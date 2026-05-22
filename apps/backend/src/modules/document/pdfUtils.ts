@@ -30,7 +30,11 @@ export async function pdfToMarkdown(buffer: Uint8Array) {
 
     // Group items that share the same Y position into lines
     const lines: { text: string; height: number }[] = [];
-    let current = { text: items[0].str, y: items[0].y, height: items[0].height };
+    let current = {
+      text: items[0].str,
+      y: items[0].y,
+      height: items[0].height,
+    };
     for (const item of items.slice(1)) {
       if (Math.abs(item.y - current.y) <= LINE_MERGE_THRESHOLD) {
         current.text += item.str;
@@ -47,7 +51,9 @@ export async function pdfToMarkdown(buffer: Uint8Array) {
     for (const h of lines.map((l) => Math.round(l.height))) {
       freq[h] = (freq[h] ?? 0) + 1;
     }
-    const bodyHeight = Number(Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0]);
+    const bodyHeight = Number(
+      Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0],
+    );
 
     const mdLines = lines
       .filter((l) => l.text)

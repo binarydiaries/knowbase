@@ -1,5 +1,8 @@
 import { Progress } from '@knowbase/ui/components/progress';
-import { SidebarGroup, SidebarGroupContent } from '@knowbase/ui/components/sidebar';
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+} from '@knowbase/ui/components/sidebar';
 import { Gauge } from 'lucide-react';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus.ts';
 
@@ -26,7 +29,9 @@ export function SidebarUsage() {
               <Gauge className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium capitalize">{subscription.plan}</p>
+              <p className="text-sm font-medium capitalize">
+                {subscription.plan}
+              </p>
               <p className="text-xs text-sidebar-foreground/70">
                 Monthly assistant messages
               </p>
@@ -36,7 +41,8 @@ export function SidebarUsage() {
             <div className="flex items-center justify-between gap-2 text-xs">
               <span className="text-sidebar-foreground/70">This month</span>
               <span className="font-medium">
-                {subscription.messagesThisMonth} / {subscription.messagesPerMonthLimit}
+                {subscription.messagesThisMonth} /{' '}
+                {subscription.messagesPerMonthLimit}
               </span>
             </div>
             <Progress value={percentage} className="h-2" />

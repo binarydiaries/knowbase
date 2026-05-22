@@ -2,7 +2,11 @@
 import { getImage } from 'astro:assets';
 import pricingBgSrc from '../assets/images/pricing-bg.png';
 
-const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
+const pricingBg = await getImage({
+  src: pricingBgSrc,
+  format: 'webp',
+  quality: 80,
+});
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 ---

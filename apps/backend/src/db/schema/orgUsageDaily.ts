@@ -1,4 +1,10 @@
-import { index, integer, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core';
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
 import {
   clerkOrgIdColumn,
   cuid2PrimaryKey,
@@ -16,7 +22,10 @@ export const orgUsageDaily = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex('org_usage_daily_org_day_unique').on(table.orgId, table.dateKey),
+    uniqueIndex('org_usage_daily_org_day_unique').on(
+      table.orgId,
+      table.dateKey,
+    ),
     index('org_usage_daily_org_idx').on(table.orgId),
   ],
 );

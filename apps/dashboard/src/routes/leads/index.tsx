@@ -36,8 +36,8 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { AlertCircleIcon, ExternalLink, LockIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { getAgents, getLeads } from '@/services';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
+import { getAgents, getLeads } from '@/services';
 
 export const Route = createFileRoute('/leads/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -89,7 +89,10 @@ function RouteComponent() {
   const leads = leadsQuery.data?.data.leads ?? [];
   const total = leadsQuery.data?.data.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const pageNumbers = useMemo(() => getPageNumbers(page, totalPages), [page, totalPages]);
+  const pageNumbers = useMemo(
+    () => getPageNumbers(page, totalPages),
+    [page, totalPages],
+  );
 
   const agents = agentsQuery.data?.data.agents ?? [];
 
@@ -112,9 +115,7 @@ function RouteComponent() {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <h1 className="text-sm font-semibold">Leads</h1>
-          {total > 0 && (
-            <Badge variant="secondary">{total}</Badge>
-          )}
+          {total > 0 && <Badge variant="secondary">{total}</Badge>}
         </div>
         <div className="ml-auto px-4">
           <Select
@@ -146,9 +147,12 @@ function RouteComponent() {
             <div className="rounded-full border p-4">
               <LockIcon className="size-6 text-muted-foreground" />
             </div>
-            <h2 className="text-sm font-semibold">Lead Generation is a paid feature</h2>
+            <h2 className="text-sm font-semibold">
+              Lead Generation is a paid feature
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Upgrade to the Starter plan or above to capture and view leads from your AI agents.
+              Upgrade to the Starter plan or above to capture and view leads
+              from your AI agents.
             </p>
           </div>
         </div>
@@ -188,7 +192,8 @@ function RouteComponent() {
             <div className="text-center">
               <p className="text-sm font-medium">No leads yet</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Leads will appear here once your agent captures contact information.
+                Leads will appear here once your agent captures contact
+                information.
               </p>
             </div>
           </div>
@@ -214,16 +219,24 @@ function RouteComponent() {
                   {leads.map((lead) => (
                     <TableRow key={lead.id}>
                       <TableCell className="font-medium">
-                        {lead.name ?? <span className="text-muted-foreground">—</span>}
+                        {lead.name ?? (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {lead.email ?? <span className="text-muted-foreground">—</span>}
+                        {lead.email ?? (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {lead.phone ?? <span className="text-muted-foreground">—</span>}
+                        {lead.phone ?? (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {lead.company ?? <span className="text-muted-foreground">—</span>}
+                        {lead.company ?? (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {lead.agent ? (
@@ -240,7 +253,10 @@ function RouteComponent() {
                       </TableCell>
                       <TableCell>
                         {lead.channel ? (
-                          <Badge variant="outline" className="capitalize text-xs">
+                          <Badge
+                            variant="outline"
+                            className="capitalize text-xs"
+                          >
                             {lead.channel.type}
                           </Badge>
                         ) : (
@@ -280,7 +296,11 @@ function RouteComponent() {
                           navigate({ search: { page: Math.max(1, page - 1) } })
                         }
                         aria-disabled={page === 1}
-                        className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={
+                          page === 1
+                            ? 'pointer-events-none opacity-50'
+                            : 'cursor-pointer'
+                        }
                       />
                     </PaginationItem>
                     {pageNumbers.map((p, i) =>
@@ -303,10 +323,16 @@ function RouteComponent() {
                     <PaginationItem>
                       <PaginationNext
                         onClick={() =>
-                          navigate({ search: { page: Math.min(totalPages, page + 1) } })
+                          navigate({
+                            search: { page: Math.min(totalPages, page + 1) },
+                          })
                         }
                         aria-disabled={page === totalPages}
-                        className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={
+                          page === totalPages
+                            ? 'pointer-events-none opacity-50'
+                            : 'cursor-pointer'
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>

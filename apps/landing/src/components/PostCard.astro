@@ -1,26 +1,26 @@
 ---
-import type { CollectionEntry } from 'astro:content'
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  post: CollectionEntry<'blog'>
+  post: CollectionEntry<'blog'>;
 }
 
-const { post } = Astro.props
-const { title, date, excerpt, tags, readTime, image } = post.data
+const { post } = Astro.props;
+const { title, date, excerpt, tags, readTime, image } = post.data;
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })
+  });
 }
 
 const TAG_COLORS = [
   'bg-[#301B69]/10 text-[#301B69]',
   'bg-[#B07CD1]/15 text-[#6B3FA0]',
   'bg-purple-50 text-purple-700',
-]
+];
 ---
 
 <article class="group relative bg-white rounded-2xl border border-[#301B69]/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">

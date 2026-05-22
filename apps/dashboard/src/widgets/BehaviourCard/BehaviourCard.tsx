@@ -44,7 +44,9 @@ export const agentBehaviourSchema = z.object({
     .min(20, 'System prompt is too short')
     .max(500, 'System prompt is too long (max 500 characters)'),
   tone: z.enum(toneValues, { error: 'Please select a valid tone' }),
-  verbosity: z.enum(verbosityValues, { error: 'Please select a valid verbosity' }),
+  verbosity: z.enum(verbosityValues, {
+    error: 'Please select a valid verbosity',
+  }),
   fallbackMessage: z
     .string()
     .min(5, 'Fallback message is too short')
@@ -60,9 +62,7 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
 
-  const behaviour = useBehaviour(
-    (state) => state.behaviourByAgentId[agentId],
-  );
+  const behaviour = useBehaviour((state) => state.behaviourByAgentId[agentId]);
 
   const patchBehaviour = useBehaviour((s) => s.updateBehaviour);
   const {
@@ -163,7 +163,9 @@ const BehaviourCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             <DisabledTooltip disabled={readOnly} content={AGENT_LOCK_TOOLTIP}>
               <Button
                 type="submit"
-                disabled={readOnly || !isDirty || saveBehaviourMutation.isPending}
+                disabled={
+                  readOnly || !isDirty || saveBehaviourMutation.isPending
+                }
               >
                 {saveBehaviourMutation.isPending ? 'Saving…' : 'Save'}
               </Button>

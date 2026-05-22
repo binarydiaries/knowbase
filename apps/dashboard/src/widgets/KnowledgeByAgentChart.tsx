@@ -46,9 +46,7 @@ export function KnowledgeByAgentChart({ agentId }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
-          Knowledge Sources per Agent
-        </CardTitle>
+        <CardTitle className="text-base">Knowledge Sources per Agent</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (

@@ -32,7 +32,7 @@ const DEFAULT_PRICING: Record<string, Pricing> = {
 };
 
 function normalizeModel(model: string) {
-  return model.includes('/') ? model.split('/').at(-1) ?? model : model;
+  return model.includes('/') ? (model.split('/').at(-1) ?? model) : model;
 }
 
 function parsePricingMap() {
@@ -71,11 +71,12 @@ export abstract class AiCostEventService {
   }
 
   static computeCostUsd(model: string, usage: UsageLike) {
-    const { pricing, normalizedModel } = this.getPricing(model);
+    const { pricing, normalizedModel } = AiCostEventService.getPricing(model);
     const inputTokens = toSafeInt(usage.inputTokens);
     const outputTokens = toSafeInt(usage.outputTokens);
     const cachedInputTokens = toSafeInt(usage.cachedInputTokens);
-    const totalTokens = toSafeInt(usage.totalTokens) || inputTokens + outputTokens;
+    const totalTokens =
+      toSafeInt(usage.totalTokens) || inputTokens + outputTokens;
 
     if (!pricing) {
       return {
@@ -91,7 +92,8 @@ export abstract class AiCostEventService {
     const costUsd =
       (inputTokens / 1_000_000) * pricing.inputPer1M +
       (outputTokens / 1_000_000) * pricing.outputPer1M +
-      (cachedInputTokens / 1_000_000) * (pricing.cachedInputPer1M ?? pricing.inputPer1M);
+      (cachedInputTokens / 1_000_000) *
+        (pricing.cachedInputPer1M ?? pricing.inputPer1M);
 
     return {
       normalizedModel,
@@ -120,7 +122,7 @@ export abstract class AiCostEventService {
     usage: UsageLike;
     metadata?: Record<string, unknown>;
   }) {
-    const parsed = this.computeCostUsd(model, usage);
+    const parsed = AiCostEventService.computeCostUsd(model, usage);
 
     await db.insert(aiCostEvents).values({
       orgId,
@@ -133,7 +135,9 @@ export abstract class AiCostEventService {
       cachedInputTokens: parsed.cachedInputTokens,
       totalTokens: parsed.totalTokens,
       costUsd: parsed.costUsd.toFixed(6),
-      metadata: metadata ? { ...metadata, rawModel: model } : { rawModel: model },
+      metadata: metadata
+        ? { ...metadata, rawModel: model }
+        : { rawModel: model },
     });
 
     return parsed;

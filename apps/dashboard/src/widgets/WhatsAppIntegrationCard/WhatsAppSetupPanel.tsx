@@ -37,7 +37,10 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
   const { data: setupInfo } = useQuery({
     queryKey: ['whatsapp-setup-info'],
     queryFn: async () => {
-      const res = await client.get({ url: '/whatsapp/setup-info', responseType: 'json' });
+      const res = await client.get({
+        url: '/whatsapp/setup-info',
+        responseType: 'json',
+      });
       return res.data as { webhookUrl: string; verifyToken: string };
     },
   });
@@ -57,7 +60,11 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
     onSuccess: (data) => {
       setConnection({
         businessAccountId: data.businessAccountId,
-        phoneNumbers: data.phoneNumbers.map((p) => ({ ...p, boundToAgentId: null, agentName: null })),
+        phoneNumbers: data.phoneNumbers.map((p) => ({
+          ...p,
+          boundToAgentId: null,
+          agentName: null,
+        })),
       });
       reset();
       toast.success('WhatsApp Business Account connected');
@@ -94,33 +101,48 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
                 Meta for Developers
                 <ExternalLink className="size-2.5" />
               </a>{' '}
-              → Create App → Business type → add the <strong>WhatsApp</strong> product.
-              Create or connect a WhatsApp Business Account (WABA) and add a verified phone number.
+              → Create App → Business type → add the <strong>WhatsApp</strong>{' '}
+              product. Create or connect a WhatsApp Business Account (WABA) and
+              add a verified phone number.
             </p>
           </SetupStep>
 
           <SetupStep number={2} title="Configure the Webhook">
             <p className="text-xs text-muted-foreground mb-2">
-              In your Meta App → <strong>WhatsApp → Configuration → Webhooks</strong>, click{' '}
+              In your Meta App →{' '}
+              <strong>WhatsApp → Configuration → Webhooks</strong>, click{' '}
               <em>Edit</em> and enter these values:
             </p>
             <div className="space-y-2">
-              <CopyField label="Callback URL" value={setupInfo?.webhookUrl ?? ''} loading={!setupInfo} />
-              <CopyField label="Verify Token" value={setupInfo?.verifyToken ?? ''} loading={!setupInfo} />
+              <CopyField
+                label="Callback URL"
+                value={setupInfo?.webhookUrl ?? ''}
+                loading={!setupInfo}
+              />
+              <CopyField
+                label="Verify Token"
+                value={setupInfo?.verifyToken ?? ''}
+                loading={!setupInfo}
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Click <em>Verify and Save</em>, then subscribe to the <strong>messages</strong> webhook field.
+              Click <em>Verify and Save</em>, then subscribe to the{' '}
+              <strong>messages</strong> webhook field.
             </p>
           </SetupStep>
 
           <SetupStep number={3} title="Get your credentials">
             <ul className="text-xs text-muted-foreground space-y-1.5 list-none">
               <li>
-                <span className="font-medium text-foreground">Business Account ID</span>{' '}
+                <span className="font-medium text-foreground">
+                  Business Account ID
+                </span>{' '}
                 — Meta Business Manager → Business Settings → Business Info.
               </li>
               <li>
-                <span className="font-medium text-foreground">Access Token</span>{' '}
+                <span className="font-medium text-foreground">
+                  Access Token
+                </span>{' '}
                 — Go to{' '}
                 <a
                   href="https://developers.facebook.com/docs/whatsapp/business-management-api/get-started/system-users"
@@ -131,8 +153,8 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
                   System Users
                   <ExternalLink className="size-2.5" />
                 </a>{' '}
-                → Create an Admin System User → assign your WABA as an asset → generate a token
-                with permissions:{' '}
+                → Create an Admin System User → assign your WABA as an asset →
+                generate a token with permissions:{' '}
                 <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
                   whatsapp_business_messaging
                 </code>{' '}
@@ -142,8 +164,8 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
               </li>
             </ul>
             <p className="mt-2 text-xs text-amber-600 dark:text-amber-500">
-              ⚠ Do not use the temporary token from the API Setup page — it expires in 24 hours
-              and will silently break your integration.
+              ⚠ Do not use the temporary token from the API Setup page — it
+              expires in 24 hours and will silently break your integration.
             </p>
           </SetupStep>
 
@@ -174,7 +196,8 @@ export function WhatsAppSetupPanel({ onClose }: { onClose: () => void }) {
               placeholder="EAAxxxxxxxx…"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Use a System User permanent token — temporary tokens expire in 24 hours
+              Use a System User permanent token — temporary tokens expire in 24
+              hours
             </p>
           </div>
         </div>
@@ -241,7 +264,9 @@ function CopyField({
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-xs font-mono">
-        <span className={`flex-1 truncate ${loading ? 'animate-pulse text-muted-foreground' : ''}`}>
+        <span
+          className={`flex-1 truncate ${loading ? 'animate-pulse text-muted-foreground' : ''}`}
+        >
           {loading ? 'Loading…' : value}
         </span>
         <button
@@ -251,7 +276,11 @@ function CopyField({
           className="shrink-0 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
           aria-label={`Copy ${label}`}
         >
-          {copied ? <Check className="size-3.5 text-green-500" /> : <Copy className="size-3.5" />}
+          {copied ? (
+            <Check className="size-3.5 text-green-500" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
         </button>
       </div>
     </div>

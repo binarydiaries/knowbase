@@ -1,9 +1,9 @@
+import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
+import Underline from '@tiptap/extension-underline';
+import { Markdown } from '@tiptap/markdown';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Underline from '@tiptap/extension-underline';
-import Placeholder from '@tiptap/extension-placeholder';
-import { Markdown } from '@tiptap/markdown';
 import { useEffect } from 'react';
 import { EditorToolbar } from './EditorToolbar';
 
@@ -13,7 +13,11 @@ interface IRichEditorProps {
   readOnly?: boolean;
 }
 
-export function RichEditor({ value, onChange, readOnly = false }: IRichEditorProps) {
+export function RichEditor({
+  value,
+  onChange,
+  readOnly = false,
+}: IRichEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,

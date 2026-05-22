@@ -23,23 +23,25 @@ interface IWhatsAppConnectionState {
   clearConnection: () => void;
 }
 
-export const useWhatsAppConnection = create<IWhatsAppConnectionState>((set) => ({
-  connected: false,
-  businessAccountId: null,
-  phoneNumbers: [],
+export const useWhatsAppConnection = create<IWhatsAppConnectionState>(
+  (set) => ({
+    connected: false,
+    businessAccountId: null,
+    phoneNumbers: [],
 
-  setConnection: ({ businessAccountId, phoneNumbers }) =>
-    set({ connected: true, businessAccountId, phoneNumbers }),
+    setConnection: ({ businessAccountId, phoneNumbers }) =>
+      set({ connected: true, businessAccountId, phoneNumbers }),
 
-  updatePhoneBinding: (phoneNumberId, boundToAgentId, agentName) =>
-    set((state) => ({
-      phoneNumbers: state.phoneNumbers.map((p) =>
-        p.phoneNumberId === phoneNumberId
-          ? { ...p, boundToAgentId, agentName }
-          : p,
-      ),
-    })),
+    updatePhoneBinding: (phoneNumberId, boundToAgentId, agentName) =>
+      set((state) => ({
+        phoneNumbers: state.phoneNumbers.map((p) =>
+          p.phoneNumberId === phoneNumberId
+            ? { ...p, boundToAgentId, agentName }
+            : p,
+        ),
+      })),
 
-  clearConnection: () =>
-    set({ connected: false, businessAccountId: null, phoneNumbers: [] }),
-}));
+    clearConnection: () =>
+      set({ connected: false, businessAccountId: null, phoneNumbers: [] }),
+  }),
+);

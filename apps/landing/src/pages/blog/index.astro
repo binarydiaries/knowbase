@@ -1,13 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
-import BlogLayout from '../../layouts/BlogLayout.astro';
-import PostCard from '../../components/PostCard.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import PostCard from '../../components/PostCard.astro';
+import BlogLayout from '../../layouts/BlogLayout.astro';
 
 const allPosts = await getCollection('blog');
 const posts = allPosts
   .filter((p) => p.data.published)
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+  .sort(
+    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  );
 
 const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags)));
 
@@ -17,7 +19,8 @@ const blogSchema = {
   '@type': 'Blog',
   '@id': `${siteURL}/blog`,
   name: 'Agenvik Blog',
-  description: 'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
+  description:
+    'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
   url: `${siteURL}/blog`,
   publisher: { '@id': `${siteURL}/#organization` },
   inLanguage: 'en-US',

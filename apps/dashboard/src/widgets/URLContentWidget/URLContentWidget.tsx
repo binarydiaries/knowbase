@@ -81,16 +81,28 @@ export const URLContentWidget = ({ onClose }: { onClose?: () => void }) => {
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      if (!preview?.rawText) throw new Error('No page content available. Please go back and fetch the page again.');
+      if (!preview?.rawText)
+        throw new Error(
+          'No page content available. Please go back and fetch the page again.',
+        );
       const saveRes = await client.post<{ document: unknown }, unknown>({
         url: '/documents/url',
-        body: { agentId, title: data.title, url: data.url, rawText: preview.rawText },
+        body: {
+          agentId,
+          title: data.title,
+          url: data.url,
+          rawText: preview.rawText,
+        },
       });
       return saveRes.data;
     },
     onSuccess: (result) => {
       if (result && typeof result === 'object' && 'document' in result) {
-        addUpdateDocument(agentId, (result as { document: Parameters<typeof addUpdateDocument>[1] }).document);
+        addUpdateDocument(
+          agentId,
+          (result as { document: Parameters<typeof addUpdateDocument>[1] })
+            .document,
+        );
       }
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success('Website added as knowledge source');
@@ -113,7 +125,8 @@ export const URLContentWidget = ({ onClose }: { onClose?: () => void }) => {
       <SheetHeader>
         <SheetTitle>Add Website URL</SheetTitle>
         <SheetDescription>
-          Paste a public URL and we will extract the text content to use as a knowledge source.
+          Paste a public URL and we will extract the text content to use as a
+          knowledge source.
         </SheetDescription>
       </SheetHeader>
 
@@ -167,7 +180,8 @@ export const URLContentWidget = ({ onClose }: { onClose?: () => void }) => {
                 {preview.preview}
                 {preview.charCount > 500 && (
                   <span className="text-muted-foreground italic">
-                    {'\n\n'}… and {(preview.charCount - 500).toLocaleString()} more characters
+                    {'\n\n'}… and {(preview.charCount - 500).toLocaleString()}{' '}
+                    more characters
                   </span>
                 )}
               </div>

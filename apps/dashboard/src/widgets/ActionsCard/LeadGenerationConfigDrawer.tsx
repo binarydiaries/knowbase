@@ -9,8 +9,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
-import { Switch } from '@knowbase/ui/components/switch';
 import { toast } from '@knowbase/ui/components/sonner';
+import { Switch } from '@knowbase/ui/components/switch';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -91,20 +91,23 @@ export function LeadGenerationConfigDrawer({
 }) {
   const cfg = action.config;
 
-  const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      fields: cfg.fields ?? DEFAULT_FIELDS,
-      triggerInstructions: cfg.triggerInstructions ?? '',
-      successMessage: cfg.successMessage ?? "Thanks! We'll be in touch.",
+  const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>(
+    {
+      resolver: zodResolver(schema),
+      defaultValues: {
+        fields: cfg.fields ?? DEFAULT_FIELDS,
+        triggerInstructions: cfg.triggerInstructions ?? '',
+        successMessage: cfg.successMessage ?? "Thanks! We'll be in touch.",
+      },
     },
-  });
+  );
 
   useEffect(() => {
     reset({
       fields: action.config.fields ?? DEFAULT_FIELDS,
       triggerInstructions: action.config.triggerInstructions ?? '',
-      successMessage: action.config.successMessage ?? "Thanks! We'll be in touch.",
+      successMessage:
+        action.config.successMessage ?? "Thanks! We'll be in touch.",
     });
   }, [action.id, reset]);
 
@@ -146,57 +149,64 @@ export function LeadGenerationConfigDrawer({
           <div className="flex flex-col gap-3">
             <Label className="text-sm font-medium">Fields to collect</Label>
             <div className="rounded-lg border divide-y">
-              {(Object.keys(FIELD_LABELS) as (keyof NonNullable<LeadConfig['fields']>)[]).map(
-                (key) => {
-                  const isCollected = fieldsValues[key]?.collect ?? false;
+              {(
+                Object.keys(FIELD_LABELS) as (keyof NonNullable<
+                  LeadConfig['fields']
+                >)[]
+              ).map((key) => {
+                const isCollected = fieldsValues[key]?.collect ?? false;
 
-                  return (
-                    <div key={key} className="flex items-center justify-between px-4 py-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{FIELD_LABELS[key]}</span>
-                        {isCollected && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <Controller
-                              control={control}
-                              name={`fields.${key}.required`}
-                              render={({ field }) => (
-                                <Switch
-                                  id={`${key}-required`}
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                  className="scale-75 origin-left"
-                                />
-                              )}
-                            />
-                            <label
-                              htmlFor={`${key}-required`}
-                              className="text-xs text-muted-foreground cursor-pointer"
-                            >
-                              Required
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                      <Controller
-                        control={control}
-                        name={`fields.${key}.collect`}
-                        render={({ field }) => (
-                          <Switch
-                            id={`${key}-collect`}
-                            checked={field.value}
-                            onCheckedChange={(v) => {
-                              field.onChange(v);
-                              if (!v) {
-                                setValue(`fields.${key}.required`, false);
-                              }
-                            }}
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {FIELD_LABELS[key]}
+                      </span>
+                      {isCollected && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Controller
+                            control={control}
+                            name={`fields.${key}.required`}
+                            render={({ field }) => (
+                              <Switch
+                                id={`${key}-required`}
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="scale-75 origin-left"
+                              />
+                            )}
                           />
-                        )}
-                      />
+                          <label
+                            htmlFor={`${key}-required`}
+                            className="text-xs text-muted-foreground cursor-pointer"
+                          >
+                            Required
+                          </label>
+                        </div>
+                      )}
                     </div>
-                  );
-                },
-              )}
+                    <Controller
+                      control={control}
+                      name={`fields.${key}.collect`}
+                      render={({ field }) => (
+                        <Switch
+                          id={`${key}-collect`}
+                          checked={field.value}
+                          onCheckedChange={(v) => {
+                            field.onChange(v);
+                            if (!v) {
+                              setValue(`fields.${key}.required`, false);
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -221,7 +231,11 @@ export function LeadGenerationConfigDrawer({
         </div>
 
         <SheetFooter className="px-6 py-4 border-t mt-auto">
-          <Button variant="outline" onClick={onClose} disabled={saveMutation.isPending}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={saveMutation.isPending}
+          >
             Cancel
           </Button>
           <Button

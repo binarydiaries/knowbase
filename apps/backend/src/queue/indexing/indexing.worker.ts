@@ -36,7 +36,12 @@ indexingWorker.on('completed', async (job) => {
     lastTrainedAt: new Date(),
   });
   if (userId) {
-    await addEmailJob({ type: 'document-indexed', documentId, userId, documentTitle }).catch(() => {});
+    await addEmailJob({
+      type: 'document-indexed',
+      documentId,
+      userId,
+      documentTitle,
+    }).catch(() => {});
   }
 });
 
@@ -45,7 +50,12 @@ indexingWorker.on('failed', async (job) => {
     const { documentId, userId, documentTitle } = job.data;
     await DocumentService.update(documentId, { status: 'failed' });
     if (userId) {
-      await addEmailJob({ type: 'document-failed', documentId, userId, documentTitle }).catch(() => {});
+      await addEmailJob({
+        type: 'document-failed',
+        documentId,
+        userId,
+        documentTitle,
+      }).catch(() => {});
     }
   }
 });

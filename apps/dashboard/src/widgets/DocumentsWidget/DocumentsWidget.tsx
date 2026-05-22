@@ -1,7 +1,10 @@
 import * as amplitude from '@amplitude/unified';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@knowbase/ui/components/alert';
 import { Button } from '@knowbase/ui/components/button';
-import { toast } from '@knowbase/ui/components/sonner';
-import { Alert, AlertDescription, AlertTitle } from '@knowbase/ui/components/alert';
 import {
   Card,
   CardAction,
@@ -10,6 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@knowbase/ui/components/dialog';
 import {
   Empty,
   EmptyContent,
@@ -23,30 +34,16 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@knowbase/ui/components/hover-card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@knowbase/ui/components/dialog';
 import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import { Sheet } from '@knowbase/ui/components/sheet';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Check, Copy, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
-import {
-  type DocumentSchema,
-  deleteDocumentsById,
-  getIndexingStatus,
-  postIndexing,
-} from '@/services';
 import {
   AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
@@ -54,16 +51,23 @@ import {
   NO_READY_TRAINING_TOOLTIP,
   TRAINING_LIMIT_TOOLTIP,
 } from '@/components/DisabledTooltip/DisabledTooltip.tsx';
+import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import { UsageMeter } from '@/components/UsageMeter/UsageMeter.tsx';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags.ts';
+import type { SubscriptionStatusSchema } from '@/services';
+import {
+  type DocumentSchema,
+  deleteDocumentsById,
+  getIndexingStatus,
+  postIndexing,
+} from '@/services';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags.ts';
 import { AddDocumentDropdown } from '@/widgets/DocumentsWidget/AddDocumentDropdown.tsx';
 import { PDFContentWidget } from '@/widgets/PDFContentWidget/PDFContentWidget.tsx';
 import { QAContentWidget } from '@/widgets/QAContentWidget/QAContentWidget.tsx';
 import { TextContentWidget } from '@/widgets/TextContentWidget/TextContentWidget.tsx';
 import { URLContentWidget } from '@/widgets/URLContentWidget/URLContentWidget.tsx';
-import type { SubscriptionStatusSchema } from '@/services';
 
 dayjs.extend(utc);
 
@@ -85,7 +89,10 @@ export const DocumentsWidget = ({
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
-  const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
+  const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const [copiedTitle, setCopiedTitle] = useState(false);
 
@@ -102,7 +109,9 @@ export const DocumentsWidget = ({
     subscription?.hasReachedKnowledgeSourceLimit ?? false;
   const hasReachedTrainingLimit =
     subscription?.hasReachedTrainingRunsPerDayLimit ?? false;
-  const hasReadyDocuments = documents.some((document) => document.status === 'ready');
+  const hasReadyDocuments = documents.some(
+    (document) => document.status === 'ready',
+  );
   const nextUtcMidnight = dayjs.utc().add(1, 'day').startOf('day').local();
   const nextUtcMonth = dayjs.utc().add(1, 'month').startOf('month').local();
   const trainingResetLabel = nextUtcMidnight.format('h:mm A');
@@ -139,7 +148,10 @@ export const DocumentsWidget = ({
       deleteDocument(agentId, documentId);
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success('Knowledge source deleted');
-      amplitude.track('Knowledge Source Deleted', { agent_id: agentId, document_id: documentId });
+      amplitude.track('Knowledge Source Deleted', {
+        agent_id: agentId,
+        document_id: documentId,
+      });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -263,10 +275,7 @@ export const DocumentsWidget = ({
                       <Button variant="outline">Add</Button>
                     </AddDocumentDropdown>
                   ) : (
-                    <DisabledTooltip
-                      content={addDisabledReason}
-                      disabled
-                    >
+                    <DisabledTooltip content={addDisabledReason} disabled>
                       <Button variant="outline" disabled>
                         Add
                       </Button>
@@ -317,7 +326,9 @@ export const DocumentsWidget = ({
                 setDeleteConfirmDoc({ id: doc.id, title: doc.title });
               }}
               readOnly={readOnly}
-              disableEdit={doc.content.type === 'pdf' || doc.content.type === 'url'}
+              disableEdit={
+                doc.content.type === 'pdf' || doc.content.type === 'url'
+              }
               disabledReason={AGENT_LOCK_TOOLTIP}
             />
           ))}
@@ -355,10 +366,7 @@ export const DocumentsWidget = ({
                     </DisabledTooltip>
                   )
                 ) : (
-                  <DisabledTooltip
-                    content={AGENT_LOCK_TOOLTIP}
-                    disabled
-                  >
+                  <DisabledTooltip content={AGENT_LOCK_TOOLTIP} disabled>
                     <Button disabled>Add Source</Button>
                   </DisabledTooltip>
                 )}
@@ -442,13 +450,16 @@ export const DocumentsWidget = ({
       </Sheet>
       <Dialog
         open={!!deleteConfirmDoc}
-        onOpenChange={(open) => { if (!open) setDeleteConfirmDoc(null); }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmDoc(null);
+        }}
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Delete knowledge source?</DialogTitle>
             <DialogDescription>
-              This knowledge source will be permanently deleted. This action cannot be undone.
+              This knowledge source will be permanently deleted. This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
@@ -465,7 +476,11 @@ export const DocumentsWidget = ({
                   setTimeout(() => setCopiedTitle(false), 1500);
                 }}
               >
-                {copiedTitle ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copiedTitle ? (
+                  <Check className="h-3 w-3" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
               to confirm
             </Label>
@@ -523,24 +538,14 @@ export const DocumentsWidget = ({
           />
         )}
       </Sheet>
-      <Sheet
-        open={isPdfSheetOpen}
-        onOpenChange={setIsPdfSheetOpen}
-      >
+      <Sheet open={isPdfSheetOpen} onOpenChange={setIsPdfSheetOpen}>
         {isPdfSheetOpen && (
-          <PDFContentWidget
-            onClose={() => setIsPdfSheetOpen(false)}
-          />
+          <PDFContentWidget onClose={() => setIsPdfSheetOpen(false)} />
         )}
       </Sheet>
-      <Sheet
-        open={isUrlSheetOpen}
-        onOpenChange={setIsUrlSheetOpen}
-      >
+      <Sheet open={isUrlSheetOpen} onOpenChange={setIsUrlSheetOpen}>
         {isUrlSheetOpen && (
-          <URLContentWidget
-            onClose={() => setIsUrlSheetOpen(false)}
-          />
+          <URLContentWidget onClose={() => setIsUrlSheetOpen(false)} />
         )}
       </Sheet>
     </>

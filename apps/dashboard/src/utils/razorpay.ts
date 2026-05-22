@@ -14,5 +14,9 @@ export function loadRazorpayScript(): Promise<boolean> {
 }
 
 export function formatDate(date: Date) {
-  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }

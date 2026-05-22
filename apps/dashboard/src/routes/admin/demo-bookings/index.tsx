@@ -1,6 +1,11 @@
 import { useUser } from '@clerk/clerk-react';
-import { getAdminDemoBookings } from '@/services';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
+import { Button } from '@knowbase/ui/components/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import {
@@ -11,11 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
-import { Button } from '@knowbase/ui/components/button';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import { getAdminDemoBookings } from '@/services';
 import { isAdminEmail } from '@/utils/adminAccess';
 
 type DemoBooking = {
@@ -66,7 +71,9 @@ function RouteComponent() {
     queryKey: ['admin-demo-bookings', page],
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await getAdminDemoBookings({ query: { page, limit: PAGE_SIZE } } as any);
+      const { data } = await getAdminDemoBookings({
+        query: { page, limit: PAGE_SIZE },
+      } as any);
       return data as BookingsResponse;
     },
     enabled: canAccessAdmin,
@@ -83,7 +90,10 @@ function RouteComponent() {
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
           <h1 className="text-sm font-medium flex-1">Demo Bookings</h1>
         </div>
       </header>
@@ -108,7 +118,9 @@ function RouteComponent() {
                     Total Bookings
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-2xl font-semibold">{total}</CardContent>
+                <CardContent className="text-2xl font-semibold">
+                  {total}
+                </CardContent>
               </Card>
             </div>
 
@@ -167,7 +179,9 @@ function RouteComponent() {
                           <TableHead>Company</TableHead>
                           <TableHead>Phone</TableHead>
                           <TableHead>Use Case</TableHead>
-                          <TableHead className="whitespace-nowrap">Submitted</TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            Submitted
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -176,7 +190,9 @@ function RouteComponent() {
                             <TableCell className="font-medium whitespace-nowrap">
                               {row.name}
                             </TableCell>
-                            <TableCell className="text-sm">{row.email}</TableCell>
+                            <TableCell className="text-sm">
+                              {row.email}
+                            </TableCell>
                             <TableCell className="text-sm whitespace-nowrap">
                               {row.company}
                             </TableCell>

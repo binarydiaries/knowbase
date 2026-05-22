@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
+import { agents } from '../../db/schema/agents';
 import { behaviors } from '../../db/schema/behaviors';
 import { channels } from '../../db/schema/channels';
-import { agents } from '../../db/schema/agents';
 import { DEFAULT_BEHAVIOR } from '../behaviour/defaults';
 import { CHANNEL_CONFIG_DEFAULTS } from '../channel/defaults';
 

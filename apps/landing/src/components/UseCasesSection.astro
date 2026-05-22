@@ -2,7 +2,11 @@
 import { getImage } from 'astro:assets';
 import usecaseBgSrc from '../assets/images/usecase-bg.png';
 
-const usecaseBg = await getImage({ src: usecaseBgSrc, format: 'webp', quality: 80 });
+const usecaseBg = await getImage({
+  src: usecaseBgSrc,
+  format: 'webp',
+  quality: 80,
+});
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const useCases = [

@@ -10,23 +10,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@knowbase/ui/components/sheet';
-import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { toast } from '@knowbase/ui/components/sonner';
+import { RichEditor } from '@knowbase/ui/widgets/RichEditor/RichEditor';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  AGENT_LOCK_TOOLTIP,
+  DisabledTooltip,
+} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { FormInput } from '@/components/FormInput/FormInput.tsx';
 import {
   type DocumentSchema,
   patchDocumentsById,
   postDocuments,
 } from '@/services';
-import {
-  AGENT_LOCK_TOOLTIP,
-  DisabledTooltip,
-} from '@/components/DisabledTooltip/DisabledTooltip.tsx';
 import { useDocuments } from '@/store/useDocuments.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -39,10 +39,12 @@ type ITextContentWidgetProps = {
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
-  content: z.string().refine(
-    (val) => val.replace(/<[^>]*>/g, '').trim().length > 0,
-    'Content is required',
-  ),
+  content: z
+    .string()
+    .refine(
+      (val) => val.replace(/<[^>]*>/g, '').trim().length > 0,
+      'Content is required',
+    ),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -96,7 +98,10 @@ export const TextContentWidget = ({
         mode === 'edit' ? 'Text source updated' : 'Text source added',
       );
       if (mode === 'add') {
-        amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'text' });
+        amplitude.track('Knowledge Source Added', {
+          agent_id: agentId,
+          source_type: 'text',
+        });
       }
       onClose?.();
     },

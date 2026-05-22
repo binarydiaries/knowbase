@@ -27,20 +27,20 @@ amplitude.initAll(import.meta.env.VITE_AMPLITUDE_API_KEY, {
   analytics: {
     remoteConfig: { fetchRemoteConfig: true }, // fetch remote SDK config from Amplitude
     autocapture: {
-      attribution: true,           // UTM / referrer attribution events
-      pageViews: true,             // SPA route changes + initial load
-      sessions: true,              // Session start / end events
-      formInteractions: true,      // Form starts + submits
-      fileDownloads: true,         // Downloads of common file types
-      elementInteractions: true,   // Click + change on instrumented elements
+      attribution: true, // UTM / referrer attribution events
+      pageViews: true, // SPA route changes + initial load
+      sessions: true, // Session start / end events
+      formInteractions: true, // Form starts + submits
+      fileDownloads: true, // Downloads of common file types
+      elementInteractions: true, // Click + change on instrumented elements
       frustrationInteractions: true, // Rage clicks, dead clicks
-      pageUrlEnrichment: true,     // Adds path / search to event properties
-      networkTracking: true,       // XHR + fetch request events
-      webVitals: true,             // Core Web Vitals (LCP, INP, CLS)
+      pageUrlEnrichment: true, // Adds path / search to event properties
+      networkTracking: true, // XHR + fetch request events
+      webVitals: true, // Core Web Vitals (LCP, INP, CLS)
     },
   },
   sessionReplay: { sampleRate: 1 }, // Record user sessions; comment out to disable
-  engagement: {},                   // In-product Guides & Surveys; comment out to disable
+  engagement: {}, // In-product Guides & Surveys; comment out to disable
 });
 
 Sentry.init({

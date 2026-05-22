@@ -1,10 +1,16 @@
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
 import { Checkbox } from '@knowbase/ui/components/checkbox';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { toast } from '@knowbase/ui/components/sonner';
 import {
   Table,
   TableBody,
@@ -13,14 +19,19 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
-import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { isAdminEmail } from '@/utils/adminAccess';
 
-type SafeStatus = 'healthy' | 'expiring' | 'risky' | 'expired' | 'pending' | 'free';
+type SafeStatus =
+  | 'healthy'
+  | 'expiring'
+  | 'risky'
+  | 'expired'
+  | 'pending'
+  | 'free';
 
 type SubRow = {
   orgId: string;
@@ -58,27 +69,50 @@ const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
   { label: 'Free', value: 'free' },
 ];
 
-const SAFE_STATUS_BADGE: Record<SafeStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
-  healthy:  { variant: 'default',      label: 'Healthy',  className: 'bg-green-600 text-white border-transparent' },
-  expiring: { variant: 'outline',      label: 'Expiring', className: 'border-amber-500 text-amber-600' },
-  risky:    { variant: 'destructive',  label: 'Risky' },
-  expired:  { variant: 'secondary',    label: 'Expired' },
-  pending:  { variant: 'secondary',    label: 'Pending',  className: 'bg-blue-100 text-blue-700 border-transparent' },
-  free:     { variant: 'outline',      label: 'Free' },
+const SAFE_STATUS_BADGE: Record<
+  SafeStatus,
+  {
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    label: string;
+    className?: string;
+  }
+> = {
+  healthy: {
+    variant: 'default',
+    label: 'Healthy',
+    className: 'bg-green-600 text-white border-transparent',
+  },
+  expiring: {
+    variant: 'outline',
+    label: 'Expiring',
+    className: 'border-amber-500 text-amber-600',
+  },
+  risky: { variant: 'destructive', label: 'Risky' },
+  expired: { variant: 'secondary', label: 'Expired' },
+  pending: {
+    variant: 'secondary',
+    label: 'Pending',
+    className: 'bg-blue-100 text-blue-700 border-transparent',
+  },
+  free: { variant: 'outline', label: 'Free' },
 };
 
 const PLAN_BADGE: Record<string, string> = {
-  free:     'bg-secondary text-secondary-foreground',
-  starter:  'bg-violet-100 text-violet-700 border-transparent',
-  growth:   'bg-indigo-600 text-white border-transparent',
-  pro:      'bg-primary text-primary-foreground border-transparent',
+  free: 'bg-secondary text-secondary-foreground',
+  starter: 'bg-violet-100 text-violet-700 border-transparent',
+  growth: 'bg-indigo-600 text-white border-transparent',
+  pro: 'bg-primary text-primary-foreground border-transparent',
 };
 
 const PAGE_SIZE = 25;
 
 function formatDate(iso: string | null) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function truncate(s: string | null, n = 14) {
@@ -86,13 +120,25 @@ function truncate(s: string | null, n = 14) {
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
 
-function StatCard({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function StatCard({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: number;
+  highlight?: boolean;
+}) {
   return (
     <Card>
       <CardHeader className="pb-1">
-        <CardTitle className="text-xs text-muted-foreground font-normal">{label}</CardTitle>
+        <CardTitle className="text-xs text-muted-foreground font-normal">
+          {label}
+        </CardTitle>
       </CardHeader>
-      <CardContent className={`text-2xl font-semibold ${highlight && value > 0 ? 'text-destructive' : ''}`}>
+      <CardContent
+        className={`text-2xl font-semibold ${highlight && value > 0 ? 'text-destructive' : ''}`}
+      >
         {value}
       </CardContent>
     </Card>
@@ -134,7 +180,10 @@ function RouteComponent() {
   const subsQuery = useQuery<SubsResponse>({
     queryKey: ['admin-subscriptions', statusFilter, page],
     queryFn: () => {
-      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(PAGE_SIZE),
+      });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       return authFetch(`/admin/subscriptions?${params}`);
     },
@@ -145,9 +194,15 @@ function RouteComponent() {
     mutationFn: async (orgId: string) => {
       setSyncingOrgs((prev) => new Set(prev).add(orgId));
       try {
-        return await authFetch(`/admin/subscriptions/${orgId}/sync`, { method: 'POST' });
+        return await authFetch(`/admin/subscriptions/${orgId}/sync`, {
+          method: 'POST',
+        });
       } finally {
-        setSyncingOrgs((prev) => { const next = new Set(prev); next.delete(orgId); return next; });
+        setSyncingOrgs((prev) => {
+          const next = new Set(prev);
+          next.delete(orgId);
+          return next;
+        });
       }
     },
     onSuccess: () => {
@@ -168,7 +223,9 @@ function RouteComponent() {
     onSuccess: (data: { synced: number; errors: number; total: number }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] });
       setSelected(new Set());
-      toast.success(`Synced ${data.synced} of ${data.total}${data.errors ? ` (${data.errors} errors)` : ''}`);
+      toast.success(
+        `Synced ${data.synced} of ${data.total}${data.errors ? ` (${data.errors} errors)` : ''}`,
+      );
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Bulk sync failed');
@@ -182,7 +239,8 @@ function RouteComponent() {
   const hasPrev = page > 1;
   const hasNext = page < totalPages;
 
-  const allOnPageSelected = rows.length > 0 && rows.every((r) => selected.has(r.orgId));
+  const allOnPageSelected =
+    rows.length > 0 && rows.every((r) => selected.has(r.orgId));
   const someOnPageSelected = rows.some((r) => selected.has(r.orgId));
 
   function toggleAll() {
@@ -218,7 +276,10 @@ function RouteComponent() {
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
           <h1 className="text-sm font-medium flex-1">Admin Subscriptions</h1>
         </div>
         <div className="px-4 flex items-center gap-2">
@@ -228,7 +289,11 @@ function RouteComponent() {
             disabled={isBulkBusy}
             onClick={() => bulkSyncMutation.mutate([])}
           >
-            {isBulkBusy ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+            {isBulkBusy ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
             Sync All
           </Button>
         </div>
@@ -268,7 +333,9 @@ function RouteComponent() {
                 >
                   {f.label}
                   {counts && f.value !== 'all' && (
-                    <span className="ml-1.5 text-xs opacity-70">{counts[f.value as SafeStatus]}</span>
+                    <span className="ml-1.5 text-xs opacity-70">
+                      {counts[f.value as SafeStatus]}
+                    </span>
                   )}
                 </Button>
               ))}
@@ -277,13 +344,17 @@ function RouteComponent() {
             {/* Bulk actions */}
             {selected.size > 0 && (
               <div className="flex items-center gap-3 rounded-lg border bg-muted/40 px-4 py-2 text-sm">
-                <span className="text-muted-foreground">{selected.size} selected</span>
+                <span className="text-muted-foreground">
+                  {selected.size} selected
+                </span>
                 <Button
                   size="sm"
                   disabled={isBulkBusy}
                   onClick={() => bulkSyncMutation.mutate([...selected])}
                 >
-                  {isBulkBusy ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                  {isBulkBusy ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : null}
                   Sync Selected ({selected.size})
                 </Button>
                 <Button
@@ -302,7 +373,9 @@ function RouteComponent() {
                 <CardTitle>
                   Subscriptions
                   {subsQuery.isFetching && (
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">Loading…</span>
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      Loading…
+                    </span>
                   )}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -333,9 +406,13 @@ function RouteComponent() {
               </CardHeader>
               <CardContent className="p-0">
                 {subsQuery.error ? (
-                  <p className="p-4 text-sm text-destructive">Failed to load subscriptions.</p>
+                  <p className="p-4 text-sm text-destructive">
+                    Failed to load subscriptions.
+                  </p>
                 ) : rows.length === 0 && !subsQuery.isFetching ? (
-                  <p className="p-4 text-sm text-muted-foreground">No subscriptions found.</p>
+                  <p className="p-4 text-sm text-muted-foreground">
+                    No subscriptions found.
+                  </p>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
@@ -344,7 +421,11 @@ function RouteComponent() {
                           <TableHead className="w-10">
                             <Checkbox
                               checked={allOnPageSelected}
-                              data-state={someOnPageSelected && !allOnPageSelected ? 'indeterminate' : undefined}
+                              data-state={
+                                someOnPageSelected && !allOnPageSelected
+                                  ? 'indeterminate'
+                                  : undefined
+                              }
                               onCheckedChange={toggleAll}
                               aria-label="Select all on page"
                             />
@@ -365,7 +446,12 @@ function RouteComponent() {
                           const isSyncing = syncingOrgs.has(row.orgId);
                           const canSync = !!row.providerSubscriptionId;
                           return (
-                            <TableRow key={row.orgId} data-state={selected.has(row.orgId) ? 'selected' : undefined}>
+                            <TableRow
+                              key={row.orgId}
+                              data-state={
+                                selected.has(row.orgId) ? 'selected' : undefined
+                              }
+                            >
                               <TableCell>
                                 <Checkbox
                                   checked={selected.has(row.orgId)}
@@ -373,7 +459,10 @@ function RouteComponent() {
                                   aria-label={`Select ${row.orgId}`}
                                 />
                               </TableCell>
-                              <TableCell className="font-mono text-xs" title={row.orgId}>
+                              <TableCell
+                                className="font-mono text-xs"
+                                title={row.orgId}
+                              >
                                 {truncate(row.orgId, 16)}
                               </TableCell>
                               <TableCell>
@@ -395,7 +484,10 @@ function RouteComponent() {
                               <TableCell className="text-xs whitespace-nowrap">
                                 {formatDate(row.currentPeriodEnd)}
                               </TableCell>
-                              <TableCell className="font-mono text-xs" title={row.providerSubscriptionId ?? ''}>
+                              <TableCell
+                                className="font-mono text-xs"
+                                title={row.providerSubscriptionId ?? ''}
+                              >
                                 {truncate(row.providerSubscriptionId, 18)}
                               </TableCell>
                               <TableCell className="text-xs whitespace-nowrap text-muted-foreground">

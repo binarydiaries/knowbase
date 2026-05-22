@@ -1,6 +1,11 @@
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Button } from '@knowbase/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
 import { Input } from '@knowbase/ui/components/input';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
@@ -85,7 +90,15 @@ function RouteComponent() {
     }
 
     return [
-      ['Organization ID', 'Requests', 'Input Tokens', 'Output Tokens', 'Cached Input Tokens', 'Total Tokens', 'Cost (USD)'],
+      [
+        'Organization ID',
+        'Requests',
+        'Input Tokens',
+        'Output Tokens',
+        'Cached Input Tokens',
+        'Total Tokens',
+        'Cost (USD)',
+      ],
       ...data.data.map((row) => [
         row.orgId,
         String(row.requestCount),
@@ -103,7 +116,9 @@ function RouteComponent() {
       return;
     }
 
-    const csv = csvRows.map((row) => row.map((v) => `"${v}"`).join(',')).join('\n');
+    const csv = csvRows
+      .map((row) => row.map((v) => `"${v}"`).join(','))
+      .join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -118,7 +133,10 @@ function RouteComponent() {
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
           <h1 className="text-sm font-medium">Admin Costs</h1>
         </div>
       </header>
@@ -142,7 +160,9 @@ function RouteComponent() {
               </CardHeader>
               <CardContent className="flex flex-wrap items-end gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Start month</label>
+                  <label className="text-xs text-muted-foreground">
+                    Start month
+                  </label>
                   <Input
                     className="w-44"
                     type="month"
@@ -151,7 +171,9 @@ function RouteComponent() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">End month</label>
+                  <label className="text-xs text-muted-foreground">
+                    End month
+                  </label>
                   <Input
                     className="w-44"
                     type="month"
@@ -201,30 +223,54 @@ function RouteComponent() {
                 {isFetching ? (
                   <p className="text-sm text-muted-foreground">Loading...</p>
                 ) : error ? (
-                  <p className="text-sm text-destructive">Failed to load cost data.</p>
+                  <p className="text-sm text-destructive">
+                    Failed to load cost data.
+                  </p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Organization ID</TableHead>
                         <TableHead className="text-right">Requests</TableHead>
-                        <TableHead className="text-right">Input Tokens</TableHead>
-                        <TableHead className="text-right">Output Tokens</TableHead>
-                        <TableHead className="text-right">Cached Input</TableHead>
-                        <TableHead className="text-right">Total Tokens</TableHead>
+                        <TableHead className="text-right">
+                          Input Tokens
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Output Tokens
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Cached Input
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Total Tokens
+                        </TableHead>
                         <TableHead className="text-right">Cost (USD)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data?.data.map((row) => (
                         <TableRow key={row.orgId}>
-                          <TableCell className="font-medium">{row.orgId}</TableCell>
-                          <TableCell className="text-right">{row.requestCount}</TableCell>
-                          <TableCell className="text-right">{row.inputTokens}</TableCell>
-                          <TableCell className="text-right">{row.outputTokens}</TableCell>
-                          <TableCell className="text-right">{row.cachedInputTokens}</TableCell>
-                          <TableCell className="text-right">{row.totalTokens}</TableCell>
-                          <TableCell className="text-right">${row.costUsd.toFixed(6)}</TableCell>
+                          <TableCell className="font-medium">
+                            {row.orgId}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {row.requestCount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {row.inputTokens}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {row.outputTokens}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {row.cachedInputTokens}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {row.totalTokens}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${row.costUsd.toFixed(6)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gte, isNotNull, lt, sql } from 'drizzle-orm';
 import { db } from '../../db';
-import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { channels } from '../../db/schema/channels';
 import { conversations } from '../../db/schema/conversations';
 import { messages } from '../../db/schema/messages';
 
@@ -43,14 +43,14 @@ export abstract class AnalyticsService {
     // Query 2: avg confidence score from assistant messages
     const [conf] = await db
       .select({
-        avg: sql<string | null>`avg((${messages.metadata}->>'confidenceScore')::numeric)`,
+        avg: sql<
+          string | null
+        >`avg((${messages.metadata}->>'confidenceScore')::numeric)`,
       })
       .from(messages)
       .innerJoin(conversations, eq(messages.conversationId, conversations.id))
       .innerJoin(agents, eq(conversations.agentId, agents.id))
-      .where(
-        and(eq(agents.orgId, orgId), eq(messages.role, 'assistant')),
-      );
+      .where(and(eq(agents.orgId, orgId), eq(messages.role, 'assistant')));
 
     const totalConversations = counts?.totalConversations ?? 0;
     const totalMessages = counts?.totalMessages ?? 0;
@@ -95,7 +95,9 @@ export abstract class AnalyticsService {
       .groupBy(sql`date_trunc('day', ${conversations.createdAt})::date`)
       .orderBy(sql`date_trunc('day', ${conversations.createdAt})::date`);
 
-    const countMap = new Map<string, number>(rows.map((r) => [r.date, r.count]));
+    const countMap = new Map<string, number>(
+      rows.map((r) => [r.date, r.count]),
+    );
     const data = eachDayInRange(start, end).map((dateStr) => ({
       date: dateStr,
       count: countMap.get(dateStr) ?? 0,
@@ -137,11 +139,7 @@ export abstract class AnalyticsService {
   }
 
   /** Top agents ranked by conversation count in date range */
-  static async getTopAgents(
-    orgId: string,
-    startDate: string,
-    endDate: string,
-  ) {
+  static async getTopAgents(orgId: string, startDate: string, endDate: string) {
     const start = parseUtcDate(startDate);
     const end = parseUtcDate(endDate);
 
@@ -152,7 +150,9 @@ export abstract class AnalyticsService {
         agentName: agents.name,
         conversations: count(conversations.id),
         messages: count(messages.id),
-        avgConfidence: sql<string | null>`avg((${messages.metadata}->>'confidenceScore')::numeric)`,
+        avgConfidence: sql<
+          string | null
+        >`avg((${messages.metadata}->>'confidenceScore')::numeric)`,
       })
       .from(agents)
       .leftJoin(
@@ -236,7 +236,9 @@ export abstract class AnalyticsService {
       .limit(10);
 
     return {
-      data: rows.filter((r): r is { topic: string; count: number } => r.topic !== null),
+      data: rows.filter(
+        (r): r is { topic: string; count: number } => r.topic !== null,
+      ),
     };
   }
 
@@ -271,7 +273,9 @@ export abstract class AnalyticsService {
       .limit(20);
 
     return {
-      data: rows.filter((r): r is { country: string; count: number } => r.country !== null),
+      data: rows.filter(
+        (r): r is { country: string; count: number } => r.country !== null,
+      ),
     };
   }
 }

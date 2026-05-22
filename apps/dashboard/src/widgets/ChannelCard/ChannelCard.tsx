@@ -44,9 +44,7 @@ export const ChannelSchema = z.object({
     .max(500, 'Suggestion questions are too long (max 500 characters)')
     .optional(),
 
-  allowedDomains: z
-    .string()
-    .optional(),
+  allowedDomains: z.string().optional(),
 
   primaryColor: z
     .string()
@@ -67,7 +65,8 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     ),
   );
   const channelAdditional = channelWeb?.additional;
-  const channelConfig = channelAdditional?.type === 'web' ? channelAdditional.config : undefined;
+  const channelConfig =
+    channelAdditional?.type === 'web' ? channelAdditional.config : undefined;
   const updateChannel = useChannels((s) => s.updateChannel);
 
   const {
@@ -96,7 +95,9 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         subtitle: channelConfig.subtitle ?? '',
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
-        suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join('\n'),
+        suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join(
+          '\n',
+        ),
         allowedDomains: (channelConfig.allowedDomains ?? []).join('\n'),
         primaryColor: channelConfig.primaryColor ?? '#915964',
       });
@@ -142,7 +143,10 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
     onSuccess: () => {
       toast.success('Channel settings saved');
-      amplitude.track('Channel Settings Saved', { agent_id: agentId, channel_type: 'web' });
+      amplitude.track('Channel Settings Saved', {
+        agent_id: agentId,
+        channel_type: 'web',
+      });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));

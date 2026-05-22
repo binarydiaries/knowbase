@@ -1,8 +1,8 @@
+import { createId } from '@paralleldrive/cuid2';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../db';
 import { featureFlagDefinitions } from '../../db/schema/featureFlagDefinitions';
 import { orgFeatureFlags } from '../../db/schema/orgFeatureFlags';
-import { createId } from '@paralleldrive/cuid2';
 
 export abstract class FeatureFlagService {
   static async isEnabled(flag: string, orgId: string): Promise<boolean> {
@@ -24,10 +24,13 @@ export abstract class FeatureFlagService {
 
     const overrides = await db.query.orgFeatureFlags.findMany();
 
-    const overrideCountByFlag = overrides.reduce<Record<string, number>>((acc, o) => {
-      acc[o.flag] = (acc[o.flag] ?? 0) + 1;
-      return acc;
-    }, {});
+    const overrideCountByFlag = overrides.reduce<Record<string, number>>(
+      (acc, o) => {
+        acc[o.flag] = (acc[o.flag] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
 
     return definitions.map((d) => ({
       flag: d.flag,
@@ -79,7 +82,11 @@ export abstract class FeatureFlagService {
     }));
   }
 
-  static async setOrgOverrides(flag: string, orgIds: string[], enabled: boolean) {
+  static async setOrgOverrides(
+    flag: string,
+    orgIds: string[],
+    enabled: boolean,
+  ) {
     for (const orgId of orgIds) {
       const existing = await db.query.orgFeatureFlags.findFirst({
         where: { flag, orgId },
@@ -88,7 +95,12 @@ export abstract class FeatureFlagService {
         await db
           .update(orgFeatureFlags)
           .set({ enabled, updatedAt: new Date() })
-          .where(and(eq(orgFeatureFlags.flag, flag), eq(orgFeatureFlags.orgId, orgId)));
+          .where(
+            and(
+              eq(orgFeatureFlags.flag, flag),
+              eq(orgFeatureFlags.orgId, orgId),
+            ),
+          );
       } else {
         await db.insert(orgFeatureFlags).values({
           id: createId(),
@@ -105,12 +117,16 @@ export abstract class FeatureFlagService {
   static async removeOrgOverride(flag: string, orgId: string) {
     await db
       .delete(orgFeatureFlags)
-      .where(and(eq(orgFeatureFlags.flag, flag), eq(orgFeatureFlags.orgId, orgId)));
+      .where(
+        and(eq(orgFeatureFlags.flag, flag), eq(orgFeatureFlags.orgId, orgId)),
+      );
   }
 
   static async deleteFlag(flag: string) {
     await db.delete(orgFeatureFlags).where(eq(orgFeatureFlags.flag, flag));
-    await db.delete(featureFlagDefinitions).where(eq(featureFlagDefinitions.flag, flag));
+    await db
+      .delete(featureFlagDefinitions)
+      .where(eq(featureFlagDefinitions.flag, flag));
   }
 
   static async getForOrg(orgId: string): Promise<Record<string, boolean>> {

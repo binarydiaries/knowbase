@@ -1,5 +1,5 @@
-import { useAuth } from '@clerk/clerk-react';
 import { useChat } from '@ai-sdk/react';
+import { useAuth } from '@clerk/clerk-react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';

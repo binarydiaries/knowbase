@@ -72,16 +72,16 @@ export function NavUser() {
                   <span className="truncate text-xs text-muted-foreground">
                     {user?.primaryEmailAddress?.emailAddress}
                   </span>
-                  <span className="text-xs font-medium text-primary">{planLabel}</span>
+                  <span className="text-xs font-medium text-primary">
+                    {planLabel}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link
-                  to={'/subscriptions'}
-                >
+                <Link to={'/subscriptions'}>
                   {isPaid ? <CreditCard /> : <Sparkles />}
                   {isPaid ? 'Manage Billing' : 'Upgrade Plan'}
                 </Link>

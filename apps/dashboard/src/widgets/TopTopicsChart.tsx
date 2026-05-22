@@ -1,10 +1,15 @@
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
+import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from '@knowbase/ui/components/chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, XAxis, YAxis } from 'recharts';
@@ -61,7 +66,13 @@ export function TopTopicsChart({ agentId, startDate, endDate }: Props) {
               layout="vertical"
               margin={{ left: 8, right: 16 }}
             >
-              <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
+              <XAxis
+                type="number"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 11 }}
+                allowDecimals={false}
+              />
               <YAxis
                 dataKey="topic"
                 type="category"

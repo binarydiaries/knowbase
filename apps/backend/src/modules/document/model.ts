@@ -164,7 +164,15 @@ const SaveUrlBody = z.object({
 });
 
 const UrlErrorResponse = z.object({
-  code: z.enum(['INVALID_URL', 'FETCH_FAILED', 'FETCH_TIMEOUT', 'NOT_HTML', 'PRIVATE_HOST', 'DNS_FAILED', 'PAGE_EMPTY']),
+  code: z.enum([
+    'INVALID_URL',
+    'FETCH_FAILED',
+    'FETCH_TIMEOUT',
+    'NOT_HTML',
+    'PRIVATE_HOST',
+    'DNS_FAILED',
+    'PAGE_EMPTY',
+  ]),
   message: z.string(),
 });
 

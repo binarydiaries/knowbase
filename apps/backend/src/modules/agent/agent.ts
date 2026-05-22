@@ -17,7 +17,8 @@ export const Agent = new Elysia({
   .post(
     '',
     async ({ body, userId, orgId, status }) => {
-      const agentLimit = await SubscriptionService.assertAgentLimitNotReached(orgId);
+      const agentLimit =
+        await SubscriptionService.assertAgentLimitNotReached(orgId);
 
       if (!agentLimit.allowed) {
         return status(403, {
@@ -73,7 +74,10 @@ export const Agent = new Elysia({
     '/:id',
     async ({ params, orgId, status }) => {
       const subscription = await SubscriptionService.getStatus(orgId);
-      const agent = await AgentService.singleWithRelations({ id: params.id, orgId });
+      const agent = await AgentService.singleWithRelations({
+        id: params.id,
+        orgId,
+      });
 
       if (!agent) {
         return status(404, {
@@ -118,7 +122,9 @@ export const Agent = new Elysia({
     '/:id',
     async ({ params, body, agent, orgId, status }) => {
       const subscription = await SubscriptionService.getStatus(orgId);
-      const changedKeys = Object.entries(body).filter(([, value]) => value !== undefined);
+      const changedKeys = Object.entries(body).filter(
+        ([, value]) => value !== undefined,
+      );
       const isArchiveOnly =
         agent.agentStatus === 'active' &&
         body.agentStatus === 'archived' &&
@@ -128,7 +134,10 @@ export const Agent = new Elysia({
         agent.agentStatus === 'archived' && body.agentStatus === 'active';
 
       if (subscription.isOverLimit && !isArchiveOnly) {
-        if (isUnarchive || SubscriptionService.hasReachedAgentLimit(subscription)) {
+        if (
+          isUnarchive ||
+          SubscriptionService.hasReachedAgentLimit(subscription)
+        ) {
           return status(403, {
             code: 'AGENT_LIMIT_REACHED',
             message: SubscriptionService.getLimitReachedMessage(subscription),
@@ -147,7 +156,10 @@ export const Agent = new Elysia({
         });
       }
 
-      if (isUnarchive && SubscriptionService.hasReachedAgentLimit(subscription)) {
+      if (
+        isUnarchive &&
+        SubscriptionService.hasReachedAgentLimit(subscription)
+      ) {
         return status(403, {
           code: 'AGENT_LIMIT_REACHED',
           message: SubscriptionService.getLimitReachedMessage(subscription),

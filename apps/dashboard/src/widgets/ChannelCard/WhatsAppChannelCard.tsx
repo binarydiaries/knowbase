@@ -139,8 +139,7 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       if (!result) return;
       const { channel: updatedChannel, wasCreated } = result;
       if (wasCreated) {
-        const current =
-          useChannels.getState().channelsByAgentId[agentId] ?? [];
+        const current = useChannels.getState().channelsByAgentId[agentId] ?? [];
         setChannels(agentId, [...current, updatedChannel]);
       } else {
         updateChannel(agentId, updatedChannel);
@@ -207,7 +206,8 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     return (
       <div className="flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
-          Connect your WhatsApp Business Account in Integrations to enable this channel.
+          Connect your WhatsApp Business Account in Integrations to enable this
+          channel.
         </p>
         <div className="flex justify-end">
           <Button variant="outline" size="sm" asChild>
@@ -237,7 +237,10 @@ const WhatsAppChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             </DisabledTooltip>
           </div>
         </div>
-        <Dialog open={unassignConfirmOpen} onOpenChange={setUnassignConfirmOpen}>
+        <Dialog
+          open={unassignConfirmOpen}
+          onOpenChange={setUnassignConfirmOpen}
+        >
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Unassign phone number?</DialogTitle>

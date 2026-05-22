@@ -13,7 +13,9 @@ function decryptRow<T extends { accessToken: string }>(row: T): T {
 
 export abstract class WhatsAppConnectionService {
   static async findByOrg(orgId: string) {
-    const row = await db.query.whatsappConnections.findFirst({ where: { orgId } });
+    const row = await db.query.whatsappConnections.findFirst({
+      where: { orgId },
+    });
     return row ? decryptRow(row) : row;
   }
 
@@ -22,7 +24,9 @@ export abstract class WhatsAppConnectionService {
     data: { accessToken: string; businessAccountId: string },
   ) {
     const encrypted = encryptRow(data);
-    const existing = await db.query.whatsappConnections.findFirst({ where: { orgId } });
+    const existing = await db.query.whatsappConnections.findFirst({
+      where: { orgId },
+    });
     if (existing) {
       const [row] = await db
         .update(whatsappConnections)

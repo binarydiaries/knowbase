@@ -43,7 +43,8 @@ export function ArchiveAgentDialog({
     setTimeout(() => setCopied(false), 1500);
   }
 
-  const canConfirm = !isArchiving || !agentName || confirmInput.trim() === agentName;
+  const canConfirm =
+    !isArchiving || !agentName || confirmInput.trim() === agentName;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -68,7 +69,11 @@ export function ArchiveAgentDialog({
                 title="Copy to clipboard"
                 className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
               >
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? (
+                  <Check className="h-3 w-3" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
               to confirm
             </Label>

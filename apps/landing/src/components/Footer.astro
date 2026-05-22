@@ -1,9 +1,13 @@
 ---
-import { Image, getImage } from 'astro:assets';
-import logoSrc from '../assets/images/TextLogo.svg';
+import { getImage, Image } from 'astro:assets';
 import footerBgSrc from '../assets/images/footer-bg.png';
+import logoSrc from '../assets/images/TextLogo.svg';
 
-const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 });
+const footerBg = await getImage({
+  src: footerBgSrc,
+  format: 'webp',
+  quality: 80,
+});
 ---
 <footer class="px-6" aria-label="Site footer">
   <div class="w-full mx-auto">

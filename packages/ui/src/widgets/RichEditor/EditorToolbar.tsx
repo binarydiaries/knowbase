@@ -14,7 +14,6 @@ import {
   Undo,
 } from 'lucide-react';
 import { Button } from '../../components/button';
-import { Separator } from '../../components/separator';
 import {
   Select,
   SelectContent,
@@ -23,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/select';
+import { Separator } from '../../components/separator';
 import { Toggle } from '../../components/toggle';
 
 interface EditorToolbarProps {
@@ -53,7 +53,13 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
 
   if (!editor || !state) return null;
 
-  const blockType = state.isH1 ? 'h1' : state.isH2 ? 'h2' : state.isH3 ? 'h3' : 'paragraph';
+  const blockType = state.isH1
+    ? 'h1'
+    : state.isH2
+      ? 'h2'
+      : state.isH3
+        ? 'h3'
+        : 'paragraph';
 
   const setBlockType = (value: string) => {
     switch (value) {
@@ -108,7 +114,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Redo className="h-4 w-4" />
       </Button>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5 mx-0.5"
+      />
 
       {/* Block type */}
       <Select value={blockType} onValueChange={setBlockType}>
@@ -125,7 +134,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </SelectContent>
       </Select>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5 mx-0.5"
+      />
 
       {/* Inline formatting */}
       <Toggle
@@ -169,7 +181,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Code />
       </Toggle>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5 mx-0.5"
+      />
 
       {/* Lists */}
       <Toggle
@@ -189,7 +204,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <ListOrdered />
       </Toggle>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5 mx-0.5"
+      />
 
       {/* Blockquote & code block */}
       <Toggle
@@ -209,7 +227,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Code2 />
       </Toggle>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5 mx-0.5" />
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-5 mx-0.5"
+      />
 
       {/* Link */}
       <Toggle

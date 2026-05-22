@@ -1,4 +1,9 @@
-import { createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from 'node:crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  timingSafeEqual,
+} from 'node:crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
@@ -10,7 +15,10 @@ function getKey(): Buffer {
   const raw = process.env.TOKEN_ENCRYPTION_KEY;
   if (!raw) throw new Error('TOKEN_ENCRYPTION_KEY is not set');
   const key = Buffer.from(raw, 'hex');
-  if (key.length !== 32) throw new Error('TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)');
+  if (key.length !== 32)
+    throw new Error(
+      'TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)',
+    );
   return key;
 }
 
@@ -18,7 +26,10 @@ export function encryptToken(plaintext: string): string {
   const key = getKey();
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, key, iv);
-  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, 'utf8'),
+    cipher.final(),
+  ]);
   const authTag = cipher.getAuthTag();
   // Format: enc:v1:<iv_hex>:<authTag_hex>:<ciphertext_hex>
   return `${ENC_PREFIX}${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;

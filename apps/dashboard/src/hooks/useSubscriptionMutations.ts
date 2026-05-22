@@ -60,8 +60,7 @@ export function useCancelMutation() {
   const invalidate = useInvalidateSubscription();
 
   return useMutation({
-    mutationFn: () =>
-      postSubscriptionsCancel({ body: { immediate: false } }),
+    mutationFn: () => postSubscriptionsCancel({ body: { immediate: false } }),
     onSuccess: () => {
       invalidate();
       amplitude.track('Subscription Cancelled');

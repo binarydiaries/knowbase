@@ -3,7 +3,13 @@ import { z } from 'zod';
 import { AdminGuard } from '../../common/authGuard/adminGuard';
 import { AdminQueueService } from './queue.service';
 
-const QueueJobStatusSchema = z.enum(['waiting', 'active', 'delayed', 'failed', 'completed']);
+const QueueJobStatusSchema = z.enum([
+  'waiting',
+  'active',
+  'delayed',
+  'failed',
+  'completed',
+]);
 
 const QueueJobSchema = z.object({
   id: z.string(),
@@ -59,13 +65,9 @@ export const AdminQueue = new Elysia({
 })
   .use(AdminGuard)
   .use(QueueModel)
-  .get(
-    '/counts',
-    async () => AdminQueueService.getQueueCounts(),
-    {
-      response: 'QueueCountsResponseSchema',
-    },
-  )
+  .get('/counts', async () => AdminQueueService.getQueueCounts(), {
+    response: 'QueueCountsResponseSchema',
+  })
   .get(
     '/jobs',
     async ({ query }) =>
@@ -85,7 +87,10 @@ export const AdminQueue = new Elysia({
       try {
         return await AdminQueueService.retryJob(params.jobId);
       } catch (err) {
-        throw error(404, { code: 'NOT_FOUND', message: (err as Error).message });
+        throw error(404, {
+          code: 'NOT_FOUND',
+          message: (err as Error).message,
+        });
       }
     },
     {
@@ -98,7 +103,10 @@ export const AdminQueue = new Elysia({
       try {
         return await AdminQueueService.executeJob(params.jobId);
       } catch (err) {
-        throw error(404, { code: 'NOT_FOUND', message: (err as Error).message });
+        throw error(404, {
+          code: 'NOT_FOUND',
+          message: (err as Error).message,
+        });
       }
     },
     {

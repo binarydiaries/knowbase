@@ -1,6 +1,11 @@
-import Razorpay from 'razorpay';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { CheckoutResult, PaymentProvider, PaidPlanName, WebhookEvent } from './types';
+import Razorpay from 'razorpay';
+import type {
+  CheckoutResult,
+  PaidPlanName,
+  PaymentProvider,
+  WebhookEvent,
+} from './types';
 
 const PAID_PLAN_NAMES = new Set<string>(['starter', 'growth', 'pro']);
 
@@ -31,32 +36,55 @@ export class RazorpayProvider implements PaymentProvider {
     return planId;
   }
 
-  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
+  async createSubscription({
+    plan,
+    orgId,
+  }: {
+    plan: PaidPlanName;
+    orgId: string;
+  }): Promise<CheckoutResult> {
     const subscription = await this.getClient().subscriptions.create({
       plan_id: this.getPlanId(plan),
       total_count: 120,
       quantity: 1,
       notes: { orgId, plan },
     });
-    return { subscriptionId: subscription.id, clientToken: process.env.RAZORPAY_KEY_ID ?? '' };
+    return {
+      subscriptionId: subscription.id,
+      clientToken: process.env.RAZORPAY_KEY_ID ?? '',
+    };
   }
 
-  async cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void> {
-    await this.getClient().subscriptions.cancel(subscriptionId, options?.atPeriodEnd ?? false);
+  async cancelSubscription(
+    subscriptionId: string,
+    options?: { atPeriodEnd?: boolean },
+  ): Promise<void> {
+    await this.getClient().subscriptions.cancel(
+      subscriptionId,
+      options?.atPeriodEnd ?? false,
+    );
   }
 
   async fetchSubscription(subscriptionId: string) {
-    const sub = await this.getClient().subscriptions.fetch(subscriptionId) as any;
+    const sub = (await this.getClient().subscriptions.fetch(
+      subscriptionId,
+    )) as any;
     return {
       status: sub.status as string,
-      currentPeriodStart: sub.current_start ? new Date(sub.current_start * 1000) : null,
-      currentPeriodEnd:   sub.current_end   ? new Date(sub.current_end   * 1000) : null,
+      currentPeriodStart: sub.current_start
+        ? new Date(sub.current_start * 1000)
+        : null,
+      currentPeriodEnd: sub.current_end
+        ? new Date(sub.current_end * 1000)
+        : null,
     };
   }
 
   async getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null> {
     const sub = await this.getClient().subscriptions.fetch(subscriptionId);
-    return (sub as any).current_end ? new Date((sub as any).current_end * 1000) : null;
+    return (sub as any).current_end
+      ? new Date((sub as any).current_end * 1000)
+      : null;
   }
 
   async issueRefund(paymentId: string, amountPaise: number): Promise<void> {
@@ -74,7 +102,10 @@ export class RazorpayProvider implements PaymentProvider {
     const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
     const expectedBuf = Buffer.from(expected, 'hex');
     const actualBuf = Buffer.from(signature, 'hex');
-    if (expectedBuf.length !== actualBuf.length || !timingSafeEqual(expectedBuf, actualBuf)) {
+    if (
+      expectedBuf.length !== actualBuf.length ||
+      !timingSafeEqual(expectedBuf, actualBuf)
+    ) {
       throw new Error('Invalid signature');
     }
 
@@ -93,7 +124,9 @@ export class RazorpayProvider implements PaymentProvider {
     if (!orgId) return null;
 
     const rawPlan: string = entity.notes?.plan;
-    const planName: PaidPlanName | undefined = PAID_PLAN_NAMES.has(rawPlan) ? rawPlan as PaidPlanName : undefined;
+    const planName: PaidPlanName | undefined = PAID_PLAN_NAMES.has(rawPlan)
+      ? (rawPlan as PaidPlanName)
+      : undefined;
     const subscriptionId: string = entity.id;
     const currentPeriodStart = entity.current_start
       ? new Date(entity.current_start * 1000)
@@ -117,11 +150,30 @@ export class RazorpayProvider implements PaymentProvider {
         };
       }
       case 'subscription.activated':
-        return { orgId, plan: planName ?? 'free', status: 'active', subscriptionId, currentPeriodStart, currentPeriodEnd };
+        return {
+          orgId,
+          plan: planName ?? 'free',
+          status: 'active',
+          subscriptionId,
+          currentPeriodStart,
+          currentPeriodEnd,
+        };
       case 'subscription.cancelled':
-        return { orgId, plan: 'free', status: 'cancelled', subscriptionId, currentPeriodEnd };
+        return {
+          orgId,
+          plan: 'free',
+          status: 'cancelled',
+          subscriptionId,
+          currentPeriodEnd,
+        };
       case 'subscription.completed':
-        return { orgId, plan: 'free', status: 'completed', subscriptionId, currentPeriodEnd };
+        return {
+          orgId,
+          plan: 'free',
+          status: 'completed',
+          subscriptionId,
+          currentPeriodEnd,
+        };
       case 'subscription.halted':
         return { orgId, status: 'halted', subscriptionId };
       case 'subscription.paused':

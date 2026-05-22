@@ -24,11 +24,21 @@ export abstract class OrgUsageDailyService {
     return usage?.trainingRuns ?? 0;
   }
 
-  static async getTotalTrainingRunsSince(orgId: string, fromDateKey: string): Promise<number> {
+  static async getTotalTrainingRunsSince(
+    orgId: string,
+    fromDateKey: string,
+  ): Promise<number> {
     const result = await db
-      .select({ total: sql<number>`coalesce(sum(${orgUsageDaily.trainingRuns}), 0)` })
+      .select({
+        total: sql<number>`coalesce(sum(${orgUsageDaily.trainingRuns}), 0)`,
+      })
       .from(orgUsageDaily)
-      .where(and(eq(orgUsageDaily.orgId, orgId), gte(orgUsageDaily.dateKey, fromDateKey)));
+      .where(
+        and(
+          eq(orgUsageDaily.orgId, orgId),
+          gte(orgUsageDaily.dateKey, fromDateKey),
+        ),
+      );
     return Number(result[0]?.total ?? 0);
   }
 

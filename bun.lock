@@ -22,7 +22,7 @@
         "@sentry/elysia": "^10.51.0",
         "ai": "^6.0.3",
         "bullmq": "^5.69.2",
-        "dotenv": "^17.2.3",
+        "dotenv": "^17.4.2",
         "drizzle-orm": "^1.0.0-beta.15-859cf75",
         "elysia": "^1.4.13",
         "elysia-clerk": "^0.13.2",

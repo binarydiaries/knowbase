@@ -1,4 +1,13 @@
-import { index, integer, jsonb, numeric, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import {
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { clerkOrgIdColumn, cuid2PrimaryKey } from '../../utils/columns.utils';
 
 export const aiCostEvents = pgTable(

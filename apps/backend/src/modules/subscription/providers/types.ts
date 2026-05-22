@@ -21,8 +21,14 @@ export interface PaymentProvider {
   readonly name: string;
   readonly signatureHeader: string;
   readonly clientToken: string;
-  createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
-  cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
+  createSubscription(params: {
+    plan: PaidPlanName;
+    orgId: string;
+  }): Promise<CheckoutResult>;
+  cancelSubscription(
+    subscriptionId: string,
+    options?: { atPeriodEnd?: boolean },
+  ): Promise<void>;
   /** Fetch live subscription details from the payment gateway. */
   fetchSubscription(subscriptionId: string): Promise<{
     status: string;

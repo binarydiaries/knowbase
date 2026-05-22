@@ -1,21 +1,13 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db';
-import { channels } from '../../db/schema/channels';
 import { agents } from '../../db/schema/agents';
+import { channels } from '../../db/schema/channels';
 import type { IChannelSchema } from './model';
 
 export abstract class ChannelService {
-  static async list({
-    agentId,
-    orgId,
-  }: {
-    agentId?: string;
-    orgId: string;
-  }) {
+  static async list({ agentId, orgId }: { agentId?: string; orgId: string }) {
     return db.query.channels.findMany({
-      where: agentId
-        ? { agentId, agent: { orgId } }
-        : { agent: { orgId } },
+      where: agentId ? { agentId, agent: { orgId } } : { agent: { orgId } },
     });
   }
 
@@ -50,7 +42,10 @@ export abstract class ChannelService {
     return channel;
   }
 
-  static async findBySlackChannelId(slackChannelId: string, mode: 'channel' | 'mention') {
+  static async findBySlackChannelId(
+    slackChannelId: string,
+    mode: 'channel' | 'mention',
+  ) {
     const rows = await db
       .select({ channel: channels, agent: agents })
       .from(channels)

@@ -57,10 +57,7 @@ export function ConversationFiltersPopover({
         <PopoverContent align="end" className="space-y-3">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Agent</p>
-            <Select
-              value={agentIdFilter}
-              onValueChange={onAgentIdFilterChange}
-            >
+            <Select value={agentIdFilter} onValueChange={onAgentIdFilterChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="All agents" />
               </SelectTrigger>

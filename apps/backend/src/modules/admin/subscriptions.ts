@@ -1,13 +1,19 @@
+import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { AdminGuard } from '../../common/authGuard/adminGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
-import { AdminGuard } from '../../common/authGuard/adminGuard';
 import { getProvider } from '../subscription/providers';
-import { eq } from 'drizzle-orm';
 
 type OrgSub = typeof orgSubscriptions.$inferSelect;
 
-type SafeStatus = 'healthy' | 'expiring' | 'risky' | 'expired' | 'pending' | 'free';
+type SafeStatus =
+  | 'healthy'
+  | 'expiring'
+  | 'risky'
+  | 'expired'
+  | 'pending'
+  | 'free';
 
 function computeSafeStatus(record: OrgSub): SafeStatus {
   if (!record.providerSubscriptionId || record.plan === 'free') return 'free';
@@ -15,7 +21,9 @@ function computeSafeStatus(record: OrgSub): SafeStatus {
   switch (record.status) {
     case 'active':
     case 'authenticated':
-      return record.currentPeriodEnd && record.currentPeriodEnd < now ? 'risky' : 'healthy';
+      return record.currentPeriodEnd && record.currentPeriodEnd < now
+        ? 'risky'
+        : 'healthy';
     case 'halted':
       return 'risky';
     case 'pending_cancellation':
@@ -47,7 +55,9 @@ function toRow(record: OrgSub) {
 }
 
 async function syncOrgFromGateway(orgId: string) {
-  const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+  const record = await db.query.orgSubscriptions.findFirst({
+    where: { orgId },
+  });
   if (!record?.providerSubscriptionId) {
     throw new Error(`No provider subscription for org ${orgId}`);
   }
@@ -55,7 +65,10 @@ async function syncOrgFromGateway(orgId: string) {
   const provider = getProvider(record.provider ?? 'razorpay');
   const live = await provider.fetchSubscription(record.providerSubscriptionId);
 
-  const isTerminal = live.status === 'cancelled' || live.status === 'completed' || live.status === 'expired';
+  const isTerminal =
+    live.status === 'cancelled' ||
+    live.status === 'completed' ||
+    live.status === 'expired';
   const plan = isTerminal ? 'free' : record.plan;
 
   await db
@@ -69,7 +82,9 @@ async function syncOrgFromGateway(orgId: string) {
     })
     .where(eq(orgSubscriptions.orgId, orgId));
 
-  const updated = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+  const updated = await db.query.orgSubscriptions.findFirst({
+    where: { orgId },
+  });
   return toRow(updated!);
 }
 
@@ -90,9 +105,10 @@ export const AdminSubscriptions = new Elysia({
       });
 
       const statusFilter = query.status;
-      const filtered = statusFilter && statusFilter !== 'all'
-        ? all.filter((r) => computeSafeStatus(r) === statusFilter)
-        : all;
+      const filtered =
+        statusFilter && statusFilter !== 'all'
+          ? all.filter((r) => computeSafeStatus(r) === statusFilter)
+          : all;
 
       const total = filtered.length;
       const rows = filtered.slice(offset, offset + limit).map(toRow);
@@ -118,18 +134,15 @@ export const AdminSubscriptions = new Elysia({
       }),
     },
   )
-  .post(
-    '/:orgId/sync',
-    async ({ params, set }) => {
-      try {
-        const row = await syncOrgFromGateway(params.orgId);
-        return { success: true, row };
-      } catch (err: any) {
-        set.status = 400;
-        return { success: false, error: err.message ?? 'Sync failed' };
-      }
-    },
-  )
+  .post('/:orgId/sync', async ({ params, set }) => {
+    try {
+      const row = await syncOrgFromGateway(params.orgId);
+      return { success: true, row };
+    } catch (err: any) {
+      set.status = 400;
+      return { success: false, error: err.message ?? 'Sync failed' };
+    }
+  })
   .post(
     '/bulk-sync',
     async ({ body }) => {

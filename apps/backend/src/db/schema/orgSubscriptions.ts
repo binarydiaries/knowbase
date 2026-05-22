@@ -1,4 +1,11 @@
-import { index, pgTable, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import {
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
 
 export const orgSubscriptions = pgTable(
@@ -19,7 +26,9 @@ export const orgSubscriptions = pgTable(
   },
   (table) => [
     uniqueIndex('org_subscriptions_org_unique').on(table.orgId),
-    uniqueIndex('org_subscriptions_provider_sub_unique').on(table.providerSubscriptionId),
+    uniqueIndex('org_subscriptions_provider_sub_unique').on(
+      table.providerSubscriptionId,
+    ),
     index('org_subscriptions_org_idx').on(table.orgId),
   ],
 );

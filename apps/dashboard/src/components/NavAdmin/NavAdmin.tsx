@@ -14,8 +14,8 @@ import {
   SidebarMenuSubItem,
 } from '@knowbase/ui/components/sidebar';
 import { Link } from '@tanstack/react-router';
-import { ChevronRight, ShieldCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 
 interface AdminNavItem {

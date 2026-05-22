@@ -10,7 +10,10 @@ export function generateOrgVerifyToken(orgId: string): string {
   const secret = process.env.WHATSAPP_VERIFY_TOKEN_SECRET;
   if (!secret) throw new Error('WHATSAPP_VERIFY_TOKEN_SECRET is not set');
 
-  const mac = createHmac('sha256', secret).update(orgId).digest('hex').slice(0, 32);
+  const mac = createHmac('sha256', secret)
+    .update(orgId)
+    .digest('hex')
+    .slice(0, 32);
   const encodedOrgId = Buffer.from(orgId).toString('base64url');
   return `${encodedOrgId}.${mac}`;
 }
@@ -36,7 +39,10 @@ export function verifyOrgVerifyToken(token: string): string | null {
     return null;
   }
 
-  const expected = createHmac('sha256', secret).update(orgId).digest('hex').slice(0, 32);
+  const expected = createHmac('sha256', secret)
+    .update(orgId)
+    .digest('hex')
+    .slice(0, 32);
 
   if (mac.length !== expected.length) return null;
 

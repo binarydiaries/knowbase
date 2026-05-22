@@ -33,11 +33,7 @@ type Props = {
   endDate: string;
 };
 
-export function MessagesByChannelChart({
-  agentId,
-  startDate,
-  endDate,
-}: Props) {
+export function MessagesByChannelChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['analytics-msgs-channel', agentId, startDate, endDate],
     queryFn: async () => {

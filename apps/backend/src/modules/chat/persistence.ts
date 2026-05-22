@@ -54,7 +54,9 @@ export async function handleLeadCapture(
 ) {
   // Skip lead capture if feature flag or plan disallows it — best-effort, never break chat
   try {
-    const { allowed } = await SubscriptionService.assertLeadGenerationAccess(ctx.orgId);
+    const { allowed } = await SubscriptionService.assertLeadGenerationAccess(
+      ctx.orgId,
+    );
     if (!allowed) return;
   } catch {
     return;

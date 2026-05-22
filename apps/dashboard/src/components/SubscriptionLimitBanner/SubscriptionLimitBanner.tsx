@@ -28,9 +28,9 @@ export function SubscriptionLimitBanner({
       <AlertDescription>
         Your {subscription.plan} plan allows up to{' '}
         {subscription.activeAgentLimit} active agent
-        {subscription.activeAgentLimit === 1 ? '' : 's'}, and you currently
-        have {subscription.activeAgentCount}. Archive active agents or
-        upgrade your subscription to unlock editing and unarchive actions.
+        {subscription.activeAgentLimit === 1 ? '' : 's'}, and you currently have{' '}
+        {subscription.activeAgentCount}. Archive active agents or upgrade your
+        subscription to unlock editing and unarchive actions.
       </AlertDescription>
     </Alert>
   );

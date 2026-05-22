@@ -68,7 +68,11 @@ const adminGroups = [
   {
     label: 'CRM',
     items: [
-      { name: 'Demo Bookings', url: '/admin/demo-bookings', icon: CalendarCheck },
+      {
+        name: 'Demo Bookings',
+        url: '/admin/demo-bookings',
+        icon: CalendarCheck,
+      },
     ],
   },
 ];

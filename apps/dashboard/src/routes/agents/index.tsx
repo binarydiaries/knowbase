@@ -124,8 +124,13 @@ function RouteComponent() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
-      toast.success(variables.status === 'archived' ? 'Agent archived' : 'Agent unarchived');
-      amplitude.track('Agent Archived', { agent_id: variables.id, new_status: variables.status });
+      toast.success(
+        variables.status === 'archived' ? 'Agent archived' : 'Agent unarchived',
+      );
+      amplitude.track('Agent Archived', {
+        agent_id: variables.id,
+        new_status: variables.status,
+      });
       setArchiveConfirm(null);
     },
     onError: (error) => {

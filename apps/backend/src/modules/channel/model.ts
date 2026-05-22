@@ -20,7 +20,9 @@ export const ChannelWhatsAppConfigSchema = z.object({
   displayPhone: z.string().optional(),
 });
 
-export type IChannelWhatsAppConfig = z.infer<typeof ChannelWhatsAppConfigSchema>;
+export type IChannelWhatsAppConfig = z.infer<
+  typeof ChannelWhatsAppConfigSchema
+>;
 
 export const ChannelSlackConfigSchema = z.object({
   mode: z.enum(['channel', 'mention']).optional(),

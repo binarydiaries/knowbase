@@ -19,8 +19,14 @@ export const Route = createFileRoute('/subscriptions/')({
 });
 
 function RouteComponent() {
-  const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd, pendingPlan } =
-    useClerkPlan();
+  const {
+    plan,
+    isPaid,
+    isPendingCancellation,
+    isHalted,
+    currentPeriodEnd,
+    pendingPlan,
+  } = useClerkPlan();
   const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
 
   const checkoutMutation = useCheckoutMutation();

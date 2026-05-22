@@ -1,15 +1,12 @@
 import { useUser } from '@clerk/clerk-react';
-import {
-  deleteAdminFeatureFlagsByFlag,
-  deleteAdminFeatureFlagsByFlagOrgsByOrgId,
-  getAdminFeatureFlags,
-  getAdminFeatureFlagsByFlagOrgs,
-  putAdminFeatureFlagsByFlag,
-  putAdminFeatureFlagsByFlagOrgs,
-} from '@/services';
 import { Badge } from '@knowbase/ui/components/badge';
 import { Button } from '@knowbase/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +17,7 @@ import { Input } from '@knowbase/ui/components/input';
 import { Label } from '@knowbase/ui/components/label';
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
+import { toast } from '@knowbase/ui/components/sonner';
 import { Switch } from '@knowbase/ui/components/switch';
 import {
   Table,
@@ -29,11 +27,18 @@ import {
   TableHeader,
   TableRow,
 } from '@knowbase/ui/components/table';
-import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import {
+  deleteAdminFeatureFlagsByFlag,
+  deleteAdminFeatureFlagsByFlagOrgsByOrgId,
+  getAdminFeatureFlags,
+  getAdminFeatureFlagsByFlagOrgs,
+  putAdminFeatureFlagsByFlag,
+  putAdminFeatureFlagsByFlagOrgs,
+} from '@/services';
 import { isAdminEmail } from '@/utils/adminAccess';
 
 type FlagRow = {
@@ -69,7 +74,9 @@ function RouteComponent() {
   const [createFlag, setCreateFlag] = useState('');
   const [createDescription, setCreateDescription] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [confirmDeleteFlag, setConfirmDeleteFlag] = useState<string | null>(null);
+  const [confirmDeleteFlag, setConfirmDeleteFlag] = useState<string | null>(
+    null,
+  );
 
   const flagsQuery = useQuery<FlagRow[]>({
     queryKey: ['admin-feature-flags'],
@@ -92,7 +99,13 @@ function RouteComponent() {
   });
 
   const setGlobalMutation = useMutation({
-    mutationFn: ({ flag, globalEnabled }: { flag: string; globalEnabled: boolean }) =>
+    mutationFn: ({
+      flag,
+      globalEnabled,
+    }: {
+      flag: string;
+      globalEnabled: boolean;
+    }) =>
       putAdminFeatureFlagsByFlag({ path: { flag }, body: { globalEnabled } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
@@ -103,8 +116,17 @@ function RouteComponent() {
   });
 
   const createFlagMutation = useMutation({
-    mutationFn: ({ flag, description }: { flag: string; description: string }) =>
-      putAdminFeatureFlagsByFlag({ path: { flag }, body: { globalEnabled: false, description } }),
+    mutationFn: ({
+      flag,
+      description,
+    }: {
+      flag: string;
+      description: string;
+    }) =>
+      putAdminFeatureFlagsByFlag({
+        path: { flag },
+        body: { globalEnabled: false, description },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
       setCreateFlag('');
@@ -131,10 +153,23 @@ function RouteComponent() {
   });
 
   const addOrgMutation = useMutation({
-    mutationFn: ({ flag, orgIds, enabled }: { flag: string; orgIds: string[]; enabled: boolean }) =>
-      putAdminFeatureFlagsByFlagOrgs({ path: { flag }, body: { orgIds, enabled } }),
+    mutationFn: ({
+      flag,
+      orgIds,
+      enabled,
+    }: {
+      flag: string;
+      orgIds: string[];
+      enabled: boolean;
+    }) =>
+      putAdminFeatureFlagsByFlagOrgs({
+        path: { flag },
+        body: { orgIds, enabled },
+      }),
     onSuccess: (_, { flag }) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-feature-flags-orgs', flag] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin-feature-flags-orgs', flag],
+      });
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
       setNewOrgId('');
       toast.success('Org override saved');
@@ -148,7 +183,9 @@ function RouteComponent() {
     mutationFn: ({ flag, orgId }: { flag: string; orgId: string }) =>
       deleteAdminFeatureFlagsByFlagOrgsByOrgId({ path: { flag, orgId } }),
     onSuccess: (_, { flag }) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-feature-flags-orgs', flag] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin-feature-flags-orgs', flag],
+      });
       queryClient.invalidateQueries({ queryKey: ['admin-feature-flags'] });
       toast.success('Org override removed');
     },
@@ -163,13 +200,17 @@ function RouteComponent() {
     const trimmed = newOrgId.trim();
     if (!trimmed || !managingFlag) return;
     const orgIds = trimmed.split(/[\s,]+/).filter(Boolean);
-    addOrgMutation.mutate({ flag: managingFlag.flag, orgIds, enabled: newOrgEnabled });
+    addOrgMutation.mutate({
+      flag: managingFlag.flag,
+      orgIds,
+      enabled: newOrgEnabled,
+    });
   }
 
   function handleReleaseToAll() {
     if (!managingFlag) return;
     setGlobalMutation.mutate({ flag: managingFlag.flag, globalEnabled: true });
-    setManagingFlag((prev) => prev ? { ...prev, globalEnabled: true } : prev);
+    setManagingFlag((prev) => (prev ? { ...prev, globalEnabled: true } : prev));
     toast.success(`${managingFlag.flag} released to all orgs`);
   }
 
@@ -178,7 +219,10 @@ function RouteComponent() {
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4 flex-1">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
           <h1 className="text-sm font-medium flex-1">Feature Flags</h1>
         </div>
         <div className="px-4">
@@ -215,7 +259,11 @@ function RouteComponent() {
                         id="create-flag"
                         placeholder="e.g. slack, lead_generation"
                         value={createFlag}
-                        onChange={(e) => setCreateFlag(e.target.value.toLowerCase().replace(/\s+/g, '_'))}
+                        onChange={(e) =>
+                          setCreateFlag(
+                            e.target.value.toLowerCase().replace(/\s+/g, '_'),
+                          )
+                        }
                       />
                     </div>
                     <div className="flex flex-col gap-1.5 flex-1">
@@ -228,13 +276,25 @@ function RouteComponent() {
                       />
                     </div>
                     <Button
-                      disabled={!createFlag.trim() || createFlagMutation.isPending}
-                      onClick={() => createFlagMutation.mutate({ flag: createFlag.trim(), description: createDescription.trim() })}
+                      disabled={
+                        !createFlag.trim() || createFlagMutation.isPending
+                      }
+                      onClick={() =>
+                        createFlagMutation.mutate({
+                          flag: createFlag.trim(),
+                          description: createDescription.trim(),
+                        })
+                      }
                     >
-                      {createFlagMutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                      {createFlagMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : null}
                       Create
                     </Button>
-                    <Button variant="ghost" onClick={() => setShowCreateForm(false)}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowCreateForm(false)}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -247,13 +307,17 @@ function RouteComponent() {
                 <CardTitle>
                   Feature Flags
                   {flagsQuery.isFetching && (
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">Loading…</span>
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      Loading…
+                    </span>
                   )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {flagsQuery.error ? (
-                  <p className="p-4 text-sm text-destructive">Failed to load flags.</p>
+                  <p className="p-4 text-sm text-destructive">
+                    Failed to load flags.
+                  </p>
                 ) : flags.length === 0 && !flagsQuery.isFetching ? (
                   <p className="p-4 text-sm text-muted-foreground">
                     No flags defined yet. Create your first flag above.
@@ -285,30 +349,43 @@ function RouteComponent() {
                                   checked={flag.globalEnabled}
                                   disabled={setGlobalMutation.isPending}
                                   onCheckedChange={(checked) =>
-                                    setGlobalMutation.mutate({ flag: flag.flag, globalEnabled: checked })
+                                    setGlobalMutation.mutate({
+                                      flag: flag.flag,
+                                      globalEnabled: checked,
+                                    })
                                   }
                                 />
                                 <span className="text-xs text-muted-foreground">
-                                  {flag.globalEnabled ? 'On for all' : 'Off by default'}
+                                  {flag.globalEnabled
+                                    ? 'On for all'
+                                    : 'Off by default'}
                                 </span>
                               </div>
                             </TableCell>
                             <TableCell>
                               {flag.orgOverrideCount > 0 ? (
-                                <Badge variant="secondary">{flag.orgOverrideCount} orgs</Badge>
+                                <Badge variant="secondary">
+                                  {flag.orgOverrideCount} orgs
+                                </Badge>
                               ) : (
-                                <span className="text-xs text-muted-foreground">—</span>
+                                <span className="text-xs text-muted-foreground">
+                                  —
+                                </span>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
                               {confirmDeleteFlag === flag.flag ? (
                                 <div className="flex items-center justify-end gap-2">
-                                  <span className="text-xs text-muted-foreground">Delete flag?</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Delete flag?
+                                  </span>
                                   <Button
                                     size="sm"
                                     variant="destructive"
                                     disabled={deleteFlagMutation.isPending}
-                                    onClick={() => deleteFlagMutation.mutate(flag.flag)}
+                                    onClick={() =>
+                                      deleteFlagMutation.mutate(flag.flag)
+                                    }
                                   >
                                     {deleteFlagMutation.isPending ? (
                                       <Loader2 className="size-3.5 animate-spin" />
@@ -336,7 +413,9 @@ function RouteComponent() {
                                     size="icon"
                                     variant="ghost"
                                     className="size-8 text-muted-foreground hover:text-destructive"
-                                    onClick={() => setConfirmDeleteFlag(flag.flag)}
+                                    onClick={() =>
+                                      setConfirmDeleteFlag(flag.flag)
+                                    }
                                   >
                                     <Trash2 className="size-3.5" />
                                   </Button>
@@ -356,11 +435,17 @@ function RouteComponent() {
       </div>
 
       {/* Per-org override dialog */}
-      <Dialog open={!!managingFlag} onOpenChange={(open) => { if (!open) setManagingFlag(null); }}>
+      <Dialog
+        open={!!managingFlag}
+        onOpenChange={(open) => {
+          if (!open) setManagingFlag(null);
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              Org Overrides — <span className="font-mono text-sm">{managingFlag?.flag}</span>
+              Org Overrides —{' '}
+              <span className="font-mono text-sm">{managingFlag?.flag}</span>
             </DialogTitle>
           </DialogHeader>
 
@@ -369,8 +454,14 @@ function RouteComponent() {
             <div className="flex items-center justify-between rounded-lg border px-4 py-3 text-sm">
               <div>
                 <span className="font-medium">Global default: </span>
-                <Badge variant={managingFlag?.globalEnabled ? 'default' : 'secondary'}>
-                  {managingFlag?.globalEnabled ? 'Enabled for all' : 'Disabled by default'}
+                <Badge
+                  variant={
+                    managingFlag?.globalEnabled ? 'default' : 'secondary'
+                  }
+                >
+                  {managingFlag?.globalEnabled
+                    ? 'Enabled for all'
+                    : 'Disabled by default'}
                 </Badge>
               </div>
               {!managingFlag?.globalEnabled && (
@@ -392,7 +483,9 @@ function RouteComponent() {
                   placeholder="org_abc123 (paste one or multiple, comma/space separated)"
                   value={newOrgId}
                   onChange={(e) => setNewOrgId(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddOrg(); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddOrg();
+                  }}
                   className="flex-1"
                 />
                 <div className="flex items-center gap-2 shrink-0">
@@ -400,14 +493,18 @@ function RouteComponent() {
                     checked={newOrgEnabled}
                     onCheckedChange={setNewOrgEnabled}
                   />
-                  <span className="text-xs w-14">{newOrgEnabled ? 'Enable' : 'Disable'}</span>
+                  <span className="text-xs w-14">
+                    {newOrgEnabled ? 'Enable' : 'Disable'}
+                  </span>
                 </div>
                 <Button
                   size="sm"
                   disabled={!newOrgId.trim() || addOrgMutation.isPending}
                   onClick={handleAddOrg}
                 >
-                  {addOrgMutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                  {addOrgMutation.isPending ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : null}
                   Add
                 </Button>
               </div>
@@ -418,13 +515,20 @@ function RouteComponent() {
               <Label className="text-sm font-medium">
                 Current overrides
                 {orgsQuery.isFetching && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">Loading…</span>
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    Loading…
+                  </span>
                 )}
               </Label>
               {orgsQuery.error ? (
-                <p className="text-sm text-destructive">Failed to load overrides.</p>
-              ) : (orgsQuery.data ?? []).length === 0 && !orgsQuery.isFetching ? (
-                <p className="text-sm text-muted-foreground">No org-specific overrides.</p>
+                <p className="text-sm text-destructive">
+                  Failed to load overrides.
+                </p>
+              ) : (orgsQuery.data ?? []).length === 0 &&
+                !orgsQuery.isFetching ? (
+                <p className="text-sm text-muted-foreground">
+                  No org-specific overrides.
+                </p>
               ) : (
                 <div className="rounded-lg border overflow-hidden">
                   <Table>
@@ -438,9 +542,13 @@ function RouteComponent() {
                     <TableBody>
                       {(orgsQuery.data ?? []).map((row) => (
                         <TableRow key={row.orgId}>
-                          <TableCell className="font-mono text-xs">{row.orgId}</TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {row.orgId}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={row.enabled ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={row.enabled ? 'default' : 'secondary'}
+                            >
                               {row.enabled ? 'Enabled' : 'Disabled'}
                             </Badge>
                           </TableCell>

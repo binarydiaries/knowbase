@@ -1,10 +1,15 @@
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@knowbase/ui/components/card';
+import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from '@knowbase/ui/components/chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@knowbase/ui/components/card';
 import { Skeleton } from '@knowbase/ui/components/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
@@ -23,7 +28,11 @@ type Props = {
   endDate: string;
 };
 
-export function ConversationsDailyChart({ agentId, startDate, endDate }: Props) {
+export function ConversationsDailyChart({
+  agentId,
+  startDate,
+  endDate,
+}: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['analytics-conv-daily', agentId, startDate, endDate],
     queryFn: async () => {
@@ -50,7 +59,8 @@ export function ConversationsDailyChart({ agentId, startDate, endDate }: Props) 
           <div className="flex h-64 items-center justify-center text-sm text-destructive">
             Failed to load conversation data
           </div>
-        ) : data?.data.length === 0 || data?.data.every((d) => d.count === 0) ? (
+        ) : data?.data.length === 0 ||
+          data?.data.every((d) => d.count === 0) ? (
           <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
             No conversations in this period
           </div>

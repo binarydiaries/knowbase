@@ -7,7 +7,8 @@ export function HaltedBanner() {
       <div>
         <p className="font-medium text-destructive">Payment failed</p>
         <p className="text-muted-foreground mt-0.5">
-          We couldn't collect payment for your subscription. Please re-subscribe to restore access, or contact support.
+          We couldn't collect payment for your subscription. Please re-subscribe
+          to restore access, or contact support.
         </p>
       </div>
     </div>

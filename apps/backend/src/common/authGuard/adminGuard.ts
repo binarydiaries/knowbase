@@ -1,5 +1,5 @@
-import { clerkClient } from 'elysia-clerk';
 import { Elysia } from 'elysia';
+import { clerkClient } from 'elysia-clerk';
 import { AuthGuard } from './authGuard';
 
 function parseAllowlist(value: string | undefined): Set<string> {
@@ -15,7 +15,9 @@ function parseAllowlist(value: string | undefined): Set<string> {
   );
 }
 
-function getPrimaryEmail(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+function getPrimaryEmail(
+  user: Awaited<ReturnType<typeof clerkClient.users.getUser>>,
+) {
   const primaryId = user.primaryEmailAddressId;
   const primary = user.emailAddresses.find((email) => email.id === primaryId);
   return primary?.emailAddress?.toLowerCase() ?? null;

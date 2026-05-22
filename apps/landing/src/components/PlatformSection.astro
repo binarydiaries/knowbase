@@ -2,7 +2,11 @@
 import { getImage } from 'astro:assets';
 import platformBgSrc from '../assets/images/platform-bg.png';
 
-const platformBg = await getImage({ src: platformBgSrc, format: 'webp', quality: 80 });
+const platformBg = await getImage({
+  src: platformBgSrc,
+  format: 'webp',
+  quality: 80,
+});
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const platformFeatures = [

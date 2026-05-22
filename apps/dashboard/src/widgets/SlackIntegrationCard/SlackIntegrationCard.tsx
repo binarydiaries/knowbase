@@ -10,14 +10,14 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { ExternalLink, LockIcon } from 'lucide-react';
 import { useEffect } from 'react';
-import { Link } from '@tanstack/react-router';
 import { useClerkPlan } from '@/hooks/useClerkPlan.ts';
 import { client } from '@/services/client.gen';
 import {
-  useSlackConnection,
   type SlackChannel,
+  useSlackConnection,
 } from '@/store/useSlackConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 
@@ -47,11 +47,7 @@ export function SlackIntegrationCard() {
     } else if (params.get('slack_error') === '1') {
       toast.error('Failed to connect Slack. Please try again.');
       params.delete('slack_error');
-      window.history.replaceState(
-        {},
-        '',
-        window.location.pathname,
-      );
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 

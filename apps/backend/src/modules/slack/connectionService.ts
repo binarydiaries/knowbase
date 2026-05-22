@@ -3,7 +3,12 @@ import { db } from '../../db';
 import { slackConnections } from '../../db/schema/slackConnections';
 import { decryptToken, encryptToken } from '../../utils/crypto.utils';
 
-function encryptRow(data: { botToken: string; teamId: string; teamName: string; botUserId: string }) {
+function encryptRow(data: {
+  botToken: string;
+  teamId: string;
+  teamName: string;
+  botUserId: string;
+}) {
   return { ...data, botToken: encryptToken(data.botToken) };
 }
 
@@ -18,16 +23,25 @@ export abstract class SlackConnectionService {
   }
 
   static async findByTeamId(teamId: string) {
-    const row = await db.query.slackConnections.findFirst({ where: { teamId } });
+    const row = await db.query.slackConnections.findFirst({
+      where: { teamId },
+    });
     return row ? decryptRow(row) : row;
   }
 
   static async upsert(
     orgId: string,
-    data: { botToken: string; teamId: string; teamName: string; botUserId: string },
+    data: {
+      botToken: string;
+      teamId: string;
+      teamName: string;
+      botUserId: string;
+    },
   ) {
     const encrypted = encryptRow(data);
-    const existing = await db.query.slackConnections.findFirst({ where: { orgId } });
+    const existing = await db.query.slackConnections.findFirst({
+      where: { orgId },
+    });
     if (existing) {
       const [row] = await db
         .update(slackConnections)

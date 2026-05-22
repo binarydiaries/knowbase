@@ -1,7 +1,7 @@
 import { index, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
-import { channels } from './channels';
 import { agents } from './agents';
+import { channels } from './channels';
 import { conversations } from './conversations';
 
 export const leads = pgTable(

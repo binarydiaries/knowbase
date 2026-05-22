@@ -24,11 +24,7 @@ type Props = {
   endDate: string;
 };
 
-export function MessagesByAgentChart({
-  agentId,
-  startDate,
-  endDate,
-}: Props) {
+export function MessagesByAgentChart({ agentId, startDate, endDate }: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['usage-msgs-agent', agentId, startDate, endDate],
     queryFn: async () => {

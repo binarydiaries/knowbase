@@ -42,7 +42,11 @@ export const ChatMessage = ({
               aria-label="Copy message"
               className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-slate-600"
             >
-              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              {copied ? (
+                <Check className="size-3.5" />
+              ) : (
+                <Copy className="size-3.5" />
+              )}
             </button>
           </div>
         )}
@@ -60,7 +64,9 @@ export const ChatMessage = ({
             h1: (props) => <h1 {...props} className="text-sm font-semibold" />,
             h2: (props) => <h2 {...props} className="text-sm font-semibold" />,
             h3: (props) => <h3 {...props} className="text-sm font-semibold" />,
-            strong: (props) => <strong {...props} className="text-sm font-semibold" />,
+            strong: (props) => (
+              <strong {...props} className="text-sm font-semibold" />
+            ),
             a: ({ href, children }) => (
               <a
                 href={href}

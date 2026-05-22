@@ -5,7 +5,13 @@ import { IndexingService } from '../indexing/service';
 
 type JobStatus = 'waiting' | 'active' | 'delayed' | 'failed' | 'completed';
 
-const ALL_STATUSES: JobStatus[] = ['waiting', 'active', 'delayed', 'failed', 'completed'];
+const ALL_STATUSES: JobStatus[] = [
+  'waiting',
+  'active',
+  'delayed',
+  'failed',
+  'completed',
+];
 
 // BullMQ default prefix + queue name
 const queueBase = `bull:${indexingQueue.name}`;
@@ -55,7 +61,9 @@ export abstract class AdminQueueService {
     // Sort newest-first regardless of state
     normalized.sort((a, b) => b.timestamp - a.timestamp);
 
-    const counts = await indexingQueue.getJobCounts(...(ALL_STATUSES as [JobStatus, ...JobStatus[]]));
+    const counts = await indexingQueue.getJobCounts(
+      ...(ALL_STATUSES as [JobStatus, ...JobStatus[]]),
+    );
     const total = status
       ? (counts[status] ?? 0)
       : Object.values(counts).reduce((s, n) => s + n, 0);
@@ -87,7 +95,8 @@ export abstract class AdminQueueService {
     if (!job) throw new Error(`Job ${jobId} not found`);
 
     const { documentId, orgId, version } = normalizeData(job.data);
-    if (!documentId || !orgId) throw new Error(`Job ${jobId} has no documentId/orgId`);
+    if (!documentId || !orgId)
+      throw new Error(`Job ${jobId} has no documentId/orgId`);
 
     const document = await DocumentService.single({ id: documentId, orgId });
     if (!document) throw new Error(`Document ${documentId} not found`);
@@ -134,10 +143,14 @@ export abstract class AdminQueueService {
     pipeline.zadd(`${queueBase}:completed`, now, jobId);
 
     // Stamp the job hash with completion timestamps
-    pipeline.hset(`${queueBase}:${jobId}`,
-      'processedOn', now,
-      'finishedOn', now,
-      'returnvalue', 'null',
+    pipeline.hset(
+      `${queueBase}:${jobId}`,
+      'processedOn',
+      now,
+      'finishedOn',
+      now,
+      'returnvalue',
+      'null',
     );
 
     await pipeline.exec();

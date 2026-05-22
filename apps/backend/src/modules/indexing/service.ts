@@ -7,8 +7,8 @@ import { db } from '../../db';
 import { documents } from '../../db/schema/documents';
 import { embeddings } from '../../db/schema/embeddings';
 import { MarkdownHeaderTextSplitter } from '../../utils/MarkdownHeaderTextSplitter';
-import type { DocumentContent, DocumentContentQna } from '../document/model';
 import { AiCostEventService } from '../admin/costEvent.service';
+import type { DocumentContent, DocumentContentQna } from '../document/model';
 
 const model = openai.embedding('text-embedding-3-small');
 
@@ -29,7 +29,10 @@ const CHUNK_SIZE = 800;
 const CHUNK_OVERLAP = 100;
 
 export abstract class IndexingService {
-  static embedDocument = async (document: typeof documents.$inferSelect, orgId: string) => {
+  static embedDocument = async (
+    document: typeof documents.$inferSelect,
+    orgId: string,
+  ) => {
     const documentContent = {
       type: document.type,
       data: document.contentSerialized,
@@ -47,7 +50,11 @@ export abstract class IndexingService {
       generatedEmbeddings = result.embeddings;
       totalTokens = result.tokens;
     } else if (documentContent.type === 'url') {
-      const urlData = documentContent.data as { url: string; rawText: string; crawledAt: string };
+      const urlData = documentContent.data as {
+        url: string;
+        rawText: string;
+        crawledAt: string;
+      };
       const chunks = await IndexingService.chunkText({
         title: document.title,
         content: urlData.rawText,
@@ -55,7 +62,10 @@ export abstract class IndexingService {
       const result = await IndexingService.generateEmbeddings(chunks);
       generatedEmbeddings = result.embeddings;
       totalTokens = result.tokens;
-    } else if (documentContent.type === 'text' || documentContent.type === 'pdf') {
+    } else if (
+      documentContent.type === 'text' ||
+      documentContent.type === 'pdf'
+    ) {
       const chunks = await IndexingService.chunkText({
         title: document.title,
         content: documentContent.data as string,
@@ -126,10 +136,7 @@ export abstract class IndexingService {
   //   - first char uppercase   →  excludes prose starting mid-sentence
   //   - title at least 4 chars →  excludes "1. A" edge cases
   static preprocessContent(content: string): string {
-    return content.replace(
-      /^(\d{1,2})\.\s+([A-Z][^\n]{3,})$/gm,
-      '## $1. $2',
-    );
+    return content.replace(/^(\d{1,2})\.\s+([A-Z][^\n]{3,})$/gm, '## $1. $2');
   }
 
   static async chunkText({
@@ -177,18 +184,26 @@ export abstract class IndexingService {
 
   static generateEmbeddings = async (
     chunks: string[],
-  ): Promise<{ embeddings: Array<{ embedding: number[]; content: string }>; tokens: number }> => {
+  ): Promise<{
+    embeddings: Array<{ embedding: number[]; content: string }>;
+    tokens: number;
+  }> => {
     const { embeddings, usage } = await embedMany({
       model,
       values: chunks,
     });
     return {
-      embeddings: embeddings.map((e, i) => ({ content: chunks[i], embedding: e })),
+      embeddings: embeddings.map((e, i) => ({
+        content: chunks[i],
+        embedding: e,
+      })),
       tokens: usage?.tokens ?? 0,
     };
   };
 
-  static generateEmbedding = async (value: string): Promise<{ embedding: number[]; tokens: number }> => {
+  static generateEmbedding = async (
+    value: string,
+  ): Promise<{ embedding: number[]; tokens: number }> => {
     // Normalise whitespace the same way as at index time so that query
     // vectors sit in the same space as document chunk vectors.
     const input = value.replaceAll('\n', ' ').trim();
@@ -205,7 +220,8 @@ export abstract class IndexingService {
     orgId: string,
     conversationId?: string,
   ) => {
-    const { embedding: userQueryEmbedded, tokens } = await this.generateEmbedding(userQuery);
+    const { embedding: userQueryEmbedded, tokens } =
+      await this.generateEmbedding(userQuery);
 
     AiCostEventService.recordEvent({
       orgId,

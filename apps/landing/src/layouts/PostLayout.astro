@@ -1,14 +1,24 @@
 ---
-import BlogLayout from './BlogLayout.astro';
-import Breadcrumb from '../components/Breadcrumb.astro';
 import type { CollectionEntry } from 'astro:content';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import BlogLayout from './BlogLayout.astro';
 
 interface Props {
   post: CollectionEntry<'blog'>;
 }
 
 const { post } = Astro.props;
-const { title, date, updatedAt, author, authorRole, excerpt, tags, readTime, image } = post.data;
+const {
+  title,
+  date,
+  updatedAt,
+  author,
+  authorRole,
+  excerpt,
+  tags,
+  readTime,
+  image,
+} = post.data;
 
 const siteURL = 'https://agenvik.com';
 const slug = post.id.replace(/\.mdx?$/, '');

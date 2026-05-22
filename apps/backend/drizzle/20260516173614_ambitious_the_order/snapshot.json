@@ -2,85 +2,52 @@
   "version": "8",
   "dialect": "postgres",
   "id": "73fbad5f-e7c4-40b2-a035-46d02265d285",
-  "prevIds": [
-    "0c2d0d9b-2294-4fb6-8306-b0cd262b53e0"
-  ],
+  "prevIds": ["0c2d0d9b-2294-4fb6-8306-b0cd262b53e0"],
   "ddl": [
     {
-      "values": [
-        "lead_generation"
-      ],
+      "values": ["lead_generation"],
       "name": "actionType",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "active",
-        "archived"
-      ],
+      "values": ["active", "archived"],
       "name": "agentStatus",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "friendly",
-        "professional",
-        "neutral"
-      ],
+      "values": ["friendly", "professional", "neutral"],
       "name": "tone",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "short",
-        "balanced",
-        "detailed"
-      ],
+      "values": ["short", "balanced", "detailed"],
       "name": "verbosity",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "inactive",
-        "active",
-        "error"
-      ],
+      "values": ["inactive", "active", "error"],
       "name": "channelStatus",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "web",
-        "whatsapp",
-        "instagram",
-        "slack"
-      ],
+      "values": ["web", "whatsapp", "instagram", "slack"],
       "name": "type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "ready",
-        "queue",
-        "indexing",
-        "indexed",
-        "failed"
-      ],
+      "values": ["ready", "queue", "indexing", "indexed", "failed"],
       "name": "status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "user",
-        "assistant"
-      ],
+      "values": ["user", "assistant"],
       "name": "role",
       "entityType": "enums",
       "schema": "public"
@@ -2972,14 +2939,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "agent_actions_agentId_agents_id_fkey",
@@ -2989,14 +2952,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "behavior_agentId_agents_id_fkey",
@@ -3006,14 +2965,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "channels_agentId_agents_id_fkey",
@@ -3023,14 +2978,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "conversations_agentId_agents_id_fkey",
@@ -3040,14 +2991,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "channelId"
-      ],
+      "columns": ["channelId"],
       "schemaTo": "public",
       "tableTo": "channels",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "conversations_channelId_channels_id_fkey",
@@ -3057,14 +3004,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "documents_agentId_agents_id_fkey",
@@ -3074,14 +3017,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "documentId"
-      ],
+      "columns": ["documentId"],
       "schemaTo": "public",
       "tableTo": "documents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "embeddings_documentId_documents_id_fkey",
@@ -3091,14 +3030,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "agentId"
-      ],
+      "columns": ["agentId"],
       "schemaTo": "public",
       "tableTo": "agents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "leads_agentId_agents_id_fkey",
@@ -3108,14 +3043,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "conversationId"
-      ],
+      "columns": ["conversationId"],
       "schemaTo": "public",
       "tableTo": "conversations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "leads_conversationId_conversations_id_fkey",
@@ -3125,14 +3056,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "channelId"
-      ],
+      "columns": ["channelId"],
       "schemaTo": "public",
       "tableTo": "channels",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "leads_channelId_channels_id_fkey",
@@ -3142,14 +3069,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "conversationId"
-      ],
+      "columns": ["conversationId"],
       "schemaTo": "public",
       "tableTo": "conversations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "messages_conversationId_conversations_id_fkey",
@@ -3158,9 +3081,7 @@
       "table": "messages"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "agent_actions_pkey",
       "schema": "public",
@@ -3168,9 +3089,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "agents_pkey",
       "schema": "public",
@@ -3178,9 +3097,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ai_cost_events_pkey",
       "schema": "public",
@@ -3188,9 +3105,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "behavior_pkey",
       "schema": "public",
@@ -3198,9 +3113,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "channels_pkey",
       "schema": "public",
@@ -3208,9 +3121,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "conversations_pkey",
       "schema": "public",
@@ -3218,9 +3129,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "demo_bookings_pkey",
       "schema": "public",
@@ -3228,9 +3137,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "documents_pkey",
       "schema": "public",
@@ -3238,9 +3145,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "embeddings_pkey",
       "schema": "public",
@@ -3248,9 +3153,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "feature_flag_definitions_pkey",
       "schema": "public",
@@ -3258,9 +3161,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "leads_pkey",
       "schema": "public",
@@ -3268,9 +3169,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "messages_pkey",
       "schema": "public",
@@ -3278,9 +3177,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "org_feature_flags_pkey",
       "schema": "public",
@@ -3288,9 +3185,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "org_subscriptions_pkey",
       "schema": "public",
@@ -3298,9 +3193,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "org_usage_daily_pkey",
       "schema": "public",
@@ -3308,9 +3201,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "org_usage_monthly_pkey",
       "schema": "public",
@@ -3318,9 +3209,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "slack_connections_pkey",
       "schema": "public",
@@ -3328,9 +3217,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "whatsapp_connections_pkey",
       "schema": "public",
@@ -3339,10 +3226,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "agentId",
-        "actionType"
-      ],
+      "columns": ["agentId", "actionType"],
       "nullsNotDistinct": false,
       "name": "agent_actions_agent_type_unique",
       "entityType": "uniques",
@@ -3351,9 +3235,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "orgId"
-      ],
+      "columns": ["orgId"],
       "nullsNotDistinct": false,
       "name": "slack_connections_orgId_key",
       "schema": "public",
@@ -3362,9 +3244,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "orgId"
-      ],
+      "columns": ["orgId"],
       "nullsNotDistinct": false,
       "name": "whatsapp_connections_orgId_key",
       "schema": "public",

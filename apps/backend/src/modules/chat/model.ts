@@ -7,6 +7,7 @@ const ChatBodySchema = z.object({
   message: z.string(),
   channelId: z.string(),
   parentOrigin: z.string().optional(),
+  timezone: z.string().optional(),
 });
 
 const ChatChannelQueryParamSchema = z.object({

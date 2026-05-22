@@ -1,22 +1,26 @@
-import { createId } from '@paralleldrive/cuid2';
 import { openai } from '@ai-sdk/openai';
+import { createId } from '@paralleldrive/cuid2';
 import { generateText, streamText } from 'ai';
 import type { conversations } from '../../db/schema/conversations';
-import { BehaviourService } from '../behaviour/service';
-import { ChannelService } from '../channel/service';
+import { ActionService } from '../action/service';
+import { AiCostEventService } from '../admin/costEvent.service';
 import { AgentService } from '../agent/service';
+import { BehaviourService } from '../behaviour/service';
+import type {
+  IChannelSlackConfig,
+  IChannelWebConfig,
+  IChannelWhatsAppConfig,
+} from '../channel/model';
+import { ChannelService } from '../channel/service';
 import { ConversationService } from '../conversation/service';
 import { IndexingService } from '../indexing/service';
-import { OrgUsageMonthlyService } from '../subscription/usage';
-import { SubscriptionService } from '../subscription/service';
-import type { IChannelWebConfig, IChannelWhatsAppConfig, IChannelSlackConfig } from '../channel/model';
-import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { SlackConnectionService } from '../slack/connectionService';
-import { AiCostEventService } from '../admin/costEvent.service';
-import { referenceResolverPrompt } from './prompts';
+import { SubscriptionService } from '../subscription/service';
+import { OrgUsageMonthlyService } from '../subscription/usage';
+import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { buildChatContext } from './context';
 import { handleLeadCapture, persistMessages } from './persistence';
-import { ActionService } from '../action/service';
+import { referenceResolverPrompt } from './prompts';
 
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
@@ -35,7 +39,9 @@ export class NotFoundError extends Error {
 export class MessageLimitReachedError extends Error {
   constructor(
     readonly payload: Awaited<
-      ReturnType<typeof SubscriptionService.assertMessagesPerMonthLimitNotReached>
+      ReturnType<
+        typeof SubscriptionService.assertMessagesPerMonthLimitNotReached
+      >
     > & { allowed: false },
   ) {
     super(SubscriptionService.getMessageLimitReachedMessage(payload));
@@ -122,9 +128,13 @@ export abstract class ChatService {
     // Data-entry responses (name, email, phone, company) have no references
     // to resolve. Skipping the resolver avoids nano-model mishandling and
     // saves a round-trip.
-    const isDataEntry = Object.keys(
-      ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance),
-    ).length > 0;
+    const isDataEntry =
+      Object.keys(
+        ChatService.extractLeadFieldsHeuristically(
+          message,
+          conversation.lastAssistantUtterance,
+        ),
+      ).length > 0;
     if (isDataEntry) return message;
 
     return ChatService.resolveReferences({
@@ -142,7 +152,12 @@ export abstract class ChatService {
     orgId: string,
     conversationId?: string,
   ) {
-    const chunks = await IndexingService.findRelevantContent(finalQuery, agentId, orgId, conversationId);
+    const chunks = await IndexingService.findRelevantContent(
+      finalQuery,
+      agentId,
+      orgId,
+      conversationId,
+    );
     return {
       chunks,
       knowledgeBase: chunks.map((c) => c.content).join('\n---\n'),
@@ -159,20 +174,25 @@ export abstract class ChatService {
     if (clean.endsWith('?') || clean.length > 80) return {};
 
     // Email
-    const emailMatch = clean.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const emailMatch = clean.match(
+      /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
+    );
     if (emailMatch) return { email: emailMatch[0] };
 
     // Phone: 7–15 digits, optional +/spaces/dashes
-    const digitsOnly = clean.replace(/[\s\-\(\)\.]/g, '');
+    const digitsOnly = clean.replace(/[\s\-().]/g, '');
     if (/^\+?[\d]{7,15}$/.test(digitsOnly)) return { phone: clean };
 
     // Explicit name prefix ("Name: Keshav" / "my name is Keshav")
-    const namedPrefix = clean.match(/^(?:my )?name(?:\s+is)?\s*[:\-]?\s*(.+)$/i);
+    const namedPrefix = clean.match(/^(?:my )?name(?:\s+is)?\s*[:-]?\s*(.+)$/i);
     if (namedPrefix) return { name: namedPrefix[1].trim() };
 
     // Context-based: map the reply to whatever the assistant just asked for
     const lower = lastAssistantUtterance.toLowerCase();
-    if (/\bname\b/.test(lower) && !/\bcompany\b|\bemail\b|\bphone\b/.test(lower)) {
+    if (
+      /\bname\b/.test(lower) &&
+      !/\bcompany\b|\bemail\b|\bphone\b/.test(lower)
+    ) {
       return { name: clean };
     }
     if (/\bcompany\b|\borganization\b|\borganisation\b/.test(lower)) {
@@ -200,7 +220,10 @@ export abstract class ChatService {
     const lastAssistantUtterance = conversation?.lastAssistantUtterance;
     if (!lastAssistantUtterance) return;
 
-    const extracted = ChatService.extractLeadFieldsHeuristically(message, lastAssistantUtterance);
+    const extracted = ChatService.extractLeadFieldsHeuristically(
+      message,
+      lastAssistantUtterance,
+    );
     if (!Object.keys(extracted).length) return;
 
     const existing = (conversation?.entities as Record<string, string>) ?? {};
@@ -212,7 +235,13 @@ export abstract class ChatService {
     }
   }
 
-  static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {
+  static async getAgent({
+    agentId,
+    orgId,
+  }: {
+    agentId: string;
+    orgId: string;
+  }) {
     const agent = await AgentService.single({ id: agentId, orgId });
 
     if (agent && agent.agentStatus === 'active') {
@@ -279,6 +308,7 @@ export abstract class ChatService {
     conversationId,
     orgId,
     ip,
+    timezone,
   }: {
     agentId: string;
     conversationId: string;
@@ -286,14 +316,19 @@ export abstract class ChatService {
     channelId: string;
     orgId: string;
     ip?: string;
+    timezone?: string;
   }) {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getAgent({ agentId, orgId });
 
-    const rawConversation = await ConversationService.single({ id: conversationId, orgId });
+    const rawConversation = await ConversationService.single({
+      id: conversationId,
+      orgId,
+    });
     // Discard if the stored record belongs to a different channel (can happen
     // when the same client-generated ID is reused across agents in the same org).
-    const conversation = rawConversation?.channelId === channelId ? rawConversation : undefined;
+    const conversation =
+      rawConversation?.channelId === channelId ? rawConversation : undefined;
     const behavior = await ChatService.getBehaviour(agentId);
     const finalQuery = await ChatService.getFinalQuery({
       message,
@@ -302,40 +337,62 @@ export abstract class ChatService {
       agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(
+      finalQuery,
+      agentId,
+      orgId,
+      conversationId,
+    );
 
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+    const leadAction = enabledActions.find(
+      (a) => a.actionType === 'lead_generation',
+    );
+    const schedulingAction = enabledActions.find(
+      (a) => a.actionType === 'scheduling',
+    );
 
     // Load entities saved from PREVIOUS turns only — extracting from the
     // current message here would cause the model to say "I already have X"
     // in the same turn the user just provided it.
-    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
+    const entities = leadAction
+      ? ChatService.getStoredEntities(conversation)
+      : undefined;
 
     // Detect if the current message is a data-entry response so we can inject
     // an explicit "user just provided X: Y" hint — more reliable than relying
     // on the model to infer it from conversation history.
-    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
-      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
-      : undefined;
+    const currentDataEntry =
+      leadAction && conversation?.lastAssistantUtterance
+        ? ChatService.extractLeadFieldsHeuristically(
+            message,
+            conversation.lastAssistantUtterance,
+          )
+        : undefined;
 
-    const { tools, systemPrompt, priorMessages } = await buildChatContext({
-      agentId,
-      conversationId,
-      orgId,
-      knowledgeBase,
-      behavior,
-      hasExistingConversation: !!conversation,
-      leadAction,
-      entities,
-      currentDataEntry,
-    });
+    const { tools, systemPrompt, priorMessages, hasScheduling } =
+      await buildChatContext({
+        agentId,
+        conversationId,
+        channelId,
+        orgId,
+        knowledgeBase,
+        behavior,
+        hasExistingConversation: !!conversation,
+        leadAction,
+        schedulingAction,
+        entities,
+        currentDataEntry,
+        timezone,
+      });
+
+    const maxSteps = hasScheduling ? 2 : 1;
 
     const result = streamText({
       system: systemPrompt,
       model,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 1 } : {}),
+      ...(tools ? { tools, maxSteps } : {}),
       onFinish: async ({ text: assistantMessage, toolCalls, usage }) => {
         const conversationData = {
           lastUserQuestion: finalQuery,
@@ -357,7 +414,11 @@ export abstract class ChatService {
 
         // Extract entities from this turn's user message and save for next turn
         if (leadAction && conversationId) {
-          void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
+          void ChatService.extractAndSaveLeadEntities({
+            message,
+            conversation,
+            conversationId,
+          });
         }
 
         await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
@@ -371,18 +432,24 @@ export abstract class ChatService {
           metadata: { operation: 'web-chat-response' },
         });
 
-        await handleLeadCapture(toolCalls ?? [], { agentId, conversationId, channelId, orgId });
+        await handleLeadCapture(toolCalls ?? [], {
+          agentId,
+          conversationId,
+          channelId,
+          orgId,
+        });
 
         // Sentiment scoring — paid plans only
         const plan = await SubscriptionService.getPlan(orgId);
-        const sentiment = plan !== 'free'
-          ? await ChatService.scoreSentiment({
-            assistantMessage,
-            orgId,
-            agentId,
-            conversationId,
-          })
-          : null;
+        const sentiment =
+          plan !== 'free'
+            ? await ChatService.scoreSentiment({
+                assistantMessage,
+                orgId,
+                agentId,
+                conversationId,
+              })
+            : null;
 
         await persistMessages({
           conversationId,
@@ -419,6 +486,7 @@ export abstract class ChatService {
     conversationId,
     orgId,
     ip,
+    timezone,
   }: {
     agentId: string;
     channelId: string;
@@ -426,6 +494,7 @@ export abstract class ChatService {
     conversationId?: string;
     orgId: string;
     ip?: string;
+    timezone?: string;
   }) {
     await ChatService.assertMessagesPerMonthLimitNotReached(orgId);
     await ChatService.getAgent({ agentId, orgId });
@@ -442,34 +511,56 @@ export abstract class ChatService {
       agentId,
       conversationId,
     });
-    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
+    const { knowledgeBase, chunks } = await ChatService.getSearchChunks(
+      finalQuery,
+      agentId,
+      orgId,
+      conversationId,
+    );
 
     const enabledActions = await ActionService.getEnabledByAgent(agentId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+    const leadAction = enabledActions.find(
+      (a) => a.actionType === 'lead_generation',
+    );
+    const schedulingAction = enabledActions.find(
+      (a) => a.actionType === 'scheduling',
+    );
 
-    const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
-
-    const currentDataEntry = leadAction && conversation?.lastAssistantUtterance
-      ? ChatService.extractLeadFieldsHeuristically(message, conversation.lastAssistantUtterance)
+    const entities = leadAction
+      ? ChatService.getStoredEntities(conversation)
       : undefined;
 
-    const { tools, systemPrompt, priorMessages } = await buildChatContext({
-      agentId,
-      conversationId,
-      orgId,
-      knowledgeBase,
-      behavior,
-      hasExistingConversation: !!conversation,
-      leadAction,
-      entities,
-      currentDataEntry,
-    });
+    const currentDataEntry =
+      leadAction && conversation?.lastAssistantUtterance
+        ? ChatService.extractLeadFieldsHeuristically(
+            message,
+            conversation.lastAssistantUtterance,
+          )
+        : undefined;
+
+    const { tools, systemPrompt, priorMessages, hasScheduling } =
+      await buildChatContext({
+        agentId,
+        conversationId,
+        channelId,
+        orgId,
+        knowledgeBase,
+        behavior,
+        hasExistingConversation: !!conversation,
+        leadAction,
+        schedulingAction,
+        entities,
+        currentDataEntry,
+        timezone,
+      });
+
+    const maxSteps = hasScheduling ? 2 : 1;
 
     const result = await generateText({
       model,
       system: systemPrompt,
       messages: [...priorMessages, { role: 'user', content: finalQuery }],
-      ...(tools ? { tools, maxSteps: 1 } : {}),
+      ...(tools ? { tools, maxSteps } : {}),
     });
     await AiCostEventService.recordEvent({
       orgId,
@@ -639,7 +730,11 @@ export abstract class ChatService {
     });
 
     // Extract entities from this turn's message and save for next turn
-    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
+    void ChatService.extractAndSaveLeadEntities({
+      message,
+      conversation,
+      conversationId,
+    });
 
     await persistMessages({
       conversationId,
@@ -695,16 +790,22 @@ export abstract class ChatService {
     };
     let placeholderTs: string | null = null;
     try {
-      const placeholderRes = await fetch('https://slack.com/api/chat.postMessage', {
-        method: 'POST',
-        headers: slackHeaders,
-        body: JSON.stringify({
-          channel: slackChannelId,
-          text: '_Thinking…_',
-          thread_ts: threadTs,
-        }),
-      });
-      const placeholderData = (await placeholderRes.json()) as { ok: boolean; ts?: string };
+      const placeholderRes = await fetch(
+        'https://slack.com/api/chat.postMessage',
+        {
+          method: 'POST',
+          headers: slackHeaders,
+          body: JSON.stringify({
+            channel: slackChannelId,
+            text: '_Thinking…_',
+            thread_ts: threadTs,
+          }),
+        },
+      );
+      const placeholderData = (await placeholderRes.json()) as {
+        ok: boolean;
+        ts?: string;
+      };
       if (placeholderData.ok && placeholderData.ts) {
         placeholderTs = placeholderData.ts;
       }
@@ -782,7 +883,11 @@ export abstract class ChatService {
       orgId,
     });
 
-    void ChatService.extractAndSaveLeadEntities({ message, conversation, conversationId });
+    void ChatService.extractAndSaveLeadEntities({
+      message,
+      conversation,
+      conversationId,
+    });
 
     await persistMessages({
       conversationId,
@@ -802,12 +907,14 @@ export abstract class ChatService {
     message,
     parentOrigin,
     ip,
+    timezone,
   }: {
     channelId: string;
     message: string;
     conversationId: string;
     parentOrigin?: string;
     ip?: string;
+    timezone?: string;
   }) {
     const channel = await ChannelService.singleById(channelId);
 
@@ -838,6 +945,7 @@ export abstract class ChatService {
       message,
       orgId: channel.orgId,
       ip,
+      timezone,
     });
   }
 }
@@ -847,31 +955,33 @@ export abstract class ChatService {
 // ---------------------------------------------------------------------------
 
 /** Fire-and-forget: attach country (IP lookup) and topic (AI label) to a conversation. */
-async function enrichConversationAsync(
-  {
-    conversationId,
-    firstUserMessage,
-    isNew,
-    orgId,
-    agentId,
-    ip,
-  }: {
-    conversationId: string;
-    firstUserMessage: string;
-    isNew: boolean;
-    orgId: string;
-    agentId: string;
-    ip?: string;
-  },
-) {
+async function enrichConversationAsync({
+  conversationId,
+  firstUserMessage,
+  isNew,
+  orgId,
+  agentId,
+  ip,
+}: {
+  conversationId: string;
+  firstUserMessage: string;
+  isNew: boolean;
+  orgId: string;
+  agentId: string;
+  ip?: string;
+}) {
   try {
     if (ip && ip !== '127.0.0.1' && ip !== '::1') {
       try {
-        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
+        const geoRes = await fetch(
+          `http://ip-api.com/json/${ip}?fields=countryCode`,
+        );
         if (geoRes.ok) {
           const geo = (await geoRes.json()) as { countryCode?: string };
           if (geo.countryCode) {
-            await ConversationService.update(conversationId, { country: geo.countryCode });
+            await ConversationService.update(conversationId, {
+              country: geo.countryCode,
+            });
           }
         }
       } catch {
@@ -898,7 +1008,9 @@ async function enrichConversationAsync(
         });
         const cleanTopic = result.text.trim().replace(/^["']|["']$/g, '');
         if (cleanTopic) {
-          await ConversationService.update(conversationId, { topic: cleanTopic });
+          await ConversationService.update(conversationId, {
+            topic: cleanTopic,
+          });
         }
       } catch {
         // Topic is best-effort

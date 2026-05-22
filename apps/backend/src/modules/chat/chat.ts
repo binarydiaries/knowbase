@@ -5,9 +5,17 @@ import { ErrorModel } from '../../common/models/error';
 import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { Model } from './model';
-import { ChatService, DomainNotAllowedError, MessageLimitReachedError, NotFoundError } from './service';
+import {
+  ChatService,
+  DomainNotAllowedError,
+  MessageLimitReachedError,
+  NotFoundError,
+} from './service';
 
-function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
+function isDomainAllowed(
+  origin: string | undefined,
+  allowedDomains: string[],
+): boolean {
   if (!allowedDomains.length) return true;
   if (!origin) return false;
   try {
@@ -43,7 +51,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
   .post(
     '',
     async ({ body, status, headers }) => {
-      const { message, channelId, conversationId } = body;
+      const { message, channelId, conversationId, timezone } = body;
       const ip =
         (headers['x-forwarded-for'] as string | undefined)
           ?.split(',')[0]
@@ -57,6 +65,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
           message: message,
           channelId,
           parentOrigin: body.parentOrigin,
+          timezone,
           ip,
         });
       } catch (error) {
@@ -78,13 +87,19 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       const channel = await ChannelService.singleById(query.channelId);
 
       if (!channel) {
-        return status(404, { code: 'NOT_FOUND', message: 'Channel not found or Invalid' });
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'Channel not found or Invalid',
+        });
       }
 
       if (channel.type === 'web') {
         const config = channel.config as IChannelWebConfig;
         if (!isDomainAllowed(query.parentOrigin, config.allowedDomains ?? [])) {
-          return status(403, { code: 'FORBIDDEN', message: 'Domain not allowed' });
+          return status(403, {
+            code: 'FORBIDDEN',
+            message: 'Domain not allowed',
+          });
         }
       }
 
@@ -118,6 +133,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
           channelId,
           message,
           orgId,
+          timezone: body.timezone,
         });
       } catch (error) {
         return handleChatError(error, status);

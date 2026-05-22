@@ -10,7 +10,8 @@ import { toast } from '@knowbase/ui/components/sonner';
 import { Switch } from '@knowbase/ui/components/switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { LockIcon, UserRound } from 'lucide-react';
+import { CalendarClock, LockIcon, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 import {
   getAgentActions,
@@ -18,34 +19,45 @@ import {
   postAgentActions,
 } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
+import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer';
+import { SchedulingConfigDrawer } from './SchedulingConfigDrawer';
 
-// import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer'; // LEAD_GENERATION_DISABLED: uncomment to restore
+type ActionTypeId = 'lead_generation' | 'scheduling';
 
-// LEAD_GENERATION_DISABLED: uncomment to restore the lead_generation action type
-// const ACTION_TYPES = [
-//   {
-//     id: 'lead_generation' as const,
-//     label: 'Lead Generation',
-//     description: 'Capture contact info (name, email, phone) through natural conversation.',
-//     icon: UserRound,
-//   },
-// ];
 const ACTION_TYPES: Array<{
-  id: 'lead_generation';
+  id: ActionTypeId;
   label: string;
   description: string;
+  lockedDescription: string;
   icon: typeof UserRound;
-}> = [];
+}> = [
+  {
+    id: 'lead_generation',
+    label: 'Lead Generation',
+    description:
+      'Capture contact info (name, email, phone) through natural conversation.',
+    lockedDescription: 'Upgrade to Starter or above to enable lead generation.',
+    icon: UserRound,
+  },
+  {
+    id: 'scheduling',
+    label: 'Appointment Scheduling',
+    description: 'Let users book Cal.com appointments directly in chat.',
+    lockedDescription:
+      'Upgrade to Starter or above to enable appointment scheduling.',
+    icon: CalendarClock,
+  },
+];
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
   const queryClient = useQueryClient();
-  // const [configuringActionId, setConfiguringActionId] = useState<string | null>(
-  //   null,
-  // );
+  const [configuringActionId, setConfiguringActionId] = useState<string | null>(
+    null,
+  );
   const { plan } = useClerkPlan();
-  const hasLeadGeneration = plan !== 'free';
+  const isPaidPlan = plan !== 'free';
 
   const actionsQuery = useQuery({
     queryKey: ['agent-actions', agentId],
@@ -54,7 +66,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   const actions = actionsQuery.data?.data.actions ?? [];
 
-  const getAction = (type: 'lead_generation') =>
+  const getAction = (type: ActionTypeId) =>
     actions.find((a) => a.actionType === type);
 
   const toggleMutation = useMutation({
@@ -62,7 +74,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       type,
       enabled,
     }: {
-      type: 'lead_generation';
+      type: ActionTypeId;
       enabled: boolean;
     }) => {
       const existing = getAction(type);
@@ -90,11 +102,9 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
   });
 
-  // const configuredAction = configuringActionId
-  //   ? getAction(configuringActionId as 'lead_generation')
-  //   : null;
-
-  if (ACTION_TYPES.length === 0) return null;
+  const configuringAction = configuringActionId
+    ? getAction(configuringActionId as ActionTypeId)
+    : null;
 
   return (
     <>
@@ -110,8 +120,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
             const action = getAction(actionType.id);
             const isEnabled = action?.enabled ?? false;
             const Icon = actionType.icon;
-            const isLocked =
-              actionType.id === 'lead_generation' && !hasLeadGeneration;
+            const isLocked = !isPaidPlan;
 
             return (
               <div key={actionType.id}>
@@ -137,7 +146,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {isLocked
-                          ? 'Upgrade to Starter or above to enable lead generation.'
+                          ? actionType.lockedDescription
                           : actionType.description}
                       </p>
                     </div>
@@ -147,7 +156,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
                       <button
                         type="button"
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        // onClick={() => setConfiguringActionId(actionType.id)}
+                        onClick={() => setConfiguringActionId(actionType.id)}
                         disabled={readOnly}
                       >
                         Configure
@@ -173,10 +182,9 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         </CardContent>
       </Card>
 
-      {/* LEAD_GENERATION_DISABLED: uncomment to restore the config drawer
-      {configuredAction && (
+      {configuringAction?.actionType === 'lead_generation' && (
         <LeadGenerationConfigDrawer
-          action={configuredAction}
+          action={configuringAction}
           open={configuringActionId === 'lead_generation'}
           onClose={() => setConfiguringActionId(null)}
           onSaved={() => {
@@ -187,7 +195,20 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           }}
         />
       )}
-      */}
+
+      {configuringAction?.actionType === 'scheduling' && (
+        <SchedulingConfigDrawer
+          action={configuringAction}
+          open={configuringActionId === 'scheduling'}
+          onClose={() => setConfiguringActionId(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({
+              queryKey: ['agent-actions', agentId],
+            });
+            setConfiguringActionId(null);
+          }}
+        />
+      )}
     </>
   );
 };

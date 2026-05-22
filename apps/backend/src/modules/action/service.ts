@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { agentActions, type LeadGenerationConfig } from '../../db/schema/agentActions';
+import { type ActionConfig, agentActions } from '../../db/schema/agentActions';
 
 export abstract class ActionService {
   static getEnabledByAgent(agentId: string) {
@@ -28,7 +28,7 @@ export abstract class ActionService {
 
   static async update(
     id: string,
-    data: { enabled?: boolean; config?: LeadGenerationConfig },
+    data: { enabled?: boolean; config?: ActionConfig },
   ) {
     const rows = await db
       .update(agentActions)

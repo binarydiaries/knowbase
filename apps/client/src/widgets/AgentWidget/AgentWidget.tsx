@@ -46,6 +46,7 @@ const AgentWidgetContent = ({
             conversationId: id,
             channelId: channelSchema?.id,
             ...(parentOrigin ? { parentOrigin } : {}),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
         };
       },
@@ -97,7 +98,10 @@ const AgentWidgetContent = ({
   );
 };
 
-export const AgentWidget = ({ channelSchema, parentOrigin }: IAgentWidgetProps) => {
+export const AgentWidget = ({
+  channelSchema,
+  parentOrigin,
+}: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (

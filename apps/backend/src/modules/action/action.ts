@@ -45,6 +45,17 @@ export const Action = new Elysia({
         }
       }
 
+      if (body.actionType === 'scheduling') {
+        const access = await SubscriptionService.assertSchedulingAccess(orgId);
+        if (!access.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message:
+              'Appointment scheduling is available on the Starter plan and above. Upgrade your plan to use this feature.',
+          });
+        }
+      }
+
       const agent = await AgentService.single({ id: body.agentId, orgId });
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
@@ -89,6 +100,17 @@ export const Action = new Elysia({
             code: 'PLAN_LIMIT_REACHED',
             message:
               'Lead generation is available on the Starter plan and above. Upgrade your plan to use this feature.',
+          });
+        }
+      }
+
+      if (existing.actionType === 'scheduling' && body.enabled === true) {
+        const access = await SubscriptionService.assertSchedulingAccess(orgId);
+        if (!access.allowed) {
+          return status(403, {
+            code: 'PLAN_LIMIT_REACHED',
+            message:
+              'Appointment scheduling is available on the Starter plan and above. Upgrade your plan to use this feature.',
           });
         }
       }

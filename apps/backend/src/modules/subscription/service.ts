@@ -3,9 +3,10 @@ import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
-import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
-import { PLANS, type PlanName } from './plans';
 import { FeatureFlagService } from '../featureFlag/service';
+import { PLANS, type PlanName } from './plans';
+import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
+
 export type { PlanName } from './plans';
 
 const PLAN_NAMES = new Set<PlanName>(['free', 'starter', 'growth', 'pro']);
@@ -36,7 +37,7 @@ export abstract class SubscriptionService {
   }
 
   static async getPlan(orgId: string): Promise<PlanName> {
-    const record = await this.getRecord(orgId);
+    const record = await SubscriptionService.getRecord(orgId);
     const rawPlan = normalizePlanName(record?.plan) ?? 'free';
     return record?.status === 'created' ? 'free' : rawPlan;
   }
@@ -46,15 +47,14 @@ export abstract class SubscriptionService {
   }
 
   static async getStatus(orgId: string) {
-    const record = await this.getRecord(orgId);
+    const record = await SubscriptionService.getRecord(orgId);
     // 'created' means checkout initiated but payment not yet confirmed — treat as free
     const rawPlan = normalizePlanName(record?.plan) ?? 'free';
-    const plan: PlanName =
-      record?.status === 'created' ? 'free' : rawPlan;
+    const plan: PlanName = record?.status === 'created' ? 'free' : rawPlan;
     const pendingPlan: PlanName | null =
       record?.status === 'created' && rawPlan !== 'free' ? rawPlan : null;
     const subscriptionStatus = record?.status ?? null;
-    const limits = this.getLimits(plan);
+    const limits = SubscriptionService.getLimits(plan);
     const activeAgentLimit = limits.agents;
     const knowledgeSourceLimit = limits.knowledgeSources;
     const messagesPerMonthLimit = limits.messagesPerMonth;
@@ -63,9 +63,7 @@ export abstract class SubscriptionService {
     const [{ value: activeAgentCount }] = await db
       .select({ value: count() })
       .from(agents)
-      .where(
-        and(eq(agents.orgId, orgId), eq(agents.agentStatus, 'active')),
-      );
+      .where(and(eq(agents.orgId, orgId), eq(agents.agentStatus, 'active')));
 
     const [{ value: knowledgeSourceCount }] = await db
       .select({ value: count() })
@@ -171,10 +169,24 @@ export abstract class SubscriptionService {
 
   static async assertLeadGenerationAccess(orgId: string) {
     const [plan, flagEnabled] = await Promise.all([
-      this.getPlan(orgId),
+      SubscriptionService.getPlan(orgId),
       FeatureFlagService.isEnabled('lead_generation', orgId),
     ]);
-    const allowed = flagEnabled && this.planHasLeadGeneration(plan);
+    const allowed =
+      flagEnabled && SubscriptionService.planHasLeadGeneration(plan);
+    return { allowed, plan };
+  }
+
+  static planHasScheduling(plan: PlanName): boolean {
+    return plan !== 'free';
+  }
+
+  static async assertSchedulingAccess(orgId: string) {
+    const [plan, flagEnabled] = await Promise.all([
+      SubscriptionService.getPlan(orgId),
+      FeatureFlagService.isEnabled('scheduling', orgId),
+    ]);
+    const allowed = flagEnabled && SubscriptionService.planHasScheduling(plan);
     return { allowed, plan };
   }
 
@@ -183,8 +195,8 @@ export abstract class SubscriptionService {
   }
 
   static async assertPaidChannelAccess(orgId: string) {
-    const plan = await this.getPlan(orgId);
-    const allowed = this.planHasPaidChannels(plan);
+    const plan = await SubscriptionService.getPlan(orgId);
+    const allowed = SubscriptionService.planHasPaidChannels(plan);
     return { allowed, plan };
   }
 
@@ -193,9 +205,9 @@ export abstract class SubscriptionService {
   }
 
   static async assertAgentLimitNotReached(orgId: string) {
-    const subscriptionStatus = await this.getStatus(orgId);
+    const subscriptionStatus = await SubscriptionService.getStatus(orgId);
 
-    if (this.hasReachedAgentLimit(subscriptionStatus)) {
+    if (SubscriptionService.hasReachedAgentLimit(subscriptionStatus)) {
       return {
         allowed: false as const,
         ...subscriptionStatus,
@@ -209,9 +221,11 @@ export abstract class SubscriptionService {
   }
 
   static async assertKnowledgeSourceLimitNotReached(orgId: string) {
-    const subscriptionStatus = await this.getStatus(orgId);
+    const subscriptionStatus = await SubscriptionService.getStatus(orgId);
 
-    if (this.hasReachedKnowledgeSourceLimit(subscriptionStatus)) {
+    if (
+      SubscriptionService.hasReachedKnowledgeSourceLimit(subscriptionStatus)
+    ) {
       return {
         allowed: false as const,
         ...subscriptionStatus,
@@ -225,9 +239,11 @@ export abstract class SubscriptionService {
   }
 
   static async assertMessagesPerMonthLimitNotReached(orgId: string) {
-    const subscriptionStatus = await this.getStatus(orgId);
+    const subscriptionStatus = await SubscriptionService.getStatus(orgId);
 
-    if (this.hasReachedMessagesPerMonthLimit(subscriptionStatus)) {
+    if (
+      SubscriptionService.hasReachedMessagesPerMonthLimit(subscriptionStatus)
+    ) {
       return {
         allowed: false as const,
         ...subscriptionStatus,

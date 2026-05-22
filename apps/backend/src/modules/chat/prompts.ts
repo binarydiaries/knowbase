@@ -33,7 +33,11 @@ ${currentUserMessage}
 `;
 };
 
-export function buildPlatformRules({ hasLeadCollection = false }: { hasLeadCollection?: boolean } = {}) {
+export function buildPlatformRules({
+  hasLeadCollection = false,
+}: {
+  hasLeadCollection?: boolean;
+} = {}) {
   const leadCollectionException = hasLeadCollection
     ? `- Exception: when you are actively collecting lead information, short user responses such as a name, email address, phone number, or company name are direct answers to your question — accept and record them immediately. Do NOT evaluate these against the Knowledge Base or treat them as unanswerable queries.`
     : '';
@@ -93,14 +97,18 @@ export function buildActionsPrompt(
   const collected = collectedFields
     ? Object.entries(collectedFields).filter(([, v]) => v)
     : [];
-  const collectedSection = collected.length > 0
-    ? `\nAlready collected — do NOT ask for these again:\n${collected.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\n`
-    : '';
+  const collectedSection =
+    collected.length > 0
+      ? `\nAlready collected — do NOT ask for these again:\n${collected.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\n`
+      : '';
 
-  const current = currentDataEntry ? Object.entries(currentDataEntry).filter(([, v]) => v) : [];
-  const currentSection = current.length > 0
-    ? `\nThe user's current message is providing:\n${current.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\nAccept this immediately. Do NOT ask for it again. Continue to the next missing required field.\n`
-    : '';
+  const current = currentDataEntry
+    ? Object.entries(currentDataEntry).filter(([, v]) => v)
+    : [];
+  const currentSection =
+    current.length > 0
+      ? `\nThe user's current message is providing:\n${current.map(([k, v]) => `- ${k}: ${v}`).join('\n')}\nAccept this immediately. Do NOT ask for it again. Continue to the next missing required field.\n`
+      : '';
 
   return `
 You have access to a \`capture_lead\` tool to collect contact information.
@@ -116,5 +124,16 @@ Lead collection rules:
 export function buildDataEntryAwarenessRule() {
   return `
 - If the user's message is a direct answer to a question you asked (e.g. providing a name, number, or company), acknowledge it and continue — do not treat it as a knowledge-base query.
+`;
+}
+
+export function buildSchedulingPrompt(triggerInstructions?: string) {
+  return `
+You have access to \`get_available_slots\` and \`book_appointment\` tools for scheduling meetings.
+- Call \`get_available_slots\` first to show the user available times. Present slots clearly, e.g. "Monday May 25 at 10:00 AM".
+- Collect the user's name and email before calling \`book_appointment\`.
+- Only call \`book_appointment\` after the user has explicitly confirmed a specific slot AND provided their name and email.
+- Do not book without explicit user confirmation.
+${triggerInstructions ? `Scheduling context: ${triggerInstructions}` : ''}
 `;
 }

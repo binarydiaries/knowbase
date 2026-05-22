@@ -19,26 +19,49 @@ const LeadGenerationConfigSchema = z.object({
   successMessage: z.string().max(200).optional(),
 });
 
+const SchedulingConfigSchema = z.object({
+  eventTypeId: z.number().int().positive(),
+  timezone: z.string().min(1),
+  slotsToShow: z.number().int().min(1).max(20).optional(),
+  triggerInstructions: z.string().max(300).optional(),
+  confirmationMessage: z.string().max(200).optional(),
+});
+
+const ActionConfigSchema = z.union([
+  LeadGenerationConfigSchema,
+  SchedulingConfigSchema,
+]);
+
 export const AgentActionSchema = z.object({
   id: z.string(),
   agentId: z.string(),
-  actionType: z.enum(['lead_generation']),
+  actionType: z.enum(['lead_generation', 'scheduling']),
   enabled: z.boolean(),
-  config: LeadGenerationConfigSchema,
+  config: ActionConfigSchema,
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
-export const CreateAgentActionBody = z.object({
-  agentId: z.string(),
-  actionType: z.enum(['lead_generation']),
-  config: LeadGenerationConfigSchema.optional().default({}),
-});
+export const CreateAgentActionBody = z.discriminatedUnion('actionType', [
+  z.object({
+    agentId: z.string(),
+    actionType: z.literal('lead_generation'),
+    config: LeadGenerationConfigSchema.optional().default({}),
+  }),
+  z.object({
+    agentId: z.string(),
+    actionType: z.literal('scheduling'),
+    config: SchedulingConfigSchema.optional().default({
+      eventTypeId: 0,
+      timezone: 'auto',
+    }),
+  }),
+]);
 
 export const UpdateAgentActionBody = z.object({
   enabled: z.boolean().optional(),
-  config: LeadGenerationConfigSchema.optional(),
+  config: ActionConfigSchema.optional(),
 });
 
 export const GetAgentActionsQuery = z.object({

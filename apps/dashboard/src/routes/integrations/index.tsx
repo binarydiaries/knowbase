@@ -8,9 +8,10 @@ import {
 import { Separator } from '@knowbase/ui/components/separator';
 import { SidebarTrigger } from '@knowbase/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { CalcomIntegrationCard } from '@/widgets/CalcomIntegrationCard/CalcomIntegrationCard.tsx';
 import { SlackIntegrationCard } from '@/widgets/SlackIntegrationCard/SlackIntegrationCard.tsx';
 import { WhatsAppIntegrationCard } from '@/widgets/WhatsAppIntegrationCard/WhatsAppIntegrationCard.tsx';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 export const Route = createFileRoute('/integrations/')({
   component: RouteComponent,
@@ -87,6 +88,14 @@ function RouteComponent() {
             <ComingSoonCard
               name="Slack"
               description="Send and receive messages in Slack channels."
+            />
+          )}
+          {flags?.scheduling ? (
+            <CalcomIntegrationCard />
+          ) : (
+            <ComingSoonCard
+              name="Cal.com"
+              description="Book appointments directly inside your agent chat."
             />
           )}
           <ComingSoonCard

@@ -1,30 +1,34 @@
 import { defineRelations } from 'drizzle-orm';
-import { aiCostEvents } from './aiCostEvents';
-import { demoBookings } from './demoBookings';
-import { behaviors } from './behaviors';
-import { channels } from './channels';
 import { agentActions } from './agentActions';
 import { agents } from './agents';
+import { aiCostEvents } from './aiCostEvents';
+import { appointments } from './appointments';
+import { behaviors } from './behaviors';
+import { calcomConnections } from './calcomConnections';
+import { channels } from './channels';
 import { conversations } from './conversations';
+import { demoBookings } from './demoBookings';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
+import { featureFlagDefinitions } from './featureFlagDefinitions';
 import { leads } from './leads';
 import { messages } from './messages';
+import { orgFeatureFlags } from './orgFeatureFlags';
+import { orgSubscriptions } from './orgSubscriptions';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
-import { orgSubscriptions } from './orgSubscriptions';
-import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
-import { featureFlagDefinitions } from './featureFlagDefinitions';
-import { orgFeatureFlags } from './orgFeatureFlags';
+import { whatsappConnections } from './whatsappConnections';
 
 export const relations = defineRelations(
   {
     aiCostEvents,
     agents,
+    appointments,
     demoBookings,
     channels,
     behaviors,
+    calcomConnections,
     agentActions,
     documents,
     conversations,
@@ -60,6 +64,10 @@ export const relations = defineRelations(
       leads: r.many.leads({
         from: r.agents.id,
         to: r.leads.agentId,
+      }),
+      appointments: r.many.appointments({
+        from: r.agents.id,
+        to: r.appointments.agentId,
       }),
     },
     documents: {
@@ -122,12 +130,27 @@ export const relations = defineRelations(
         to: r.channels.id,
       }),
     },
+    appointments: {
+      agent: r.one.agents({
+        from: r.appointments.agentId,
+        to: r.agents.id,
+      }),
+      conversation: r.one.conversations({
+        from: r.appointments.conversationId,
+        to: r.conversations.id,
+      }),
+      channel: r.one.channels({
+        from: r.appointments.channelId,
+        to: r.channels.id,
+      }),
+    },
     orgUsageDaily: {},
     orgUsageMonthly: {},
     orgSubscriptions: {},
     aiCostEvents: {},
     whatsappConnections: {},
     slackConnections: {},
+    calcomConnections: {},
     featureFlagDefinitions: {},
     orgFeatureFlags: {},
     demoBookings: {},

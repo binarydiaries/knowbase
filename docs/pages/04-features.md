@@ -2,8 +2,8 @@
 
 **Purpose:** Go deep on what Agenvik does. Target feature-specific search queries. Convert visitors who've heard of Agenvik and want specifics before signing up.
 
-**Meta title:** Agenvik Features — Knowledge Base, Multi-Channel, Analytics & More
-**Meta description:** See every feature Agenvik offers — upload PDFs, crawl websites, deploy on WhatsApp and Slack, customise agent behaviour, and track every conversation.
+**Meta title:** Agenvik Features — No-Code AI Agent Builder with WhatsApp, Slack & Analytics
+**Meta description:** Explore every Agenvik feature: upload PDFs, crawl websites, build no-code AI agents, deploy on WhatsApp and Slack, customise tone and fallback, and track every conversation.
 
 ---
 
@@ -21,7 +21,7 @@ Same as homepage.
 Everything you need to build an AI agent that actually knows your business
 
 ### Subhead
-No prompt engineering. No infrastructure. No AI expertise required. Just your content, your brand, and the channels your customers already use.
+Agenvik is a no-code AI agent platform. Upload your documents, point it at your website, and deploy on WhatsApp, Slack, or your site — no prompt engineering, no infrastructure, no AI expertise required.
 
 ### CTA
 **Button:** Start for free → (links to `app.agenvik.com`)
@@ -108,6 +108,9 @@ Build your agent in minutes. No code, no config files.
 
 ### H2
 One agent. Meet your customers where they are.
+
+### Subhead
+Agenvik supports three deployment channels — website chat widget, WhatsApp Business, and Slack — all powered by the same knowledge base and agent configuration.
 
 ---
 
@@ -211,8 +214,9 @@ What's on the roadmap
 
 | Feature | Status |
 |---------|--------|
-| Human handoff — live agent takeover inbox | In development |
+| Scheduling — let your agent book appointments | In development |
 | Lead capture — collect contact info during chat | In development |
+| Human handoff — live agent takeover inbox | Planned |
 | REST API access | Planned |
 | CRM integrations (HubSpot, Salesforce, Zoho) | Planned |
 | Instagram & Messenger channels | Planned |
@@ -221,7 +225,17 @@ What's on the roadmap
 | Multi-language support | Planned |
 | Full site crawl (multi-page URLs) | Planned |
 
-**Subtext:** We ship every week. Follow us on [Twitter/X] or check the changelog to see what just landed.
+**Subtext:** Follow us on X / Twitter for updates on what's shipping next.
+
+---
+
+## SECTION 8.5 — FAQ link
+
+A plain text line between the Coming Soon section and the final CTA:
+
+> "Have more questions? [See the full FAQ →](/faq)"
+
+No container. Centered. `text-[#301B69]/50 text-sm`. The link is `text-[#301B69] font-medium underline underline-offset-2`.
 
 ---
 
@@ -238,6 +252,24 @@ Start on the free plan — no credit card, no time limit. See how far you can ge
 - **Secondary:** See pricing →  (links to `/pricing`)
 
 ---
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Three schemas are emitted on the features page via `features.astro`:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (set to build date), `BreadcrumbList` (Home → Features).
+2. **`ItemList`** — 15 named features, each as a `ListItem` with `name` and `description`. This is the primary AEO/GEO signal — AI assistants can cite individual features from this list.
+3. **`FAQPage`** — 6 Q&As covering: coding required, knowledge source types, supported channels, multi-agent support, analytics, and customisation. Maps directly to the most common pre-purchase questions.
+
+`Organization` + `WebSite` schemas are emitted on every page via `Layout.astro`.
+
+### Entity recognition (GEO)
+The word "Agenvik" appears explicitly in the hero subhead and in the intro paragraphs of the Agent Builder and Channels sections. This ensures AI models extracting entity–attribute pairs from the page correctly attribute features to Agenvik (not a generic "the platform").
+
+### Accessibility
+All decorative UI mockup containers across every section have `aria-hidden="true"`. This removes low-contrast opacity text (e.g. `text-[9px] text-white/30`) from screen-reader and accessibility audits without affecting visual output.
 
 ## FOOTER
 Same as homepage.

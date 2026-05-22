@@ -124,7 +124,7 @@ Upload PDFs, paste your FAQ, drop in a website URL, or type plain text. Your age
 Dashed drop-zone with upload icon ("Drop files here"). Two file chips below: "shipping-policy.pdf" and "product-faq.pdf", each with a green "Trained" badge. A URL row showing "help.yoursite.com" with a globe icon.
 
 **Step 2 — Configure your agent**
-Give your agent a name, a tone (friendly, formal, direct), and tell it which channels to live on. It takes 2 minutes. You can change anything later.
+Give your agent a name, a tone (Formal, Friendly, Direct, or Supportive), and tell it which channels to live on. It takes 2 minutes. You can change anything later.
 
 [MOCKUP — built in HTML/CSS, no image file needed]
 Settings panel with three fields: Agent name input showing "Aria" with a blinking cursor; Tone dropdown set to "Friendly"; Channels section with toggle rows — Website ✓, WhatsApp ✓, Slack ✗.
@@ -137,7 +137,7 @@ Three stacked channel previews: (1) Website — chat bubble with "Aria · Agenvi
 
 > **Design note:** No product screenshots in this section. All step visuals are coded HTML/CSS mockups — no external image files required. This keeps the section fast and easy to update. Do NOT add arrow/line connectors between the cards; they look cluttered and have been intentionally removed.
 
-> **Container note:** Section uses `bg-white border border-[#301B69]/10 shadow-sm rounded-3xl` — same card style as the Comparison section above it. Padding: `p-10 md:p-14`.
+> **Container note:** Section uses `bg-[#1a0f3d] rounded-3xl` (dark navy) — matching the deep navy used in Agent Builder and Coming Soon. Cards inside are `bg-white/5 border-white/10` with white text. Padding: `p-10 md:p-14`. The bottom CTA bar is `bg-white/5 border-white/10`.
 
 ### Bottom CTA
 **Text:** Start building — it's free
@@ -165,7 +165,7 @@ Built to give accurate answers, not impressive-sounding ones
 **Card 2**
 **Headline:** Your tone. Your brand. Not robot speak.
 **Body:** Set how your agent sounds — formal, casual, concise, detailed. It writes like your team, not like a generic AI. Customers won't know it's automated unless you tell them.
-[ILLUSTRATION: Tone selector UI — a slider or dropdown with options: Formal · Professional · Friendly · Casual]
+[ILLUSTRATION: Tone selector UI — a slider or dropdown with options: Formal · Friendly · Direct · Supportive]
 
 **Card 3**
 **Headline:** One agent. Three channels.
@@ -225,15 +225,18 @@ Whatever your business. Wherever your customers are.
 
 **Purpose:** Trust. This is the single most important section after the hero.
 
+> **Container note:** Section uses `bg-[#F5F3FF] border border-[#301B69]/10 rounded-3xl p-10 md:p-14` (light lavender). This breaks the visual rhythm between the dark Use Cases section above and the Pricing section below. Cards inside are `bg-white shadow-sm`. A faint radial glow `bg-[#301B69]/10 blur-[120px]` sits at the top.
+
 ### H2
-[PLACEHOLDER: Real headline once reviews exist]
-Options: "What our early users say" / "Used by teams who needed it yesterday"
+What our early users say
 
 ### Testimonial cards (3 cards)
 [PLACEHOLDER: Real testimonials needed. Each card should include:]
 - Photo of the person (real, not stock)
 - Name + Title + Company
 - 2-3 sentence quote that mentions: the specific problem they had, what they use Agenvik for, and a concrete result (time saved, tickets reduced, etc.)
+
+Placeholder card copy: "Real testimonial coming soon — if you're using Agenvik and want to share your story, reach out at hello@agenvik.com"
 
 **Sample format when real quotes arrive:**
 > "Before Agenvik, our support team was handling 200 repeat questions a day. Now the agent handles 140 of them automatically. We set it up on a Friday afternoon."
@@ -345,12 +348,17 @@ Three schemas are emitted on the homepage via `index.astro`:
 `hero-dashboard.png` uses `loading="eager" fetchpriority="high"`. Do not change to `loading="lazy"` — this is the Largest Contentful Paint element.
 
 ### Preconnect hints (Layout.astro)
-`<link rel="preconnect" href="https://app.agenvik.com">` and `embed.agenvik.com` are set globally. DNS prefetch for Amplitude CDN. These reduce connection latency measured in Google's CrUX field data.
+`<link rel="preconnect" href="https://app.agenvik.com">` is set globally (critical path — used by Get Started CTAs). `embed.agenvik.com` uses `dns-prefetch` only (not preconnect) because the embed script is `defer async` and establishing a full early connection wastes a TCP slot. DNS prefetch for Amplitude CDN. These reduce connection latency measured in Google's CrUX field data.
 
 ### Section container consistency
-All homepage sections (except Hero, Problem, FinalCTA which have unique backgrounds) use `rounded-3xl p-10 md:p-14` with either:
-- `bg-white border border-[#301B69]/10 shadow-sm` — clean white (Comparison, HowItWorks)
-- `bg-cover bg-center` + `bg-white/50 backdrop-blur-[2px]` overlay — textured (Features, UseCases, Pricing, FAQ)
+All homepage sections (except Hero, Problem, FinalCTA which have unique backgrounds) use `rounded-3xl p-10 md:p-14` with one of these styles:
+
+- `bg-white border border-[#301B69]/10 shadow-sm` — clean white (Comparison)
+- `bg-[#1a0f3d]` — dark navy with glow blobs (HowItWorks, UseCases)
+- `bg-[#F5F3FF] border border-[#301B69]/10` — light lavender (SocialProof)
+- `bg-cover bg-center` + `bg-white/50 backdrop-blur-[2px]` overlay — textured bg-image (Features, Pricing, FAQ)
+
+**Section colour rhythm (top to bottom):** Hero (white) → Problem (dark contrast) → Comparison (white) → HowItWorks (dark navy) → Features (textured light) → UseCases (dark navy) → SocialProof (lavender) → Pricing (textured light) → FAQ (textured light) → FinalCTA (dark). No two consecutive sections share the same style.
 
 Do not mix these patterns within a single section.
 

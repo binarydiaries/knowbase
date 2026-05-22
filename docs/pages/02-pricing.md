@@ -21,7 +21,7 @@ Same as homepage.
 Simple pricing that grows with you
 
 ### Subhead
-Start for free. Pay only when you need more. No hidden fees, no long-term lock-in — just clear limits and real value at every tier.
+Agenvik starts free — no credit card, no time limit. Pay only when you need more capacity. No hidden fees, no long-term lock-in, just clear limits and real value at every tier.
 
 ### Toggle (if applicable in future)
 [PLACEHOLDER: Monthly / Annual toggle — "Save 20% annually" — implement when annual billing is ready]
@@ -172,6 +172,45 @@ Start with the free plan — no credit card, no time limit. Upgrade only when yo
 **Button:** Start for free → (links to `app.agenvik.com`)
 
 ---
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+These are lessons carried over from the features page build. Apply them here to avoid repeating the same mistakes.
+
+### Structured data (JSON-LD)
+Emit these schemas from `pricing.astro`:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (set to build date), `BreadcrumbList` (Home → Pricing).
+2. **`FAQPage`** — the 6 pricing Q&As in Section 4. Write them in full sentences — AI assistants pull these verbatim for snippet answers about Agenvik pricing.
+3. **`Product`** (optional but valuable) — one `Product` entry for Agenvik with `offers` listing each plan as an `Offer` with `name`, `price`, `priceCurrency: "INR"`, and `eligibleQuantity` or `description`. This helps Google rich results and price-comparison AI queries.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text on this page — not just in headings or schema. The subhead above names it. If any section body copy is written without naming the product, add "Agenvik" at first reference in that section.
+
+### Section background rhythm
+Follow the same alternating pattern used across the site — no two consecutive sections share the same background style. For the pricing page, a safe sequence is:
+
+- Header section: white/grid (matches homepage hero)
+- Plan table (Section 2): `bg-[#F5F3FF] border border-[#301B69]/10 rounded-3xl` (light lavender) or textured bg-image with `bg-white/50 backdrop-blur-[2px]` overlay
+- FAQ (Section 4): `bg-[#1a0f3d] rounded-3xl` (dark navy) — breaks the light-to-light rhythm
+- Enterprise / Final CTA: white or textured
+
+Adjust as needed but never let two consecutive sections both be white or both be dark navy.
+
+### `aria-hidden` on decorative elements
+Any UI mockup, illustration, icon decoration, or non-functional badge inside a section must have `aria-hidden="true"` on its outermost container. This prevents tiny opacity text (e.g. `text-[9px] text-[#301B69]/30`) from failing Lighthouse contrast checks. This was the most widespread accessibility issue found on the features page.
+
+### Preconnect vs dns-prefetch
+`embed.agenvik.com` uses `dns-prefetch` only in `Layout.astro` — **do not add a `preconnect` hint for it**. The embed script is `defer async`, so establishing an early connection wastes a TCP slot. `app.agenvik.com` keeps `preconnect` because it is on the critical CTA path.
+
+### Icon and colour consistency
+Plan feature icons (check/cross rows) and any section icons should use the brand palette: `text-[#301B69]` for filled/active states, `text-[#301B69]/30` for inactive. Do not use third-party platform brand colours (WhatsApp green, Slack purple) in the comparison table — use standard check/cross glyphs only.
+
+### Tone option naming
+If tone is referenced anywhere on this page (e.g. in a feature row tooltip or a callout), use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual" — those were the old names and they do not match the product UI.
 
 ## FOOTER
 Same as homepage.

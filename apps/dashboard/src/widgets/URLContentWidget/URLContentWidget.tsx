@@ -36,7 +36,7 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-export const URLContentWidget = ({ onClose }: { onClose?: () => void }) => {
+export const URLContentWidget = ({ onClose, onSuccess }: { onClose?: () => void; onSuccess?: () => void }) => {
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
   const { addUpdateDocument } = useDocuments();
@@ -98,6 +98,7 @@ export const URLContentWidget = ({ onClose }: { onClose?: () => void }) => {
         agent_id: agentId,
         source_type: 'url',
       });
+      onSuccess?.();
       onClose?.();
     },
     onError: (error) => {

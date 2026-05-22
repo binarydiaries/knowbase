@@ -34,6 +34,7 @@ type ITextContentWidgetProps = {
   mode?: 'add' | 'edit';
   document?: DocumentSchema;
   onClose?: () => void;
+  onSuccess?: () => void;
   readOnly?: boolean;
 };
 
@@ -50,6 +51,7 @@ export const TextContentWidget = ({
   mode = 'add',
   document,
   onClose,
+  onSuccess,
   readOnly = false,
 }: ITextContentWidgetProps) => {
   const { agentId } = useParams({ strict: false });
@@ -97,6 +99,7 @@ export const TextContentWidget = ({
       );
       if (mode === 'add') {
         amplitude.track('Knowledge Source Added', { agent_id: agentId, source_type: 'text' });
+        onSuccess?.();
       }
       onClose?.();
     },

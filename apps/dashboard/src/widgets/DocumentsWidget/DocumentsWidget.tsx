@@ -192,12 +192,12 @@ export const DocumentsWidget = ({
     if (!deleteConfirmDoc) setDeleteConfirmInput('');
   }, [deleteConfirmDoc]);
 
-  useEffect(() => {
-    if (documents.length > 0 && !localStorage.getItem(TRAINING_REMINDER_KEY)) {
+  const handleDocumentAdded = () => {
+    if (!localStorage.getItem(TRAINING_REMINDER_KEY)) {
       localStorage.setItem(TRAINING_REMINDER_KEY, '1');
       setIsTrainingReminderOpen(true);
     }
-  }, [documents.length]);
+  };
 
   const isDocumentsAvailable = !!documents?.length;
   return (
@@ -446,6 +446,7 @@ export const DocumentsWidget = ({
               setIsTextContentSheetOpen(false);
               setSelectedDocument(undefined);
             }}
+            onSuccess={handleDocumentAdded}
             readOnly={readOnly}
           />
         )}
@@ -529,6 +530,7 @@ export const DocumentsWidget = ({
               setIsQASheetOpen(false);
               setSelectedDocument(undefined);
             }}
+            onSuccess={handleDocumentAdded}
             readOnly={readOnly}
           />
         )}
@@ -540,6 +542,7 @@ export const DocumentsWidget = ({
         {isPdfSheetOpen && (
           <PDFContentWidget
             onClose={() => setIsPdfSheetOpen(false)}
+            onSuccess={handleDocumentAdded}
           />
         )}
       </Sheet>
@@ -550,6 +553,7 @@ export const DocumentsWidget = ({
         {isUrlSheetOpen && (
           <URLContentWidget
             onClose={() => setIsUrlSheetOpen(false)}
+            onSuccess={handleDocumentAdded}
           />
         )}
       </Sheet>
@@ -571,7 +575,7 @@ export const DocumentsWidget = ({
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
               <li>Add your knowledge sources (text, PDF, Q&amp;A, URL)</li>
               <li>Click <strong className="text-foreground">Train</strong> to start processing</li>
-              <li>Wait for the status to change to <strong className="text-foreground">Indexed</strong></li>
+              <li>Wait for the status to change to <strong className="text-foreground">Trained</strong></li>
               <li>Your agent is ready to answer questions</li>
             </ol>
           </div>

@@ -50,7 +50,7 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
+export const PDFContentWidget = ({ onClose, onSuccess }: { onClose?: () => void; onSuccess?: () => void }) => {
   const { agentId } = useParams({ strict: false });
   const queryClient = useQueryClient();
   const { addUpdateDocument } = useDocuments();
@@ -132,6 +132,7 @@ export const PDFContentWidget = ({ onClose }: { onClose?: () => void }) => {
         agent_id: agentId,
         source_type: 'pdf',
       });
+      onSuccess?.();
       onClose?.();
     },
     onError: (error) => {

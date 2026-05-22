@@ -54,9 +54,9 @@ const orgSchema = {
   url: siteURL,
   logo: {
     '@type': 'ImageObject',
-    url: `${siteURL}/og-image.png`,
-    width: 1200,
-    height: 630,
+    url: `${siteURL}/favicon-32x32.png`,
+    width: 32,
+    height: 32,
   },
   sameAs: [
     'https://x.com/agenvik',
@@ -162,7 +162,7 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
         primaryColor: "#301B69",
       };
     </script>
-    <script src="https://embed.agenvik.com/embed.js" async></script>
+    <script src="https://embed.agenvik.com/embed.js" defer async></script>
   </body>
 </html>
 <style is:global>

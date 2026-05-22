@@ -1,9 +1,5 @@
 ---
-import { getImage } from 'astro:assets';
-import usecaseBgSrc from '../assets/images/usecase-bg.png';
 import { Home, Hospital, Users, GraduationCap } from '@lucide/astro';
-
-const usecaseBg = await getImage({ src: usecaseBgSrc, format: 'webp', quality: 80 });
 
 const useCases = [
   {
@@ -38,36 +34,34 @@ const useCases = [
 ---
 <section aria-labelledby="usecases-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
-    <div
-      class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style={`background-image: url(${usecaseBg.src})`}
-    >
-      <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+      <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[#301B69] blur-[120px] opacity-40" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#B07CD1]/20 blur-[100px]" aria-hidden="true"></div>
 
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
+        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/10 text-white/80 mb-6" aria-hidden="true">
           ✦ WHO USES AGENVIK
         </div>
 
-        <h2 id="usecases-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+        <h2 id="usecases-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
           Whatever your business. Wherever your customers are.
         </h2>
 
         <div class="grid md:grid-cols-2 gap-6 mt-10">
           {useCases.map((item) => (
-            <div class="rounded-2xl bg-white/80 border border-[#301B69]/10 p-6">
+            <div class="rounded-2xl bg-white/8 border border-white/10 p-6">
               <div class="flex items-start gap-3 mb-3">
-                <div class="mt-0.5 text-[#301B69] flex-shrink-0" aria-hidden="true">
+                <div class="mt-0.5 text-white/70 flex-shrink-0" aria-hidden="true">
                   <item.Icon size={20} strokeWidth={1.75} />
                 </div>
                 <div>
-                  <p class="text-xs text-[#301B69]/50 uppercase tracking-widest mb-0.5">{item.title}</p>
-                  <h3 class="font-semibold text-[#301B69]">{item.headline}</h3>
+                  <p class="text-xs text-white/40 uppercase tracking-widest mb-0.5">{item.title}</p>
+                  <h3 class="font-semibold text-white">{item.headline}</h3>
                 </div>
               </div>
-              <p class="text-sm text-[#301B69]/70 leading-relaxed mb-4">{item.desc}</p>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">{item.desc}</p>
               {item.href && (
-                <a href={item.href} class="text-sm text-[#301B69] font-medium hover:opacity-70 transition-opacity">
+                <a href={item.href} class="text-sm text-white/70 font-medium hover:text-white transition-colors">
                   See how it works →
                 </a>
               )}

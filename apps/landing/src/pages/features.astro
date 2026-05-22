@@ -22,6 +22,7 @@ const webPageSchema = {
     'Explore every feature Agenvik offers: upload PDFs, crawl websites, build no-code AI agents, deploy on WhatsApp and Slack, customise tone and fallback behaviour, and track conversations with built-in analytics.',
   isPartOf: { '@id': `${siteURL}/#website` },
   about: { '@id': `${siteURL}/#software` },
+  dateModified: new Date().toISOString().split('T')[0],
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

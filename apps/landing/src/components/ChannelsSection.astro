@@ -1,17 +1,10 @@
 ---
-import { getImage } from 'astro:assets';
-import howBgSrc from '../assets/images/how-bg.png';
 import { Monitor, MessageCircle, Hash } from '@lucide/astro';
-
-const howBg = await getImage({ src: howBgSrc, format: 'webp', quality: 80 });
 ---
 <section id="channels" aria-labelledby="channels-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
-    <div
-      class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden"
-      style={`background-image: url(${howBg.src})`}
-    >
-      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#F5F3FF] border border-[#301B69]/10">
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#301B69]/10 blur-[120px] opacity-60" aria-hidden="true"></div>
       <div class="absolute -bottom-20 right-0 w-[400px] h-[300px] bg-[#B07CD1]/20 blur-[100px]" aria-hidden="true"></div>
 
       <div class="relative z-10">
@@ -66,7 +59,7 @@ const howBg = await getImage({ src: howBgSrc, format: 'webp', quality: 80 });
           <!-- WhatsApp -->
           <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm overflow-hidden flex flex-col">
             <div class="p-6 pb-4">
-              <div class="w-9 h-9 rounded-xl bg-[#25D366]/10 flex items-center justify-center text-[#25D366] mb-4" aria-hidden="true">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
                 <MessageCircle size={18} strokeWidth={1.75} />
               </div>
               <h3 class="font-semibold text-[#301B69] text-lg mb-2">Your agent handles WhatsApp messages automatically</h3>
@@ -98,7 +91,7 @@ const howBg = await getImage({ src: howBgSrc, format: 'webp', quality: 80 });
           <!-- Slack -->
           <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm overflow-hidden flex flex-col">
             <div class="p-6 pb-4">
-              <div class="w-9 h-9 rounded-xl bg-[#4A154B]/10 flex items-center justify-center text-[#4A154B] mb-4" aria-hidden="true">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
                 <Hash size={18} strokeWidth={1.75} />
               </div>
               <h3 class="font-semibold text-[#301B69] text-lg mb-2">Internal knowledge, available in any Slack channel</h3>

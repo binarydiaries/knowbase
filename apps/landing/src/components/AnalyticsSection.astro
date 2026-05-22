@@ -33,7 +33,7 @@ const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
               <h3 class="font-semibold text-[#301B69] text-lg mb-2">Every conversation, searchable and readable</h3>
               <p class="text-sm text-[#301B69]/70 leading-relaxed">Every chat session is logged in full. See the exact questions asked, the answers given, and whether the agent answered from your knowledge base or hit a fallback. Filter by channel, date, or search for specific queries.</p>
             </div>
-            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-white overflow-hidden mt-auto">
+            <div aria-hidden="true" class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-white overflow-hidden mt-auto">
               <div class="grid grid-cols-3 bg-[#301B69]/[0.03] px-3 py-2 border-b border-[#301B69]/8">
                 <span class="text-[8px] text-[#301B69]/40 font-semibold uppercase tracking-wider">Channel</span>
                 <span class="text-[8px] text-[#301B69]/40 font-semibold uppercase tracking-wider">Message</span>
@@ -63,7 +63,7 @@ const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
               <h3 class="font-semibold text-[#301B69] text-lg mb-2">Know what your customers can't find on their own</h3>
               <p class="text-sm text-[#301B69]/70 leading-relaxed">The most-asked questions are surfaced automatically. These are the gaps in your product, docs, or support content — prioritise answering them to reduce tickets and improve your knowledge base.</p>
             </div>
-            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-3 space-y-2 mt-auto">
+            <div aria-hidden="true" class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-3 space-y-2 mt-auto">
               <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider font-medium px-1 mb-1">Top questions this week</p>
               {[
                 { q: 'How do I reset my password?', n: 47 },
@@ -93,7 +93,7 @@ const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
               <h3 class="font-semibold text-[#301B69] text-lg mb-2">See which channels drive the most conversations</h3>
               <p class="text-sm text-[#301B69]/70 leading-relaxed">Track conversation volume, message count, and fallback rate by channel. Understand where your customers prefer to ask questions, and where your agent needs more knowledge.</p>
             </div>
-            <div class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 mt-auto">
+            <div aria-hidden="true" class="mx-5 mb-5 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 mt-auto">
               <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider font-medium mb-4">Conversations by channel</p>
               <div class="space-y-3">
                 {[

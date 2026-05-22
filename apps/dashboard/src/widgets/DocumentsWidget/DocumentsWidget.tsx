@@ -38,8 +38,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Check, Copy, FolderIcon } from 'lucide-react';
+import { Check, Copy, FolderIcon, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
+
+const TRAINING_REMINDER_KEY = 'doc-training-reminder-seen';
 import { DocumentItem } from '@/components/DocumentItem/DocumentItem.tsx';
 import {
   type DocumentSchema,
@@ -85,6 +87,7 @@ export const DocumentsWidget = ({
   const [selectedDocument, setSelectedDocument] = useState<DocumentSchema>();
   const [isPollingActive, setIsPollingActive] = useState(true);
   const [isTrainDialogOpen, setIsTrainDialogOpen] = useState(false);
+  const [isTrainingReminderOpen, setIsTrainingReminderOpen] = useState(false);
   const [deleteConfirmDoc, setDeleteConfirmDoc] = useState<{ id: string; title: string } | null>(null);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const [copiedTitle, setCopiedTitle] = useState(false);
@@ -188,6 +191,13 @@ export const DocumentsWidget = ({
   useEffect(() => {
     if (!deleteConfirmDoc) setDeleteConfirmInput('');
   }, [deleteConfirmDoc]);
+
+  useEffect(() => {
+    if (documents.length > 0 && !localStorage.getItem(TRAINING_REMINDER_KEY)) {
+      localStorage.setItem(TRAINING_REMINDER_KEY, '1');
+      setIsTrainingReminderOpen(true);
+    }
+  }, [documents.length]);
 
   const isDocumentsAvailable = !!documents?.length;
   return (
@@ -543,6 +553,35 @@ export const DocumentsWidget = ({
           />
         )}
       </Sheet>
+      <Dialog open={isTrainingReminderOpen} onOpenChange={setIsTrainingReminderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <DialogTitle>One more step — train your agent</DialogTitle>
+            </div>
+            <DialogDescription>
+              Documents you add won't be used by your agent until you train it.
+              After adding all your knowledge sources, click the{' '}
+              <strong>Train</strong> button to process them.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border bg-muted/40 p-4 text-sm space-y-2">
+            <p className="font-medium">How it works</p>
+            <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+              <li>Add your knowledge sources (text, PDF, Q&amp;A, URL)</li>
+              <li>Click <strong className="text-foreground">Train</strong> to start processing</li>
+              <li>Wait for the status to change to <strong className="text-foreground">Indexed</strong></li>
+              <li>Your agent is ready to answer questions</li>
+            </ol>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsTrainingReminderOpen(false)}>
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

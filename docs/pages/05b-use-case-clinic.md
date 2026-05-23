@@ -123,19 +123,19 @@ The agent logs every conversation. Your staff reviews the log daily, spots any g
 ## SECTION 6 — FAQ (Clinic-specific)
 
 **Q: What about patient privacy and data security?**
-A: The agent only knows what you upload — general clinic information like hours, services, and billing basics. No patient records, medical history, or personal data ever enters the system. The agent cannot access your clinic management software.
+A: The Agenvik agent only knows what you upload — general clinic information like hours, services, and billing basics. No patient records, medical history, or personal data ever enters the system. The agent cannot access your clinic management software.
 
 **Q: Can it book appointments?**
-A: Right now it can share your booking link (Calendly, Practo, your own form) or collect the patient's details for a callback. Direct calendar integration — where the agent books the appointment itself — is on the roadmap.
+A: Right now Agenvik can share your booking link (Calendly, Practo, your own form) or collect the patient's details for a callback. Direct calendar integration — where the agent books the appointment itself — is on the roadmap.
 
 **Q: What if a patient asks a medical question?**
 A: The agent is scoped to administrative queries only. If a patient asks something clinical ("is this symptom serious?", "can I take this medication?"), the agent responds: "For medical questions, please speak with one of our doctors. Call us at [number] or visit during clinic hours." It never attempts to answer clinical questions.
 
 **Q: What languages does it support?**
-A: The agent responds in whatever language the patient writes in, as long as the relevant information is in your knowledge base. Upload your FAQ in the languages your patients use most.
+A: Agenvik responds in whatever language the patient writes in, as long as the relevant information is in your knowledge base. Upload your FAQ in the languages your patients use most.
 
 **Q: How long does setup take?**
-A: Most clinics are live within an hour. Upload your documents, deploy the widget, connect WhatsApp. The agent starts handling queries immediately.
+A: Most clinics are live within an hour. Upload your documents, deploy the widget, connect WhatsApp. The Agenvik agent starts handling queries immediately.
 
 ---
 
@@ -154,3 +154,47 @@ Free plan. Set up in under an hour. No credit card.
 
 ## FOOTER
 Same as homepage.
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Emit from the page file:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (build date), `BreadcrumbList` (Home → Use Cases → Clinics & Hospitals).
+2. **`FAQPage`** — the 5 FAQ Q&As in Section 6. Write answers in full sentences naming the product where natural — AI assistants pull these verbatim as snippet answers about clinic automation.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text — not just headings or schema. The subhead names it. The solution section body must name "Agenvik" at first reference. FAQ answers should include "Agenvik" by name in at least 3 of 5 answers (see updated answers in Section 6).
+
+### Medical / clinical boundary (critical)
+The solution section includes a mandatory disclaimer: "Agenvik handles administrative and informational queries only. It never provides clinical advice, diagnoses, or anything that requires a licensed professional." This line must appear in the rendered body text — not just in a tooltip or collapsed FAQ — to protect against misrepresentation of the product's scope.
+
+### Channel emphasis
+Clinic is a **dual-channel** use case: website widget (for patients researching online) and WhatsApp Business (for patients already messaging the clinic). Section 4 Step 2 explicitly covers both. If channel icons are shown, use generic icons in brand colours — do not use WhatsApp green or any platform brand colour.
+
+### Illustration containers
+All illustration placeholders (Section 1 reception desk mockup) must render inside a `<div aria-hidden="true">` container. Decorative UI chrome and non-functional elements must not surface in the accessibility tree.
+
+### Eyebrow badge
+The `✦ CLINICS & HOSPITALS` eyebrow badge is intentional on use-case pages. Wrap its outer container in `aria-hidden="true"` if it contains decorative glyphs (✦).
+
+### Section background rhythm
+Follow the alternating pattern — no two consecutive sections share the same background style:
+- Hero (Section 1): white with subtle grid
+- Problem (Section 2): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- Solution (Section 3): white
+- How It Works (Section 4): textured bg-image (`pricing-bg.png`) with `bg-white/55 backdrop-blur-[2px]` overlay
+- Social Proof (Section 5): white
+- FAQ (Section 6): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- CTA (Section 7): `FinalCTASection` → `bg-[#301B69]`
+
+Never let two consecutive sections both be white or both be dark.
+
+### Section spacing
+Sections use `px-6 pt-16` only — no `pb-` on intermediate sections. Gap between sections comes from `pt-16` on each section. `FinalCTASection` uses `pt-16 pb-10`.
+
+### Tone option naming
+If tone is referenced anywhere on this page, use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual".

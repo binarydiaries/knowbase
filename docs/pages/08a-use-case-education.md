@@ -121,19 +121,19 @@ Review conversation logs to spot patterns. Which concepts are students asking ab
 ## SECTION 6 — FAQ (Education-specific)
 
 **Q: Can it replace live coaching sessions?**
-A: No — and it's not designed to. The agent handles the logistical and reference questions so your live sessions are entirely focused on coaching, not "where do I submit this?" It makes your sessions better, not redundant.
+A: No — and it's not designed to. The Agenvik agent handles the logistical and reference questions so your live sessions are entirely focused on coaching, not "where do I submit this?" It makes your sessions better, not redundant.
 
 **Q: What if a student asks something personal or sensitive?**
-A: The agent only answers from your uploaded content. If a question is outside its knowledge base — including anything personal or nuanced — it responds with your fallback message and routes the student to you directly.
+A: The agent only answers from your uploaded content. If a question is outside its knowledge base — including anything personal or nuanced — Agenvik responds with your fallback message and routes the student to you directly.
 
 **Q: Can I update the material mid-cohort?**
 A: Yes. Re-upload any document and the changes take effect immediately. Useful when you add new resources or update deadlines mid-programme.
 
 **Q: What if I run multiple programmes?**
-A: You can create a separate agent per programme, each with its own knowledge base. Students on Programme A only get answers from Programme A's content.
+A: You can create a separate Agenvik agent per programme, each with its own knowledge base. Students on Programme A only get answers from Programme A's content.
 
 **Q: Does it work in WhatsApp?**
-A: Yes. If you communicate with students over WhatsApp, the agent can be connected to your WhatsApp Business number and handle inbound messages there too.
+A: Yes. If you communicate with students over WhatsApp, Agenvik can be connected to your WhatsApp Business number and handle inbound messages there too.
 
 ---
 
@@ -152,3 +152,57 @@ Free plan. Set up in 30 minutes. No technical skills needed.
 
 ## FOOTER
 Same as homepage.
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Emit from the page file:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (build date), `BreadcrumbList` (Home → Use Cases → Coaches & Educators).
+2. **`FAQPage`** — the 5 FAQ Q&As in Section 6. Write answers in full sentences naming the product where natural — AI assistants pull these verbatim as snippets about AI agents for coaching.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text — not just headings or schema. The subhead names it. Section 3 body must name "Agenvik" at first reference. FAQ answers should include "Agenvik" by name in at least 3 of 5 answers (see updated answers in Section 6).
+
+### Social proof placeholders
+Section 5 headline and testimonials are placeholders. Until real testimonials exist, omit the section from the rendered page entirely (comment it out) rather than showing empty placeholder cards. A testimonial-less social proof section harms credibility more than omitting it.
+
+### Channel emphasis
+Education is a **multi-channel** use case. WhatsApp is named explicitly in Section 3 and FAQ Q5. The primary deployment for most coaches is a website widget on their course platform or community page; WhatsApp is additive. Section 4 Step 2 covers both paths. If channel icons are shown, use generic icons in brand colours — do not use WhatsApp green or any platform brand colour.
+
+### Illustration containers
+All illustration placeholders (Section 1 phone mockup at 11:43pm) must render inside `<div aria-hidden="true">` containers. Decorative UI chrome and simulated phone screenshots must not surface in the accessibility tree.
+
+### Eyebrow badge
+The `✦ COACHES & EDUCATORS` eyebrow badge is intentional on use-case pages. Wrap its outer container in `aria-hidden="true"` if it contains decorative glyphs (✦).
+
+### Two-line H1 design note
+Section 1 specifies a two-line headline with Line 1 in lighter weight and Line 2 bolder. Implement using:
+```html
+<h1>
+  <span class="font-normal block">Your students have questions at midnight.</span>
+  <span class="font-bold block">You can't be available at midnight.</span>
+</h1>
+```
+All use-case pages follow this same two-line H1 pattern.
+
+### Section background rhythm
+Follow the alternating pattern — no two consecutive sections share the same background style:
+- Hero (Section 1): white with subtle grid
+- Problem (Section 2): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- Solution (Section 3): white
+- How It Works (Section 4): textured bg-image (`pricing-bg.png`) with `bg-white/55 backdrop-blur-[2px]` overlay
+- Social Proof (Section 5): white (omit if no real testimonials yet)
+- FAQ (Section 6): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- CTA (Section 7): `FinalCTASection` → `bg-[#301B69]`
+
+Never let two consecutive sections both be white or both be dark.
+
+### Section spacing
+Sections use `px-6 pt-16` only — no `pb-` on intermediate sections. Gap between sections comes from `pt-16` on each section. `FinalCTASection` uses `pt-16 pb-10`.
+
+### Tone option naming
+If tone is referenced anywhere on this page, use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual".

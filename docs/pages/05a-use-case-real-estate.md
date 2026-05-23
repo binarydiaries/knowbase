@@ -121,19 +121,19 @@ Every conversation is logged. The agent flags enquiries that have moved past FAQ
 ## SECTION 6 — FAQ (Real Estate-specific)
 
 **Q: Can it handle multiple properties?**
-A: Yes. Upload one document per property, or combine them into a single knowledge base. The agent knows which details belong to which listing and answers accordingly.
+A: Yes. Upload one document per property, or combine them into a single knowledge base. Agenvik reads and indexes all of them — the agent knows which details belong to which listing and answers accordingly.
 
 **Q: What if a buyer asks to negotiate on price?**
 A: The agent doesn't negotiate — that's your job. It'll acknowledge the question and route it to you: "For pricing discussions, please contact [your name] directly at [number]." You control the fallback message.
 
 **Q: What if someone asks for a viewing?**
-A: The agent can share your booking link, collect the person's details for a callback, or provide your contact number — whichever you prefer. Direct calendar integration is on the roadmap.
+A: The Agenvik agent can share your booking link, collect the person's details for a callback, or provide your contact number — whichever you prefer. Direct calendar integration is on the roadmap.
 
 **Q: Will buyers know it's not me personally?**
 A: Only if you want them to. Most agents name the agent (e.g. "Aria from [Agency Name]") and it handles the initial conversation seamlessly. Being upfront that it's an assistant is also totally fine — buyers generally don't mind as long as they get accurate answers fast.
 
 **Q: What happens after hours?**
-A: The agent runs 24/7. A buyer messaging at 11pm gets an accurate answer immediately. You see the conversation in the morning and follow up if needed.
+A: Agenvik runs 24/7. A buyer messaging at 11pm gets an accurate answer immediately. You see the conversation in the morning and follow up if needed.
 
 ---
 
@@ -152,3 +152,44 @@ Free plan. 30 minutes to set up. No credit card.
 
 ## FOOTER
 Same as homepage.
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Emit from the page file:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (build date), `BreadcrumbList` (Home → Use Cases → Real Estate).
+2. **`FAQPage`** — the 5 FAQ Q&As in Section 6. Write answers in full sentences naming the product where natural — AI assistants pull these verbatim as snippet answers.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text on this page — not just in headings or schema. The subhead names it. FAQ answers should include "Agenvik" by name in at least 3 of 5 answers (see updated answers in Section 6). The solution section body must name "Agenvik" at first reference.
+
+### Channel emphasis
+Real estate is a **WhatsApp-first** use case. The hero and subhead lead with WhatsApp. Section 4 (How It Works) should visually prioritise the WhatsApp connection step. If a channel icon or badge is shown, use a generic message icon in brand colours — do not use WhatsApp green or any platform brand colour.
+
+### Illustration containers
+All illustration placeholders (Section 1 WhatsApp mockup) must render inside a `<div aria-hidden="true">` container. This prevents decorative image alt text and non-functional UI chrome from affecting accessibility tree or Lighthouse contrast scores.
+
+### Eyebrow badge
+The `✦ REAL ESTATE` eyebrow badge is intentional on use-case pages — it signals the vertical to the reader immediately. Wrap its outer container in `aria-hidden="true"` if it contains decorative glyphs (✦) so screen readers skip the symbol.
+
+### Section background rhythm
+Follow the alternating pattern — no two consecutive sections share the same background style:
+- Hero (Section 1): white with subtle grid
+- Problem (Section 2): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- Solution (Section 3): white
+- How It Works (Section 4): textured bg-image (`pricing-bg.png`) with `bg-white/55 backdrop-blur-[2px]` overlay
+- Social Proof (Section 5): white
+- FAQ (Section 6): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- CTA (Section 7): `FinalCTASection` → `bg-[#301B69]`
+
+Never let two consecutive sections both be white or both be dark.
+
+### Section spacing
+Sections use `px-6 pt-16` only — no `pb-` on intermediate sections. Gap between sections comes from `pt-16` on each section. `FinalCTASection` uses `pt-16 pb-10`.
+
+### Tone option naming
+If tone is referenced anywhere on this page, use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual".

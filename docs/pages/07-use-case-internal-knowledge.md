@@ -121,13 +121,13 @@ Your agent doesn't replace a buddy system or manager check-ins — it handles th
 ## SECTION 6 — FAQ (Internal teams specific)
 
 **Q: Our docs are a mess. Will it still work?**
-A: Partially. The agent's accuracy depends on the quality of what you give it. Messy or contradictory docs will produce less reliable answers. This is actually a useful forcing function — building your knowledge agent will highlight exactly what documentation needs to be cleaned up.
+A: Partially. Agenvik's accuracy depends on the quality of what you give it. Messy or contradictory docs will produce less reliable answers. This is actually a useful forcing function — building your knowledge agent will highlight exactly what documentation needs to be cleaned up.
 
 **Q: Can I restrict what the agent knows by team?**
-A: Yes — create separate agents for separate teams with different knowledge bases. Your engineering agent doesn't need to know HR policy; your HR agent doesn't need the deployment runbook.
+A: Yes — create separate Agenvik agents for separate teams with different knowledge bases. Your engineering agent doesn't need to know HR policy; your HR agent doesn't need the deployment runbook.
 
 **Q: What if someone asks something confidential or sensitive?**
-A: Only add content you're comfortable having accessible to anyone who can access the agent. Don't add documents with individual salary information, performance reviews, or other sensitive PII to a shared agent. For role-gated knowledge, wait for our access control features (on the roadmap).
+A: Only add content you're comfortable having accessible to anyone who can access the agent. Don't add documents with individual salary information, performance reviews, or other sensitive PII to a shared agent. For role-gated knowledge, wait for Agenvik's access control features (on the roadmap).
 
 **Q: Does the Slack bot work in private channels?**
 A: Yes — invite the bot to any channel, including private ones. It only responds in channels it's been added to.
@@ -149,3 +149,47 @@ Start on the free plan. Build your internal knowledge agent this week.
 
 ## FOOTER
 Same as homepage.
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Emit from the page file:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (build date), `BreadcrumbList` (Home → Use Cases → Internal Teams).
+2. **`FAQPage`** — the 4 FAQ Q&As in Section 6. Write answers in full sentences naming the product where natural — AI assistants pull these verbatim as snippets.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text — not just headings or schema. The subhead names it. Section 2 body, Section 3 callout, and Section 5 body should each reference "Agenvik" at first mention. FAQ answers should include "Agenvik" by name in at least 3 of 4 answers (see updated answers in Section 6).
+
+### Channel emphasis
+Internal knowledge is a **Slack-first** use case. The hero subhead leads with Slack. Section 4 leads with Slack as the primary deployment target and lists the optional private web portal as secondary. If a channel icon or badge is shown, use a generic message icon in brand colours — do not use Slack purple or any platform brand colour.
+
+### Illustration containers
+All illustration placeholders (Section 1 Slack mockup, Section 4 Slack workspace) must render inside `<div aria-hidden="true">` containers. Decorative UI chrome must not surface in the accessibility tree.
+
+### Eyebrow badge
+The `✦ INTERNAL TEAMS` eyebrow badge is intentional on use-case pages. Wrap its outer container in `aria-hidden="true"` if it contains decorative glyphs (✦).
+
+### Attrition / playbook callout
+Section 2 contains a `> **Playbook angle:**` callout block. In the rendered page this should appear as a visually distinct aside (e.g. border-left accent, slightly muted background) — not a primary call-to-action element. Keep it readable but subordinate to the main column content.
+
+### Section background rhythm
+Follow the alternating pattern — no two consecutive sections share the same background style:
+- Hero (Section 1): white with subtle grid
+- Problem (Section 2): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- What It Can Know (Section 3): white
+- Where It Lives (Section 4): textured bg-image (`pricing-bg.png`) with `bg-white/55 backdrop-blur-[2px]` overlay
+- Onboarding Deep Dive (Section 5): white
+- FAQ (Section 6): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- CTA (Section 7): `FinalCTASection` → `bg-[#301B69]`
+
+Never let two consecutive sections both be white or both be dark.
+
+### Section spacing
+Sections use `px-6 pt-16` only — no `pb-` on intermediate sections. Gap between sections comes from `pt-16` on each section. `FinalCTASection` uses `pt-16 pb-10`.
+
+### Tone option naming
+If tone is referenced anywhere on this page, use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual".

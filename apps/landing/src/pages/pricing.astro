@@ -239,7 +239,7 @@ const productSchema = {
     </section>
 
     <!-- Section 2: Plan Cards + Feature Comparison Table -->
-    <section aria-labelledby="plan-comparison-heading" class="px-6 pb-16">
+    <section aria-labelledby="plan-comparison-heading" class="px-6 pt-10">
       <div class="max-w-6xl mx-auto">
         <div
           class="relative rounded-3xl p-6 md:p-10 overflow-hidden bg-cover bg-center"
@@ -440,7 +440,7 @@ const productSchema = {
     </section>
 
     <!-- Section 4: FAQ — dark navy -->
-    <section aria-labelledby="pricing-faq-heading" class="px-6 pb-16">
+    <section aria-labelledby="pricing-faq-heading" class="px-6 pt-16">
       <div class="max-w-6xl mx-auto">
         <div class="relative rounded-3xl p-10 md:p-14 bg-[#1a0f3d] overflow-hidden">
           <div
@@ -483,22 +483,25 @@ const productSchema = {
     </section>
 
     <!-- Section 5: Enterprise / Custom -->
-    <section aria-labelledby="enterprise-heading" class="px-6 pb-16">
+    <section aria-labelledby="enterprise-heading" class="px-6 pt-16">
       <div class="max-w-6xl mx-auto">
-        <div class="rounded-3xl border border-[#301B69]/10 p-10 md:p-14 text-center bg-white shadow-sm">
-          <div class="max-w-2xl mx-auto">
-            <h2 id="enterprise-heading" class="text-2xl md:text-3xl font-bold text-[#301B69] mb-4">
-              Need more than the Pro plan?
+        <div
+          class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-cover bg-center text-center"
+          style={`background-image: url(${pricingBg.src})`}
+        >
+          <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px]" aria-hidden="true"></div>
+          <div class="relative z-10 max-w-2xl mx-auto">
+            <h2 id="enterprise-heading" class="text-2xl md:text-3xl font-bold text-[#301B69] mb-4 leading-snug">
+              Running at scale or managing multiple clients?
             </h2>
-            <p class="text-[#301B69]/65 mb-8 leading-relaxed">
-              Custom message limits, dedicated support, SLA agreements, and white-labelling are available for
-              high-volume businesses and agencies. Talk to us.
+            <p class="text-[#301B69]/65 mb-8 leading-relaxed text-base md:text-lg">
+              If the Pro plan isn't quite the right fit, we'll work something out. Tell us what you need.
             </p>
             <a
               href="mailto:hello@agenvik.com"
               class="inline-flex items-center gap-2 px-7 py-3 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
             >
-              Contact us →
+              Let's talk →
             </a>
           </div>
         </div>

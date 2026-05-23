@@ -111,7 +111,7 @@ const pricingFaqs = [
   {
     question: 'What happens when I hit my message limit?',
     answer:
-      "Your agent stops responding to new conversations for the rest of the month. Existing conversations in progress complete normally. You'll get an email warning at 80% usage so you can upgrade before hitting the limit.",
+      "On Agenvik, your agent stops responding to new conversations for the rest of the month. Existing conversations in progress complete normally. You'll get an email warning at 80% usage so you can upgrade before hitting the limit.",
   },
   {
     question: 'Can I upgrade or downgrade anytime?',
@@ -121,7 +121,7 @@ const pricingFaqs = [
   {
     question: 'Is there an annual plan?',
     answer:
-      "Not yet — monthly billing only for now. Annual plans with a discount are on the roadmap. Join the waitlist if that's a blocker for you: hello@agenvik.com",
+      "Not yet — Agenvik is on monthly billing only for now. Annual plans with a discount are on the roadmap. Join the waitlist if that's a blocker for you: hello@agenvik.com",
   },
   {
     question: 'Do you offer refunds?',
@@ -129,12 +129,12 @@ const pricingFaqs = [
   },
   {
     question: 'What payment methods do you accept?',
-    answer: 'All major credit and debit cards (Visa, Mastercard, RuPay) and UPI.',
+    answer: 'Agenvik accepts all major credit and debit cards (Visa, Mastercard, RuPay) and UPI.',
   },
   {
     question: 'Is there a plan for agencies or multiple clients?',
     answer:
-      "The Pro plan supports 30 agents — enough for most agencies. If you need a custom arrangement, email hello@agenvik.com and we'll work something out.",
+      "Agenvik's Pro plan supports 30 agents — enough for most agencies. If you need a custom arrangement, email hello@agenvik.com and we'll work something out.",
   },
 ];
 
@@ -180,6 +180,7 @@ const productSchema = {
       name: 'Free',
       price: '0',
       priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
       description: 'Free forever. For trying Agenvik, personal projects, and testing before committing.',
     },
     {
@@ -187,6 +188,7 @@ const productSchema = {
       name: 'Starter',
       price: '499',
       priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
       description: 'For solo builders, small businesses, and single product agents. ₹499/month.',
     },
     {
@@ -194,6 +196,7 @@ const productSchema = {
       name: 'Growth',
       price: '1499',
       priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
       description: 'For growing teams, multi-product companies, and active customer support. ₹1,499/month.',
     },
     {
@@ -201,6 +204,7 @@ const productSchema = {
       name: 'Pro',
       price: '3999',
       priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
       description: 'For high-volume businesses, agencies, and teams running multiple agents. ₹3,999/month.',
     },
   ],
@@ -371,7 +375,7 @@ const productSchema = {
                                     class="w-3.5 h-3.5 rounded-full bg-[#301B69]/10 text-[#301B69] text-[9px] flex items-center justify-center font-bold cursor-help focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#301B69]/40"
                                     aria-label={`About ${row.label}`}
                                   >
-                                    ?
+                                    <span aria-hidden="true">?</span>
                                   </button>
                                   <span
                                     class="pointer-events-none absolute bottom-full left-0 mb-2 w-52 rounded-lg bg-[#1a0f3d] px-3 py-2 text-xs text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 z-30 leading-snug"
@@ -495,7 +499,7 @@ const productSchema = {
               Running at scale or managing multiple clients?
             </h2>
             <p class="text-[#301B69]/65 mb-8 leading-relaxed text-base md:text-lg">
-              If the Pro plan isn't quite the right fit, we'll work something out. Tell us what you need.
+              If Agenvik's Pro plan isn't quite the right fit, we'll work something out. Tell us what you need.
             </p>
             <a
               href="mailto:hello@agenvik.com"

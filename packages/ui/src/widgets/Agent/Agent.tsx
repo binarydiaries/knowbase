@@ -1,4 +1,9 @@
 import { Alert, AlertDescription } from '@knowbase/ui/components/alert';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@knowbase/ui/components/avatar';
 import { Button } from '@knowbase/ui/components/button';
 import {
   DropdownMenu,
@@ -8,7 +13,15 @@ import {
 } from '@knowbase/ui/components/dropdown-menu';
 import { Textarea } from '@knowbase/ui/components/textarea';
 import { cn } from '@knowbase/ui/lib/utils';
-import { Ellipsis, MessageSquarePlus, MoreVertical, SendHorizonal, Volume2, VolumeOff, X } from 'lucide-react';
+import {
+  Ellipsis,
+  MessageSquarePlus,
+  MoreVertical,
+  SendHorizonal,
+  Volume2,
+  VolumeOff,
+  X,
+} from 'lucide-react';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import type { IChatMessage } from './Agent.types';
 import { ChatMessage } from './ChatMessage';
@@ -49,6 +62,7 @@ interface IAgentProps extends ComponentProps<'div'> {
   suggestionQuestions?: string[];
   primaryColor: string;
   brandLink: string;
+  avatarUrl?: string;
 }
 
 export const Agent = ({
@@ -66,10 +80,13 @@ export const Agent = ({
   suggestionQuestions,
   primaryColor,
   brandLink,
+  avatarUrl,
   ...otherProps
 }: IAgentProps) => {
   const [input, setInput] = useState('');
-  const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === 'true');
+  const [muted, setMuted] = useState(
+    () => localStorage.getItem(MUTE_KEY) === 'true',
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // Initialise with the current count so the welcome message never triggers a tone.
@@ -96,7 +113,8 @@ export const Agent = ({
 
   // Play tone when a new system message arrives and not muted.
   useEffect(() => {
-    const systemCount = messages?.filter((m) => m.type === 'system').length ?? 0;
+    const systemCount =
+      messages?.filter((m) => m.type === 'system').length ?? 0;
     if (systemCount > prevSystemCountRef.current && !muted) {
       playNotificationTone();
     }
@@ -133,22 +151,35 @@ export const Agent = ({
         className="flex h-18 px-5 items-center gap-5 shrink-0"
         style={{ backgroundColor: primaryColor }}
       >
-        <svg
-          width="27"
-          height="27"
-          viewBox="0 0 27 27"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <title>Agent</title>
-          <path
-            d="M13.5 18.5V8.5M8.5 16V11M18.5 16V11M19.75 2.67228C17.9114 1.60871 15.7768 1 13.5 1C6.59644 1 1 6.59644 1 13.5C1 15.4996 1.46952 17.3895 2.30432 19.0656C2.52617 19.511 2.60001 20.0201 2.4714 20.5007L1.72689 23.2834C1.40369 24.4912 2.50876 25.5963 3.71669 25.2731L6.49924 24.5286C6.97991 24.4 7.48901 24.4739 7.93441 24.6956C9.61046 25.5305 11.5004 26 13.5 26C20.4035 26 26 20.4035 26 13.5C26 11.2232 25.3913 9.08859 24.3278 7.25"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
+        {avatarUrl ? (
+          <Avatar className="size-9 border border-white/20 shrink-0">
+            <AvatarImage
+              src={avatarUrl}
+              alt={displayName}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-white/10 text-white font-semibold uppercase">
+              {displayName.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <svg
+            width="27"
+            height="27"
+            viewBox="0 0 27 27"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <title>Agent</title>
+            <path
+              d="M13.5 18.5V8.5M8.5 16V11M18.5 16V11M19.75 2.67228C17.9114 1.60871 15.7768 1 13.5 1C6.59644 1 1 6.59644 1 13.5C1 15.4996 1.46952 17.3895 2.30432 19.0656C2.52617 19.511 2.60001 20.0201 2.4714 20.5007L1.72689 23.2834C1.40369 24.4912 2.50876 25.5963 3.71669 25.2731L6.49924 24.5286C6.97991 24.4 7.48901 24.4739 7.93441 24.6956C9.61046 25.5305 11.5004 26 13.5 26C20.4035 26 26 20.4035 26 13.5C26 11.2232 25.3913 9.08859 24.3278 7.25"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
 
         <div className="text-white flex-1 min-w-0">
           <h2 className="text-base font-semibold truncate">{displayName}</h2>
@@ -214,6 +245,7 @@ export const Agent = ({
                 message={message.message}
                 key={message.id}
                 primaryColor={primaryColor}
+                avatarUrl={avatarUrl}
               />
             ))}
 

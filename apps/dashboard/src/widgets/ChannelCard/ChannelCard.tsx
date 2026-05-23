@@ -7,6 +7,7 @@ import { useParams } from '@tanstack/react-router';
 import { useEffect, useRef, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Bot, Trash, Upload } from 'lucide-react';
 import {
   AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
@@ -219,111 +220,58 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   return (
     <form onSubmit={handleSubmit(onSave)}>
       <div className="flex-col gap-5 flex">
-        {/* Avatar Uploader Widget */}
-        <div className="flex items-center gap-6 p-4 rounded-2xl bg-muted/40 border border-border/50">
-          <div className="relative group shrink-0">
-            <div className="size-20 rounded-full border-2 border-border overflow-hidden bg-muted flex items-center justify-center shadow-inner relative">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Agent avatar preview"
-                  className="size-full object-cover"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-muted-foreground">
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 27 27"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="opacity-60"
-                  >
-                    <title>Agent</title>
-                    <path
-                      d="M13.5 18.5V8.5M8.5 16V11M18.5 16V11M19.75 2.67228C17.9114 1.60871 15.7768 1 13.5 1C6.59644 1 1 6.59644 1 13.5C1 15.4996 1.46952 17.3895 2.30432 19.0656C2.52617 19.511 2.60001 20.0201 2.4714 20.5007L1.72689 23.2834C1.40369 24.4912 2.50876 25.5963 3.71669 25.2731L6.49924 24.5286C6.97991 24.4 7.48901 24.4739 7.93441 24.6956C9.61046 25.5305 11.5004 26 13.5 26C20.4035 26 26 20.4035 26 13.5C26 11.2232 25.3913 9.08859 24.3278 7.25"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">Agent Avatar</span>
-            <span className="text-xs text-muted-foreground">
-              Recommended: 128x128px. Max 1MB (automatically compressed).
-            </span>
-            <div className="flex items-center gap-2 mt-1">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-                disabled={readOnly}
+        {/* Avatar Uploader Widget (Compact) */}
+        <div className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/40 max-w-md">
+          <div className="size-10 rounded-full border border-border overflow-hidden bg-muted flex items-center justify-center shrink-0 shadow-sm relative">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Agent avatar preview"
+                className="size-full object-cover"
               />
+            ) : (
+              <Bot className="size-5 text-muted-foreground opacity-70" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col">
+            <span className="text-xs font-semibold text-foreground leading-tight">Agent Avatar</span>
+            <span className="text-[10px] text-muted-foreground truncate leading-normal">
+              128x128px recommended (auto-compressed)
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+              disabled={readOnly}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="cursor-pointer gap-1.5 h-7 px-2.5 text-xs font-normal"
+              disabled={readOnly}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="size-3.5" />
+              Upload
+            </Button>
+            {avatarUrl && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="cursor-pointer gap-1.5 h-8 text-xs font-normal"
+                className="cursor-pointer h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 flex items-center justify-center"
                 disabled={readOnly}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setValue('avatarUrl', '', { shouldDirty: true })}
+                title="Remove Avatar"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-3.5"
-                >
-                  <title>Upload icon</title>
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                Upload Photo
+                <Trash className="size-3.5" />
               </Button>
-              {avatarUrl && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="cursor-pointer gap-1.5 h-8 text-xs font-normal text-destructive hover:text-destructive hover:bg-destructive/10"
-                  disabled={readOnly}
-                  onClick={() =>
-                    setValue('avatarUrl', '', { shouldDirty: true })
-                  }
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-3.5"
-                  >
-                    <title>Remove icon</title>
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
-                  Remove
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </div>
 

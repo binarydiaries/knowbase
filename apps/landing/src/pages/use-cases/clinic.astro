@@ -13,23 +13,23 @@ const pageURL = `${siteURL}/use-cases/clinic`;
 
 const faqs = [
   {
-    q: 'What about patient privacy and data security?',
+    q: 'Is patient data safe with an AI agent at a clinic?',
     a: 'The Agenvik agent only knows what you upload — general clinic information like hours, services, and billing basics. No patient records, medical history, or personal data ever enters the system. Agenvik cannot access your clinic management software.',
   },
   {
-    q: 'Can it book appointments?',
+    q: 'Can an AI agent book clinic appointments automatically?',
     a: 'Right now Agenvik can share your booking link (Calendly, Practo, your own form) or collect the patient\'s details for a callback. Direct calendar integration — where Agenvik books the appointment itself — is on the roadmap.',
   },
   {
-    q: 'What if a patient asks a medical question?',
+    q: 'What happens if a patient asks the AI agent a medical question?',
     a: 'Agenvik is scoped to administrative queries only. If a patient asks something clinical ("is this symptom serious?", "can I take this medication?"), Agenvik responds: "For medical questions, please speak with one of our doctors. Call us at [number] or visit during clinic hours." It never attempts to answer clinical questions.',
   },
   {
-    q: 'What languages does it support?',
+    q: 'What languages does Agenvik support for clinic patient queries?',
     a: 'Agenvik responds in whatever language the patient writes in, as long as the relevant information is in your knowledge base. Upload your FAQ in the languages your patients use most.',
   },
   {
-    q: 'How long does setup take?',
+    q: 'How long does it take to set up Agenvik for a clinic?',
     a: 'Most clinics are live within an hour. Upload your documents, deploy the widget, connect WhatsApp. The Agenvik agent starts handling queries immediately — no engineering required.',
   },
 ];
@@ -39,7 +39,7 @@ const webPageSchema = {
   '@type': 'WebPage',
   '@id': pageURL,
   url: pageURL,
-  name: 'AI Agent for Clinics & Hospitals — Automate Patient FAQs on WhatsApp & Website | Agenvik',
+  name: 'AI Agent for Clinics & Hospitals — Handle Patient FAQs 24/7 | Agenvik',
   description:
     'Stop tying up your front desk with calls about hours, services, and insurance. Agenvik answers common patient questions 24/7 — on your website and WhatsApp — no clinical advice, just accurate admin info.',
   isPartOf: { '@id': `${siteURL}/#website` },
@@ -48,7 +48,7 @@ const webPageSchema = {
   dateModified: '2025-05-23',
   speakable: {
     '@type': 'SpeakableSpecification',
-    cssSelector: ['#page-description', '#solution-heading'],
+    cssSelector: ['#page-description', '#solution-heading', '#clinical-boundary'],
   },
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -106,7 +106,7 @@ const howToSchema = {
 ---
 
 <Layout
-  title="AI Agent for Clinics & Hospitals — Automate Patient FAQs on WhatsApp & Website | Agenvik"
+  title="AI Agent for Clinics & Hospitals — Handle Patient FAQs 24/7 | Agenvik"
   description="Stop tying up your front desk with calls about hours, services, and insurance. Agenvik answers common patient questions 24/7 — on your website and WhatsApp — no clinical advice, just accurate admin info."
   activePage="use-cases"
   jsonLd={[webPageSchema, faqSchema, howToSchema]}
@@ -322,7 +322,7 @@ const howToSchema = {
             <p class="text-[#301B69]/70 text-base leading-relaxed mb-3">
               Upload your clinic's FAQ, services list, doctor profiles, insurance information, and standard procedures. Agenvik answers inbound questions instantly — on your website and WhatsApp — 24 hours a day. Anything clinical, complex, or requiring a real decision routes straight to your team.
             </p>
-            <p class="text-[#301B69]/60 text-sm leading-relaxed mb-5 bg-[#301B69]/4 rounded-xl px-4 py-3 border border-[#301B69]/8">
+            <p id="clinical-boundary" class="text-[#301B69]/60 text-sm leading-relaxed mb-5 bg-[#301B69]/4 rounded-xl px-4 py-3 border border-[#301B69]/8">
               <strong class="text-[#301B69]/80 font-semibold">Important:</strong> Agenvik handles administrative and informational queries only. It never provides clinical advice, diagnoses, or anything that requires a licensed professional. Patient records never touch the system.
             </p>
             <div class="flex flex-wrap gap-4 text-sm mb-8">

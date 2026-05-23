@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: "Will buyers know it's not me personally?",
-    a: "Only if you want them to. Most agents name the agent (e.g. \"Aria from [Agency Name]\") and it handles the initial conversation seamlessly. Being upfront that it's an assistant is also totally fine — buyers generally don't mind as long as they get accurate answers fast.",
+    a: "Only if you want them to. Most agents give their Agenvik agent a name (e.g. \"Aria from [Agency Name]\") and it handles the initial conversation seamlessly. Being upfront that it's an AI assistant is also fine — buyers generally don't mind as long as Agenvik gives them accurate answers fast.",
   },
   {
     q: 'What happens after hours?',
@@ -44,7 +44,12 @@ const webPageSchema = {
     'Stop answering the same property questions on WhatsApp. Agenvik trains on your listings and FAQs — handles price, availability, process queries 24/7, so you focus on closings.',
   isPartOf: { '@id': `${siteURL}/#website` },
   about: { '@id': `${siteURL}/#organization` },
-  dateModified: new Date().toISOString().split('T')[0],
+  publisher: { '@id': `${siteURL}/#organization` },
+  dateModified: '2025-05-23',
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description', '#solution-heading'],
+  },
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -53,6 +58,40 @@ const webPageSchema = {
       { '@type': 'ListItem', position: 3, name: 'Real Estate', item: pageURL },
     ],
   },
+};
+
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to set up an AI agent for real estate WhatsApp queries using Agenvik',
+  description: 'Set up Agenvik to automatically handle property enquiries on WhatsApp in 4 steps — no coding required.',
+  totalTime: 'PT30M',
+  step: [
+    {
+      '@type': 'HowToStep',
+      position: 1,
+      name: 'Upload your property docs',
+      text: 'Drop in property briefs, pricing sheets, FAQs, and your standard process document. One PDF per property works fine. Agenvik reads and indexes everything automatically — no formatting required.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 2,
+      name: 'Connect your WhatsApp Business number',
+      text: 'Link your WhatsApp Business account in about 15 minutes. From that point, every inbound message gets handled by your agent first.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 3,
+      name: 'Agent handles the flood',
+      text: 'Buyers and renters get instant, accurate answers about price, availability, location, and next steps — any hour, any day. The agent uses your exact content so nothing is made up.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 4,
+      name: 'You see the leads',
+      text: 'Every conversation is logged. The agent flags enquiries that have moved past FAQ-stage so you know exactly who needs your attention today.',
+    },
+  ],
 };
 
 const faqSchema = {
@@ -70,7 +109,7 @@ const faqSchema = {
   title="AI Agent for Real Estate Agents — Handle WhatsApp Property Queries Automatically | Agenvik"
   description="Stop answering the same property questions on WhatsApp. Agenvik trains on your listings and FAQs — handles price, availability, process queries 24/7, so you focus on closings."
   activePage="use-cases"
-  jsonLd={[webPageSchema, faqSchema]}
+  jsonLd={[webPageSchema, faqSchema, howToSchema]}
 >
   <main id="main-content">
 
@@ -104,8 +143,8 @@ const faqSchema = {
               <span class="block font-bold">Most messages ask the same 5 questions.</span>
             </h1>
 
-            <p class="text-[#301B69]/70 text-base md:text-lg mb-6 leading-relaxed">
-              Agenvik answers property queries on WhatsApp — prices, availability, documents needed, next steps — instantly, accurately, 24/7. You only step in when a lead is ready to move.
+            <p id="page-description" class="text-[#301B69]/70 text-base md:text-lg mb-6 leading-relaxed">
+              Agenvik is an AI agent for real estate agents that handles property enquiries on WhatsApp — prices, availability, documents needed, next steps — instantly, accurately, 24/7. You only step in when a lead is ready to move.
             </p>
 
             <!-- Trust chips -->
@@ -272,11 +311,15 @@ const faqSchema = {
         <div class="grid md:grid-cols-2 gap-12 items-start">
           <div>
             <h2 id="solution-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-5 leading-tight">
-              An agent that knows your listings better than your newest team member
+              An AI agent for real estate agents — trained on your listings, live on WhatsApp
             </h2>
-            <p class="text-[#301B69]/70 text-base leading-relaxed mb-8">
+            <p class="text-[#301B69]/70 text-base leading-relaxed mb-5">
               Upload your property briefs, pricing sheets, and FAQs once. Agenvik reads them and handles every inbound query on WhatsApp — with accurate, sourced answers in seconds. You get a log of every conversation, so you know exactly who's hot and who needs a follow-up.
             </p>
+            <div class="flex flex-wrap gap-4 text-sm mb-8">
+              <a href="/features" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">See all features →</a>
+              <a href="/pricing" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">View pricing →</a>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 gap-4">

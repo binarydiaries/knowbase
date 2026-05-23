@@ -147,78 +147,83 @@ const faqSchema = {
 
               <!-- WA header -->
               <div class="bg-[#075E54] px-4 py-3 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-[#128C7E] flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">A</div>
+                <div class="w-9 h-9 rounded-full bg-[#128C7E] flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">R</div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-white text-sm font-semibold leading-none mb-0.5">Aria · Your agent</p>
-                  <p class="text-[#4CAF7A] text-xs">online · 34 handled today</p>
-                </div>
-                <div class="text-white/50">
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                  <p class="text-white text-sm font-semibold leading-none mb-0.5">Ravi Kumar</p>
+                  <p class="text-[#4CAF7A] text-xs">online</p>
                 </div>
               </div>
 
               <!-- Chat thread -->
-              <div class="bg-[#E5DDD5] px-3 py-3 space-y-3" style="background-image: url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0V0zm1 1v38h38V1H1z\' fill=\'%23c9b99a\' fill-opacity=\'0.08\'/%3E%3C/svg%3E')">
-
-                <!-- Buyer Q1 -->
-                <div class="flex gap-2 items-end">
-                  <div class="w-6 h-6 rounded-full bg-[#AB8E77] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 mb-0.5">R</div>
-                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[78%] shadow-sm">
-                    <p class="text-[10px] text-[#128C7E] font-semibold mb-0.5">Ravi Kumar</p>
-                    <p class="text-[11px] text-gray-800">What's the price of the 2BHK?</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5 text-right">9:14 AM</p>
+              <div
+                class="px-3 py-3 space-y-2 overflow-hidden"
+                style="background-color: #E5DDD5; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 0h80v80H0z' fill='none'/%3E%3Cpath d='M20 20h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2zm-30 10h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2zm-30 10h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2zm10 0h2v2h-2z' fill='%23b2a99a' fill-opacity='0.15'/%3E%3C/svg%3E&quot;)"
+              >
+                <!-- Buyer: price question -->
+                <div class="flex justify-start">
+                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[82%] shadow-sm">
+                    <p class="text-[11px] text-gray-800 leading-snug">Hi, I saw your 2BHK listing in Sector 12. What's the price?</p>
+                    <p class="text-[9px] text-gray-400 mt-1 text-right">9:14 AM</p>
                   </div>
                 </div>
 
-                <!-- Agent reply Q1 -->
+                <!-- Agent: price reply -->
                 <div class="flex justify-end">
-                  <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[85%] shadow-sm">
-                    <p class="text-[11px] text-gray-800 leading-relaxed">The 2BHK is priced at ₹85L all-inclusive. It's 920 sq ft on the 7th floor with covered parking.</p>
-                    <div class="flex items-center gap-1 mt-1.5 border-t border-black/5 pt-1">
-                      <svg class="w-2.5 h-2.5 text-[#128C7E] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
-                      <p class="text-[9px] text-[#128C7E]">Property Brief — Sector 12.pdf</p>
+                  <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[88%] shadow-sm">
+                    <p class="text-[11px] text-gray-800 leading-snug">The 2BHK is priced at ₹85L all-inclusive. It's 920 sq ft on the 7th floor with covered parking. Possession in Dec 2025.</p>
+                    <div class="flex items-center justify-end gap-1 mt-1">
+                      <p class="text-[9px] text-gray-400">9:14 AM</p>
+                      <!-- double blue tick -->
+                      <svg class="w-3 h-3 text-[#4FC3F7] flex-shrink-0" fill="currentColor" viewBox="0 0 16 11" aria-hidden="true"><path d="M11.07.87L5.55 6.38 3.46 4.29 2 5.75l3.55 3.55 6.97-6.97L11.07.87zM14.93.87l-6.52 6.52-1.06-1.06-1.46 1.46 2.52 2.52 7.98-7.98L14.93.87z"/></svg>
                     </div>
-                    <p class="text-[9px] text-gray-400 mt-0.5 text-right flex items-center justify-end gap-1">9:14 AM <svg class="w-3 h-3 text-[#4FC3F7]" fill="currentColor" viewBox="0 0 24 24"><path d="M18 7l-9.5 9.5-4-4 1.4-1.4 2.6 2.6L16.6 5.6 18 7zm-2 0l-7.5 7.5-2-2-1.4 1.4 3.4 3.4 8.9-8.9L16 7z"/></svg></p>
                   </div>
                 </div>
 
-                <!-- Buyer Q2 -->
-                <div class="flex gap-2 items-end">
-                  <div class="w-6 h-6 rounded-full bg-[#7986CB] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 mb-0.5">P</div>
-                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[78%] shadow-sm">
-                    <p class="text-[10px] text-[#7986CB] font-semibold mb-0.5">Priya S.</p>
-                    <p class="text-[11px] text-gray-800">Is the flat still available? What documents do I need?</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5 text-right">9:22 AM</p>
+                <!-- Buyer: availability -->
+                <div class="flex justify-start">
+                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[82%] shadow-sm">
+                    <p class="text-[11px] text-gray-800 leading-snug">Is it still available? What documents would I need?</p>
+                    <p class="text-[9px] text-gray-400 mt-1 text-right">9:16 AM</p>
                   </div>
                 </div>
 
-                <!-- Agent reply Q2 -->
+                <!-- Agent: availability + docs -->
                 <div class="flex justify-end">
-                  <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[85%] shadow-sm">
-                    <p class="text-[11px] text-gray-800 leading-relaxed">Yes, still available! For booking you'll need: Aadhaar, PAN card, 3 months' bank statements, and a ₹1L token cheque.</p>
-                    <div class="flex items-center gap-1 mt-1.5 border-t border-black/5 pt-1">
-                      <svg class="w-2.5 h-2.5 text-[#128C7E] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
-                      <p class="text-[9px] text-[#128C7E]">Booking Process.pdf</p>
+                  <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[88%] shadow-sm">
+                    <p class="text-[11px] text-gray-800 leading-snug">Yes, still available! To proceed you'll need: Aadhaar, PAN card, 3 months' bank statements, and a ₹1L token cheque.</p>
+                    <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-black/5">
+                      <div class="flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 text-[#128C7E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                        <p class="text-[9px] text-[#128C7E]">Booking Process.pdf</p>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <p class="text-[9px] text-gray-400">9:16 AM</p>
+                        <svg class="w-3 h-3 text-[#4FC3F7] flex-shrink-0" fill="currentColor" viewBox="0 0 16 11" aria-hidden="true"><path d="M11.07.87L5.55 6.38 3.46 4.29 2 5.75l3.55 3.55 6.97-6.97L11.07.87zM14.93.87l-6.52 6.52-1.06-1.06-1.46 1.46 2.52 2.52 7.98-7.98L14.93.87z"/></svg>
+                      </div>
                     </div>
-                    <p class="text-[9px] text-gray-400 mt-0.5 text-right flex items-center justify-end gap-1">9:22 AM <svg class="w-3 h-3 text-[#4FC3F7]" fill="currentColor" viewBox="0 0 24 24"><path d="M18 7l-9.5 9.5-4-4 1.4-1.4 2.6 2.6L16.6 5.6 18 7zm-2 0l-7.5 7.5-2-2-1.4 1.4 3.4 3.4 8.9-8.9L16 7z"/></svg></p>
                   </div>
                 </div>
 
-                <!-- Hot lead flag -->
-                <div class="flex gap-2 items-end">
-                  <div class="w-6 h-6 rounded-full bg-[#E67E22] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 mb-0.5">K</div>
-                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[78%] shadow-sm border-l-2 border-[#25D366]">
-                    <p class="text-[10px] text-[#E67E22] font-semibold mb-0.5">Karan M. <span class="text-[#25D366]">· 🔥 Hot lead</span></p>
-                    <p class="text-[11px] text-gray-800">I'm ready to visit. When can I come this weekend?</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5 text-right">10:47 AM</p>
+                <!-- Buyer: ready to visit — hot lead moment -->
+                <div class="flex justify-start">
+                  <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[82%] shadow-sm border-l-[3px] border-[#25D366]">
+                    <p class="text-[11px] text-gray-800 leading-snug">Perfect. I'm ready to visit — can I come this Saturday?</p>
+                    <p class="text-[9px] text-gray-400 mt-1 text-right">9:18 AM</p>
                   </div>
+                </div>
+
+                <!-- System: flagged for agent -->
+                <div class="flex justify-center">
+                  <span class="text-[9px] text-white bg-[#25D366] px-3 py-1 rounded-full shadow-sm">
+                    🔥 Flagged for you — lead ready to visit
+                  </span>
                 </div>
               </div>
 
               <!-- Footer bar -->
               <div class="bg-[#F0F0F0] px-4 py-2 flex items-center justify-between">
-                <p class="text-[10px] text-gray-500">3 hot leads flagged for you</p>
-                <span class="text-[9px] font-semibold text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-full">View →</span>
+                <p class="text-[10px] text-gray-500">Aria handled this · flagged for follow-up</p>
+                <span class="text-[9px] font-semibold text-[#16a34a] bg-[#dcfce7] px-2 py-0.5 rounded-full">Reply →</span>
               </div>
             </div>
           </div>

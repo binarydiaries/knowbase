@@ -1,29 +1,669 @@
 ---
+import { getImage } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import Footer from '../../components/Footer.astro';
+import pricingBgSrc from '../../assets/images/pricing-bg.png';
+import {
+  ChevronDown,
+  Users,
+  UserPlus,
+  Terminal,
+  BookOpen,
+  FileText,
+  Package,
+  Palette,
+  GitBranch,
+  Target,
+  Wrench,
+} from '@lucide/astro';
 
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/use-cases/internal-knowledge`;
+
+const faqs = [
+  {
+    q: 'Our internal docs are a mess — will Agenvik still work?',
+    a: "Partially. Agenvik's accuracy depends on the quality of what you give it. Messy or contradictory docs will produce less reliable answers. This is actually a useful forcing function — building your Agenvik knowledge agent will highlight exactly what documentation needs to be cleaned up.",
+  },
+  {
+    q: 'Can I restrict what Agenvik knows by team or department?',
+    a: 'Yes — create separate Agenvik agents for separate teams with different knowledge bases. Your engineering agent only knows runbooks and technical docs; your HR agent only knows HR policy. Each team gets a focused Agenvik agent with no cross-contamination.',
+  },
+  {
+    q: 'What if an employee asks the agent something confidential or sensitive?',
+    a: "Only add content you're comfortable making accessible to anyone who can reach the agent. Don't upload documents with individual salary information, performance reviews, or sensitive PII to a shared Agenvik agent. For role-gated knowledge, access control is on the Agenvik roadmap.",
+  },
+  {
+    q: 'Does the Agenvik Slack bot work in private channels?',
+    a: 'Yes — invite the Agenvik bot to any channel, including private ones. It only responds in channels it has been added to. You stay in full control of where the agent is active.',
+  },
+];
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'AI Agent for Internal Teams — Your Playbook, Instant Answers | Agenvik',
+  description:
+    'Stop being the person your team DMs for things that should be written down. Build an AI agent on Slack trained on your SOPs, playbook, and policies. Knowledge stays — even when people leave.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  dateModified: '2025-05-23',
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description', '#solution-heading'],
+  },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Use Cases', item: `${siteURL}/use-cases` },
+      { '@type': 'ListItem', position: 3, name: 'Internal Teams', item: pageURL },
+    ],
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
 ---
+
 <Layout
-  title="AI Agent for Internal Teams — Agenvik"
-  description="Give your team instant answers from company SOPs, processes, and docs. Stop being the person everyone DMs. Knowledge stops leaving when employees do."
+  title="AI Agent for Internal Teams — Your Playbook, Instant Answers | Agenvik"
+  description="Stop being the person your team DMs for things that should be written down. Build an AI agent on Slack trained on your SOPs, playbook, and policies. Knowledge stays — even when people leave."
   activePage="use-cases"
+  jsonLd={[webPageSchema, faqSchema]}
 >
-  <main id="main-content" class="pt-[68px]">
-    <section class="px-6 pt-20 pb-20 max-w-3xl mx-auto text-center">
-      <div class="inline-flex px-4 py-1 text-xs rounded-full bg-[#301B69]/8 text-[#301B69] mb-4" aria-hidden="true">
-        🏢 INTERNAL TEAMS
+  <main id="main-content">
+
+    <!-- ── SECTION 1: HERO ── -->
+    <section aria-label="Hero" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <!-- Grid background -->
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 max-w-6xl mx-auto px-6 pt-14 pb-20">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+
+          <!-- Left: copy -->
+          <div>
+            <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+              <span>✦</span> Internal Teams
+            </div>
+
+            <h1 class="text-4xl md:text-5xl leading-tight tracking-tight text-[#301B69] mb-6">
+              <span class="block font-normal">Your team keeps asking questions that are already answered somewhere.</span>
+              <span class="block font-bold">Your playbook should answer them.</span>
+            </h1>
+
+            <p id="page-description" class="text-[#301B69]/70 text-base md:text-lg mb-6 leading-relaxed">
+              Agenvik is an AI agent for internal teams that lives in Slack and is trained on your company playbook — SOPs, policies, onboarding guides, process docs. Every team member gets an accurate answer in seconds, without pinging a senior person or searching Notion for 10 minutes.
+            </p>
+
+            <!-- Trust chips -->
+            <div class="flex flex-wrap gap-2 mb-8">
+              {[
+                'Answers in under 3 seconds',
+                'Lives where your team works',
+                'Every answer sourced from your docs',
+                'Free to start',
+              ].map((chip) => (
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#301B69]/6 text-[#301B69]/70 text-xs font-medium">
+                  <svg class="w-3 h-3 text-[#301B69]/40 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  {chip}
+                </span>
+              ))}
+            </div>
+
+            <div class="flex flex-wrap gap-4 items-center mb-6">
+              <a
+                href={appURL}
+                class="px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Start free →
+              </a>
+              <a
+                href="#how-it-works"
+                class="px-8 py-3.5 text-[#301B69] bg-white rounded-xl border border-[#301B69]/20 hover:bg-[#301B69]/5 transition-colors"
+              >
+                See how it works ↓
+              </a>
+            </div>
+
+            <p class="text-sm text-[#301B69]/50">Free plan · No credit card required · Live in 30 minutes</p>
+          </div>
+
+          <!-- Right: Slack mockup -->
+          <div aria-hidden="true" class="flex justify-center md:justify-end">
+            <div class="w-full max-w-[480px] rounded-2xl overflow-hidden shadow-2xl border border-black/10 bg-[#1a1d21]">
+
+              <!-- Slack window -->
+              <div class="flex" style="min-height:420px">
+
+                <!-- Sidebar -->
+                <div class="w-[130px] flex-shrink-0 flex flex-col bg-[#19171D]">
+                  <!-- Workspace name -->
+                  <div class="px-3.5 py-3 border-b border-white/10">
+                    <p class="text-xs font-bold text-white truncate">Acme Corp</p>
+                    <div class="flex items-center gap-1 mt-0.5">
+                      <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                      <p class="text-[10px] text-white/40 truncate">Priya Sharma</p>
+                    </div>
+                  </div>
+                  <!-- Channels -->
+                  <div class="px-2 py-3 space-y-0.5 flex-1">
+                    <p class="text-[9px] text-white/25 uppercase tracking-widest px-1.5 mb-2 font-semibold">Channels</p>
+                    {[
+                      { name: 'general', active: false },
+                      { name: 'eng-team', active: false },
+                      { name: 'ask-aria', active: true },
+                      { name: 'ask-hr', active: false },
+                      { name: 'ask-product', active: false },
+                    ].map(({ name, active }) => (
+                      <div class:list={[
+                        'flex items-center gap-1.5 px-2 py-1.5 rounded text-[10px]',
+                        active ? 'bg-white/12 text-white font-semibold' : 'text-white/40',
+                      ]}>
+                        <span class="flex-shrink-0">#</span>
+                        <span class="truncate">{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Main area -->
+                <div class="flex-1 flex flex-col min-w-0">
+                  <!-- Channel header -->
+                  <div class="px-4 py-2.5 border-b border-white/10 bg-[#1a1d21] flex items-center gap-2">
+                    <span class="text-xs font-bold text-white">#ask-aria</span>
+                    <span class="text-[10px] text-white/30 truncate">Company knowledge base</span>
+                  </div>
+
+                  <!-- Messages -->
+                  <div class="flex-1 px-3 py-3 space-y-4 overflow-hidden bg-[#1a1d21]">
+
+                    <!-- User message -->
+                    <div class="flex items-start gap-2.5">
+                      <div class="w-8 h-8 rounded bg-orange-500 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-white">P</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2 mb-0.5">
+                          <span class="text-[11px] font-bold text-white">Priya</span>
+                          <span class="text-[9px] text-white/30">9:14 AM</span>
+                        </div>
+                        <p class="text-[11px] text-white/75 leading-snug">How do I submit a reimbursement request?</p>
+                      </div>
+                    </div>
+
+                    <!-- Agent reply -->
+                    <div class="flex items-start gap-2.5">
+                      <div class="w-8 h-8 rounded bg-[#301B69] flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-white">A</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2 mb-1 flex-wrap">
+                          <span class="text-[11px] font-bold text-white">Aria</span>
+                          <span class="text-[8px] font-semibold text-[#B07CD1] bg-[#301B69]/40 px-1.5 py-0.5 rounded">APP</span>
+                          <span class="text-[9px] text-white/30">9:14 AM</span>
+                        </div>
+                        <div class="bg-white/6 rounded-lg p-3 border border-white/10">
+                          <p class="text-[11px] text-white/80 leading-snug mb-2">Here's the process (4 steps):</p>
+                          <ol class="space-y-1.5">
+                            <li class="text-[10px] text-white/65 leading-snug">1. Fill the Expense Claim form (Finance drive)</li>
+                            <li class="text-[10px] text-white/65 leading-snug">2. Attach receipts + manager approval email</li>
+                            <li class="text-[10px] text-white/65 leading-snug">3. Submit to finance@ by the 25th</li>
+                            <li class="text-[10px] text-white/65 leading-snug">4. Reimbursement within 5 working days</li>
+                          </ol>
+                          <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/10">
+                            <svg class="w-3 h-3 text-[#B07CD1]/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                            <p class="text-[10px] text-[#B07CD1]/70">Expense Policy.pdf</p>
+                          </div>
+                        </div>
+                        <!-- Reactions -->
+                        <div class="flex items-center gap-1.5 mt-2">
+                          <span class="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5">👍 4</span>
+                          <span class="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5">✅ 2</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Second user message -->
+                    <div class="flex items-start gap-2.5">
+                      <div class="w-8 h-8 rounded bg-teal-600 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-white">K</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2 mb-0.5">
+                          <span class="text-[11px] font-bold text-white">Karan</span>
+                          <span class="text-[9px] text-white/30">9:31 AM</span>
+                        </div>
+                        <p class="text-[11px] text-white/75 leading-snug">Where's the engineering on-call runbook?</p>
+                      </div>
+                    </div>
+
+                    <!-- Second agent reply -->
+                    <div class="flex items-start gap-2.5">
+                      <div class="w-8 h-8 rounded bg-[#301B69] flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-white">A</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2 mb-1 flex-wrap">
+                          <span class="text-[11px] font-bold text-white">Aria</span>
+                          <span class="text-[8px] font-semibold text-[#B07CD1] bg-[#301B69]/40 px-1.5 py-0.5 rounded">APP</span>
+                          <span class="text-[9px] text-white/30">9:31 AM</span>
+                        </div>
+                        <div class="bg-white/6 rounded-lg p-3 border border-white/10">
+                          <p class="text-[11px] text-white/80 leading-snug">The on-call runbook covers escalation paths, PagerDuty setup, and incident severity levels.</p>
+                          <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/10">
+                            <svg class="w-3 h-3 text-[#B07CD1]/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                            <p class="text-[10px] text-[#B07CD1]/70">Engineering On-Call Guide.pdf</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Footer bar -->
+                  <div class="px-4 py-2.5 border-t border-white/10 bg-[#1a1d21] flex items-center justify-between">
+                    <p class="text-[10px] text-white/40">Aria handled this · just now</p>
+                    <span class="text-[9px] font-semibold text-[#B07CD1] bg-[#301B69]/30 px-2.5 py-1 rounded-full">View thread</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-      <h1 class="text-3xl md:text-5xl font-bold text-[#301B69] mb-6">
-        New hire asks Slack. Gets the answer. Done.
-      </h1>
-      <p class="text-[#301B69]/70 text-base md:text-lg mb-10 leading-relaxed">
-        Stop being the person everyone DMs for things that should be written down. Your agent knows your SOPs, processes, and company docs. Knowledge stops leaving when people do.
-      </p>
-      <a href={appURL} class="inline-flex px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity">
-        Start for free →
-      </a>
     </section>
+
+    <!-- ── SECTION 2: THE REAL COST ── -->
+    <section aria-labelledby="problem-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-[#1a0f3d]">
+          <div class="absolute -top-32 left-0 w-[500px] h-[400px] bg-[#301B69] blur-[120px] opacity-40" aria-hidden="true"></div>
+          <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[#B07CD1]/15 blur-[100px]" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-10">
+            <h2 id="problem-heading" class="text-3xl md:text-4xl font-bold text-white leading-tight max-w-3xl mx-auto">
+              Every time a senior person answers a repeat question, they lose 10 minutes of deep work
+            </h2>
+          </div>
+
+          <div class="relative z-10">
+            <p class="text-white/60 text-base leading-relaxed mb-4 max-w-3xl mx-auto text-center">
+              It's not just the question. It's the context switch. The ping at the wrong moment. The "let me find that link" that turns into 5 minutes of searching. Multiply that by 10 people asking 5 repeat questions a week — that's hours of productivity lost every week on things that should be documented.
+            </p>
+            <p class="text-white/60 text-base leading-relaxed mb-10 max-w-3xl mx-auto text-center">
+              And the person being asked? They start to gate-keep. Or they burn out. Or they leave, and the knowledge leaves with them.
+            </p>
+
+            <!-- 3 signals -->
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+              {[
+                {
+                  number: '1',
+                  label: 'New hires ask the same questions your team has answered 50 times',
+                  body: "Every new team member goes through the same onboarding maze — tools, processes, policies. Your senior people answer the same questions on loop. It doesn't stop being frustrating just because it's expected.",
+                },
+                {
+                  number: '2',
+                  label: "Institutional knowledge lives in one person's head — and they're always busy",
+                  body: "There's always one person who knows where everything is, how everything works, and why decisions were made. They can't be in every thread. But the questions keep coming.",
+                },
+                {
+                  number: '3',
+                  label: "Your docs exist but nobody can find the right one fast enough",
+                  body: "You have a Notion. You have a Google Drive. You have a Confluence. None of them answer a question in 10 seconds. People give up searching and ping a person instead.",
+                },
+              ].map(({ number, label, body }) => (
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-6">
+                  <div class="w-8 h-8 rounded-full bg-[#301B69] text-white text-sm font-bold flex items-center justify-center mb-3">{number}</div>
+                  <p class="text-sm font-semibold text-[#B07CD1] uppercase tracking-wide mb-2 leading-snug">{label}</p>
+                  <p class="text-white/60 text-sm leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+
+            <!-- Playbook callout aside -->
+            <div class="rounded-2xl border border-white/10 bg-white/4 p-6 border-l-4 border-l-[#B07CD1]/60">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-[#B07CD1]/20 flex items-center justify-center mt-0.5">
+                  <svg class="w-4 h-4 text-[#B07CD1]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-[#B07CD1] text-xs font-semibold uppercase tracking-widest mb-2">The deeper cost: attrition</p>
+                  <p class="text-white/55 text-sm leading-relaxed">When a senior person leaves, they take years of institutional knowledge with them. If that knowledge was never written into a playbook — and even if it was, if the playbook isn't findable — the cost of their departure is far higher than their replacement hire. An internal agent forces the playbook to be written, and makes it perpetually accessible.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: WHAT IT CAN KNOW ── -->
+    <section aria-labelledby="solution-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+
+        <div class="text-center mb-10">
+          <h2 id="solution-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4 leading-tight">
+            An AI agent for internal teams — trained on everything that's already written down
+          </h2>
+          <p class="text-[#301B69]/70 text-base leading-relaxed max-w-2xl mx-auto">
+            Upload your company's existing documents to Agenvik. No special formatting, no migration. The agent reads what you have and makes it instantly searchable by anyone on your team.
+          </p>
+          <div class="flex flex-wrap justify-center gap-4 text-sm mt-5">
+            <a href="/features" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">See all features →</a>
+            <a href="/pricing" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">View pricing →</a>
+          </div>
+        </div>
+
+        <!-- Content types grid -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+          {(
+            [
+              { Icon: Users,      label: 'HR policies',          sub: 'Leave, travel, reimbursement, benefits' },
+              { Icon: UserPlus,   label: 'Onboarding guides',    sub: 'Checklists, tool access, role intros' },
+              { Icon: Terminal,   label: 'Engineering runbooks', sub: 'SOPs, incident response, deploy guides' },
+              { Icon: BookOpen,   label: 'Company handbook',     sub: 'Values, culture, decision-making' },
+              { Icon: FileText,   label: 'Meeting notes',        sub: 'Decision logs, retrospectives' },
+              { Icon: Package,    label: 'Product docs',         sub: 'Specs, roadmaps, release notes' },
+              { Icon: Palette,    label: 'Brand guidelines',     sub: 'Visual identity, tone, naming' },
+              { Icon: GitBranch,  label: 'Process guides',       sub: 'Workflows, approval chains' },
+              { Icon: Target,     label: 'OKR frameworks',       sub: 'Goal docs, performance cycles' },
+              { Icon: Wrench,     label: 'Tooling guides',       sub: 'Notion, Jira, Figma how-tos' },
+            ] as const
+          ).map(({ Icon, label, sub }) => (
+            <div class="rounded-xl border border-[#301B69]/10 bg-[#301B69]/3 p-4 flex flex-col gap-2">
+              <Icon class="w-5 h-5 text-[#301B69]/60" strokeWidth={1.75} aria-hidden="true" />
+              <p class="text-sm font-semibold text-[#301B69] leading-snug">{label}</p>
+              <p class="text-xs text-[#301B69]/50 leading-snug">{sub}</p>
+            </div>
+          ))}
+        </div>
+
+        <!-- Callout -->
+        <div class="rounded-2xl bg-[#301B69]/5 border border-[#301B69]/10 p-6 flex items-start gap-4">
+          <div class="w-8 h-8 rounded-full bg-[#301B69] flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <p class="text-[#301B69] font-semibold mb-1">You don't need to write anything new.</p>
+            <p class="text-[#301B69]/65 text-sm leading-relaxed">Upload what you already have — even rough Google Docs and old Notion pages. Agenvik figures out how to answer from them.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── SECTION 4: WHERE IT LIVES ── -->
+    <section id="how-it-works" aria-labelledby="where-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div
+          class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
+          style={`background-image: url(${pricingBg.src})`}
+        >
+          <div class="absolute inset-0 bg-white/55 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-12">
+            <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-4 uppercase tracking-widest">
+              <span>✦</span> Deployment
+            </div>
+            <h2 id="where-heading" class="text-3xl md:text-4xl font-bold text-[#301B69]">
+              In Slack, where your team already works
+            </h2>
+          </div>
+
+          <div class="relative z-10 grid md:grid-cols-2 gap-10 items-start">
+
+            <!-- Left: Slack explanation -->
+            <div>
+              <p class="text-[#301B69]/70 text-base leading-relaxed mb-6">
+                Deploy your internal agent as a Slack bot in any workspace channel. Team members type a question in natural language — no command syntax, no searching. The agent replies in thread with the exact information from your docs.
+              </p>
+
+              <!-- Channel routing -->
+              <div class="space-y-3 mb-6">
+                <p class="text-xs font-semibold text-[#301B69]/60 uppercase tracking-widest mb-3">Smart routing — create channel-specific agents:</p>
+                {[
+                  { channel: '#ask-hr', desc: 'Knows all HR policies — leave, travel, benefits' },
+                  { channel: '#ask-eng', desc: 'Knows runbooks, technical docs, deploy guides' },
+                  { channel: '#ask-product', desc: 'Knows product specs, roadmap, release notes' },
+                ].map(({ channel, desc }) => (
+                  <div class="rounded-xl border border-[#301B69]/15 bg-white/60 p-4 flex items-start gap-3 backdrop-blur">
+                    <span class="text-[#301B69] font-bold text-sm font-mono flex-shrink-0">{channel}</span>
+                    <span class="text-[#301B69]/60 text-sm leading-snug">— {desc}</span>
+                  </div>
+                ))}
+              </div>
+
+              <!-- Web portal -->
+              <div class="rounded-xl border border-[#301B69]/15 bg-white/60 p-5 backdrop-blur">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-4 h-4 text-[#301B69]/50 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <p class="text-sm font-semibold text-[#301B69]">Private web portal (optional)</p>
+                </div>
+                <p class="text-sm text-[#301B69]/60 leading-relaxed">For teams that don't use Slack — deploy a password-protected or SSO-gated web interface. Share the URL internally. Same knowledge base, different entry point.</p>
+              </div>
+            </div>
+
+            <!-- Right: Slack illustration -->
+            <div aria-hidden="true" class="flex justify-center">
+              <div class="w-full max-w-[400px] rounded-2xl overflow-hidden shadow-xl border border-black/8 bg-[#1a1d21]">
+
+                <!-- Channel header -->
+                <div class="px-4 py-3 border-b border-white/10 bg-[#19171D] flex items-center gap-2">
+                  <span class="text-xs font-bold text-white">#ask-hr</span>
+                  <span class="text-[10px] text-white/30">HR policies & benefits</span>
+                </div>
+
+                <!-- Thread -->
+                <div class="px-3.5 py-3.5 space-y-4">
+
+                  <!-- New hire question -->
+                  <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded bg-blue-500 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white">N</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline gap-2 mb-0.5">
+                        <span class="text-[11px] font-bold text-white">Nikhil</span>
+                        <span class="text-[9px] text-white/30">10:22 AM</span>
+                      </div>
+                      <p class="text-[11px] text-white/75 leading-snug">How many days of paid leave do I get in year 1?</p>
+                    </div>
+                  </div>
+
+                  <!-- Agent reply -->
+                  <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded bg-[#301B69] flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white">A</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline gap-2 mb-1 flex-wrap">
+                        <span class="text-[11px] font-bold text-white">Aria</span>
+                        <span class="text-[8px] font-semibold text-[#B07CD1] bg-[#301B69]/40 px-1.5 py-0.5 rounded">APP</span>
+                        <span class="text-[9px] text-white/30">10:22 AM</span>
+                      </div>
+                      <div class="bg-white/6 rounded-lg p-3 border border-white/10">
+                        <p class="text-[11px] text-white/80 leading-snug">You receive 15 days of paid leave in your first year, accrued monthly from your start date.</p>
+                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/10">
+                          <svg class="w-3 h-3 text-[#B07CD1]/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                          <p class="text-[10px] text-[#B07CD1]/70">Leave Policy.pdf</p>
+                        </div>
+                      </div>
+                      <!-- Reactions -->
+                      <div class="flex items-center gap-1.5 mt-2">
+                        <span class="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5">👍 5</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Second question -->
+                  <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded bg-rose-500 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white">S</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline gap-2 mb-0.5">
+                        <span class="text-[11px] font-bold text-white">Sneha</span>
+                        <span class="text-[9px] text-white/30">10:45 AM</span>
+                      </div>
+                      <p class="text-[11px] text-white/75 leading-snug">Can I carry over unused leave to next year?</p>
+                    </div>
+                  </div>
+
+                  <!-- Second agent reply -->
+                  <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded bg-[#301B69] flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white">A</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline gap-2 mb-1 flex-wrap">
+                        <span class="text-[11px] font-bold text-white">Aria</span>
+                        <span class="text-[8px] font-semibold text-[#B07CD1] bg-[#301B69]/40 px-1.5 py-0.5 rounded">APP</span>
+                        <span class="text-[9px] text-white/30">10:45 AM</span>
+                      </div>
+                      <div class="bg-white/6 rounded-lg p-3 border border-white/10">
+                        <p class="text-[11px] text-white/80 leading-snug">Yes — up to 5 unused days carry over. Any balance above that lapses at year end.</p>
+                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/10">
+                          <svg class="w-3 h-3 text-[#B07CD1]/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                          <p class="text-[10px] text-[#B07CD1]/70">Leave Policy.pdf</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 5: ONBOARDING USE CASE ── -->
+    <section aria-labelledby="onboarding-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 items-start">
+
+          <!-- Left: copy -->
+          <div>
+            <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-5 tracking-widest uppercase">
+              <span>✦</span> Onboarding
+            </div>
+            <h2 id="onboarding-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-5 leading-tight">
+              New hire starts Monday. Your agent has them up to speed by Friday.
+            </h2>
+            <p class="text-[#301B69]/70 text-base leading-relaxed mb-6">
+              The first week is the highest-anxiety, highest-question-volume period for any new team member. They need to understand your tools, processes, culture, and role — fast — without constantly feeling like a burden to their colleagues.
+            </p>
+
+            <!-- Callout -->
+            <div class="rounded-xl bg-[#301B69]/5 border border-[#301B69]/10 p-5">
+              <p class="text-[#301B69]/75 text-sm leading-relaxed">
+                Your agent doesn't replace a buddy system or manager check-ins — it handles the factual, documentation-based questions so those relationships can focus on culture, judgment, and the nuanced stuff only a human can teach.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: question list -->
+          <div>
+            <p class="text-xs font-semibold text-[#301B69]/60 uppercase tracking-widest mb-4">What your onboarding agent handles:</p>
+            <ul class="space-y-3">
+              {[
+                'What tools does the team use and how do I get access?',
+                'Where do I find the project briefs?',
+                'Who do I talk to about [specific domain]?',
+                "What's the process for shipping code / approving designs / getting sign-off?",
+                'How does the standup format work?',
+                'What are the company values and how do we make decisions?',
+              ].map((question) => (
+                <li class="flex items-start gap-3 rounded-xl border border-[#301B69]/8 bg-[#301B69]/3 px-4 py-3">
+                  <svg class="w-4 h-4 text-[#301B69]/35 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  <span class="text-sm text-[#301B69]/70 leading-snug">{question}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 6: FAQ ── -->
+    <section aria-labelledby="faq-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+          <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[#301B69] blur-[120px] opacity-40" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-10">
+            <h2 id="faq-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
+              Questions team leads and ops managers ask
+            </h2>
+          </div>
+
+          <div class="relative z-10 space-y-4 max-w-3xl mx-auto">
+            {faqs.map(({ q, a }) => (
+              <div class="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+                <details class="group">
+                  <summary class="flex w-full justify-between items-center text-left cursor-pointer p-5 list-none [&::-webkit-details-marker]:hidden">
+                    <span class="text-sm md:text-base font-medium text-white">{q}</span>
+                    <span class="w-5 h-5 text-white/60 transition-transform flex-shrink-0 group-open:rotate-180 ml-3" aria-hidden="true">
+                      <ChevronDown size={20} strokeWidth={2} />
+                    </span>
+                  </summary>
+                  <p class="px-5 pb-5 text-sm text-white/60 leading-relaxed">{a}</p>
+                </details>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 7: CTA ── -->
+    <section aria-labelledby="cta-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#B07CD1]/30 blur-[100px]" aria-hidden="true"></div>
+
+          <div class="relative z-10">
+            <h2 id="cta-heading" class="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+              Your team's questions have answers.<br class="hidden md:block" /> Let your agent deliver them.
+            </h2>
+            <p class="text-white/70 text-base md:text-lg mb-8 max-w-xl mx-auto">
+              Start on the free plan. Build your internal knowledge agent this week.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center mb-6">
+              <a
+                href={appURL}
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Build your internal agent →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Book a demo instead →
+              </a>
+            </div>
+            <p class="text-white/40 text-sm">Free plan · No credit card required · Cancel anytime · Data stays private</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
   <Footer />
 </Layout>

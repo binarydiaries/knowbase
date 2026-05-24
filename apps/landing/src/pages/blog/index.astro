@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
-import BlogLayout from '../../layouts/BlogLayout.astro';
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
 import PostCard from '../../components/PostCard.astro';
-import Breadcrumb from '../../components/Breadcrumb.astro';
 
 const allPosts = await getCollection('blog');
 const posts = allPosts
@@ -12,13 +12,41 @@ const posts = allPosts
 const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags)));
 
 const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/blog`;
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'Agenvik Blog — AI Agents, Tutorials & Insights',
+  description:
+    'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description'],
+  },
+  dateModified: '2025-05-23',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: pageURL },
+    ],
+  },
+};
+
 const blogSchema = {
   '@context': 'https://schema.org',
   '@type': 'Blog',
-  '@id': `${siteURL}/blog`,
+  '@id': pageURL,
   name: 'Agenvik Blog',
-  description: 'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
-  url: `${siteURL}/blog`,
+  description:
+    'Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.',
+  url: pageURL,
   publisher: { '@id': `${siteURL}/#organization` },
   inLanguage: 'en-US',
   blogPost: posts.slice(0, 10).map((p) => ({
@@ -33,69 +61,116 @@ const blogSchema = {
 };
 ---
 
-<BlogLayout
+<Layout
   title="Agenvik Blog — AI Agents, Tutorials & Insights"
-  description="Explore the Agenvik blog for guides on AI agents, knowledge base building, customer support automation, and more."
-  jsonLd={blogSchema}
+  description="Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik."
+  activePage="blog"
+  jsonLd={[webPageSchema, blogSchema]}
 >
-  <div class="max-w-6xl mx-auto px-6 pt-6">
-    <Breadcrumb items={[{ label: 'Blog' }]} />
-  </div>
+  <main id="main-content" class="bg-white">
 
-  <!-- Hero -->
-  <section class="max-w-6xl mx-auto px-6 pt-10 pb-10 text-center">
-    <div
-      class="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 border border-[#301B69]/10 text-[#301B69] mb-4"
-      aria-hidden="true"
-    >
-      ✦ BLOG
-    </div>
-    <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] mb-4 leading-tight">
-      Insights on AI Agents<br />
-      <span class="bg-gradient-to-b from-[#301B69] to-[#B07CD1] bg-clip-text text-transparent">
-        and Knowledge Automation
-      </span>
-    </h1>
-    <p class="text-[#301B69]/70 max-w-xl mx-auto leading-relaxed">
-      Tutorials, guides, and product updates to help you build smarter AI agents with Agenvik.
-    </p>
-  </section>
+    <!-- ── HERO ── -->
+    <section aria-label="Blog hero" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
 
-  <!-- Tag filter -->
-  <div class="max-w-6xl mx-auto px-6 mb-8 flex flex-wrap gap-2 justify-center" id="tag-filter">
-    <button
-      data-tag=""
-      class="tag-btn active px-3 py-1 rounded-full text-sm border transition bg-[#301B69] text-white border-[#301B69]"
-    >
-      All
-    </button>
-    {allTags.map((tag) => (
-      <button
-        data-tag={tag}
-        class="tag-btn px-3 py-1 rounded-full text-sm border transition bg-white text-[#301B69] border-[#301B69]/20 hover:border-[#301B69]/50"
-      >
-        {tag}
-      </button>
-    ))}
-  </div>
+      <div class="relative z-10 max-w-3xl mx-auto px-6 pt-16 pb-12 text-center">
+        <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+          <span>✦</span> Blog
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] leading-tight tracking-tight mb-4">
+          Insights on AI agents and knowledge automation
+        </h1>
+        <p id="page-description" class="text-[#301B69]/60 text-base md:text-lg leading-relaxed">
+          Tutorials, guides, and product updates from the Agenvik team — helping you build smarter AI agents from your existing knowledge.
+        </p>
+      </div>
+    </section>
 
-  <!-- Post grid -->
-  <section class="max-w-6xl mx-auto px-6 pb-16" aria-label="Blog posts">
-    {posts.length === 0 ? (
-      <p class="text-center text-[#301B69]/50 py-16">No posts yet — check back soon.</p>
-    ) : (
-      <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 list-none" id="posts-grid">
-        {posts.map((post) => (
-          <li data-tags={post.data.tags.join(',')}>
-            <PostCard post={post} />
-          </li>
-        ))}
-      </ul>
+    <!-- ── TAG FILTER (sticky nav) ── -->
+    {allTags.length > 0 && (
+      <div class="sticky top-[68px] z-20 bg-white/90 backdrop-blur-md border-b border-[#301B69]/8">
+        <div class="max-w-6xl mx-auto px-6">
+          <nav aria-label="Filter posts by tag" class="flex gap-1 overflow-x-auto scrollbar-none py-3" id="tag-filter">
+            <button
+              data-tag=""
+              class="tag-btn px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors bg-[#301B69] text-white"
+            >
+              All
+            </button>
+            {allTags.map((tag) => (
+              <button
+                data-tag={tag}
+                class="tag-btn px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap text-[#301B69]/55 hover:text-[#301B69] hover:bg-[#301B69]/6 transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
     )}
-  </section>
-</BlogLayout>
 
-<!-- Client-side tag filter (vanilla JS, no framework needed) -->
+    <!-- ── POST GRID ── -->
+    <section class="max-w-6xl mx-auto px-6 pt-12 pb-16" aria-label="Blog posts">
+      {posts.length === 0 ? (
+        <div class="text-center py-24">
+          <p class="text-[#301B69]/50 text-base mb-2">No posts yet — check back soon.</p>
+          <p class="text-sm text-[#301B69]/40">We're working on something good.</p>
+        </div>
+      ) : (
+        <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 list-none p-0 m-0" id="posts-grid">
+          {posts.map((post) => (
+            <li data-tags={post.data.tags.join(',')}>
+              <PostCard post={post} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+
+    <!-- ── BOTTOM CTA ── -->
+    <section aria-labelledby="blog-cta-heading" class="px-6 pt-4 pb-10">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#B07CD1]/30 blur-[100px]" aria-hidden="true"></div>
+          <div class="relative z-10">
+            <h2 id="blog-cta-heading" class="text-2xl md:text-3xl font-bold text-white mb-3">
+              Ready to build your AI agent?
+            </h2>
+            <p class="text-white/65 text-base mb-8 max-w-md mx-auto">
+              Turn your documents into a working AI agent in under 30 minutes. Free to start, no credit card required.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center">
+              <a
+                href="https://app.agenvik.com"
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Start building free →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Book a demo →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
 <script>
   const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-btn');
   const items = document.querySelectorAll<HTMLLIElement>('#posts-grid li');
@@ -104,17 +179,19 @@ const blogSchema = {
     btn.addEventListener('click', () => {
       const selectedTag = btn.dataset.tag ?? '';
 
+      // Update button styles
       buttons.forEach((b) => {
         const isActive = b.dataset.tag === selectedTag;
-        b.classList.toggle('active', isActive);
-        b.classList.toggle('bg-[#301B69]', isActive);
-        b.classList.toggle('text-white', isActive);
-        b.classList.toggle('border-[#301B69]', isActive);
-        b.classList.toggle('bg-white', !isActive);
-        b.classList.toggle('text-[#301B69]', !isActive);
-        b.classList.toggle('border-[#301B69]/20', !isActive);
+        if (isActive) {
+          b.classList.add('bg-[#301B69]', 'text-white');
+          b.classList.remove('text-[#301B69]/55', 'hover:bg-[#301B69]/6');
+        } else {
+          b.classList.remove('bg-[#301B69]', 'text-white');
+          b.classList.add('text-[#301B69]/55', 'hover:bg-[#301B69]/6');
+        }
       });
 
+      // Show / hide posts
       items.forEach((item) => {
         const tags = item.dataset.tags?.split(',') ?? [];
         const show = selectedTag === '' || tags.includes(selectedTag);

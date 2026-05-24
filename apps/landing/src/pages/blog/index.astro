@@ -29,7 +29,7 @@ const webPageSchema = {
     '@type': 'SpeakableSpecification',
     cssSelector: ['#page-description'],
   },
-  dateModified: '2025-05-23',
+  dateModified: posts[0] ? new Date(posts[0].data.date).toISOString().split('T')[0] : '2025-05-23',
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -49,6 +49,12 @@ const blogSchema = {
   url: pageURL,
   publisher: { '@id': `${siteURL}/#organization` },
   inLanguage: 'en-US',
+  about: [
+    { '@type': 'Thing', name: 'AI Agents' },
+    { '@type': 'Thing', name: 'Knowledge Automation' },
+    { '@type': 'Thing', name: 'Customer Support Automation' },
+  ],
+  keywords: 'AI agents, knowledge base, chatbot automation, customer support, Agenvik',
   blogPost: posts.slice(0, 10).map((p) => ({
     '@type': 'BlogPosting',
     headline: p.data.title,

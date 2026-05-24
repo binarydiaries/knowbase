@@ -1,13 +1,16 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import LegalLayout from '../components/LegalLayout.astro';
 ---
-<Layout title="Privacy Policy — Agenvik" description="Learn how Agenvik collects, uses, and protects your personal information.">
-  <LegalLayout title="Privacy Policy">
+<LegalLayout
+  title="Privacy Policy"
+  description="How Agenvik collects, uses, and protects your personal data — covering data collection, retention, your rights, and how to contact us."
+  lastUpdated="2026-04-21"
+  pageURL="https://agenvik.com/privacy-policy"
+>
     <div class="mb-10">
       <p class="text-xs text-[#301B69]/50 mb-2">Last updated: April 21, 2026</p>
       <h1 class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">Privacy Policy</h1>
-      <p class="text-[#301B69]/70 leading-relaxed">
+      <p id="page-description" class="text-[#301B69]/70 leading-relaxed">
         At Agenvik, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform. Please read it carefully.
       </p>
     </div>
@@ -112,5 +115,4 @@ import LegalLayout from '../components/LegalLayout.astro';
         </address>
       </section>
     </div>
-  </LegalLayout>
-</Layout>
+</LegalLayout>

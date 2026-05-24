@@ -1,39 +1,116 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Breadcrumb from '../components/Breadcrumb.astro';
+import Footer from '../components/Footer.astro';
 
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/book-demo`;
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'Book an Agenvik Demo — Watch Your Docs Become an AI Agent Live',
+  description:
+    'Schedule a 30-minute personalised walkthrough of Agenvik. Bring your own documents and watch a working AI agent take shape in real time.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description'],
+  },
+  dateModified: '2025-05-23',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Book a Demo', item: pageURL },
+    ],
+  },
+};
 ---
 <Layout
-  title="Book a Demo — Agenvik"
-  description="Schedule a personalised walkthrough of Agenvik. See how to build AI agents from your own data and deploy across web, WhatsApp, and Slack."
+  title="Book an Agenvik Demo — Watch Your Docs Become an AI Agent Live"
+  description="Schedule a 30-minute personalised walkthrough of Agenvik. Bring your own documents and watch a working AI agent take shape in real time."
+  jsonLd={[webPageSchema]}
 >
-  <div class="min-h-screen bg-[#f8f7fc] pt-[68px]">
-    <div class="max-w-2xl mx-auto px-6 pt-6">
-      <Breadcrumb items={[{ label: 'Book a Demo' }]} />
-    </div>
-    <main class="max-w-2xl mx-auto px-6 py-8">
-      <!-- Success state (hidden initially) -->
-      <div id="success-state" class="hidden bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14 text-center">
-        <div class="text-5xl mb-6">🎉</div>
-        <h1 class="text-2xl font-bold text-[#301B69] mb-3">Thanks! We'll be in touch shortly.</h1>
-        <p class="text-[#301B69]/60 mb-8">
-          We've received your details and will reach out within one business day to schedule your personalised demo.
+  <main id="main-content" class="relative w-full overflow-hidden bg-white pt-[68px]">
+
+    <!-- Grid background -->
+    <div
+      class="absolute inset-0 pointer-events-none"
+      style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 50%, transparent 100%);"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(124,58,237,0.07),transparent)] pointer-events-none"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+      <!-- ── LEFT: CONTEXT ── -->
+      <div class="lg:pt-4 lg:sticky lg:top-28">
+        <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+          <span>✦</span> Book a Demo
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold text-[#301B69] leading-tight tracking-tight mb-4">
+          Watch your knowledge become an AI agent — live
+        </h1>
+        <p id="page-description" class="text-[#301B69]/60 text-base leading-relaxed mb-8">
+          A 30-minute session built around your business. Bring your own docs — we'll build a working Agenvik agent together and show you exactly how it handles real questions.
         </p>
-        <a href="/" class="inline-block px-6 py-2.5 bg-[#301B69] text-white rounded-xl text-sm font-medium hover:opacity-90 transition">
-          Back to Home
-        </a>
+
+        <!-- What you'll see -->
+        <div class="mb-8">
+          <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-4">What you'll see</p>
+          <ul class="space-y-3">
+            {[
+              'Upload your own documents — PDFs, FAQs, policies — and watch an agent take shape in real time',
+              'Ask it live questions to see how it handles your actual use case',
+              'Deploy it to your website, WhatsApp, or Slack channel before the session ends',
+            ].map((item) => (
+              <li class="flex items-start gap-3 text-sm text-[#301B69]/70 leading-relaxed">
+                <span class="w-5 h-5 rounded-full bg-[#301B69]/8 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-[#301B69]/50">✓</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Trust line -->
+        <p class="text-sm text-[#301B69]/45 border-t border-[#301B69]/8 pt-5">
+          No slides. No sales pitch. We respond within one business day to schedule a time that works for you.
+        </p>
       </div>
 
-      <!-- Form state -->
-      <div id="form-state" class="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 md:p-14">
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-[#301B69] mb-2">Book a Demo</h1>
-          <p class="text-[#301B69]/60 text-sm">
-            See how Agenvik can work for your team. Fill in your details and we'll reach out to schedule a personalised walkthrough.
+      <!-- ── RIGHT: FORM ── -->
+      <div>
+        <!-- Success state (hidden initially) -->
+        <div id="success-state" class="hidden bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-10 text-center">
+          <div class="text-5xl mb-6">🎉</div>
+          <h2 class="text-2xl font-bold text-[#301B69] mb-3">Thanks! We'll be in touch shortly.</h2>
+          <p class="text-[#301B69]/60 mb-8">
+            We've received your details and will reach out within one business day to schedule your personalised demo.
           </p>
+          <a href="/" class="inline-block px-6 py-2.5 bg-[#301B69] text-white rounded-xl text-sm font-medium hover:opacity-90 transition">
+            Back to Home
+          </a>
         </div>
+
+        <!-- Form state -->
+        <div id="form-state" class="bg-white rounded-3xl border border-[#301B69]/10 shadow-sm p-8 md:p-10">
+          <div class="mb-7">
+            <h2 class="text-xl font-bold text-[#301B69] mb-1">Request your demo</h2>
+            <p class="text-[#301B69]/55 text-sm">
+              Fill in your details and we'll reach out to schedule a time.
+            </p>
+          </div>
 
         <form id="demo-form" novalidate class="space-y-5">
           <div class="flex flex-col gap-1">
@@ -70,11 +147,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           </div>
 
           <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium text-[#301B69]/70" for="phone">Phone</label>
+            <label class="text-xs font-medium text-[#301B69]/70" for="phone">Phone <span class="text-red-500">*</span></label>
             <input
               id="phone" name="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel"
               class="w-full rounded-xl border border-[#301B69]/15 px-4 py-2.5 text-sm text-[#301B69] outline-none placeholder:text-[#301B69]/30 focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition"
             />
+            <p class="text-xs text-red-600 hidden" data-error="phone"></p>
           </div>
 
           <div class="flex flex-col gap-1">
@@ -128,9 +206,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </p>
           )}
         </form>
+        </div>
       </div>
-    </main>
-  </div>
+
+    </div><!-- /grid -->
+  </main>
+  <Footer />
 </Layout>
 
 {recaptchaSiteKey && (
@@ -176,6 +257,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
       errors.email = 'Enter a valid email';
     if (!data.company.trim()) errors.company = 'Company is required';
+    if (!data.phone.trim()) errors.phone = 'Phone number is required';
     if (!data.category) errors.category = 'Please select a category';
     return errors;
   }

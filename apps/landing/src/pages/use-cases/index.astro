@@ -1,0 +1,213 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+import {
+  House,
+  Stethoscope,
+  Users,
+  GraduationCap,
+} from '@lucide/astro';
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/use-cases`;
+
+const useCases = [
+  {
+    Icon: House,
+    eyebrow: 'Real Estate',
+    title: 'AI agent for real estate agents',
+    description: 'Handle WhatsApp enquiries about price, availability, and booking process — 24/7. You step in only when a lead is ready to move.',
+    href: '/use-cases/real-estate',
+    cta: 'See how it works →',
+  },
+  {
+    Icon: Stethoscope,
+    eyebrow: 'Clinics & Hospitals',
+    title: 'AI agent for clinics and hospitals',
+    description: 'Answer patient questions about hours, services, insurance, and booking on your website and WhatsApp. Admin handled. Clinical advice never.',
+    href: '/use-cases/clinic',
+    cta: 'See how it works →',
+  },
+  {
+    Icon: Users,
+    eyebrow: 'Internal Teams',
+    title: 'AI agent for internal teams',
+    description: 'Turn your company playbook into an instant Slack bot. SOPs, policies, onboarding guides — answered in seconds without pinging a senior person.',
+    href: '/use-cases/internal-knowledge',
+    cta: 'See how it works →',
+  },
+  {
+    Icon: GraduationCap,
+    eyebrow: 'Coaches & Educators',
+    title: 'AI agent for coaches and educators',
+    description: 'Let your course material answer student questions at midnight. Assignments, deadlines, resources — handled. You focus on the sessions that need you.',
+    href: '/use-cases/education',
+    cta: 'See how it works →',
+  },
+];
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'AI Agent Use Cases — Real Estate, Clinics, Teams & Coaches | Agenvik',
+  description:
+    'See how Agenvik\'s AI agent handles repeat questions across every vertical — real estate, clinics, internal teams, coaching, e-commerce, SaaS, and more. Trained on your content, live in 30 minutes.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description'],
+  },
+  dateModified: '2025-05-23',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Use Cases', item: pageURL },
+    ],
+  },
+};
+
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Agenvik AI Agent Use Cases',
+  description:
+    'AI agent use cases across real estate, clinics, internal teams, and coaching — trained on your content and deployed in 30 minutes.',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'AI agent for real estate agents',
+      url: `${siteURL}/use-cases/real-estate`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'AI agent for clinics and hospitals',
+      url: `${siteURL}/use-cases/clinic`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: 'AI agent for internal teams',
+      url: `${siteURL}/use-cases/internal-knowledge`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 4,
+      name: 'AI agent for coaches and educators',
+      url: `${siteURL}/use-cases/education`,
+    },
+  ],
+};
+---
+
+<Layout
+  title="AI Agent Use Cases — Real Estate, Clinics, Teams & Coaches | Agenvik"
+  description="See how Agenvik's AI agent handles repeat questions across every vertical — real estate, clinics, internal teams, coaching, e-commerce, SaaS, and more. Trained on your content, live in 30 minutes."
+  activePage="use-cases"
+  jsonLd={[webPageSchema, itemListSchema]}
+>
+  <main id="main-content">
+
+    <!-- ── HERO ── -->
+    <section aria-label="Use cases hero" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 max-w-3xl mx-auto px-6 pt-16 pb-14 text-center">
+        <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+          <span>✦</span> Use Cases
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] leading-tight tracking-tight mb-5">
+          Every business has repeat questions.
+          <span class="block font-normal text-[#301B69]/70 mt-1">Agenvik handles them.</span>
+        </h1>
+
+        <p id="page-description" class="text-[#301B69]/65 text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+          Agenvik is an AI agent platform that trains on your existing documents — FAQs, guides, policies, product docs — and deploys on WhatsApp, your website, or Slack. Accurate answers, instantly, at any hour.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── USE CASE GRID ── -->
+    <section aria-label="Use case list" class="px-6 pt-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-6">
+          {useCases.map(({ Icon, eyebrow, title, description, href, cta }) => (
+            <a
+              href={href}
+              class="group rounded-2xl border border-[#301B69]/10 bg-white p-8 flex flex-col gap-6 hover:border-[#301B69]/30 hover:shadow-xl hover:shadow-[#301B69]/6 transition-all duration-200"
+            >
+              <!-- Icon + eyebrow -->
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-[#301B69]/6 flex items-center justify-center flex-shrink-0 group-hover:bg-[#301B69]/10 transition-colors">
+                  <Icon class="w-5 h-5 text-[#301B69]/70" strokeWidth={1.75} aria-hidden="true" />
+                </div>
+                <span class="text-xs font-semibold text-[#301B69]/45 uppercase tracking-widest">{eyebrow}</span>
+              </div>
+
+              <!-- Text -->
+              <div class="flex-1">
+                <h2 class="text-lg font-semibold text-[#301B69] mb-3 leading-snug">
+                  {title.charAt(0).toUpperCase() + title.slice(1)}
+                </h2>
+                <p class="text-sm text-[#301B69]/60 leading-relaxed">{description}</p>
+              </div>
+
+              <!-- CTA -->
+              <div class="flex items-center text-sm font-semibold text-[#301B69] gap-1 group-hover:gap-2.5 transition-all pt-4 border-t border-[#301B69]/8">
+                {cta}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BOTTOM CTA ── -->
+    <section aria-labelledby="usecases-cta-heading" class="px-6 pt-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#B07CD1]/30 blur-[100px]" aria-hidden="true"></div>
+          <div class="relative z-10">
+            <h2 id="usecases-cta-heading" class="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
+              Don't see your use case?
+            </h2>
+            <p class="text-white/65 text-base mb-8 max-w-lg mx-auto">
+              Agenvik works for any business that answers the same questions repeatedly. Upload your docs and have a working agent in 30 minutes.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center">
+              <a
+                href="https://app.agenvik.com"
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Start building for free →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Book a demo instead →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

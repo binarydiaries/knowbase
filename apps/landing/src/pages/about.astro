@@ -11,7 +11,7 @@ const pageURL = `${siteURL}/about`;
 
 const webPageSchema = {
   '@context': 'https://schema.org',
-  '@type': 'WebPage',
+  '@type': 'AboutPage',
   '@id': pageURL,
   url: pageURL,
   name: 'About Agenvik — Who We Are, Why We Built This',
@@ -22,7 +22,7 @@ const webPageSchema = {
   publisher: { '@id': `${siteURL}/#organization` },
   speakable: {
     '@type': 'SpeakableSpecification',
-    cssSelector: ['#page-description', '#our-point-of-view'],
+    cssSelector: ['#page-description', '#origin-content', '#point-of-view-content'],
   },
   dateModified: '2025-05-23',
   breadcrumb: {
@@ -82,7 +82,7 @@ const webPageSchema = {
               </h2>
             </div>
             <!-- Right: paragraphs -->
-            <div class="space-y-6 text-white/70 text-base leading-relaxed">
+            <div id="origin-content" class="space-y-6 text-white/70 text-base leading-relaxed">
               <p>
                 When we were working closely with early-stage businesses, we kept seeing the same pattern: companies had detailed, hard-won knowledge about their products, policies, and processes — and customers couldn't find any of it. The answers existed. They lived in PDFs, help articles, onboarding decks, and the inboxes of overloaded founders. Getting to them required either a 10-minute search or a human who was rarely available.
               </p>
@@ -139,7 +139,7 @@ const webPageSchema = {
             Our point of view
           </h2>
 
-          <div class="grid md:grid-cols-3 gap-8">
+          <div id="point-of-view-content" class="grid md:grid-cols-3 gap-8">
             <!-- Theme 1 -->
             <div>
               <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-3">Access</p>

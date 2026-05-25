@@ -3,73 +3,118 @@ title: "FAQs"
 description: "Answers to common Agenvik setup, training, channel, and billing questions."
 ---
 
-## Agents
+## Getting started
 
 <AccordionGroup>
-  <Accordion title="What is an Agent?">
-    An Agent is an AI assistant configured for a specific use case. It has its own Knowledge Sources, Behaviour, Channels, Actions, and analytics.
+  <Accordion title="What is Agenvik?">
+    Agenvik is a platform that lets you build AI agents trained on your own content — documents, FAQs, websites. Once trained, your agent answers questions from customers, team members, or students over any channel you choose: website chat, WhatsApp, or Slack. It only speaks from what you've given it — no hallucinations, no off-topic responses.
   </Accordion>
-  <Accordion title="Why can I not create another Agent?">
-    Your workspace may have reached its active Agent limit. Archive an unused Agent or review your subscription.
+  <Accordion title="Do I need technical skills to use Agenvik?">
+    No. Agenvik is designed for non-technical users. You upload documents, fill in a few settings, copy one line of code for the website widget, and you're done. The most technical thing you'll do is paste an embed snippet.
   </Accordion>
-  <Accordion title="Can I restore an archived Agent?">
-    Yes, if your workspace has active Agent capacity available for your plan.
+  <Accordion title="How long does it take to set up my first agent?">
+    Most users go from sign-up to a live agent in under 30 minutes. Uploading documents, naming your agent, and configuring tone takes about 10 minutes. Getting it on your website takes another 2 minutes with the embed code. WhatsApp setup takes a bit longer (15–20 minutes) because it requires connecting a WhatsApp Business number.
+  </Accordion>
+  <Accordion title="What's the difference between an AI agent and a regular chatbot?">
+    Traditional chatbots follow scripts — you define every possible question and response. If someone asks something slightly differently, the bot breaks. An Agenvik AI agent understands natural language. You give it your actual content and it figures out how to answer any question from that material.
+  </Accordion>
+  <Accordion title="Can I try Agenvik before paying?">
+    Yes. The free plan lets you create 1 agent, add up to 10 knowledge sources, and handle 100 conversations per month — forever. No credit card required.
+  </Accordion>
+  <Accordion title="Can I create multiple agents?">
+    Yes. Each agent is independent — its own name, knowledge base, tone, and channels. Starter gives you 3 agents, Growth gives you 10, Pro gives you 30. A common pattern: one agent for public customer support, a separate one for internal team knowledge, and a third as a sales qualifier.
   </Accordion>
 </AccordionGroup>
-
-<Frame>
-  <img src="/images/product-ss/agents-list.png" alt="Agents FAQ placeholder" />
-</Frame>
 
 ## Knowledge and training
 
 <AccordionGroup>
-  <Accordion title="Which Knowledge Sources are supported?">
-    Agenvik currently supports Text sources and Q&A sources.
+  <Accordion title="What types of content can I upload?">
+    Agenvik supports four formats: **PDF documents** (policy docs, manuals, guides), **plain text** (paste any text directly), **Q&A pairs** (structured question-and-answer format), and **website URLs** (point your agent at a URL and it reads and indexes the page content). PDF and URL crawling are available on all paid plans; plain text and Q&A are available on all plans including Free.
+  </Accordion>
+  <Accordion title="Can I train my agent on a PDF?">
+    Yes. Upload the PDF in the Knowledge Sources section. Agenvik breaks it into chunks, creates embeddings, and stores them. Your agent can then answer questions using the exact content in that document.
+  </Accordion>
+  <Accordion title="How many knowledge sources can I add?">
+    The limit depends on your plan: 10 on Free, 250 on Starter, 1,000 on Growth, 5,000 on Pro. One document, one PDF, and one URL each count as one knowledge source.
+  </Accordion>
+  <Accordion title="Does it index my entire website if I give it a URL?">
+    Currently, Agenvik indexes the specific URL you provide — not a full site crawl. To index multiple pages, add each URL as a separate knowledge source. Full site crawl with depth settings is on the roadmap.
+  </Accordion>
+  <Accordion title="How accurate are the answers?">
+    Accuracy depends on the quality of your knowledge base. Agenvik uses a RAG (Retrieval-Augmented Generation) architecture — answers are constructed from retrieved passages in your documents, not generated from the AI's general knowledge. If the information isn't in your knowledge base, the agent says so rather than guessing.
+  </Accordion>
+  <Accordion title="What if my agent doesn't know the answer?">
+    It says so. Agents are configured to respond with something like "I don't have that information — please contact [your email]" rather than guessing. You can customise this fallback message in the **Behaviour** settings.
+  </Accordion>
+  <Accordion title="Can I update my agent's knowledge after it's live?">
+    Yes, at any time. Add new documents, delete outdated ones, edit text sources. After updating, click **Train** to re-index. Changes are live within a few minutes.
   </Accordion>
   <Accordion title="Why is Train disabled?">
-    Training can be disabled when no source is ready, the Agent is locked, or the daily training limit has been reached.
-  </Accordion>
-  <Accordion title="Should I use Text or Q&A?">
-    Use Text for broader content and Q&A for precise answers to common or sensitive questions.
+    Training can be disabled when no source is ready to index, the Agent is locked by a plan limit, or the daily training limit has been reached. Check the training dialog for the reason.
   </Accordion>
 </AccordionGroup>
 
-<Frame>
-  <img src="/images/product-ss/train-agent-dialog.png" alt="Training FAQ placeholder" />
-</Frame>
-
-## Channels and integrations
+## Channels and deployment
 
 <AccordionGroup>
-  <Accordion title="Where do I customize the web chat?">
-    Open an Agent and edit the **Channel** card to set display name, subtitle, welcome message, input placeholder, and primary color.
+  <Accordion title="Where can I deploy my agent?">
+    Agenvik supports three channels: (1) **Website chat widget** — embeds on any website with a single line of code, works on Webflow, Shopify, WordPress, and custom HTML. (2) **WhatsApp** — connect your WhatsApp Business number and your agent handles incoming messages automatically (Starter and above). (3) **Slack** — deploy inside your Slack workspace for internal team use (Growth and above).
+  </Accordion>
+  <Accordion title="Do I need a WhatsApp Business account?">
+    Yes. You need a WhatsApp Business account and a dedicated phone number (not your personal WhatsApp). If you don't have one, it takes about 15 minutes to set up through Meta's Business Manager. See the [WhatsApp Channel guide](/user-guides/agents/whatsapp-channel) for step-by-step instructions.
+  </Accordion>
+  <Accordion title="Can the same agent work on both website and WhatsApp?">
+    Yes. One agent, multiple channels. The same knowledge base and tone works across all channels you enable. You can enable or disable channels without touching the knowledge base.
+  </Accordion>
+  <Accordion title="Can I customise what the chat widget looks like?">
+    Yes. You can set the agent name, subtitle, welcome message, input placeholder, and primary color. Open the **Channel** card inside an Agent to make changes.
   </Accordion>
   <Accordion title="Why is WhatsApp locked?">
-    WhatsApp is available on paid plans. You also need to connect WhatsApp Business from **Integrations** before assigning a phone number to an Agent.
+    WhatsApp is available on Starter and above. You also need to connect WhatsApp Business from **Workspace → Integrations** before assigning a phone number to an Agent.
   </Accordion>
-  <Accordion title="Can one WhatsApp number be used by multiple Agents?">
+  <Accordion title="Can one WhatsApp number be used by multiple agents?">
     No. A phone number can be assigned to one Agent at a time.
   </Accordion>
 </AccordionGroup>
 
-<Frame>
-  <img src="/images/product-ss/whatsapp-integration.png" alt="WhatsApp FAQ placeholder" />
-</Frame>
-
-## Analytics
+## Pricing and plans
 
 <AccordionGroup>
-  {/* LEAD_GENERATION_DISABLED: uncomment to restore leads FAQ entry
-  <Accordion title="Why do I not see leads?">
-    Lead Generation must be available on your plan, enabled on the Agent, and triggered during conversation.
+  <Accordion title="What does 'messages per month' mean exactly?">
+    One message = one question sent to your agent plus one response back. If a user sends 5 messages in one conversation, that counts as 5 messages. Test messages you send yourself from the dashboard do not count.
   </Accordion>
-  */}
-  <Accordion title="Why are Analytics charts locked?">
-    Detailed Analytics are available on Starter and above. Overview cards may still be visible on other plans.
+  <Accordion title="What happens if I exceed my message limit?">
+    Your agent stops responding to new incoming messages for the rest of that billing month. You'll receive an email warning at 80% of your limit so you have time to upgrade before hitting the cap. Conversations already in progress complete normally.
   </Accordion>
-  <Accordion title="How do I improve an Agent after launch?">
-    Review **Conversations** for weak answers and **Analytics** for patterns. Then update Knowledge Sources or Behaviour.
+  <Accordion title="Can I upgrade or downgrade anytime?">
+    Yes. Upgrades take effect immediately and you are charged a prorated amount for the remainder of the month. Downgrades take effect at the end of your current billing period.
+  </Accordion>
+  <Accordion title="Is there an annual billing discount?">
+    Not yet. Annual plans with a discount are on the roadmap. Email hello@agenvik.com to be notified when they launch.
+  </Accordion>
+  <Accordion title="Do you offer refunds?">
+    Yes. Within 7 days of upgrading to a paid plan, email us and we will refund in full, no questions asked.
+  </Accordion>
+  <Accordion title="What payment methods do you accept?">
+    Agenvik accepts all major credit and debit cards (Visa, Mastercard, RuPay) and UPI.
+  </Accordion>
+  <Accordion title="Is there a plan for agencies managing multiple clients?">
+    The Pro plan supports 30 agents — enough for most agencies. If you need a custom arrangement, email hello@agenvik.com.
+  </Accordion>
+</AccordionGroup>
+
+## Data and security
+
+<AccordionGroup>
+  <Accordion title="Who can see my uploaded documents?">
+    Only you and the agents you have created. Your data is scoped to your account and organisation. Agenvik staff do not access customer knowledge bases except when required to resolve a specific support issue you have raised, with your permission.
+  </Accordion>
+  <Accordion title="Is my data used to train Agenvik's AI models?">
+    No. Your documents are used only to answer questions for your own agents. Agenvik does not use your content to train any shared or general-purpose AI model.
+  </Accordion>
+  <Accordion title="Can I delete my data?">
+    Yes. You can delete individual knowledge sources, entire agents, or your full account at any time. Deletion is permanent and immediate.
   </Accordion>
 </AccordionGroup>
 

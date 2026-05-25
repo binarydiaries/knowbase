@@ -1,28 +1,43 @@
 ---
 title: "Subscriptions and limits"
-description: "Understand plan access, usage limits, and locked states in Agenvik."
+description: "Understand plan tiers, feature access, usage limits, and locked states in Agenvik."
 ---
 
 Plans determine which features are available and how many resources your workspace can use.
 
-## What you will learn
+## Plan overview
 
-- Which areas can be limited by plan
-- How locked and disabled states work
-- Where to review usage
-- What to do when a limit is reached
+| | Free | Starter | Growth | Pro |
+|---|---|---|---|---|
+| **Price** | ₹0 | ₹499/mo | ₹1,499/mo | ₹3,999/mo |
+| **Active agents** | 1 | 3 | 10 | 30 |
+| **Knowledge sources** | 10 | 250 | 1,000 | 5,000 |
+| **Training runs / day** | 3 | 10 | 20 | 40 |
+| **Messages / month** | 100 | 500 | 2,000 | 8,000 |
+| **PDF upload** | ✓ | ✓ | ✓ | ✓ |
+| **Plain text / Q&A** | ✓ | ✓ | ✓ | ✓ |
+| **Website URL crawling** | — | ✓ | ✓ | ✓ |
+| **Website chat widget** | ✓ | ✓ | ✓ | ✓ |
+| **WhatsApp integration** | — | ✓ | ✓ | ✓ |
+| **Slack integration** | — | — | ✓ | ✓ |
+| **Conversation analytics** | — | ✓ | ✓ | ✓ |
+| **Usage stats** | ✓ | ✓ | ✓ | ✓ |
+| **Support** | Community | Email (48h) | Email (24h) | Priority (4h) |
 
-## Common limits
+<Note>
+  One knowledge source = one document, one PDF, or one URL. One message = one question plus one response. Test messages from the dashboard do not count toward your limit.
+</Note>
 
-Agenvik can show limits for:
+## What counts as a message
 
-- Active Agents
-- Knowledge Sources
-- Monthly Messages
-- Daily Training
-- Analytics access
-- WhatsApp integration
-- Lead Generation
+One message is one question sent to your agent plus one response back. If a user sends 5 messages in a single conversation, that counts as 5 messages toward your monthly limit. Messages you send yourself while testing in the dashboard do not count.
+
+## What happens when you reach a limit
+
+- **Agent limit reached**: create a new agent is disabled. Archive an unused Agent to free up a slot.
+- **Knowledge source limit**: adding new sources is disabled. Delete outdated sources to free space.
+- **Daily training limit reached**: the Train button is disabled until the daily reset.
+- **Message limit reached**: your agent stops responding to new conversations for the rest of the billing month. You'll receive an email warning at 80% of your limit so you can upgrade before hitting the cap.
 
 <Frame>
   <img src="/images/product-ss/subscription-limit-banner.png" alt="Subscription limit banner placeholder" />
@@ -30,7 +45,7 @@ Agenvik can show limits for:
 
 ## Usage inside Knowledge Sources
 
-On an Agent page, the **Knowledge Sources** card can show a usage popover with knowledge source count, monthly messages, and daily training runs.
+On an Agent page, the **Knowledge Sources** card shows a usage popover with knowledge source count, monthly messages, and daily training runs.
 
 <Frame>
   <img src="/images/product-ss/knowledge-source-usage.png" alt="Knowledge Source usage popover placeholder" />
@@ -38,7 +53,7 @@ On an Agent page, the **Knowledge Sources** card can show a usage popover with k
 
 ## Usage dashboard
 
-Open **Usage** to review message and knowledge usage across Agents.
+Open **Usage** to review message and knowledge usage across all Agents.
 
 <Frame>
   <img src="/images/product-ss/usage-dashboard.png" alt="Usage dashboard placeholder" />
@@ -46,19 +61,15 @@ Open **Usage** to review message and knowledge usage across Agents.
 
 ## Locked and disabled states
 
-When a limit is reached, Agenvik may disable actions such as creating Agents, adding sources, starting training, restoring archived Agents, or enabling paid features.
+When a limit is reached, Agenvik disables the relevant action and shows a tooltip explaining the reason.
 
 <Frame>
   <img src="/images/product-ss/disabled-tooltip.png" alt="Disabled tooltip placeholder" />
 </Frame>
 
-## What to do when you reach a limit
+## Upgrading and downgrading
 
-- Archive unused Agents if you reached the active Agent limit
-- Delete outdated Knowledge Sources if you reached the source limit
-- Wait until the daily training reset if training runs are used
-- Review **Usage** to understand message volume
-- Upgrade when the workspace needs more capacity or paid features
+Upgrades take effect immediately and are charged prorated for the remainder of the month. Downgrades take effect at the end of your current billing period. Within 7 days of upgrading to a paid plan, email hello@agenvik.com for a full refund, no questions asked.
 
 ## Next steps
 

@@ -1,14 +1,14 @@
 ---
 title: "Knowledge Sources"
-description: "Add, manage, and train the source content your Agent uses to answer questions."
+description: "Add, manage, and train the content your Agent uses to answer questions."
 ---
 
-**Knowledge Sources** are the trusted content behind an Agent. Agenvik currently supports Text sources and Q&A sources.
+**Knowledge Sources** are the trusted content behind an Agent. Agenvik supports four source types: Text, Q&A, PDF, and Website URL.
 
 ## What you will learn
 
-- How to add Text sources
-- How to add Q&A sources
+- How to add each source type
+- Which source types are available on your plan
 - How to train ready sources
 - How limits and deletion work
 
@@ -38,7 +38,7 @@ Use **Text** for policies, product notes, service descriptions, onboarding steps
 
 ## Add a Q&A source
 
-Use **Q&A** for high-confidence answers to common questions.
+Use **Q&A** for high-confidence answers to common or sensitive questions.
 
 1. Click **Add**.
 2. Choose **Q&A**.
@@ -51,6 +51,30 @@ Use **Q&A** for high-confidence answers to common questions.
 </Frame>
 
 You can add multiple questions in one Q&A source when they belong to the same topic.
+
+## Add a PDF source
+
+Use **PDF** for policy documents, product manuals, guides, and reports. Available on all plans.
+
+1. Click **Add**.
+2. Choose **PDF**.
+3. Upload the PDF file.
+4. Click **Save**.
+
+Agenvik breaks the PDF into chunks and indexes the content. One PDF file counts as one knowledge source toward your plan limit.
+
+## Add a Website URL source
+
+Use **Website URL** to point your agent at a web page and have it automatically read and index the content. Available on **Starter and above**.
+
+1. Click **Add**.
+2. Choose **Website URL**.
+3. Paste the full URL of the page.
+4. Click **Save**.
+
+<Tip>
+  Agenvik indexes the specific URL you provide — not the full site. To index multiple pages, add each URL as a separate knowledge source. Full site crawl is on the roadmap.
+</Tip>
 
 ## Train sources
 
@@ -73,6 +97,17 @@ Click a source to edit it. Use the delete action when a source should no longer 
 <Frame>
   <img src="/images/product-ss/knowledge-source-list.png" alt="Knowledge Source list placeholder" />
 </Frame>
+
+## Plan limits
+
+| Plan | Knowledge sources | Training runs / day |
+|------|-------------------|---------------------|
+| Free | 10 | 3 |
+| Starter | 250 | 10 |
+| Growth | 1,000 | 20 |
+| Pro | 5,000 | 40 |
+
+PDF upload and plain text/Q&A are available on all plans. Website URL crawling is available on Starter and above.
 
 ## Next steps
 

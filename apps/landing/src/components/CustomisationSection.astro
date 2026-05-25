@@ -4,8 +4,8 @@ import { Sliders, AlertCircle } from '@lucide/astro';
 <section id="customisation" aria-labelledby="customisation-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
     <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69]">
-      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#B07CD1]/30 blur-[100px]" aria-hidden="true"></div>
-      <div class="absolute bottom-0 right-0 w-[400px] h-[300px] bg-[#1a0f3d]/50 blur-[80px]" aria-hidden="true"></div>
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.3),transparent_70%)]" aria-hidden="true"></div>
+      <div class="absolute bottom-0 right-0 w-[400px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(26,15,61,0.5),transparent_70%)]" aria-hidden="true"></div>
 
       <div class="relative z-10">
         <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/15 text-white/80 mb-4" aria-hidden="true">
@@ -18,7 +18,7 @@ import { Sliders, AlertCircle } from '@lucide/astro';
         <div class="grid md:grid-cols-2 gap-6">
 
           <!-- Tone & Personality -->
-          <div class="rounded-2xl border border-white/10 bg-white/8 backdrop-blur-sm overflow-hidden flex flex-col">
+          <div class="rounded-2xl border border-white/10 bg-white/10 overflow-hidden flex flex-col">
             <div class="p-6 pb-4">
               <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
                 <Sliders size={18} strokeWidth={1.75} />
@@ -53,7 +53,7 @@ import { Sliders, AlertCircle } from '@lucide/astro';
           </div>
 
           <!-- Fallback Behaviour -->
-          <div class="rounded-2xl border border-white/10 bg-white/8 backdrop-blur-sm overflow-hidden flex flex-col">
+          <div class="rounded-2xl border border-white/10 bg-white/10 overflow-hidden flex flex-col">
             <div class="p-6 pb-4">
               <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
                 <AlertCircle size={18} strokeWidth={1.75} />

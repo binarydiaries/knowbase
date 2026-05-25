@@ -23,7 +23,7 @@ const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
 
         <div class="space-y-4 max-w-3xl mx-auto">
           {homepageFaqs.map((faq) => (
-            <div class="rounded-xl border border-[#301B69]/10 bg-white/80 backdrop-blur overflow-hidden">
+            <div class="rounded-xl border border-[#301B69]/10 bg-white/90 overflow-hidden">
               <details class="group">
                 <summary class="flex w-full justify-between items-center text-left cursor-pointer p-4 list-none [&::-webkit-details-marker]:hidden">
                   <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>

@@ -124,6 +124,9 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <meta name="twitter:image" content={ogImageURL} />
     <meta name="twitter:image:alt" content={title} />
 
+    <!-- LLM content discovery -->
+    <link rel="alternate" type="text/plain" title="LLMs.txt" href="/llms.txt" />
+
     <!-- Preconnect to external origins -->
     <link rel="preconnect" href="https://app.agenvik.com" />
     <link rel="dns-prefetch" href="https://embed.agenvik.com" />

@@ -5,7 +5,7 @@ export const GET: APIRoute = () => {
 
   const content = isStaging
     ? `User-agent: *\nDisallow: /\n`
-    : `User-agent: *\nAllow: /\n\nSitemap: https://agenvik.com/sitemap-index.xml\n`;
+    : `User-agent: *\nAllow: /\n\nSitemap: https://agenvik.com/sitemap-index.xml\n\n# LLM crawlers\nLLMs-txt: https://agenvik.com/llms.txt\n`;
 
   return new Response(content, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

@@ -1,0 +1,89 @@
+# Agenvik Documentation
+
+> Agenvik is a no-code AI agent platform. Build AI agents trained on your own PDFs, plain text, Q&A pairs, and website URLs. Deploy on website chat, WhatsApp, or Slack in under 30 minutes. Agents answer only from your knowledge — no hallucinations.
+
+## Documentation sections
+
+- [Getting started](https://docs.agenvik.com): Welcome page with quick links to all major guides
+- [Build your first agent](https://docs.agenvik.com/user-guides/quick-start/build-your-first-agent): Step-by-step guide from sign-up to a live agent in under 30 minutes
+- [Best practices](https://docs.agenvik.com/user-guides/quick-start/best-practices): How to structure knowledge, write behaviour settings, test before launch, and monitor after
+
+## Agent management
+
+- [Agents overview](https://docs.agenvik.com/user-guides/agents/overview): How agent pages are structured and the recommended setup order
+- [Knowledge sources](https://docs.agenvik.com/user-guides/agents/knowledge-sources): Add PDFs, plain text, Q&A pairs, and website URLs; train the agent; manage plan limits
+- [Behaviour](https://docs.agenvik.com/user-guides/agents/behaviour): Configure system prompt, tone, verbosity, fallback message, and guardrails
+- [Web channel](https://docs.agenvik.com/user-guides/agents/web-channel): Customise the chat widget display name, greeting, placeholder, and brand color
+- [WhatsApp channel](https://docs.agenvik.com/user-guides/agents/whatsapp-channel): Connect WhatsApp Business and assign a number to an agent (Starter and above)
+- [Lead generation](https://docs.agenvik.com/user-guides/agents/actions-lead-generation): Capture visitor contact details through conversation
+- [Archive and restore agents](https://docs.agenvik.com/user-guides/agents/archive-restore): Free up plan capacity by archiving unused agents
+
+## Inbox
+
+- [Conversations](https://docs.agenvik.com/user-guides/inbox/conversations): Browse and filter every conversation across agents and channels
+- [Leads](https://docs.agenvik.com/user-guides/inbox/leads): View contact details captured by lead generation
+
+## Analytics and usage
+
+- [Analytics](https://docs.agenvik.com/user-guides/analytics/overview): Daily conversations, channel breakdown, sentiment, topics, top agents, country distribution
+- [Usage](https://docs.agenvik.com/user-guides/analytics/usage): Messages sent, knowledge sources consumed, per-agent breakdowns vs plan limits
+
+## Workspace
+
+- [Integrations](https://docs.agenvik.com/user-guides/workspace/integrations): Connect WhatsApp Business; Slack available on Growth and above
+- [Account](https://docs.agenvik.com/user-guides/workspace/account): Manage profile, email, and authentication settings
+- [Pricing plans and limits](https://docs.agenvik.com/user-guides/workspace/subscriptions-limits): Free, Starter, Growth, Pro — agents, sources, messages, channels, support SLAs
+
+## Developer guide
+
+- [Developer overview](https://docs.agenvik.com/developer-guide/overview): How the Agenvik web widget fits into a website setup
+- [Install the web widget](https://docs.agenvik.com/developer-guide/install-web-widget): Add the Agenvik script tag to Webflow, Shopify, WordPress, or custom HTML
+- [Embed options](https://docs.agenvik.com/developer-guide/embed-options): Site-wide vs page-specific widget placement
+- [Pre-launch checklist](https://docs.agenvik.com/developer-guide/configure-before-launch): Verify knowledge, behaviour, channel, and widget before going live
+- [Widget troubleshooting](https://docs.agenvik.com/developer-guide/troubleshooting-widget): Fix widget not showing, poor answers, missing conversations
+
+## Help and support
+
+- [Help overview](https://docs.agenvik.com/help-and-support/overview): Quick links to FAQs, troubleshooting, and contact support
+- [FAQs](https://docs.agenvik.com/help-and-support/faqs): Getting started, knowledge training, channels, pricing, and data security questions
+- [Troubleshooting](https://docs.agenvik.com/help-and-support/troubleshooting): Fixes for agent creation, training, WhatsApp, and analytics issues
+- [Contact support](https://docs.agenvik.com/help-and-support/contact-support): Email hello@agenvik.com with workspace, agent, and issue details
+
+---
+
+## Key facts
+
+**What is Agenvik?**
+Agenvik is an AI agent platform where any business — without writing code — builds AI assistants trained on their own documents. Unlike generic AI chatbots, Agenvik agents are scoped to your knowledge base. If the answer isn't in your documents, the agent says so.
+
+**Knowledge source types**
+- PDF (policies, manuals, guides)
+- Plain text (paste any content directly)
+- Q&A pairs (structured question-answer format)
+- Website URL (Agenvik reads and indexes the page; Starter and above)
+
+**Deployment channels**
+- Website chat widget (all plans) — one script tag, works on any site
+- WhatsApp Business (Starter and above) — automated responses on a connected number
+- Slack (Growth and above) — internal team knowledge bot inside Slack
+
+**Plans**
+| Plan | Price | Agents | Knowledge sources | Messages/month |
+|------|-------|--------|-------------------|----------------|
+| Free | ₹0 | 1 | 10 | 100 |
+| Starter | ₹499/mo | 3 | 250 | 500 |
+| Growth | ₹1,499/mo | 10 | 1,000 | 2,000 |
+| Pro | ₹3,999/mo | 30 | 5,000 | 8,000 |
+
+One message = one visitor question + one agent response. Test messages from the dashboard do not count.
+
+**Setup time**
+Under 30 minutes from sign-up to a live agent. Under 2 minutes to embed the widget. WhatsApp setup takes 15–20 minutes (requires a WhatsApp Business account).
+
+**Accuracy**
+Agenvik uses RAG (Retrieval-Augmented Generation). Every answer is grounded in your uploaded content. If the information is not in the knowledge base, the agent falls back to a customisable message rather than guessing.
+
+**Contact**
+- Support: hello@agenvik.com
+- App: https://app.agenvik.com
+- Website: https://agenvik.com

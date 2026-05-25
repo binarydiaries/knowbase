@@ -1,0 +1,250 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import { faqCategories, faqSchema } from '../data/faqs';
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/faq`;
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'Agenvik FAQ — How it Works, Pricing, Data Security & More',
+  description:
+    'Answers to the most common questions about building AI agents with Agenvik — setup, pricing, data privacy, channels, and what happens when something goes wrong.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description'],
+  },
+  dateModified: '2025-05-23',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'FAQ', item: pageURL },
+    ],
+  },
+};
+---
+
+<Layout
+  title="Agenvik FAQ — How it Works, Pricing, Data Security & More"
+  description="Answers to the most common questions about building AI agents with Agenvik — setup, pricing, data privacy, channels, and what happens when something goes wrong."
+  activePage="faq"
+  jsonLd={[webPageSchema, faqSchema]}
+>
+  <main id="main-content">
+
+    <!-- ── HERO ── -->
+    <section aria-label="FAQ hero" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 max-w-3xl mx-auto px-6 pt-16 pb-12 text-center">
+        <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+          <span>✦</span> FAQ
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] leading-tight tracking-tight mb-4">
+          Everything you want to know about Agenvik
+        </h1>
+        <p id="page-description" class="text-[#301B69]/60 text-base md:text-lg leading-relaxed mb-8">
+          Can't find your answer? Email us at
+          <a href="mailto:hello@agenvik.com" class="font-medium text-[#301B69] underline underline-offset-2 decoration-[#301B69]/30 hover:decoration-[#301B69]">hello@agenvik.com</a>
+          — we reply to every message.
+        </p>
+
+        <!-- Search -->
+        <div class="relative max-w-lg mx-auto">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#301B69]/35 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            id="faq-search"
+            type="search"
+            placeholder="Search questions…"
+            autocomplete="off"
+            class="w-full rounded-2xl border border-[#301B69]/15 bg-white pl-11 pr-4 py-3.5 text-sm text-[#301B69] placeholder:text-[#301B69]/35 outline-none focus:ring-2 focus:ring-[#301B69]/20 focus:border-[#301B69]/40 transition shadow-sm"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CATEGORY NAV ── -->
+    <div class="sticky top-[68px] z-20 bg-white/90 backdrop-blur-md border-b border-[#301B69]/8">
+      <div class="max-w-4xl mx-auto px-6">
+        <nav aria-label="FAQ categories" class="flex gap-1 overflow-x-auto scrollbar-none py-3">
+          {faqCategories.map((cat) => (
+            <a
+              href={`#${cat.id}`}
+              class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap text-[#301B69]/55 hover:text-[#301B69] hover:bg-[#301B69]/6 transition-colors"
+            >
+              {cat.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </div>
+
+    <!-- ── FAQ CATEGORIES ── -->
+    <div class="max-w-4xl mx-auto px-6">
+      {faqCategories.map((cat, i) => (
+        <section
+          id={cat.id}
+          aria-labelledby={`${cat.id}-heading`}
+          data-faq-category
+          class={`pt-14 ${i === faqCategories.length - 1 ? 'pb-16' : 'pb-2'}`}
+        >
+          <h2
+            id={`${cat.id}-heading`}
+            class="text-xl font-bold text-[#301B69] mb-6 pb-4 border-b border-[#301B69]/8"
+          >
+            {cat.label}
+          </h2>
+
+          <div class="space-y-2">
+            {cat.faqs.map((faq) => (
+              <div
+                data-faq-item
+                data-question={faq.question.toLowerCase()}
+                data-answer={faq.answer.toLowerCase()}
+                class="rounded-xl border border-[#301B69]/10 bg-white overflow-hidden"
+              >
+                <details class="group">
+                  <summary class="flex w-full justify-between items-center text-left cursor-pointer px-5 py-4 list-none [&::-webkit-details-marker]:hidden gap-4">
+                    <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>
+                    <svg
+                      class="w-4 h-4 text-[#301B69]/40 transition-transform flex-shrink-0 group-open:rotate-180"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </summary>
+                  <p class="px-5 pb-5 text-sm text-[#301B69]/65 leading-relaxed border-t border-[#301B69]/6 pt-3">
+                    {faq.answer}
+                  </p>
+                </details>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- ── NO RESULTS ── -->
+    <div id="faq-no-results" class="hidden max-w-4xl mx-auto px-6 pt-14 pb-4 text-center">
+      <p class="text-[#301B69]/50 text-base mb-2">No questions match your search.</p>
+      <p class="text-sm text-[#301B69]/40">
+        Try different keywords, or
+        <a href="mailto:hello@agenvik.com" class="text-[#301B69] underline underline-offset-2 hover:opacity-70">email us</a>
+        and we'll answer directly.
+      </p>
+    </div>
+
+    <!-- ── BOTTOM CTA ── -->
+    <section aria-labelledby="faq-cta-heading" class="px-6 pt-16 pb-10">
+      <div class="max-w-4xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.3),transparent_70%)]" aria-hidden="true"></div>
+          <div class="relative z-10">
+            <h2 id="faq-cta-heading" class="text-2xl md:text-3xl font-bold text-white mb-3">
+              Didn't find your answer?
+            </h2>
+            <p class="text-white/65 text-base mb-8 max-w-md mx-auto">
+              We're a small team and we reply to every email. Reach out and we'll get back to you within 24 hours on weekdays.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center">
+              <a
+                href="mailto:hello@agenvik.com"
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Email us →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Or book a demo →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('faq-search') as HTMLInputElement | null;
+  const categories = document.querySelectorAll<HTMLElement>('[data-faq-category]');
+  const noResults = document.getElementById('faq-no-results');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase().trim();
+
+      // Reset — show everything
+      if (!query) {
+        categories.forEach((cat) => {
+          cat.classList.remove('hidden');
+          cat.querySelectorAll<HTMLElement>('[data-faq-item]').forEach((item) => {
+            item.classList.remove('hidden');
+            const details = item.querySelector('details');
+            if (details) details.removeAttribute('open');
+          });
+        });
+        noResults?.classList.add('hidden');
+        return;
+      }
+
+      let totalVisible = 0;
+
+      categories.forEach((cat) => {
+        const items = cat.querySelectorAll<HTMLElement>('[data-faq-item]');
+        let visibleInCat = 0;
+
+        items.forEach((item) => {
+          const q = item.getAttribute('data-question') ?? '';
+          const a = item.getAttribute('data-answer') ?? '';
+          const matches = q.includes(query) || a.includes(query);
+
+          if (matches) {
+            item.classList.remove('hidden');
+            // Auto-open matching items so the answer is visible
+            const details = item.querySelector('details');
+            if (details) details.setAttribute('open', '');
+            visibleInCat++;
+            totalVisible++;
+          } else {
+            item.classList.add('hidden');
+            const details = item.querySelector('details');
+            if (details) details.removeAttribute('open');
+          }
+        });
+
+        // Hide category heading if nothing matches inside it
+        cat.classList.toggle('hidden', visibleInCat === 0);
+      });
+
+      noResults?.classList.toggle('hidden', totalVisible > 0);
+    });
+  }
+</script>

@@ -1,0 +1,554 @@
+---
+import { getImage } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import Footer from '../../components/Footer.astro';
+import pricingBgSrc from '../../assets/images/pricing-bg.png';
+import { ChevronDown } from '@lucide/astro';
+
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/use-cases/education`;
+
+const faqs = [
+  {
+    q: 'Can an AI agent replace live coaching or mentoring sessions?',
+    a: "No — and Agenvik is not designed to. The agent handles logistical and reference questions so your live sessions are entirely focused on coaching, not \"where do I submit this?\" Agenvik makes your sessions more valuable, not redundant.",
+  },
+  {
+    q: 'What happens when a student asks the AI agent something personal or sensitive?',
+    a: 'Agenvik only answers from your uploaded content. If a question is outside its knowledge base — including anything personal or emotionally sensitive — Agenvik responds with your fallback message and routes the student directly to you.',
+  },
+  {
+    q: 'Can I update course material in Agenvik after the programme has started?',
+    a: 'Yes. Re-upload any document and Agenvik processes the updated content immediately — useful when you add new resources, revise deadlines, or release bonus material mid-cohort. Changes take effect right away.',
+  },
+  {
+    q: 'How does Agenvik handle multiple coaching programmes with different students?',
+    a: "Create a separate Agenvik agent per programme, each with its own knowledge base. Students on Programme A only receive answers sourced from Programme A's content — no cross-contamination between cohorts.",
+  },
+  {
+    q: 'Can Agenvik handle student questions directly on WhatsApp?',
+    a: 'Yes. If you communicate with students over WhatsApp, Agenvik connects to your WhatsApp Business number and handles inbound messages there — the same agent, the same knowledge base, a different channel.',
+  },
+];
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'AI Agent for Coaches & Educators — Answer Questions 24/7 | Agenvik',
+  description:
+    'Turn your course material into an AI agent that answers student questions at any hour. Agenvik scales your expertise without scaling your time — students get answers, you get your evenings back.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  dateModified: '2025-05-23',
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description', '#solution-heading'],
+  },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Use Cases', item: `${siteURL}/use-cases` },
+      { '@type': 'ListItem', position: 3, name: 'Coaches & Educators', item: pageURL },
+    ],
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
+
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to set up an AI agent for coaches and educators using Agenvik',
+  description:
+    'Set up Agenvik to answer student questions from your course material automatically in 4 steps — no coding required.',
+  totalTime: 'PT30M',
+  step: [
+    {
+      '@type': 'HowToStep',
+      position: 1,
+      name: 'Upload your course content',
+      text: 'Drop in your workbooks, session PDFs, FAQ doc, and any guides or resources you have created. Agenvik reads and indexes everything automatically — no re-formatting, no prompts to write.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 2,
+      name: 'Choose where students ask questions',
+      text: 'Set up the chat widget on your course platform, website, or community page. Or share a direct chat link via WhatsApp or email. Students access it wherever they already are.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 3,
+      name: 'Students get answers in your voice',
+      text: 'A student asks about an assignment at 11pm. The agent responds with the exact details from your brief — accurately, in the tone you set. Source cited.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 4,
+      name: 'Review what students are asking',
+      text: 'Check conversation logs to spot patterns — which concepts students ask about most, where they get confused. Use this to sharpen your content and coaching focus each cohort.',
+    },
+  ],
+};
+---
+
+<Layout
+  title="AI Agent for Coaches & Educators — Answer Questions 24/7 | Agenvik"
+  description="Turn your course material into an AI agent that answers student questions at any hour. Agenvik scales your expertise without scaling your time — students get answers, you get your evenings back."
+  activePage="use-cases"
+  jsonLd={[webPageSchema, faqSchema, howToSchema]}
+>
+  <main id="main-content">
+
+    <!-- ── SECTION 1: HERO ── -->
+    <section aria-label="Hero" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <!-- Grid background -->
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 max-w-6xl mx-auto px-6 pt-14 pb-20">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+
+          <!-- Left: copy -->
+          <div>
+            <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+              <span>✦</span> Coaches & Educators
+            </div>
+
+            <h1 class="text-4xl md:text-5xl leading-tight tracking-tight text-[#301B69] mb-6">
+              <span class="block font-normal">Your students have questions at midnight.</span>
+              <span class="block font-bold">You can't be available at midnight.</span>
+            </h1>
+
+            <p id="page-description" class="text-[#301B69]/70 text-base md:text-lg mb-6 leading-relaxed">
+              Agenvik is an AI agent for coaches and educators that reads your course material — workbooks, session notes, and PDFs — and answers student questions in your voice, any time of day. You stay focused on the sessions that actually need you.
+            </p>
+
+            <!-- Trust chips -->
+            <div class="flex flex-wrap gap-2 mb-8">
+              {[
+                'Answers in under 3 seconds',
+                'Available 24/7',
+                'Every answer sourced from your content',
+                'Free to start',
+              ].map((chip) => (
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#301B69]/6 text-[#301B69]/70 text-xs font-medium">
+                  <svg class="w-3 h-3 text-[#301B69]/40 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  {chip}
+                </span>
+              ))}
+            </div>
+
+            <div class="flex flex-wrap gap-4 items-center mb-6">
+              <a
+                href={appURL}
+                class="px-8 py-3.5 bg-[#301B69] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Start free →
+              </a>
+              <a
+                href="#how-it-works"
+                class="px-8 py-3.5 text-[#301B69] bg-white rounded-xl border border-[#301B69]/20 hover:bg-[#301B69]/5 transition-colors"
+              >
+                See how it works ↓
+              </a>
+            </div>
+
+            <p class="text-sm text-[#301B69]/50">Free plan · No credit card required · Live in 30 minutes</p>
+          </div>
+
+          <!-- Right: phone mockup at 11:43pm -->
+          <div aria-hidden="true" class="flex justify-center md:justify-end">
+            <div class="flex flex-col items-center gap-4">
+
+              <!-- Phone frame -->
+              <div class="rounded-[2.5rem] border-[7px] border-[#1a1d21] shadow-2xl overflow-hidden w-[280px]">
+
+                <!-- Status bar -->
+                <div class="bg-[#075E54] px-4 py-1.5 flex justify-between items-center">
+                  <span class="text-white text-[10px] font-semibold">11:43 PM</span>
+                  <div class="flex items-center gap-1.5">
+                    <!-- Signal bars -->
+                    <div class="flex gap-0.5 items-end h-3">
+                      <div class="w-[2px] h-[4px] bg-white/70 rounded-sm"></div>
+                      <div class="w-[2px] h-[6px] bg-white/70 rounded-sm"></div>
+                      <div class="w-[2px] h-[9px] bg-white/70 rounded-sm"></div>
+                      <div class="w-[2px] h-[12px] bg-white/70 rounded-sm"></div>
+                    </div>
+                    <!-- Battery -->
+                    <div class="flex items-center gap-0.5">
+                      <div class="border border-white/70 rounded-[2px] w-5 h-2.5 p-[1.5px]">
+                        <div class="bg-white/70 rounded-[1px] w-3/5 h-full"></div>
+                      </div>
+                      <div class="w-[2px] h-[5px] bg-white/70 rounded-sm"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- WhatsApp header -->
+                <div class="bg-[#075E54] px-3 pb-3 flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-white text-xs font-semibold leading-tight">Students — Cohort 4</p>
+                    <p class="text-white/60 text-[9px]">4 new messages</p>
+                  </div>
+                </div>
+
+                <!-- Chat thread -->
+                <div class="bg-[#E5DDD5] px-2.5 py-3 space-y-2.5" style="background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2240%22%20height%3D%2240%22%3E%3Ccircle%20cx%3D%221%22%20cy%3D%221%22%20r%3D%220.5%22%20fill%3D%22rgba(0%2C0%2C0%2C0.04)%22%2F%3E%3C%2Fsvg%3E')">
+
+                  <!-- Student Q1 -->
+                  <div class="flex justify-start">
+                    <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[85%] shadow-sm">
+                      <p class="text-[11px] text-gray-800 leading-snug">What's the assignment for week 3?</p>
+                      <p class="text-[9px] text-gray-400 mt-0.5 text-right">11:32 PM</p>
+                    </div>
+                  </div>
+
+                  <!-- Aria reply Q1 -->
+                  <div class="flex justify-end">
+                    <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[90%] shadow-sm">
+                      <p class="text-[11px] text-gray-800 leading-snug">Week 3 is on building your lead magnet. Complete workbook pages 18–22 before Friday's session.</p>
+                      <div class="flex items-center gap-1 mt-1.5 border-t border-black/5 pt-1">
+                        <svg class="w-2.5 h-2.5 text-[#075E54]/50 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                        <p class="text-[9px] text-[#075E54]/60">Week 3 Module Brief.pdf</p>
+                      </div>
+                      <!-- Blue double ticks -->
+                      <div class="flex justify-end mt-0.5 gap-[-2px]">
+                        <svg class="w-3.5 h-3.5 text-[#34B7F1]" viewBox="0 0 16 11" fill="currentColor" aria-hidden="true"><path d="M11.071.653a.75.75 0 0 1 .025 1.06L5.91 7.503 3.904 5.498A.75.75 0 0 0 2.843 6.56l2.537 2.537a.75.75 0 0 0 1.06.001l5.718-6.02A.75.75 0 0 0 11.07.653z"/><path d="M14.571.653a.75.75 0 0 1 .025 1.06L9.41 7.503 8.35 6.442l5.16-5.764a.75.75 0 0 1 1.061-.025z"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Student Q2 -->
+                  <div class="flex justify-start">
+                    <div class="bg-white rounded-t-xl rounded-br-xl rounded-bl-sm px-3 py-2 max-w-[85%] shadow-sm">
+                      <p class="text-[11px] text-gray-800 leading-snug">Where do I submit my work?</p>
+                      <p class="text-[9px] text-gray-400 mt-0.5 text-right">11:37 PM</p>
+                    </div>
+                  </div>
+
+                  <!-- Aria reply Q2 -->
+                  <div class="flex justify-end">
+                    <div class="bg-[#DCF8C6] rounded-t-xl rounded-bl-xl rounded-br-sm px-3 py-2 max-w-[90%] shadow-sm">
+                      <p class="text-[11px] text-gray-800 leading-snug">Submit via the portal link in your welcome email, under "Submit Work". Deadline is Sunday 11:59pm.</p>
+                      <div class="flex items-center gap-1 mt-1.5 border-t border-black/5 pt-1">
+                        <svg class="w-2.5 h-2.5 text-[#075E54]/50 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/></svg>
+                        <p class="text-[9px] text-[#075E54]/60">Programme FAQ.pdf</p>
+                      </div>
+                      <div class="flex justify-end mt-0.5 gap-[-2px]">
+                        <svg class="w-3.5 h-3.5 text-[#34B7F1]" viewBox="0 0 16 11" fill="currentColor" aria-hidden="true"><path d="M11.071.653a.75.75 0 0 1 .025 1.06L5.91 7.503 3.904 5.498A.75.75 0 0 0 2.843 6.56l2.537 2.537a.75.75 0 0 0 1.06.001l5.718-6.02A.75.75 0 0 0 11.07.653z"/><path d="M14.571.653a.75.75 0 0 1 .025 1.06L9.41 7.503 8.35 6.442l5.16-5.764a.75.75 0 0 1 1.061-.025z"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- System pill -->
+                  <div class="flex justify-center py-1">
+                    <span class="text-[9px] text-gray-600 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+                      ✓ Aria answered 4 questions tonight
+                    </span>
+                  </div>
+
+                </div>
+
+                <!-- Input bar -->
+                <div class="bg-white px-3 py-2.5 flex items-center gap-2">
+                  <div class="flex-1 bg-gray-100 rounded-full px-3 py-1.5">
+                    <p class="text-[9px] text-gray-400">Message</p>
+                  </div>
+                  <div class="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Caption -->
+              <p class="text-xs text-[#301B69]/50 text-center max-w-[260px] leading-relaxed">
+                Your agent handles the questions. You handle the coaching.
+              </p>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 2: THE PROBLEM ── -->
+    <section aria-labelledby="problem-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-[#1a0f3d]">
+          <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.4),transparent_70%)]" aria-hidden="true"></div>
+          <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.15),transparent_70%)]" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-12">
+            <h2 id="problem-heading" class="text-3xl md:text-4xl font-bold text-white leading-tight">
+              Your expertise is what students pay for. Your time isn't infinite.
+            </h2>
+          </div>
+
+          <div class="relative z-10 grid md:grid-cols-3 gap-8">
+            {[
+              {
+                stat: '1:1',
+                label: 'Time eaten by logistics, not coaching',
+                body: '"Where do I submit this?" "What\'s the deadline?" "How do I access the recordings?" These questions aren\'t why your students enrolled. But they keep finding their way into your DMs, your email, and your session Q&A time.',
+              },
+              {
+                stat: '11pm',
+                label: 'When students study and hit questions',
+                body: "Students don't consume content on a 9–5 schedule. They review their workbooks late at night, get stuck, and either give up or wait until morning feeling frustrated. You lose sleep. Or they lose momentum.",
+              },
+              {
+                stat: 'Every cohort',
+                label: 'The same questions asked again',
+                body: 'Cohort after cohort, the same FAQs come up. Your content answers them — but students don\'t search the docs, they DM you. You end up being your own FAQ bot.',
+              },
+            ].map(({ stat, label, body }) => (
+              <div class="text-center md:text-left">
+                <p class="text-5xl md:text-6xl font-bold text-white mb-2">{stat}</p>
+                <p class="text-sm font-semibold text-[#B07CD1] uppercase tracking-widest mb-3 leading-snug">{label}</p>
+                <p class="text-white/60 text-sm leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: THE SOLUTION ── -->
+    <section aria-labelledby="solution-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 items-start">
+
+          <!-- Left: copy -->
+          <div>
+            <h2 id="solution-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-5 leading-tight">
+              An AI agent for coaches and educators — your knowledge base, available at 3am
+            </h2>
+            <p class="text-[#301B69]/70 text-base leading-relaxed mb-5">
+              Upload your course PDFs, workbooks, session notes, and FAQ once. Agenvik reads your material and answers student questions in your voice, around the clock — without you being online. Students get accurate, sourced answers from your content. You get your time back for the conversations that actually need you.
+            </p>
+            <div class="flex flex-wrap gap-4 text-sm mb-8">
+              <a href="/features" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">See all features →</a>
+              <a href="/pricing" class="text-[#301B69] font-medium hover:opacity-70 transition-opacity underline underline-offset-2 decoration-[#301B69]/30">View pricing →</a>
+            </div>
+          </div>
+
+          <!-- Right: handles + hands off -->
+          <div class="grid grid-cols-1 gap-4">
+
+            <!-- What it handles -->
+            <div class="rounded-2xl border border-[#301B69]/10 bg-[#301B69]/3 p-6">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="w-6 h-6 rounded-full bg-[#301B69] flex items-center justify-center flex-shrink-0">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 class="font-semibold text-[#301B69] text-sm uppercase tracking-wide">What it handles</h3>
+              </div>
+              <ul class="space-y-2">
+                {[
+                  'Course structure, module order, and session schedule',
+                  'Assignment briefs, submission instructions, and deadlines',
+                  'How to access recordings, resources, and tools',
+                  'Frequently revisited concepts explained in your materials',
+                  'Coaching methodology and programme expectations',
+                  'FAQs about onboarding, payments, and logistics',
+                ].map((item) => (
+                  <li class="flex items-start gap-2.5 text-sm text-[#301B69]/70">
+                    <svg class="w-4 h-4 text-[#301B69]/40 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <!-- What it hands off -->
+            <div class="rounded-2xl border border-[#B07CD1]/20 bg-[#B07CD1]/5 p-6">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="w-6 h-6 rounded-full bg-[#B07CD1] flex items-center justify-center flex-shrink-0">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14"/></svg>
+                </div>
+                <h3 class="font-semibold text-[#301B69] text-sm uppercase tracking-wide">What it hands off to you</h3>
+              </div>
+              <ul class="space-y-2">
+                {[
+                  'Personal coaching questions that need your judgment',
+                  'Anything outside your uploaded content — with a clear "reach out to [contact]"',
+                  'Escalations or complaints that need a human response',
+                ].map((item) => (
+                  <li class="flex items-start gap-2.5 text-sm text-[#301B69]/70">
+                    <svg class="w-4 h-4 text-[#B07CD1] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 4: HOW IT WORKS ── -->
+    <section id="how-it-works" aria-labelledby="howitworks-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div
+          class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
+          style={`background-image: url(${pricingBg.src})`}
+        >
+          <div class="absolute inset-0 bg-white/55 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-12">
+            <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-4 uppercase tracking-widest">
+              <span>✦</span> How It Works
+            </div>
+            <h2 id="howitworks-heading" class="text-3xl md:text-4xl font-bold text-[#301B69]">
+              Upload your material. Students get answers. You get your time back.
+            </h2>
+          </div>
+
+          <ol class="relative z-10 grid md:grid-cols-2 gap-6 list-none">
+            {[
+              {
+                step: '1',
+                title: 'Upload your course content',
+                body: 'Drop in your workbooks, session PDFs, FAQ doc, and any guides or resources you\'ve created. Agenvik reads and indexes everything automatically — no re-formatting, no prompts to write.',
+              },
+              {
+                step: '2',
+                title: 'Choose where students ask questions',
+                body: 'Set up the chat widget on your course platform, website, or community page. Or share a direct chat link via WhatsApp or email. Students access it wherever they already are.',
+              },
+              {
+                step: '3',
+                title: 'Students get answers in your voice',
+                body: 'A student asks about an assignment at 11pm. The agent responds with the exact details from your brief — accurately, in the tone you set. No guessing. Source cited.',
+              },
+              {
+                step: '4',
+                title: 'You see what students are asking',
+                body: 'Review conversation logs to spot patterns. Which concepts are students asking about most? Where are they getting confused? Use this to improve your content each cohort.',
+              },
+            ].map(({ step, title, body }) => (
+              <li class="rounded-2xl bg-white/90 border border-[#301B69]/10 p-6 flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-full bg-[#301B69] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                    {step}
+                  </span>
+                  <h3 class="font-semibold text-[#301B69]">{title}</h3>
+                </div>
+                <p class="text-sm text-[#301B69]/70 leading-relaxed">{body}</p>
+              </li>
+            ))}
+          </ol>
+
+          <div class="relative z-10 mt-8 flex flex-col md:flex-row items-center justify-between gap-6 bg-white/80 rounded-2xl p-6 border border-[#301B69]/10">
+            <div>
+              <h3 class="text-base font-semibold text-[#301B69] mb-1">Live in 30 minutes — free to start</h3>
+              <p class="text-sm text-[#301B69]/60">No setup fees. No code. No credit card required.</p>
+            </div>
+            <a
+              href={appURL}
+              class="bg-[#301B69] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex-shrink-0"
+            >
+              Build your coaching agent →
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 5: FAQ ── -->
+    <!-- Social proof section omitted — no real testimonials yet. Add between How It Works and FAQ (bg-white) when real testimonials are collected. -->
+    <section aria-labelledby="faq-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+          <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.4),transparent_70%)]" aria-hidden="true"></div>
+
+          <div class="relative z-10 text-center mb-10">
+            <h2 id="faq-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
+              Questions coaches and course creators ask
+            </h2>
+          </div>
+
+          <div class="relative z-10 space-y-4 max-w-3xl mx-auto">
+            {faqs.map(({ q, a }) => (
+              <div class="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+                <details class="group">
+                  <summary class="flex w-full justify-between items-center text-left cursor-pointer p-5 list-none [&::-webkit-details-marker]:hidden">
+                    <span class="text-sm md:text-base font-medium text-white">{q}</span>
+                    <span class="w-5 h-5 text-white/60 transition-transform flex-shrink-0 group-open:rotate-180 ml-3" aria-hidden="true">
+                      <ChevronDown size={20} strokeWidth={2} />
+                    </span>
+                  </summary>
+                  <p class="px-5 pb-5 text-sm text-white/60 leading-relaxed">{a}</p>
+                </details>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 6: CTA ── -->
+    <section aria-labelledby="cta-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.3),transparent_70%)]" aria-hidden="true"></div>
+
+          <div class="relative z-10">
+            <h2 id="cta-heading" class="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+              Scale what you know<br class="hidden md:block" /> without scaling your hours
+            </h2>
+            <p class="text-white/70 text-base md:text-lg mb-8 max-w-xl mx-auto">
+              Free plan. Set up in 30 minutes. No technical skills needed.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center mb-6">
+              <a
+                href={appURL}
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Build your coaching agent →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Book a demo instead →
+              </a>
+            </div>
+            <p class="text-white/40 text-sm">Free plan · No credit card required · Cancel anytime · Data stays private</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

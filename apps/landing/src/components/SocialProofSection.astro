@@ -1,0 +1,35 @@
+---
+---
+<section aria-labelledby="social-proof-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#F5F3FF] border border-[#301B69]/10">
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.06),transparent_70%)]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="text-center mb-12">
+          <h2 id="social-proof-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+            What our early users say
+          </h2>
+        </div>
+
+        <!-- Testimonial cards -->
+        <div class="grid md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(() => (
+            <div class="rounded-2xl border border-[#301B69]/10 bg-white shadow-sm p-6">
+              <p class="text-sm text-[#301B69]/60 italic mb-6 leading-relaxed">
+                "Real testimonial coming soon — if you're using Agenvik and want to share your story, reach out at hello@agenvik.com"
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#301B69]/10 flex-shrink-0"></div>
+                <div>
+                  <div class="text-sm font-semibold text-[#301B69]">Name, Title</div>
+                  <div class="text-xs text-[#301B69]/50">Company</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

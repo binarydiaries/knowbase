@@ -47,27 +47,31 @@ One dropdown on Solutions. Book a Demo as outlined secondary button. Build once 
 
 Opens on hover (desktop) or tap (mobile).
 
+**Current verticals (as of Phase 2 rewrite):**
+
 ```
 ┌──────────────────────────────────────────────┐
 │                                              │
-│  🎧  Customer Support                        │
-│      Automate tier-1 queries, 24/7           │
-│      → /use-cases/customer-support           │
+│  🏠  Real Estate                             │
+│      Handle property queries on WhatsApp     │
+│      → /use-cases/real-estate                │
 │                                              │
-│  🛍  E-commerce                              │
-│      Handle shipping & returns automatically │
-│      → /use-cases/ecommerce                  │
+│  🏥  Clinics & Hospitals                     │
+│      Answer patient FAQs, free up front desk │
+│      → /use-cases/clinic                     │
 │                                              │
-│  🏢  Internal Teams                          │
-│      Company knowledge, always findable      │
+│  📋  Internal Teams                          │
+│      Company playbook, always findable       │
 │      → /use-cases/internal-knowledge         │
 │                                              │
-│  ⚡  SaaS & Product                          │
-│      Reduce support, improve activation      │
-│      → /use-cases/saas                       │
+│  🎓  Coaches & Educators                     │
+│      Scale your expertise, not your hours    │
+│      → /use-cases/education                  │
 │                                              │
 └──────────────────────────────────────────────┘
 ```
+
+> **Previous verticals (deprioritised):** Customer Support (generic), E-commerce, SaaS & Product. These pages still exist at their URLs and are linked from the footer, but are no longer in the primary nav dropdown. Real estate and clinics are the specific customer-support sub-verticals we are actively targeting.
 
 Each item has:
 - Icon (simple, single colour)
@@ -123,10 +127,10 @@ Book a Demo       →  /book-demo
 Features          →  /features
 
 Solutions
-  ↳ Customer Support
-  ↳ E-commerce
+  ↳ Real Estate
+  ↳ Clinics & Hospitals
   ↳ Internal Teams
-  ↳ SaaS & Product
+  ↳ Coaches & Educators
 
 Pricing           →  /pricing
 Blog              →  /blog
@@ -163,11 +167,11 @@ One addition: on the homepage, when the user hasn't scrolled yet (hero is visibl
 FAQ lives here, not in the top nav.
 
 ```
-Column 1 — Product       Column 2 — Solutions        Column 3 — Resources     Column 4 — Company
-Features                 Customer Support             Blog                     About
-How it Works             E-commerce                   Documentation            Book a Demo
-Pricing                  Internal Teams               Developer Guide          Contact
-Changelog                SaaS & Product               Help & Support           hello@agenvik.com
+Column 1 — Product       Column 2 — Solutions          Column 3 — Resources     Column 4 — Company
+Features                 Real Estate                   Blog                     About
+How it Works             Clinics & Hospitals           Documentation            Book a Demo
+Pricing                  Internal Teams                Developer Guide          Contact
+Changelog                Coaches & Educators           Help & Support           hello@agenvik.com
 ```
 
 Bottom bar: © 2026 Agenvik · Privacy Policy · Terms · Security · [X] [LinkedIn] [Instagram]

@@ -1,59 +1,58 @@
 ---
 import { getImage } from 'astro:assets';
 import coreBgSrc from '../assets/images/core-bg.png';
+import { FileText, Sparkles, Share2, BarChart2 } from '@lucide/astro';
 
 const coreBg = await getImage({ src: coreBgSrc, format: 'webp', quality: 80 });
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 
 const features = [
   {
-    title: 'Knowledge Sources',
-    desc: "Import data from text, FAQs, and documents. Continuously expand your agent's knowledge as your needs grow.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
+    Icon: FileText,
+    title: 'Answers from your content, not guesswork',
+    desc: 'Every response is grounded in documents you uploaded. Agenvik cites the source, so you can verify. No hallucinations. No confident wrong answers.',
   },
   {
-    title: 'Instant Agent Creation',
-    desc: 'Spin up AI agents in seconds with zero setup. No coding, no config—just define your agent and go live.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    Icon: Sparkles,
+    title: 'Your tone. Your brand. Not robot speak.',
+    desc: "Set how your agent sounds — formal, casual, concise, detailed. It writes like your team, not like a generic AI. Consistent voice across every channel, every conversation.",
   },
   {
-    title: 'Real-time Responses',
-    desc: 'Deliver fast, accurate answers instantly. Optimized for low latency and high relevance.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
+    Icon: Share2,
+    title: 'One agent. Three channels.',
+    desc: 'Build once, deploy everywhere. Website chat widget, WhatsApp Business, Slack. Your agent is consistent across all of them — same knowledge, same tone, zero duplication.',
   },
   {
-    title: 'Smart Retrieval',
-    desc: 'AI intelligently fetches answers from your data, providing context-aware responses that are always on point.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    Icon: BarChart2,
+    title: 'See exactly what your customers are asking',
+    desc: 'Every conversation is logged. See which questions come up most, where your agent is confident, and where it needs more knowledge. Improve over time with real data.',
   },
 ];
 ---
-<section id="features" aria-labelledby="features-heading" class="px-6 pt-6">
+<section id="features" aria-labelledby="features-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
     <div
       class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden"
       style={`background-image: url(${coreBg.src})`}
     >
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
-      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#301B69]/20 blur-[120px] opacity-30" aria-hidden="true"></div>
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.06),transparent_70%)]" aria-hidden="true"></div>
 
       <div class="relative z-10">
         <div class="inline-flex items-center gap-2 px-4 py-1 text-sm rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
-          ✦ CORE VALUE
+          ✦ WHAT YOU GET
         </div>
 
         <h2 id="features-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">
-          AI Agents Built on Your Knowledge
+          Built to give accurate answers, not impressive-sounding ones
         </h2>
 
-        <p class="text-[#301B69] max-w-2xl mb-10 leading-relaxed">
-          Agenvik lets you build intelligent agents trained on your own data—so every response is accurate, contextual, and genuinely useful.
-        </p>
-
-        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
+        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none mt-10">
           {features.map((item) => (
             <li class="flex gap-4">
-              <div class="mt-1 text-[#301B69]" aria-hidden="true" set:html={item.icon} />
+              <div class="mt-1 text-[#301B69] flex-shrink-0" aria-hidden="true">
+                <item.Icon size={20} strokeWidth={1.75} />
+              </div>
               <div>
                 <h3 class="font-semibold text-[#301B69] mb-1">{item.title}</h3>
                 <p class="text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
@@ -68,8 +67,8 @@ const features = [
           <a
             href={appURL}
             data-get-started
-            data-source="core_value"
-            class="bg-[#301B69] text-white px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition"
+            data-source="features"
+            class="bg-[#301B69] text-white px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition-opacity"
           >
             Create Your First Agent →
           </a>

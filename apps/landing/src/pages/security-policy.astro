@@ -1,13 +1,16 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import LegalLayout from '../components/LegalLayout.astro';
 ---
-<Layout title="Security Policy — Agenvik" description="Learn about Agenvik's security practices, data protection, and how to report vulnerabilities.">
-  <LegalLayout title="Security Policy">
+<LegalLayout
+  title="Security Policy"
+  description="Agenvik's security practices: infrastructure encryption, multi-tenant data isolation, access controls, subprocessors, and responsible vulnerability disclosure."
+  lastUpdated="2026-05-10"
+  pageURL="https://agenvik.com/security-policy"
+>
     <div class="mb-10">
       <p class="text-xs text-[#301B69]/50 mb-2">Last updated: May 10, 2026</p>
       <h1 class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">Security Policy</h1>
-      <p class="text-[#301B69]/70 leading-relaxed">
+      <p id="page-description" class="text-[#301B69]/70 leading-relaxed">
         Security is a core part of how we build and operate Agenvik. This page describes our security practices and how to report vulnerabilities responsibly.
       </p>
     </div>
@@ -112,5 +115,4 @@ import LegalLayout from '../components/LegalLayout.astro';
         </address>
       </section>
     </div>
-  </LegalLayout>
-</Layout>
+</LegalLayout>

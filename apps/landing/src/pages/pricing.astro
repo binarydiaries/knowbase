@@ -1,0 +1,529 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FinalCTASection from '../components/FinalCTASection.astro';
+import Footer from '../components/Footer.astro';
+import { getImage } from 'astro:assets';
+import pricingBgSrc from '../assets/images/pricing-bg.png';
+import { ChevronDown } from '@lucide/astro';
+
+const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
+const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+const siteURL = 'https://agenvik.com';
+
+const plans = [
+  {
+    id: 'free',
+    name: 'FREE',
+    price: '₹0',
+    period: '/ forever',
+    note: 'No credit card required',
+    bestFor: 'Trying Agenvik, personal projects, testing before committing',
+    cta: 'Get started free →',
+    highlight: false,
+  },
+  {
+    id: 'starter',
+    name: 'STARTER',
+    price: '₹499',
+    period: '/ month',
+    note: 'Billed monthly',
+    bestFor: 'Solo builders, small businesses, single product agents',
+    cta: 'Start Starter →',
+    highlight: false,
+  },
+  {
+    id: 'growth',
+    name: 'GROWTH',
+    price: '₹1,499',
+    period: '/ month',
+    note: 'Billed monthly',
+    bestFor: 'Growing teams, multi-product companies, active customer support',
+    cta: 'Start Growth →',
+    highlight: true,
+  },
+  {
+    id: 'pro',
+    name: 'PRO',
+    price: '₹3,999',
+    period: '/ month',
+    note: 'Billed monthly',
+    bestFor: 'High-volume businesses, agencies, teams running multiple agents',
+    cta: 'Start Pro →',
+    highlight: false,
+  },
+] as const;
+
+type FeatureValue = string | boolean;
+type CategoryRow = { type: 'category'; label: string };
+type FeatureRowType = {
+  type: 'feature';
+  label: string;
+  tooltip?: string;
+  values: [FeatureValue, FeatureValue, FeatureValue, FeatureValue];
+};
+type TableRow = CategoryRow | FeatureRowType;
+
+const featureRows: TableRow[] = [
+  { type: 'category', label: 'Agents' },
+  { type: 'feature', label: 'Active agents', values: ['1', '3', '10', '30'] },
+  { type: 'category', label: 'Knowledge' },
+  {
+    type: 'feature',
+    label: 'Knowledge sources',
+    tooltip: 'A source is any document, URL, or text block you add. One PDF = one source. One URL = one source.',
+    values: ['10', '250', '1,000', '5,000'],
+  },
+  { type: 'feature', label: 'PDF upload', values: [true, true, true, true] },
+  { type: 'feature', label: 'Plain text / FAQ', values: [true, true, true, true] },
+  {
+    type: 'feature',
+    label: 'Website URL crawling',
+    tooltip: 'Point your agent at a URL and it automatically reads and indexes the page content as a knowledge source.',
+    values: [false, true, true, true],
+  },
+  {
+    type: 'feature',
+    label: 'Training runs / day',
+    tooltip: 'Each time you add or update knowledge and click "Train", that counts as one training run.',
+    values: ['3', '10', '20', '40'],
+  },
+  { type: 'category', label: 'Conversations' },
+  {
+    type: 'feature',
+    label: 'Messages / month',
+    tooltip: "One question + one response = one message. Test messages from you don't count.",
+    values: ['100', '500', '2,000', '8,000'],
+  },
+  { type: 'category', label: 'Channels' },
+  { type: 'feature', label: 'Website chat widget', values: [true, true, true, true] },
+  { type: 'feature', label: 'WhatsApp integration', values: [false, true, true, true] },
+  { type: 'feature', label: 'Slack integration', values: [false, false, true, true] },
+  { type: 'category', label: 'Platform' },
+  { type: 'feature', label: 'Usage stats', values: [true, true, true, true] },
+  { type: 'feature', label: 'Conversation analytics', values: [false, true, true, true] },
+  { type: 'feature', label: 'Custom agent tone', values: [true, true, true, true] },
+  { type: 'category', label: 'Support' },
+  { type: 'feature', label: 'Support tier', values: ['Community', 'Email', 'Email', 'Priority'] },
+  { type: 'feature', label: 'Response time', values: ['—', '48h', '24h', '4h'] },
+];
+
+const pricingFaqs = [
+  {
+    question: 'What happens when I hit my message limit?',
+    answer:
+      "On Agenvik, your agent stops responding to new conversations for the rest of the month. Existing conversations in progress complete normally. You'll get an email warning at 80% usage so you can upgrade before hitting the limit.",
+  },
+  {
+    question: 'Can I upgrade or downgrade anytime?',
+    answer:
+      'Yes. Upgrades take effect immediately. Downgrades take effect at the end of your current billing period. No penalties, no questions asked.',
+  },
+  {
+    question: 'Is there an annual plan?',
+    answer:
+      "Not yet — Agenvik is on monthly billing only for now. Annual plans with a discount are on the roadmap. Join the waitlist if that's a blocker for you: hello@agenvik.com",
+  },
+  {
+    question: 'Do you offer refunds?',
+    answer: "Yes. If you're unhappy in the first 7 days of a paid plan, email us and we'll refund in full.",
+  },
+  {
+    question: 'What payment methods do you accept?',
+    answer: 'Agenvik accepts all major credit and debit cards (Visa, Mastercard, RuPay) and UPI.',
+  },
+  {
+    question: 'Is there a plan for agencies or multiple clients?',
+    answer:
+      "Agenvik's Pro plan supports 30 agents — enough for most agencies. If you need a custom arrangement, email hello@agenvik.com and we'll work something out.",
+  },
+];
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${siteURL}/pricing#webpage`,
+  url: `${siteURL}/pricing`,
+  name: 'Agenvik Pricing — Free Plan + Paid Plans from ₹499/month',
+  description:
+    "Start free forever. Agenvik plans scale from solo projects to enterprise — no hidden fees, no long-term contracts. See exactly what's included in each plan.",
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#software` },
+  dateModified: new Date().toISOString().split('T')[0],
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Pricing', item: `${siteURL}/pricing` },
+    ],
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: pricingFaqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+  })),
+};
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'Agenvik',
+  description: 'No-code AI agent builder with multi-channel deployment on website, WhatsApp, and Slack.',
+  brand: { '@type': 'Brand', name: 'Agenvik' },
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Free',
+      price: '0',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      description: 'Free forever. For trying Agenvik, personal projects, and testing before committing.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Starter',
+      price: '499',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      description: 'For solo builders, small businesses, and single product agents. ₹499/month.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Growth',
+      price: '1499',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      description: 'For growing teams, multi-product companies, and active customer support. ₹1,499/month.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '3999',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      description: 'For high-volume businesses, agencies, and teams running multiple agents. ₹3,999/month.',
+    },
+  ],
+};
+---
+
+<Layout
+  title="Agenvik Pricing — Free Plan + Paid Plans from ₹499/month"
+  description="Start free forever. Agenvik plans scale from solo projects to enterprise — no hidden fees, no long-term contracts. See exactly what's included in each plan."
+  activePage="pricing"
+  jsonLd={[webPageSchema, faqSchema, productSchema]}
+>
+  <main id="main-content" class="relative">
+    <!-- Grid + radial glow (same pattern as features page) -->
+    <div class="absolute top-0 left-0 right-0 h-[740px] pointer-events-none overflow-hidden" aria-hidden="true">
+      <div
+        class="absolute inset-0"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%);"
+      ></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)]"></div>
+    </div>
+
+    <!-- Section 1: Hero -->
+    <section aria-labelledby="pricing-page-heading" class="relative pt-[68px]">
+      <div class="relative z-10 px-6 pt-32 pb-14 text-center">
+        <div class="max-w-3xl mx-auto">
+          <h1 id="pricing-page-heading" class="text-3xl md:text-5xl font-bold text-[#301B69] mb-5 leading-tight">
+            Simple pricing that<br class="hidden sm:block" /> grows with you
+          </h1>
+          <p class="text-[#301B69]/70 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+            Agenvik starts free — no credit card, no time limit. Pay only when you need more capacity. No hidden fees,
+            no long-term lock-in, just clear limits and real value at every tier.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Plan Cards + Feature Comparison Table -->
+    <section aria-labelledby="plan-comparison-heading" class="px-6 pt-10">
+      <div class="max-w-6xl mx-auto">
+        <div
+          class="relative rounded-3xl p-6 md:p-10 overflow-hidden bg-cover bg-center"
+          style={`background-image: url(${pricingBg.src})`}
+        >
+          <div class="absolute inset-0 bg-white/55 backdrop-blur-[2px]" aria-hidden="true"></div>
+
+          <div class="relative z-10">
+            <h2 id="plan-comparison-heading" class="sr-only">Plan comparison</h2>
+
+            <!-- Plan cards -->
+            <ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 list-none">
+              {
+                plans.map((plan) => (
+                  <li class="flex flex-col">
+                    <!-- Fixed-height badge row keeps all cards the same height -->
+                    <div class="h-7 flex items-center justify-center mb-1" aria-hidden={!plan.highlight}>
+                      {plan.highlight && (
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#301B69] bg-[#301B69]/10 px-3 py-1 rounded-full">
+                          ★ Most Popular
+                        </span>
+                      )}
+                    </div>
+                    <article
+                      class:list={[
+                        'flex flex-col flex-1 rounded-2xl p-6',
+                        plan.highlight
+                          ? 'bg-[#301B69] shadow-xl'
+                          : 'bg-white border border-[#301B69]/10 shadow-sm',
+                      ]}
+                    >
+                      <h3
+                        class:list={[
+                          'text-xs font-bold tracking-widest mb-3',
+                          plan.highlight ? 'text-white/55' : 'text-[#301B69]/40',
+                        ]}
+                      >
+                        {plan.name}
+                      </h3>
+                      <div class="mb-1">
+                        <span
+                          class:list={['text-3xl font-bold', plan.highlight ? 'text-white' : 'text-[#301B69]']}
+                        >
+                          {plan.price}
+                        </span>
+                        <span
+                          class:list={['text-sm ml-1', plan.highlight ? 'text-white/55' : 'text-[#301B69]/45']}
+                        >
+                          {plan.period}
+                        </span>
+                      </div>
+                      <p class:list={['text-xs mb-4', plan.highlight ? 'text-white/45' : 'text-[#301B69]/40']}>
+                        {plan.note}
+                      </p>
+                      <p
+                        class:list={[
+                          'text-sm flex-1 mb-5 leading-relaxed',
+                          plan.highlight ? 'text-white/75' : 'text-[#301B69]/65',
+                        ]}
+                      >
+                        Best for: {plan.bestFor}
+                      </p>
+                      <a
+                        href={appURL}
+                        data-get-started
+                        data-source="pricing_page"
+                        data-plan={plan.name}
+                        class:list={[
+                          'block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-85',
+                          plan.highlight ? 'bg-white text-[#301B69]' : 'bg-[#301B69] text-white',
+                        ]}
+                      >
+                        {plan.cta}
+                      </a>
+                    </article>
+                  </li>
+                ))
+              }
+            </ul>
+
+
+            <!-- Feature comparison table -->
+            <div class="overflow-x-auto rounded-2xl border border-[#301B69]/10 bg-white/80 shadow-sm">
+              <table class="w-full min-w-[600px] border-collapse text-sm">
+                <thead>
+                  <tr>
+                    <th
+                      scope="col"
+                      class="py-3 px-5 text-left bg-[#301B69]/[0.03] border-b border-[#301B69]/10 text-[#301B69]/40 font-medium text-xs uppercase tracking-wider w-[38%]"
+                    >
+                      Feature
+                    </th>
+                    {
+                      plans.map((plan) => (
+                        <th
+                          scope="col"
+                          class:list={[
+                            'py-3 px-4 text-center border-b border-[#301B69]/10 text-xs font-bold uppercase tracking-widest',
+                            plan.highlight ? 'bg-[#301B69] text-white' : 'bg-[#301B69]/[0.03] text-[#301B69]/55',
+                          ]}
+                        >
+                          {plan.name}
+                        </th>
+                      ))
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    featureRows.map((row) =>
+                      row.type === 'category' ? (
+                        <tr>
+                          <td
+                            colspan="5"
+                            class="py-2.5 px-5 bg-[#301B69]/[0.05] text-[#301B69] text-[11px] font-bold uppercase tracking-wider"
+                          >
+                            {row.label}
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr class="border-b border-[#301B69]/[0.06] last:border-0">
+                          <td class="py-3.5 px-5 text-[#301B69]/75">
+                            <span class="inline-flex items-center gap-1.5">
+                              {row.label}
+                              {row.tooltip && (
+                                <span class="group relative inline-flex items-center">
+                                  <button
+                                    type="button"
+                                    class="w-3.5 h-3.5 rounded-full bg-[#301B69]/10 text-[#301B69] text-[9px] flex items-center justify-center font-bold cursor-help focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#301B69]/40"
+                                    aria-label={`About ${row.label}`}
+                                  >
+                                    <span aria-hidden="true">?</span>
+                                  </button>
+                                  <span
+                                    class="pointer-events-none absolute bottom-full left-0 mb-2 w-52 rounded-lg bg-[#1a0f3d] px-3 py-2 text-xs text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 z-30 leading-snug"
+                                    role="tooltip"
+                                  >
+                                    {row.tooltip}
+                                    <span
+                                      class="absolute top-full left-4 w-0 h-0 border-4 border-transparent border-t-[#1a0f3d]"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                </span>
+                              )}
+                            </span>
+                          </td>
+                          {row.values.map((val, i) => (
+                            <td
+                              class:list={[
+                                'py-3.5 px-4 text-center',
+                                plans[i].highlight ? 'bg-[#301B69]/[0.03]' : '',
+                              ]}
+                            >
+                              {typeof val === 'boolean' ? (
+                                val ? (
+                                  <span class="inline-flex justify-center" aria-label="Included">
+                                    <svg
+                                      class="w-4 h-4 text-[#301B69]"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="2.5"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      aria-hidden="true"
+                                    >
+                                      <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span class="text-[#301B69]/25 text-base leading-none" aria-label="Not included">
+                                    —
+                                  </span>
+                                )
+                              ) : (
+                                <span
+                                  class:list={[
+                                    'font-medium',
+                                    plans[i].highlight ? 'text-[#301B69]' : 'text-[#301B69]/75',
+                                  ]}
+                                >
+                                  {val}
+                                </span>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      )
+                    )
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: FAQ — dark navy -->
+    <section aria-labelledby="pricing-faq-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 bg-[#1a0f3d] overflow-hidden">
+          <div
+            class="absolute -top-24 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.15),transparent_70%)]"
+            aria-hidden="true"
+          >
+          </div>
+
+          <div class="relative z-10">
+            <div class="text-center mb-10">
+              <h2 id="pricing-faq-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
+                Pricing questions
+              </h2>
+              <p class="text-white/45 text-sm">Everything you need to know before choosing a plan.</p>
+            </div>
+
+            <div class="space-y-3 max-w-3xl mx-auto">
+              {
+                pricingFaqs.map((faq) => (
+                  <div class="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+                    <details class="group">
+                      <summary class="flex w-full justify-between items-center text-left cursor-pointer p-4 list-none [&::-webkit-details-marker]:hidden">
+                        <span class="text-sm md:text-base font-medium text-white">{faq.question}</span>
+                        <span
+                          class="w-5 h-5 text-white/50 flex-shrink-0 ml-3 transition-transform group-open:rotate-180"
+                          aria-hidden="true"
+                        >
+                          <ChevronDown size={20} strokeWidth={2} />
+                        </span>
+                      </summary>
+                      <p class="px-4 pb-4 text-sm text-white/65 leading-relaxed">{faq.answer}</p>
+                    </details>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Enterprise / Custom -->
+    <section aria-labelledby="enterprise-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div
+          class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-cover bg-center text-center"
+          style={`background-image: url(${pricingBg.src})`}
+        >
+          <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px]" aria-hidden="true"></div>
+          <div class="relative z-10 max-w-2xl mx-auto">
+            <h2 id="enterprise-heading" class="text-2xl md:text-3xl font-bold text-[#301B69] mb-4 leading-snug">
+              Running at scale or managing multiple clients?
+            </h2>
+            <p class="text-[#301B69]/65 mb-8 leading-relaxed text-base md:text-lg">
+              If Agenvik's Pro plan isn't quite the right fit, we'll work something out. Tell us what you need.
+            </p>
+            <a
+              href="mailto:hello@agenvik.com"
+              class="inline-flex items-center gap-2 px-7 py-3 bg-[#301B69] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+            >
+              Let's talk →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <FinalCTASection />
+  </main>
+  <Footer />
+</Layout>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-get-started][data-source="pricing_page"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var plan = btn.getAttribute('data-plan') || 'unknown';
+        window.amplitude?.track('Get Started Clicked', { source: 'pricing_page', plan: plan });
+      });
+    });
+  });
+</script>

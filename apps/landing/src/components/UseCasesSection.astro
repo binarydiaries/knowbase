@@ -1,77 +1,72 @@
 ---
-import { getImage } from 'astro:assets';
-import usecaseBgSrc from '../assets/images/usecase-bg.png';
-
-const usecaseBg = await getImage({ src: usecaseBgSrc, format: 'webp', quality: 80 });
-const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
+import { Home, Hospital, Users, GraduationCap } from '@lucide/astro';
 
 const useCases = [
   {
-    title: 'Customer Support Agents',
-    desc: 'Automate repetitive queries and reduce support load. Provide instant, 24/7 assistance without growing your team.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+    Icon: Home,
+    title: 'Real Estate',
+    headline: 'Stop answering the same property questions on WhatsApp.',
+    desc: 'Property prices, availability, documents needed, process overview — your agent handles the flood of WhatsApp messages 24/7. You focus on leads who are ready to move.',
+    href: '/use-cases/real-estate',
   },
   {
-    title: 'Study Assistants',
-    desc: 'Convert your notes into an interactive tutor. Ask questions and learn faster with AI-guided explanations.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+    Icon: Hospital,
+    title: 'Clinics & Hospitals',
+    headline: 'Free your front desk from repetitive calls.',
+    desc: 'Hours, services, insurance accepted, appointment process — your agent handles the queries that tie up your staff, so they can focus on patients in front of them.',
+    href: '/use-cases/clinic',
   },
   {
-    title: 'Internal Knowledge Agents',
-    desc: 'Help teams find answers across internal docs instantly. Reduce reliance on individuals and improve overall productivity.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+    Icon: Users,
+    title: 'Internal Teams',
+    headline: 'New hire asks Slack. Gets the answer. Done.',
+    desc: "Stop being the person everyone DMs for things that should be written down. Your agent knows your SOPs, processes, and company docs. Knowledge stops leaving when people do.",
+    href: '/use-cases/internal-knowledge',
   },
   {
-    title: 'Product Assistants',
-    desc: 'Guide users through your product with AI-powered help. Boost conversions with contextual, real-time recommendations.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+    Icon: GraduationCap,
+    title: 'Coaches & Educators',
+    headline: 'Your expertise. Available 24/7.',
+    desc: 'Turn your course material, workbooks, or coaching notes into an agent your students can ask anything, anytime. Personalised answers at scale.',
+    href: '/use-cases/education',
   },
 ];
 ---
 <section aria-labelledby="usecases-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
-    <div
-      class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-cover bg-center"
-      style={`background-image: url(${usecaseBg.src})`}
-    >
-      <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px]" aria-hidden="true"></div>
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+      <div class="absolute -top-32 right-0 w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.4),transparent_70%)]" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.2),transparent_70%)]" aria-hidden="true"></div>
 
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-6" aria-hidden="true">
-          ✦ USE CASES
+        <div class="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-full bg-white/10 text-white/80 mb-6" aria-hidden="true">
+          ✦ WHO USES AGENVIK
         </div>
 
-        <h2 id="usecases-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
-          Built for Every Use Case
+        <h2 id="usecases-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
+          Whatever your business. Wherever your customers are.
         </h2>
 
-        <p class="text-[#301B69]/70 max-w-2xl mb-10 text-sm md:text-base">
-          From personal productivity to enterprise automation—Agenvik adapts to your needs.
-        </p>
-
-        <ul class="relative grid md:grid-cols-2 gap-x-12 gap-y-10 list-none">
+        <div class="grid md:grid-cols-2 gap-6 mt-10">
           {useCases.map((item) => (
-            <li class="flex gap-4">
-              <div class="mt-1 text-[#301B69]" aria-hidden="true" set:html={item.icon} />
-              <div>
-                <h3 class="font-semibold text-[#301B69] mb-1 text-sm md:text-base">{item.title}</h3>
-                <p class="text-xs md:text-sm text-[#301B69]/80 leading-relaxed">{item.desc}</p>
+            <div class="rounded-2xl bg-white/8 border border-white/10 p-6">
+              <div class="flex items-start gap-3 mb-3">
+                <div class="mt-0.5 text-white/70 flex-shrink-0" aria-hidden="true">
+                  <item.Icon size={20} strokeWidth={1.75} />
+                </div>
+                <div>
+                  <p class="text-xs text-white/40 uppercase tracking-widest mb-0.5">{item.title}</p>
+                  <h3 class="font-semibold text-white">{item.headline}</h3>
+                </div>
               </div>
-            </li>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">{item.desc}</p>
+              {item.href && (
+                <a href={item.href} class="text-sm text-white/70 font-medium hover:text-white transition-colors">
+                  See how it works →
+                </a>
+              )}
+            </div>
           ))}
-          <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-[#301B69]/10" aria-hidden="true"></div>
-          <div class="hidden md:block absolute top-0 left-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true"></div>
-        </ul>
-
-        <div class="mt-12">
-          <a
-            href={appURL}
-            data-get-started
-            data-source="use_cases"
-            class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow-md hover:opacity-90 transition"
-          >
-            Get Started →
-          </a>
         </div>
       </div>
     </div>

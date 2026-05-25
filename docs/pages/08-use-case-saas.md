@@ -1,5 +1,7 @@
 # Use Case: SaaS & Product — `/use-cases/saas`
 
+> **⚠️ DEPRIORITISED** — This vertical is no longer in the primary Solutions nav dropdown. The page exists and the URL should not 404, but active content development is paused. Priority verticals are: Real Estate, Clinics & Hospitals, Internal Teams, Coaches & Educators. Revisit if SaaS founders become a meaningful portion of signups.
+
 **Purpose:** Target SaaS founders and product teams who want to reduce CS load and improve activation without scaling headcount.
 
 **Meta title:** AI Agent for SaaS — Reduce Support Load, Improve User Activation

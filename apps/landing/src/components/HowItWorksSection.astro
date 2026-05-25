@@ -1,108 +1,191 @@
 ---
-import { Image, getImage } from 'astro:assets';
-import howBgSrc from '../assets/images/how-bg.png';
-import step1Src from '../assets/images/step1.png';
-import step2Src from '../assets/images/step2.png';
-import step3Src from '../assets/images/step3.png';
-import step4Src from '../assets/images/step4.png';
-import step5Src from '../assets/images/step5.png';
-
-const howBg = await getImage({ src: howBgSrc, format: 'webp', quality: 80 });
-const stepImages = [step1Src, step2Src, step3Src, step4Src, step5Src];
-
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
-
-const steps = [
-  {
-    title: 'Set Up Your Account',
-    desc: 'Create your workspace and get started in seconds. Sign up with minimal friction and access your dashboard instantly. No complex onboarding—just a smooth entry into building AI agents. Everything is ready right out of the box.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-  },
-  {
-    title: 'Create Your Agent',
-    desc: "Define your agent's purpose, name, and identity. Whether it's for support, learning, or internal use—set the intent clearly. Each agent is independent and fully customizable. You can create multiple agents for different use cases.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>`,
-  },
-  {
-    title: 'Add Knowledge',
-    desc: 'Upload your content or add structured FAQs. Train your agent using real data that matters to you. Your agent learns context, not just keywords. Continuously update its knowledge as your needs evolve.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
-  },
-  {
-    title: 'Customize Behavior',
-    desc: 'Control how your agent thinks and responds. Adjust tone, personality, and response style. Fine-tune outputs to match your brand or use case. Make your AI feel truly yours.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`,
-  },
-  {
-    title: 'Embed & Share',
-    desc: 'Deploy your agent wherever your users are. Embed it on websites or use it internally with your team. Share access instantly—no complex integrations required. Your AI is ready to assist, anywhere.',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
-  },
-];
 ---
 <section id="how-it-works" aria-labelledby="howitworks-heading" class="px-6 pt-16">
   <div class="max-w-6xl mx-auto">
-    <div
-      class="relative rounded-3xl p-10 md:p-16 overflow-hidden bg-cover bg-center"
-      style={`background-image: url(${howBg.src})`}
-    >
-      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+      <div class="absolute -top-32 left-0 w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.4),transparent_70%)]" aria-hidden="true"></div>
+      <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.2),transparent_70%)]" aria-hidden="true"></div>
 
-      <div class="relative z-10">
-        <div class="text-center mb-16">
-          <div class="inline-flex px-4 py-1 text-xs rounded-full bg-white/70 text-[#301B69] mb-4" aria-hidden="true">
-            ✦ How it Works
-          </div>
-          <h2 id="howitworks-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
-            Get Started in Minutes
-          </h2>
-          <p class="text-[#301B69]/70 max-w-xl mx-auto text-sm md:text-base">
-            Follow these simple steps to build, train, and deploy your AI agent—no technical expertise required.
-          </p>
+      <div class="text-center mb-14 relative z-10">
+        <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/10 text-white/80 mb-4" aria-hidden="true">
+          ✦ HOW IT WORKS
         </div>
+        <h2 id="howitworks-heading" class="text-3xl md:text-4xl font-bold text-white">
+          Three steps. Ten minutes. Done.
+        </h2>
+      </div>
 
-        <div class="relative">
-          <div class="hidden md:block absolute left-1/2 top-0 -translate-x-1/2 w-px h-full bg-[#301B69]/10" aria-hidden="true"></div>
-          <ol class="space-y-5 list-none">
-            {steps.map((step, index) => {
-              const isLeft = index % 2 === 0;
-              return (
-                <li class={`flex flex-col md:flex-row items-center gap-10 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                  <div class="w-full md:w-1/2">
-                    <h3 class="text-lg font-semibold text-[#301B69] mb-2">{step.title}</h3>
-                    <p class="text-sm text-[#301B69]/70 leading-relaxed max-w-md">{step.desc}</p>
-                  </div>
-                  <div class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#301B69]/10 shadow relative z-10 text-[#301B69]" aria-hidden="true" set:html={step.icon} />
-                  <div class="w-full md:w-1/2">
-                    <div class="rounded-3xl overflow-hidden shadow-md border border-[#301B69]/10 bg-white">
-                      <Image src={stepImages[index]} alt={`Step ${index + 1}: ${step.title}`} class="w-full h-auto" loading="lazy" />
+      <!-- 3-column step cards -->
+      <ol class="grid md:grid-cols-3 gap-6 list-none relative z-10">
+
+        <!-- Step 1 — Add your knowledge -->
+        <li class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex flex-col">
+          <div class="px-6 pt-6 pb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-[#301B69] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
+            <span class="text-xs font-semibold text-white/40 uppercase tracking-widest">Add your knowledge</span>
+          </div>
+
+          <!-- Mockup: Upload UI -->
+          <div aria-hidden="true" class="mx-5 my-4 rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+            <!-- Drop zone -->
+            <div class="rounded-lg border-2 border-dashed border-white/20 p-3 text-center">
+              <svg class="w-6 h-6 text-white/30 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p class="text-[10px] text-white/30">Drop files here</p>
+            </div>
+            <!-- File chips -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between bg-white/8 rounded-lg px-3 py-1.5 border border-white/10">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-white/40 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="text-[10px] text-white/70 font-medium">shipping-policy.pdf</span>
+                </div>
+                <span class="text-[9px] bg-emerald-400/15 text-emerald-300 px-1.5 py-0.5 rounded-full font-medium">Trained</span>
+              </div>
+              <div class="flex items-center justify-between bg-white/8 rounded-lg px-3 py-1.5 border border-white/10">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-white/40 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="text-[10px] text-white/70 font-medium">product-faq.pdf</span>
+                </div>
+                <span class="text-[9px] bg-emerald-400/15 text-emerald-300 px-1.5 py-0.5 rounded-full font-medium">Trained</span>
+              </div>
+            </div>
+            <!-- URL field -->
+            <div class="flex items-center gap-2 bg-white/8 rounded-lg px-3 py-1.5 border border-white/10">
+              <svg class="w-3.5 h-3.5 text-white/30 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span class="text-[10px] text-white/40">help.yoursite.com</span>
+            </div>
+          </div>
+
+          <div class="px-6 pb-6 mt-auto">
+            <h3 class="font-semibold text-white mb-1">Add your knowledge</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Upload PDFs, paste your FAQ, drop in a URL, or type plain text. Your agent learns from whatever you already have.</p>
+          </div>
+        </li>
+
+        <!-- Step 2 — Configure your agent -->
+        <li class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex flex-col">
+          <div class="px-6 pt-6 pb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-[#301B69] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">2</span>
+            <span class="text-xs font-semibold text-white/40 uppercase tracking-widest">Configure your agent</span>
+          </div>
+
+          <!-- Mockup: Settings panel -->
+          <div aria-hidden="true" class="mx-5 my-4 rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+            <!-- Agent name -->
+            <div>
+              <p class="text-[10px] text-white/30 mb-1 font-medium uppercase tracking-wider">Agent name</p>
+              <div class="bg-white/8 rounded-lg border border-white/10 px-3 py-1.5 flex items-center justify-between">
+                <span class="text-xs text-white font-medium">Aria</span>
+                <span class="w-0.5 h-3.5 bg-white/60 rounded animate-pulse" aria-hidden="true"></span>
+              </div>
+            </div>
+            <!-- Tone -->
+            <div>
+              <p class="text-[10px] text-white/30 mb-1 font-medium uppercase tracking-wider">Tone</p>
+              <div class="bg-white/8 rounded-lg border border-white/10 px-3 py-1.5 flex items-center justify-between">
+                <span class="text-xs text-white/80">Friendly</span>
+                <svg class="w-3 h-3 text-white/30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <!-- Channels -->
+            <div>
+              <p class="text-[10px] text-white/30 mb-1.5 font-medium uppercase tracking-wider">Channels</p>
+              <div class="space-y-1.5">
+                {[
+                  { label: 'Website', on: true },
+                  { label: 'WhatsApp', on: true },
+                  { label: 'Slack', on: false },
+                ].map((ch) => (
+                  <div class="flex items-center justify-between bg-white/8 rounded-lg px-3 py-1.5 border border-white/10">
+                    <span class="text-[10px] text-white/70 font-medium">{ch.label}</span>
+                    <div class:list={['w-7 h-4 rounded-full flex items-center transition-colors', ch.on ? 'bg-[#B07CD1] justify-end pr-0.5' : 'bg-white/15 justify-start pl-0.5']}>
+                      <div class="w-3 h-3 rounded-full bg-white shadow-sm" aria-hidden="true"></div>
                     </div>
                   </div>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-
-        <div class="mt-20">
-          <div class="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/80 backdrop-blur rounded-2xl p-6 border border-[#301B69]/10 shadow-sm">
-            <div>
-              <h3 class="text-lg font-semibold text-[#301B69] mb-1">
-                Ready to Build Your First AI Agent?
-              </h3>
-              <p class="text-sm text-[#301B69]/70">
-                Start for free. No setup. No complexity. No credit card required.
-              </p>
+                ))}
+              </div>
             </div>
-            <a
-              href={appURL}
-              data-get-started
-              data-source="how_it_works"
-              class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow hover:opacity-90"
-            >
-              Get Started →
-            </a>
           </div>
+
+          <div class="px-6 pb-6 mt-auto">
+            <h3 class="font-semibold text-white mb-1">Configure your agent</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Name it, set a tone, pick channels. Two minutes. You can change anything later.</p>
+          </div>
+        </li>
+
+        <!-- Step 3 — Go live -->
+        <li class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex flex-col">
+          <div class="px-6 pt-6 pb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-[#301B69] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">3</span>
+            <span class="text-xs font-semibold text-white/40 uppercase tracking-widest">Go live</span>
+          </div>
+
+          <!-- Mockup: 3 channel previews -->
+          <div aria-hidden="true" class="mx-5 my-4 rounded-xl border border-white/10 bg-white/5 p-3 space-y-2">
+
+            <!-- Website chat bubble -->
+            <div class="bg-white/8 rounded-xl border border-white/10 p-3 relative overflow-hidden">
+              <p class="text-[9px] text-white/30 uppercase tracking-wider mb-2">Website</p>
+              <div class="flex items-start gap-2">
+                <div class="w-6 h-6 rounded-full bg-[#301B69] flex items-center justify-center flex-shrink-0">
+                  <svg class="w-3 h-3 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="bg-white/10 rounded-lg px-2 py-1.5 max-w-[80%] border border-white/10">
+                  <p class="text-[9px] text-white/40 mb-0.5 font-medium">Aria · Agenvik</p>
+                  <p class="text-[10px] text-white/80">Hi! How can I help you today?</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- WhatsApp -->
+            <div class="bg-[#dcf8c6] rounded-xl border border-[#25D366]/20 p-3">
+              <p class="text-[9px] text-[#075E54]/60 uppercase tracking-wider mb-2">WhatsApp</p>
+              <div class="space-y-1">
+                <div class="bg-white rounded-lg px-2 py-1 inline-block max-w-[80%]">
+                  <p class="text-[10px] text-gray-700">What's your return policy?</p>
+                </div>
+                <div class="ml-auto bg-[#dcf8c6] border border-[#25D366]/30 rounded-lg px-2 py-1 max-w-[90%]">
+                  <p class="text-[10px] text-[#075E54]">Returns accepted within 30 days of delivery…</p>
+                  <p class="text-[9px] text-[#075E54]/40 mt-0.5">Source: Returns Policy.pdf</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slack -->
+            <div class="bg-[#1a1d21] rounded-xl p-3">
+              <p class="text-[9px] text-white/40 uppercase tracking-wider mb-2">Slack</p>
+              <div class="flex items-start gap-1.5">
+                <div class="w-5 h-5 rounded bg-[#4A154B] flex items-center justify-center flex-shrink-0 text-[8px] font-bold text-white">A</div>
+                <div>
+                  <p class="text-[9px] text-white/60 font-medium mb-0.5">Aria <span class="text-white/30 font-normal">APP</span></p>
+                  <p class="text-[10px] text-white/80">Sure! Our pricing starts at ₹0/month…</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 pb-6 mt-auto">
+            <h3 class="font-semibold text-white mb-1">Go live</h3>
+            <p class="text-sm text-white/60 leading-relaxed">One line of code for your site, connect WhatsApp, link Slack. Same agent, same knowledge, three channels.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="mt-10 relative z-10">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/5 rounded-2xl p-6 border border-white/10">
+          <div>
+            <h3 class="text-lg font-semibold text-white mb-1">Start building — it's free</h3>
+            <p class="text-sm text-white/60">No setup. No complexity. No credit card required.</p>
+          </div>
+          <a
+            href={appURL}
+            data-get-started
+            data-source="how_it_works"
+            class="bg-[#301B69] text-white px-5 py-2.5 rounded-xl text-sm shadow hover:opacity-90 transition-opacity flex-shrink-0"
+          >
+            Get Started →
+          </a>
         </div>
       </div>
     </div>

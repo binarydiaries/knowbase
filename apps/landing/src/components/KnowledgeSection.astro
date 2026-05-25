@@ -1,0 +1,146 @@
+---
+import { getImage } from 'astro:assets';
+import platformBgSrc from '../assets/images/platform-bg.png';
+import { FileText, AlignLeft, Globe, RefreshCw } from '@lucide/astro';
+
+const platformBg = await getImage({ src: platformBgSrc, format: 'webp', quality: 80 });
+---
+<section id="knowledge" aria-labelledby="knowledge-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div
+      class="relative rounded-3xl p-10 md:p-14 bg-cover bg-center overflow-hidden border border-[#301B69]/10"
+      style={`background-image: url(${platformBg.src})`}
+    >
+      <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.06),transparent_70%)]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/70 backdrop-blur text-[#301B69] mb-4" aria-hidden="true">
+          ✦ KNOWLEDGE
+        </div>
+        <h2 id="knowledge-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
+          Your agent learns from what you already have
+        </h2>
+        <p class="text-[#301B69]/70 text-base md:text-lg max-w-2xl mb-10">
+          No need to write anything new. Agenvik reads your existing content — documents, FAQs, websites — and turns it into a searchable knowledge base your agent can answer from.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+          <!-- PDF Upload -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white overflow-hidden flex flex-col shadow-sm">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <FileText size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Upload any PDF. Your agent reads it instantly.</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">Drag and drop policy documents, product manuals, guides, reports, contracts — any PDF. Agenvik processes the text, breaks it into meaningful chunks, and indexes it so your agent can reference specific passages. Multi-file upload supported.</p>
+            </div>
+            <div aria-hidden="true" class="mx-6 mb-6 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 space-y-3 mt-auto">
+              <div class="rounded-lg border-2 border-dashed border-[#301B69]/20 p-4 text-center">
+                <svg class="w-6 h-6 text-[#301B69]/30 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p class="text-[10px] text-[#301B69]/40">Drop PDF files here</p>
+              </div>
+              <div class="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 border border-[#301B69]/8">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-[#301B69]/50 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="text-[10px] text-[#301B69]/70 font-medium">Refund Policy.pdf</span>
+                </div>
+                <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Indexing… 47 sections</span>
+              </div>
+              <div class="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 border border-[#301B69]/8">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-[#301B69]/50 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="text-[10px] text-[#301B69]/70 font-medium">Product Manual.pdf</span>
+                </div>
+                <span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Trained</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plain Text & FAQ -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white overflow-hidden flex flex-col shadow-sm">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <AlignLeft size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Paste text or type structured Q&As directly</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">No document? No problem. Type or paste text directly into the knowledge editor. Or use the structured Q&A format — write the question exactly as a customer would ask it, then write the ideal answer. This format gives the highest accuracy for predictable questions.</p>
+            </div>
+            <div aria-hidden="true" class="mx-6 mb-6 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 space-y-2 mt-auto">
+              <div class="bg-white rounded-lg border border-[#301B69]/8 p-3">
+                <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider mb-1 font-medium">Question</p>
+                <p class="text-[10px] text-[#301B69]/80">What's your return policy?</p>
+              </div>
+              <div class="bg-white rounded-lg border border-[#301B69]/8 p-3">
+                <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider mb-1 font-medium">Answer</p>
+                <p class="text-[10px] text-[#301B69]/80">We accept returns within 30 days of purchase. Items must be unused and in original packaging…</p>
+              </div>
+              <button type="button" class="text-[9px] text-[#301B69]/50 border border-dashed border-[#301B69]/20 rounded-lg px-3 py-1.5 w-full hover:bg-[#301B69]/3 transition-colors">
+                + Add another Q&A
+              </button>
+            </div>
+          </div>
+
+          <!-- Website URL Crawling -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white overflow-hidden flex flex-col shadow-sm">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <Globe size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Point it at a URL. It reads the page.</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">Add a URL as a knowledge source and Agenvik fetches and indexes the page content automatically. Ideal for help centre articles, product pages, or any web content you don't have as a file. Works with public URLs — no login required on the source page.</p>
+            </div>
+            <div aria-hidden="true" class="mx-6 mb-6 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 space-y-3 mt-auto">
+              <div class="flex items-center gap-2 bg-white rounded-lg border border-[#301B69]/10 px-3 py-2">
+                <svg class="w-3.5 h-3.5 text-[#301B69]/30 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span class="text-[10px] text-[#301B69]/50">https://yoursite.com/help/returns</span>
+              </div>
+              <div class="bg-white rounded-lg border border-[#301B69]/8 p-3">
+                <p class="text-[9px] text-[#301B69]/40 uppercase tracking-wider mb-1.5 font-medium">Page parsed — 3 sections found</p>
+                <div class="space-y-1">
+                  {['How to initiate a return', 'Eligible items for return', 'Refund timeline'].map(item => (
+                    <div class="flex items-center gap-2">
+                      <div class="w-1 h-1 rounded-full bg-emerald-500 flex-shrink-0"></div>
+                      <p class="text-[10px] text-[#301B69]/70">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Continuous Updates -->
+          <div class="rounded-2xl border border-[#301B69]/10 bg-white overflow-hidden flex flex-col shadow-sm">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-[#301B69]/8 flex items-center justify-center text-[#301B69] mb-4" aria-hidden="true">
+                <RefreshCw size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-[#301B69] text-lg mb-2">Update anytime. Changes go live in minutes.</h3>
+              <p class="text-sm text-[#301B69]/70 leading-relaxed">Your knowledge isn't static — neither is your agent. Add new sources, delete outdated ones, edit existing content. Every time you update, hit "Train" and your agent reflects the changes within minutes. No re-deployment, no downtime.</p>
+            </div>
+            <div aria-hidden="true" class="mx-6 mb-6 rounded-xl border border-[#301B69]/10 bg-[#301B69]/[0.02] p-4 space-y-2 mt-auto">
+              {[
+                { name: 'Refund Policy.pdf', status: 'Updated', color: 'bg-amber-100 text-amber-700' },
+                { name: 'Shipping FAQ', status: 'Trained', color: 'bg-emerald-100 text-emerald-700' },
+                { name: 'Product Manual.pdf', status: 'Trained', color: 'bg-emerald-100 text-emerald-700' },
+              ].map((item) => (
+                <div class="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 border border-[#301B69]/8">
+                  <span class="text-[10px] text-[#301B69]/70 font-medium">{item.name}</span>
+                  <span class={`text-[9px] ${item.color} px-2 py-0.5 rounded-full font-medium`}>{item.status}</span>
+                </div>
+              ))}
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-[9px] text-[#301B69]/40">Last trained: 2 minutes ago</span>
+                <button type="button" class="text-[9px] bg-[#301B69] text-white px-3 py-1 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                  Train →
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

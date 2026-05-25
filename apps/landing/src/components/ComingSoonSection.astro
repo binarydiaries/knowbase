@@ -1,0 +1,47 @@
+---
+const roadmap = [
+  { feature: 'Scheduling — let your agent book appointments', status: 'In development' },
+  { feature: 'Lead capture — collect contact info during chat', status: 'In development' },
+  { feature: 'Human handoff — live agent takeover inbox', status: 'Planned' },
+  { feature: 'REST API access', status: 'Planned' },
+  { feature: 'CRM integrations (HubSpot, Salesforce, Zoho)', status: 'Planned' },
+  { feature: 'Instagram & Messenger channels', status: 'Planned' },
+  { feature: 'Annual billing with discount', status: 'Planned' },
+  { feature: 'Full widget theming', status: 'Planned' },
+  { feature: 'Multi-language support', status: 'Planned' },
+  { feature: 'Full site crawl (multi-page URLs)', status: 'Planned' },
+];
+---
+<section id="coming-soon" aria-labelledby="coming-soon-heading" class="px-6 pt-16 pb-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#1a0f3d]">
+      <div class="absolute -top-32 left-0 w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(48,27,105,0.4),transparent_70%)]" aria-hidden="true"></div>
+      <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.2),transparent_70%)]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="mb-10">
+          <h2 id="coming-soon-heading" class="text-3xl md:text-4xl font-bold text-white mb-3">
+            What's on the roadmap
+          </h2>
+          <p class="text-white/50 text-sm">Follow us on <a href="https://x.com/agenvik" class="text-white/80 underline underline-offset-2 hover:text-white transition-colors">X / Twitter</a> for updates on what's shipping next.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-3">
+          {roadmap.map((item) => (
+            <div class="flex items-center justify-between bg-white/5 rounded-2xl px-5 py-4 border border-white/10">
+              <span class="text-sm text-white/80 font-medium">{item.feature}</span>
+              <span class:list={[
+                'flex-shrink-0 ml-4 text-xs px-3 py-1 rounded-full font-medium',
+                item.status === 'In development'
+                  ? 'bg-amber-400/15 text-amber-300'
+                  : 'bg-white/10 text-white/60'
+              ]}>
+                {item.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,83 @@
+---
+import { Sliders, AlertCircle } from '@lucide/astro';
+---
+<section id="customisation" aria-labelledby="customisation-heading" class="px-6 pt-16">
+  <div class="max-w-6xl mx-auto">
+    <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69]">
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.3),transparent_70%)]" aria-hidden="true"></div>
+      <div class="absolute bottom-0 right-0 w-[400px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(26,15,61,0.5),transparent_70%)]" aria-hidden="true"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center px-4 py-1 text-xs rounded-full bg-white/15 text-white/80 mb-4" aria-hidden="true">
+          ✦ CUSTOMISATION
+        </div>
+        <h2 id="customisation-heading" class="text-3xl md:text-4xl font-bold text-white mb-10">
+          Your agent speaks your language, not AI language.
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+          <!-- Tone & Personality -->
+          <div class="rounded-2xl border border-white/10 bg-white/10 overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
+                <Sliders size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-white text-lg mb-2">Formal or friendly — you decide</h3>
+              <p class="text-sm text-white/60 leading-relaxed">Choose from preset tone profiles or write your own behaviour instructions. A legal firm's agent sounds different from a streetwear brand's agent. Both can use the same platform.</p>
+            </div>
+            <div aria-hidden="true" class="mx-5 mb-5 rounded-xl border border-white/10 bg-white/5 p-4 space-y-4 mt-auto">
+              <div>
+                <p class="text-[9px] text-white/30 uppercase tracking-wider mb-2 font-medium">Tone preset</p>
+                <div class="grid grid-cols-2 gap-1.5">
+                  {[
+                    { label: 'Formal', desc: 'Professional, full sentences' },
+                    { label: 'Friendly', desc: 'Warm, conversational', active: true },
+                    { label: 'Direct', desc: 'Short, no filler' },
+                    { label: 'Supportive', desc: 'Empathetic, patient' },
+                  ].map((tone) => (
+                    <div class:list={['rounded-lg px-2.5 py-2 border cursor-pointer transition-colors', tone.active ? 'bg-white border-white/30' : 'bg-white/5 border-white/10 hover:bg-white/10']}>
+                      <p class:list={['text-[10px] font-semibold', tone.active ? 'text-[#301B69]' : 'text-white/70']}>{tone.label}</p>
+                      <p class:list={['text-[8px] mt-0.5', tone.active ? 'text-[#301B69]/60' : 'text-white/40']}>{tone.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p class="text-[9px] text-white/30 uppercase tracking-wider mb-1.5 font-medium">Custom instructions</p>
+                <div class="bg-white/5 rounded-lg border border-white/10 px-3 py-2">
+                  <p class="text-[10px] text-white/50">Always end responses with a suggested next step. Never mention competitor products.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback Behaviour -->
+          <div class="rounded-2xl border border-white/10 bg-white/10 overflow-hidden flex flex-col">
+            <div class="p-6 pb-4">
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 mb-4" aria-hidden="true">
+                <AlertCircle size={18} strokeWidth={1.75} />
+              </div>
+              <h3 class="font-semibold text-white text-lg mb-2">Control what happens when your agent doesn't know</h3>
+              <p class="text-sm text-white/60 leading-relaxed">When a question isn't answered by the knowledge base, your agent won't guess — it will follow your fallback instruction. Set it to say "I don't have that information. Please email…" or route to a specific contact method. You write the message.</p>
+            </div>
+            <div aria-hidden="true" class="mx-5 mb-5 rounded-xl border border-white/10 bg-white/5 p-4 space-y-3 mt-auto">
+              <div class="flex items-center gap-2 text-[9px] text-white/40 font-medium uppercase tracking-wider">
+                <AlertCircle size={11} strokeWidth={2} />
+                Fallback message
+              </div>
+              <div class="bg-white/10 rounded-xl border border-white/10 px-3 py-3">
+                <p class="text-[10px] text-white/70 leading-relaxed">I'm not sure about that. For more help, contact <span class="text-white font-medium">support@yourcompany.com</span> — we reply within 2 hours.</p>
+              </div>
+              <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0"></div>
+                <p class="text-[9px] text-amber-300">Shown when no knowledge source matches</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

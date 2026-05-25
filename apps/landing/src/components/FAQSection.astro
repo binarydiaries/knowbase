@@ -1,7 +1,8 @@
 ---
 import { getImage } from 'astro:assets';
 import faqBgSrc from '../assets/images/faq-bg.png';
-import { faqs } from '../data/faqs';
+import { homepageFaqs } from '../data/faqs';
+import { ChevronDown } from '@lucide/astro';
 
 const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
 ---
@@ -14,39 +15,21 @@ const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
       <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px]" aria-hidden="true"></div>
 
       <div class="relative z-10">
-        <div class="text-center mb-12">
-          <div class="inline-flex px-4 py-1 text-xs rounded-full gap-2 bg-white/80 text-[#301B69] mb-4" aria-hidden="true">
-            <span class="px-1 rounded-full border border-[#301B69]">?</span> Frequently Asked Questions
-          </div>
-
+        <div class="text-center mb-10">
           <h2 id="faq-heading" class="text-3xl md:text-4xl font-bold text-[#301B69] mb-3">
-            Common Questions About Agenvik
+            Frequently asked questions
           </h2>
-
-          <p class="text-[#301B69]/70 text-sm md:text-base max-w-xl mx-auto">
-            Find answers to the most frequently asked questions about Agenvik—features, security, pricing, and more.
-          </p>
         </div>
 
-        <div class="space-y-4">
-          {faqs.map((faq, index) => (
-            <div class="rounded-xl border border-[#301B69]/10 bg-white/80 backdrop-blur overflow-hidden">
+        <div class="space-y-4 max-w-3xl mx-auto">
+          {homepageFaqs.map((faq) => (
+            <div class="rounded-xl border border-[#301B69]/10 bg-white/90 overflow-hidden">
               <details class="group">
                 <summary class="flex w-full justify-between items-center text-left cursor-pointer p-4 list-none [&::-webkit-details-marker]:hidden">
                   <span class="text-sm md:text-base font-medium text-[#301B69]">{faq.question}</span>
-                  <svg
-                    class="w-5 h-5 text-[#301B69] transition-transform flex-shrink-0 group-open:rotate-180"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
+                  <span class="w-5 h-5 text-[#301B69] transition-transform flex-shrink-0 group-open:rotate-180 ml-3" aria-hidden="true">
+                    <ChevronDown size={20} strokeWidth={2} />
+                  </span>
                 </summary>
                 <p class="px-4 pb-4 text-sm text-[#301B69]/70 leading-relaxed">
                   {faq.answer}
@@ -54,6 +37,12 @@ const faqBg = await getImage({ src: faqBgSrc, format: 'webp', quality: 80 });
               </details>
             </div>
           ))}
+        </div>
+
+        <div class="text-center mt-8">
+          <a href="/faq" class="text-sm text-[#301B69] font-medium hover:opacity-70 transition-opacity">
+            More questions? See all FAQs →
+          </a>
         </div>
       </div>
     </div>

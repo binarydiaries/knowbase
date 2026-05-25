@@ -19,8 +19,6 @@ interface Props {
 ---
 
 <Layout {...Astro.props} activePage="blog">
-  <div class="bg-[#f8f7fc] min-h-screen pt-[68px]">
-    <slot />
-  </div>
+  <slot />
   <Footer />
 </Layout>

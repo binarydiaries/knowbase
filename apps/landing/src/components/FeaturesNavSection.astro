@@ -1,0 +1,34 @@
+---
+const links = [
+  { label: 'Knowledge Sources', href: '#knowledge' },
+  { label: 'Agent Builder', href: '#agent-builder' },
+  { label: 'Channels', href: '#channels' },
+  { label: 'Customisation', href: '#customisation' },
+  { label: 'Analytics', href: '#analytics' },
+  { label: 'Coming Soon', href: '#coming-soon' },
+];
+---
+<nav aria-label="Features navigation" class="px-6 pt-8 pb-2">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          class="flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full border border-[#301B69]/15 text-[#301B69]/70 hover:bg-[#301B69]/5 hover:text-[#301B69] hover:border-[#301B69]/30 transition-all"
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</nav>
+
+<style>
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>

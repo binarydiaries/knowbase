@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FeaturesHeroSection from '../components/FeaturesHeroSection.astro';
+import KnowledgeSection from '../components/KnowledgeSection.astro';
+import AgentBuilderSection from '../components/AgentBuilderSection.astro';
+import ChannelsSection from '../components/ChannelsSection.astro';
+import CustomisationSection from '../components/CustomisationSection.astro';
+import AnalyticsSection from '../components/AnalyticsSection.astro';
+import ComingSoonSection from '../components/ComingSoonSection.astro';
+import FinalCTASection from '../components/FinalCTASection.astro';
+import Footer from '../components/Footer.astro';
+
+const siteURL = 'https://agenvik.com';
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${siteURL}/features#webpage`,
+  url: `${siteURL}/features`,
+  name: 'Agenvik Features — No-Code AI Agent Builder with WhatsApp, Slack & Analytics',
+  description:
+    'Explore every feature Agenvik offers: upload PDFs, crawl websites, build no-code AI agents, deploy on WhatsApp and Slack, customise tone and fallback behaviour, and track conversations with built-in analytics.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#software` },
+  dateModified: new Date().toISOString().split('T')[0],
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'Features', item: `${siteURL}/features` },
+    ],
+  },
+};
+
+const featureListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Agenvik Features',
+  description: 'Complete list of features available in the Agenvik AI agent platform.',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'PDF document upload', description: 'Upload PDF files as knowledge sources. Agenvik chunks and indexes the content so agents can answer questions from specific passages.' },
+    { '@type': 'ListItem', position: 2, name: 'Plain text and Q&A editor', description: 'Type or paste text directly, or create structured question-and-answer pairs for highest accuracy on predictable questions.' },
+    { '@type': 'ListItem', position: 3, name: 'Website URL crawling', description: 'Add a public URL as a knowledge source. Agenvik fetches and indexes the page content automatically — no file export needed.' },
+    { '@type': 'ListItem', position: 4, name: 'Continuous knowledge updates', description: 'Add, edit, or delete knowledge sources at any time. Changes go live within minutes after retraining — no redeployment required.' },
+    { '@type': 'ListItem', position: 5, name: 'No-code agent builder', description: 'Create an AI agent with a name, avatar, and description through a visual dashboard. No coding, prompt engineering, or configuration files required.' },
+    { '@type': 'ListItem', position: 6, name: 'Multi-agent support', description: 'Run multiple independent agents per account — each with its own knowledge base, tone, fallback behaviour, and deployment channels.' },
+    { '@type': 'ListItem', position: 7, name: 'Instant deployment', description: 'Deploy agents immediately with no approval process. Embed on any website with a single script tag, or connect WhatsApp and Slack via guided OAuth.' },
+    { '@type': 'ListItem', position: 8, name: 'Website chat widget', description: 'Embed a branded chat widget on any website — Webflow, Shopify, WordPress, or custom — using one line of HTML.' },
+    { '@type': 'ListItem', position: 9, name: 'WhatsApp Business integration', description: 'Connect a WhatsApp Business number to handle incoming messages automatically. Setup takes approximately 15 minutes.' },
+    { '@type': 'ListItem', position: 10, name: 'Slack integration', description: 'Deploy an internal knowledge agent into any Slack workspace channel. Team members ask questions in natural language and get answers from your internal docs.' },
+    { '@type': 'ListItem', position: 11, name: 'Tone and personality customisation', description: 'Choose from preset tone profiles (formal, friendly, direct, supportive) or write custom behaviour instructions to control how the agent communicates.' },
+    { '@type': 'ListItem', position: 12, name: 'Fallback behaviour control', description: 'Define exactly what the agent says when a question falls outside the knowledge base — route to an email address, a contact method, or a custom message.' },
+    { '@type': 'ListItem', position: 13, name: 'Conversation log', description: 'Every chat session is logged in full, searchable by channel, date, or query, with outcome tracking (answered vs fallback).' },
+    { '@type': 'ListItem', position: 14, name: 'Top questions analytics', description: 'Automatically surfaces the most-asked questions to highlight knowledge gaps and improve the knowledge base over time.' },
+    { '@type': 'ListItem', position: 15, name: 'Channel performance analytics', description: 'Track conversation volume, message count, and fallback rate per channel to understand where customers are engaging most.' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Agenvik require coding to set up?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Agenvik is a no-code platform. You can build and deploy a fully functional AI agent by uploading documents, pasting text, or adding a URL — no engineering, prompt engineering, or configuration files required.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What knowledge sources does Agenvik support?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Agenvik supports four types of knowledge sources: PDF documents, plain text and structured Q&A, website URLs (crawled and indexed automatically), and direct text input. All sources can be added, edited, or deleted at any time, with changes live in minutes.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Which channels does Agenvik support for deployment?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Agenvik agents can be deployed on three channels: website chat widget (embedded with one line of HTML), WhatsApp Business, and Slack. Instagram and Messenger channels are on the roadmap.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I run multiple AI agents on Agenvik?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Agenvik supports multiple agents per account. Each agent has its own knowledge base, tone settings, fallback behaviour, and deployment channels — for example, a public customer support agent and a separate internal HR knowledge bot.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Does Agenvik provide conversation analytics?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Agenvik\'s analytics include a full searchable conversation log, a ranked list of top questions asked by customers, and channel performance metrics showing conversation volume and fallback rates per channel. Analytics are available on Growth and Pro plans.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I customise how the AI agent responds?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Agenvik lets you choose a tone preset (formal, friendly, direct, or supportive), write custom behaviour instructions, and define a fallback message shown when the agent cannot answer from its knowledge base.',
+      },
+    },
+  ],
+};
+---
+<Layout
+  title="Agenvik Features — No-Code AI Agent Builder with WhatsApp, Slack & Analytics"
+  description="Explore every Agenvik feature: upload PDFs, crawl websites, build no-code AI agents, deploy on WhatsApp and Slack, customise tone and fallback, and track every conversation."
+  activePage="features"
+  jsonLd={[webPageSchema, featureListSchema, faqSchema]}
+>
+  <main id="main-content" class="relative">
+    <!-- Page-level grid: same CSS as landing hero, fixed 740px height so
+         the grid covers the same visible area when switching between pages. -->
+    <div class="absolute top-0 left-0 right-0 h-[740px] pointer-events-none overflow-hidden" aria-hidden="true">
+      <div
+        class="absolute inset-0"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 55%, transparent 100%);"
+      ></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)]"></div>
+    </div>
+
+    <FeaturesHeroSection />
+    <KnowledgeSection />
+    <AgentBuilderSection />
+    <ChannelsSection />
+    <CustomisationSection />
+    <AnalyticsSection />
+    <ComingSoonSection />
+    <div class="px-6 py-8 text-center">
+      <p class="text-[#301B69]/50 text-sm">
+        Have more questions?
+        <a href="/faq" class="text-[#301B69] font-medium underline underline-offset-2 hover:opacity-70 transition-opacity ml-1">See the full FAQ →</a>
+      </p>
+    </div>
+    <FinalCTASection />
+  </main>
+  <Footer />
+</Layout>

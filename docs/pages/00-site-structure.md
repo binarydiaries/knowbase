@@ -4,16 +4,21 @@
 
 | Page | URL | Status | Priority |
 |------|-----|--------|----------|
-| Homepage | `/` | Rewrite | 🔴 |
-| Pricing | `/pricing` | New page | 🔴 |
-| FAQ | `/faq` | New page | 🔴 |
-| Features | `/features` | New page | 🟡 |
-| Use Case: Customer Support | `/use-cases/customer-support` | New page | 🟡 |
-| Use Case: E-commerce | `/use-cases/ecommerce` | New page | 🟡 |
-| Use Case: Internal Knowledge | `/use-cases/internal-knowledge` | New page | 🟡 |
-| Use Case: SaaS Onboarding | `/use-cases/saas-onboarding` | New page | 🟢 |
-| About | `/about` | New page | 🟡 |
+| Homepage | `/` | Live | 🔴 |
+| Pricing | `/pricing` | Live (stub) | 🔴 |
+| FAQ | `/faq` | Live | 🔴 |
+| Features | `/features` | Live (stub) | 🟡 |
+| **Use Case: Real Estate** | `/use-cases/real-estate` | Docs done, page needed | 🔴 |
+| **Use Case: Clinics & Hospitals** | `/use-cases/clinic` | Docs done, page needed | 🔴 |
+| **Use Case: Internal Teams** | `/use-cases/internal-knowledge` | Live (stub) | 🔴 |
+| **Use Case: Coaches & Educators** | `/use-cases/education` | Docs done, page needed | 🔴 |
+| Use Case: Customer Support | `/use-cases/customer-support` | Live (stub) | 🟡 |
+| Use Case: E-commerce | `/use-cases/ecommerce` | Live (stub), deprioritised | 🟢 |
+| Use Case: SaaS & Product | `/use-cases/saas` | Live (stub), deprioritised | 🟢 |
+| About | `/about` | Live (stub) | 🟡 |
 | Blog Index | `/blog` | Exists, thin | 🟡 |
+
+> **Priority key:** 🔴 Active development · 🟡 Planned · 🟢 Exists, not actively developed
 
 ## Content Files
 
@@ -21,12 +26,15 @@
 - `02-pricing.md` — Standalone pricing page
 - `03-faq.md` — Full FAQ page (expanded, search-query oriented)
 - `04-features.md` — Features overview page
-- `05-use-case-customer-support.md`
-- `06-use-case-ecommerce.md`
-- `07-use-case-internal-knowledge.md`
-- `08-use-case-saas.md`
+- `05-use-case-customer-support.md` — Generic customer support (broad search traffic)
+- `05a-use-case-real-estate.md` — 🔴 Real estate agents, WhatsApp flood
+- `05b-use-case-clinic.md` — 🔴 Clinics & hospitals, call/WhatsApp deflection
+- `06-use-case-ecommerce.md` — 🟢 Deprioritised
+- `07-use-case-internal-knowledge.md` — 🔴 Company playbook, Slack-first
+- `08-use-case-saas.md` — 🟢 Deprioritised
+- `08a-use-case-education.md` — 🔴 Coaches & educators
 - `09-about.md`
-- `10-nav.md` — Navigation spec: Phase 1 (flat) and Phase 2 (Solutions dropdown), mobile menu, footer nav
+- `10-nav.md` — Navigation spec: Solutions dropdown (Phase 2), mobile menu, footer nav
 
 ## Content Conventions Used in These Files
 

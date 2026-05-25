@@ -1,13 +1,16 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import LegalLayout from '../components/LegalLayout.astro';
 ---
-<Layout title="Terms & Conditions — Agenvik" description="Read the terms and conditions governing your use of the Agenvik platform.">
-  <LegalLayout title="Terms & Conditions">
+<LegalLayout
+  title="Terms & Conditions"
+  description="Terms and conditions governing your use of the Agenvik platform — accounts, permitted use, billing, AI output disclaimers, and your rights as a user."
+  lastUpdated="2026-04-21"
+  pageURL="https://agenvik.com/terms"
+>
     <div class="mb-10">
       <p class="text-xs text-[#301B69]/50 mb-2">Last updated: April 21, 2026</p>
       <h1 class="text-3xl md:text-4xl font-bold text-[#301B69] mb-4">Terms &amp; Conditions</h1>
-      <p class="text-[#301B69]/70 leading-relaxed">
+      <p id="page-description" class="text-[#301B69]/70 leading-relaxed">
         These Terms and Conditions govern your access to and use of the Agenvik platform. By signing up or using our services, you agree to be bound by these terms.
       </p>
     </div>
@@ -107,7 +110,7 @@ import LegalLayout from '../components/LegalLayout.astro';
       <section aria-labelledby="governing-law">
         <h2 id="governing-law" class="text-lg font-semibold text-[#301B69] mb-3">12. Governing Law</h2>
         <p>
-          These Terms are governed by the laws of the State of California, United States, without regard to conflict of law principles. Any disputes arising from these Terms shall be resolved in the courts located in San Francisco, California.
+          These Terms are governed by the laws of India, without regard to conflict of law principles. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts located in India.
         </p>
       </section>
 
@@ -127,5 +130,4 @@ import LegalLayout from '../components/LegalLayout.astro';
         </address>
       </section>
     </div>
-  </LegalLayout>
-</Layout>
+</LegalLayout>

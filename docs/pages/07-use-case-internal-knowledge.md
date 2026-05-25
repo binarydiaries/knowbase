@@ -1,9 +1,11 @@
-# Use Case: Internal Knowledge Base — `/use-cases/internal-knowledge`
+# Use Case: Internal Teams / Company Playbook — `/use-cases/internal-knowledge`
 
-**Purpose:** Target team leads, ops managers, and founders who are losing time to repetitive internal questions — onboarding, SOPs, policies, "where is the X doc?"
+**Purpose:** Target team leads, ops managers, and founders who are losing time to repetitive internal questions — onboarding, SOPs, policies, "where is the X doc?" The core angle is the **company playbook**: institutional knowledge that lives in documents (or in people's heads) and needs to be findable by anyone, anytime, without interrupting a senior person.
 
-**Meta title:** AI Knowledge Base for Teams — Stop Answering the Same Internal Questions
-**Meta description:** Turn your internal docs, SOPs, and onboarding guides into an AI agent your team can ask anything, anytime — on Slack or a private web portal. No IT team required.
+**Meta title:** AI Agent for Internal Teams — Turn Your Company Playbook Into an Instant Answer Machine
+**Meta description:** Stop being the person your team DMs for things that should be written down. Build an AI agent on Slack trained on your SOPs, playbook, and policies. Knowledge stays — even when people leave.
+
+**Priority:** 🔴 High — primary target vertical
 
 ---
 
@@ -18,14 +20,13 @@ Same as homepage.
 ✦ INTERNAL TEAMS
 
 ### H1
-"Where is the onboarding doc?"
-"What's our leave policy again?"
-"Who do I contact for [X]?"
+Your team keeps asking questions that are already answered somewhere.
+Your playbook should answer them.
 
-Your team asks these every week. Now the answer is instant.
+> **Design note:** Two-line headline. Line 1 lighter weight. Line 2 bolder.
 
 ### Subhead
-Build an internal AI agent trained on your company docs, SOPs, and knowledge base. Deploy it in Slack. Every team member gets accurate answers in seconds — without pinging a senior person, opening Notion, or waiting for a reply.
+Build an internal AI agent trained on your company playbook — SOPs, policies, onboarding guides, process docs. Deploy it in Slack. Every team member gets an accurate answer in seconds, without pinging a senior person or searching Notion for 10 minutes.
 
 ### CTAs
 - **Primary:** Start free → (links to `app.agenvik.com`)
@@ -49,6 +50,8 @@ And the person being asked? They start to gate-keep. Or they burn out. Or they l
 1. New hires ask the same questions your team has answered 50 times
 2. Institutional knowledge lives in one person's head (and they're always busy)
 3. Your docs exist but nobody can find the right one fast enough
+
+> **Playbook angle:** The deepest version of this problem is attrition. When a senior person leaves, they take years of institutional knowledge with them. If that knowledge was never written into a playbook — and even if it was, if the playbook isn't findable — the cost of their departure is far higher than their replacement hire. An internal agent forces the playbook to be written, and makes it perpetually accessible.
 
 ---
 
@@ -118,13 +121,13 @@ Your agent doesn't replace a buddy system or manager check-ins — it handles th
 ## SECTION 6 — FAQ (Internal teams specific)
 
 **Q: Our docs are a mess. Will it still work?**
-A: Partially. The agent's accuracy depends on the quality of what you give it. Messy or contradictory docs will produce less reliable answers. This is actually a useful forcing function — building your knowledge agent will highlight exactly what documentation needs to be cleaned up.
+A: Partially. Agenvik's accuracy depends on the quality of what you give it. Messy or contradictory docs will produce less reliable answers. This is actually a useful forcing function — building your knowledge agent will highlight exactly what documentation needs to be cleaned up.
 
 **Q: Can I restrict what the agent knows by team?**
-A: Yes — create separate agents for separate teams with different knowledge bases. Your engineering agent doesn't need to know HR policy; your HR agent doesn't need the deployment runbook.
+A: Yes — create separate Agenvik agents for separate teams with different knowledge bases. Your engineering agent doesn't need to know HR policy; your HR agent doesn't need the deployment runbook.
 
 **Q: What if someone asks something confidential or sensitive?**
-A: Only add content you're comfortable having accessible to anyone who can access the agent. Don't add documents with individual salary information, performance reviews, or other sensitive PII to a shared agent. For role-gated knowledge, wait for our access control features (on the roadmap).
+A: Only add content you're comfortable having accessible to anyone who can access the agent. Don't add documents with individual salary information, performance reviews, or other sensitive PII to a shared agent. For role-gated knowledge, wait for Agenvik's access control features (on the roadmap).
 
 **Q: Does the Slack bot work in private channels?**
 A: Yes — invite the bot to any channel, including private ones. It only responds in channels it's been added to.
@@ -146,3 +149,47 @@ Start on the free plan. Build your internal knowledge agent this week.
 
 ## FOOTER
 Same as homepage.
+
+---
+
+## IMPLEMENTATION NOTES — SEO / AEO / GEO
+
+### Structured data (JSON-LD)
+Emit from the page file:
+1. **`WebPage`** — page identity, canonical URL, `dateModified` (build date), `BreadcrumbList` (Home → Use Cases → Internal Teams).
+2. **`FAQPage`** — the 4 FAQ Q&As in Section 6. Write answers in full sentences naming the product where natural — AI assistants pull these verbatim as snippets.
+
+`Organization` + `WebSite` schemas come from `Layout.astro` — do not duplicate them here.
+
+### Entity recognition (GEO)
+"Agenvik" must appear in visible body text — not just headings or schema. The subhead names it. Section 2 body, Section 3 callout, and Section 5 body should each reference "Agenvik" at first mention. FAQ answers should include "Agenvik" by name in at least 3 of 4 answers (see updated answers in Section 6).
+
+### Channel emphasis
+Internal knowledge is a **Slack-first** use case. The hero subhead leads with Slack. Section 4 leads with Slack as the primary deployment target and lists the optional private web portal as secondary. If a channel icon or badge is shown, use a generic message icon in brand colours — do not use Slack purple or any platform brand colour.
+
+### Illustration containers
+All illustration placeholders (Section 1 Slack mockup, Section 4 Slack workspace) must render inside `<div aria-hidden="true">` containers. Decorative UI chrome must not surface in the accessibility tree.
+
+### Eyebrow badge
+The `✦ INTERNAL TEAMS` eyebrow badge is intentional on use-case pages. Wrap its outer container in `aria-hidden="true"` if it contains decorative glyphs (✦).
+
+### Attrition / playbook callout
+Section 2 contains a `> **Playbook angle:**` callout block. In the rendered page this should appear as a visually distinct aside (e.g. border-left accent, slightly muted background) — not a primary call-to-action element. Keep it readable but subordinate to the main column content.
+
+### Section background rhythm
+Follow the alternating pattern — no two consecutive sections share the same background style:
+- Hero (Section 1): white with subtle grid
+- Problem (Section 2): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- What It Can Know (Section 3): white
+- Where It Lives (Section 4): textured bg-image (`pricing-bg.png`) with `bg-white/55 backdrop-blur-[2px]` overlay
+- Onboarding Deep Dive (Section 5): white
+- FAQ (Section 6): `bg-[#1a0f3d] rounded-3xl` (dark navy)
+- CTA (Section 7): `FinalCTASection` → `bg-[#301B69]`
+
+Never let two consecutive sections both be white or both be dark.
+
+### Section spacing
+Sections use `px-6 pt-16` only — no `pb-` on intermediate sections. Gap between sections comes from `pt-16` on each section. `FinalCTASection` uses `pt-16 pb-10`.
+
+### Tone option naming
+If tone is referenced anywhere on this page, use the four official preset names: **Formal**, **Friendly**, **Direct**, **Supportive**. Do not use "Professional", "Neutral", or "Casual".

@@ -1,0 +1,241 @@
+---
+import { getImage } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import pricingBgSrc from '../assets/images/pricing-bg.png';
+
+const pricingBg = await getImage({ src: pricingBgSrc, format: 'webp', quality: 80 });
+
+const siteURL = 'https://agenvik.com';
+const pageURL = `${siteURL}/about`;
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': pageURL,
+  url: pageURL,
+  name: 'About Agenvik — Who We Are, Why We Built This',
+  description:
+    'Agenvik is built by a small team that got tired of watching great businesses lose customers to unanswered questions. Here\'s who we are and what we\'re building.',
+  isPartOf: { '@id': `${siteURL}/#website` },
+  about: { '@id': `${siteURL}/#organization` },
+  publisher: { '@id': `${siteURL}/#organization` },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['#page-description', '#origin-content', '#point-of-view-content'],
+  },
+  dateModified: '2025-05-23',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+      { '@type': 'ListItem', position: 2, name: 'About', item: pageURL },
+    ],
+  },
+};
+---
+
+<Layout
+  title="About Agenvik — Who We Are, Why We Built This"
+  description="Agenvik is built by a small team that got tired of watching great businesses lose customers to unanswered questions. Here's who we are and what we're building."
+  activePage="about"
+  jsonLd={[webPageSchema]}
+>
+  <main id="main-content">
+
+    <!-- ── SECTION 1: HERO ── -->
+    <section aria-label="About Agenvik" class="relative w-full overflow-hidden bg-white pt-[68px]">
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background-image: linear-gradient(rgba(48,27,105,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(48,27,105,0.07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, white 0%, white 60%, transparent 100%);"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(124,58,237,0.08),transparent)] pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 max-w-3xl mx-auto px-6 pt-16 pb-14 text-center">
+        <div aria-hidden="true" class="inline-flex items-center gap-1.5 px-4 py-1 text-xs font-semibold rounded-full bg-[#301B69]/8 text-[#301B69] mb-6 tracking-widest uppercase">
+          <span>✦</span> About
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] leading-tight tracking-tight mb-5">
+          We built Agenvik because businesses deserved better than generic chatbots
+        </h1>
+
+        <p id="page-description" class="text-[#301B69]/65 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+          Agenvik is an AI agent platform that trains on your business's own documents and deploys as a chatbot on your website, WhatsApp, or Slack — giving accurate, on-brand answers 24/7 without a support team behind every message.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── SECTION 2: ORIGIN STORY ── -->
+    <section aria-labelledby="origin-heading" class="px-6 pt-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="bg-[#1a0f3d] rounded-3xl px-8 md:px-16 py-14">
+          <div class="grid md:grid-cols-[240px_1fr] gap-12">
+            <!-- Left: sticky heading -->
+            <div>
+              <h2 id="origin-heading" class="text-2xl md:text-3xl font-bold text-white md:sticky md:top-24">
+                Where this started
+              </h2>
+            </div>
+            <!-- Right: paragraphs -->
+            <div id="origin-content" class="space-y-6 text-white/70 text-base leading-relaxed">
+              <p>
+                When we were working closely with early-stage businesses, we kept seeing the same pattern: companies had detailed, hard-won knowledge about their products, policies, and processes — and customers couldn't find any of it. The answers existed. They lived in PDFs, help articles, onboarding decks, and the inboxes of overloaded founders. Getting to them required either a 10-minute search or a human who was rarely available.
+              </p>
+              <p>
+                The tools that existed to solve this were either too heavy or too shallow. Enterprise AI deployments were priced for Fortune 500 teams and required months of integration work. Rule-based chatbots broke the moment a customer phrased something unexpected. General-purpose AI assistants were helpful in conversation but answered from the internet — not from the business's actual content — which meant confident responses that were frequently wrong.
+              </p>
+              <p>
+                We believed the underlying technology was finally good enough — retrieval-augmented generation, vector databases, instruction-tuned language models. But no one had packaged it for the businesses that needed it most: the clinic with a two-person admin team, the real estate agency answering the same property enquiries every day, the SaaS startup whose founders were still in the support queue six months after launch.
+              </p>
+              <p>
+                So we built Agenvik. A platform where any business — without a data science team, without prompt engineering expertise, without weeks of setup — can turn their existing knowledge into a working AI agent in under an hour. <span class="text-white/90 font-medium">Simplicity is a design decision, not a shortcut.</span> If it requires a tutorial to use, we redesign it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: COMPANY FACTS ── -->
+    <section aria-labelledby="facts-heading" class="px-6 pt-16 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <h2 id="facts-heading" class="text-2xl md:text-3xl font-bold text-[#301B69] mb-10">
+          Quick facts
+        </h2>
+
+        <!-- NOTE: Update these values with real data when available -->
+        <dl class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            { term: 'Founded', detail: '2025' },
+            { term: 'Location', detail: 'India' },
+            { term: 'Status', detail: 'Bootstrapped' },
+            { term: 'Channels supported', detail: 'Website, WhatsApp, Slack' },
+            { term: 'Setup time', detail: 'Under 30 minutes' },
+            { term: 'Contact', detail: 'hello@agenvik.com' },
+          ].map(({ term, detail }) => (
+            <div class="rounded-2xl border border-[#301B69]/10 bg-white px-6 py-5">
+              <dt class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-1.5">{term}</dt>
+              <dd class="text-base font-semibold text-[#301B69]">{detail}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    <!-- ── SECTION 4: POINT OF VIEW ── -->
+    <section
+      aria-labelledby="our-point-of-view"
+      class="px-6 pt-16 pb-16"
+      style={`background-image: url(${pricingBg.src}); background-size: cover; background-position: center;`}
+    >
+      <div class="max-w-6xl mx-auto">
+        <div class="bg-white/55 backdrop-blur-[2px] rounded-3xl px-8 md:px-16 py-14">
+          <h2 id="our-point-of-view" class="text-2xl md:text-3xl font-bold text-[#301B69] mb-10">
+            Our point of view
+          </h2>
+
+          <div id="point-of-view-content" class="grid md:grid-cols-3 gap-8">
+            <!-- Theme 1 -->
+            <div>
+              <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-3">Access</p>
+              <h3 class="text-base font-semibold text-[#301B69] mb-3 leading-snug">
+                Built for the businesses that need it most
+              </h3>
+              <p class="text-sm text-[#301B69]/65 leading-relaxed">
+                The most capable AI tools today are built for enterprises with ML teams and six-figure software budgets. The businesses that need AI the most are the ones least equipped to build it themselves — the solo founder, the bootstrapped startup, the regional business scaling faster than its headcount. We're building for them.
+              </p>
+            </div>
+
+            <!-- Theme 2 -->
+            <div>
+              <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-3">Accuracy</p>
+              <h3 class="text-base font-semibold text-[#301B69] mb-3 leading-snug">
+                Getting it right matters more than sounding confident
+              </h3>
+              <p class="text-sm text-[#301B69]/65 leading-relaxed">
+                Most AI agents hallucinate. They sound authoritative while being wrong — and in a customer-facing context, that destroys trust. Agenvik is built to stay grounded in your content. When the answer isn't in the knowledge base, the agent says so. We think trust is earned by accuracy, not by the flashiest demo.
+              </p>
+            </div>
+
+            <!-- Theme 3 -->
+            <div>
+              <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-3">Simplicity</p>
+              <h3 class="text-base font-semibold text-[#301B69] mb-3 leading-snug">
+                If it needs a tutorial, we redesign it
+              </h3>
+              <p class="text-sm text-[#301B69]/65 leading-relaxed">
+                Every feature we build gets tested against one question: can a non-technical business owner use this without reading a guide? If not, we go back. Simplicity isn't a limitation — it's the product. Complexity is always someone else's problem pushed onto the user.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 5: PRESS CONTACT ── -->
+    <section aria-labelledby="press-heading" class="px-6 pt-16 pb-4">
+      <div class="max-w-6xl mx-auto">
+        <div class="rounded-2xl border border-[#301B69]/10 bg-white p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          <div>
+            <h2 id="press-heading" class="text-xl font-bold text-[#301B69] mb-2">
+              For press and partners
+            </h2>
+            <p class="text-sm text-[#301B69]/60 leading-relaxed max-w-md">
+              Writing about Agenvik, exploring a partnership, or building an integration? Email us — we respond within one business day.
+            </p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-4 shrink-0">
+            <div class="rounded-xl bg-[#301B69]/4 px-6 py-4">
+              <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-1">Email</p>
+              <a href="mailto:hello@agenvik.com" class="text-sm font-semibold text-[#301B69] hover:underline">
+                hello@agenvik.com
+              </a>
+            </div>
+            <div class="rounded-xl bg-[#301B69]/4 px-6 py-4">
+              <p class="text-xs font-semibold text-[#301B69]/40 uppercase tracking-widest mb-1">Subject line</p>
+              <p class="text-sm font-mono text-[#301B69]/70">Press / [topic]</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 6: CTA ── -->
+    <section aria-labelledby="about-cta-heading" class="px-6 pt-16 pb-10">
+      <div class="max-w-6xl mx-auto">
+        <div class="relative rounded-3xl p-10 md:p-14 overflow-hidden bg-[#301B69] text-center">
+          <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(176,124,209,0.3),transparent_70%)]" aria-hidden="true"></div>
+          <div class="relative z-10">
+            <h2 id="about-cta-heading" class="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
+              Want to see what we've built?
+            </h2>
+            <p class="text-white/65 text-base mb-8 max-w-md mx-auto">
+              Try Agenvik free — no credit card, no setup call. Upload your docs and have a working agent running in 30 minutes.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 items-center">
+              <a
+                href="https://app.agenvik.com"
+                class="px-8 py-3.5 bg-white text-[#301B69] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                Try Agenvik free →
+              </a>
+              <a
+                href="/book-demo"
+                class="px-8 py-3.5 text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Book a demo instead →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

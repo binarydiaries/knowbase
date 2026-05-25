@@ -16,6 +16,9 @@ export default defineConfig({
   }), mdx()],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    resolve: {
+      noExternal: ['@lucide/astro'],
+    },
   }
 });

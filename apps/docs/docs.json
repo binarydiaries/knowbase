@@ -116,6 +116,9 @@
       "vscode"
     ]
   },
+  "seo": {
+    "indexHiddenPages": false
+  },
   "footer": {
     "socials": {
       "x": "https://x.com/agenvik",

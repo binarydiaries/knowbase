@@ -100,6 +100,38 @@ ${faqSection}
 
 ---
 
+## Release History
+
+### v0.6.0 — May 26, 2026 (latest)
+
+- **PDF knowledge source** — Upload any PDF as a knowledge source. Agenvik extracts text page-by-page and indexes it automatically. Supports documents up to 200,000 characters.
+- **Website URL knowledge source** — Point an agent at any public webpage. Agenvik fetches, strips, and indexes the content without manual copy-pasting.
+- **Training reminder** — First-time users see a guided prompt after adding their first knowledge source, so no agent goes live without being trained.
+- **Conversation filter** — Filter the conversation list in the dashboard to find specific chats quickly.
+
+### v0.1.0 — May 20, 2026 (public launch)
+
+- Agenvik launched publicly. Businesses can build AI agents from their own knowledge and deploy them on their website, WhatsApp, or Slack — no coding required.
+
+### v0.5.0 — May 8, 2026
+
+- **Dark mode** — Full dark mode support in the dashboard.
+- **Notification sound** — Chat widget plays a soft tone on new messages; users can mute/unmute per session.
+- **Suggestion questions** — Configure up to four suggested questions shown before the first message in the chat widget.
+- **Bubble color customization** — Set a custom chat bubble color per agent to match brand colors.
+- **Rich text editor** — Upgraded knowledge source editor with cleaner toolbar and improved paste behavior.
+
+### v0.4.0 — April 21, 2026
+
+- **Lead generation** — Agents can collect visitor contact details (name, email, phone) through natural conversation. Leads appear in the dashboard and can be exported.
+- **Live billing plans** — Subscription management is live; upgrade, downgrade, or cancel from the dashboard.
+
+### v0.2.0 — April 2026
+
+- **Chat UX polish** — Messages auto-scroll to latest reply; New Chat button lets visitors start a fresh conversation; keyboard navigation improved.
+
+---
+
 ## Company
 
 Agenvik is a bootstrapped company founded in 2025, based in India.

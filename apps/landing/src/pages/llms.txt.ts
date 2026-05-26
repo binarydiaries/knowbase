@@ -16,6 +16,7 @@ export const GET: APIRoute = () => {
 - [About](https://agenvik.com/about): Company background, founding story, philosophy on AI accuracy and simplicity
 - [Book a Demo](https://agenvik.com/book-demo): Request a personalised 30-minute live walkthrough — bring your own documents and see a working agent built in real time
 - [Documentation](https://agenvik.com/docs): Setup guides, developer API reference, and help articles
+- [Changelog](https://agenvik.com/changelog): Full release history — every new feature, improvement, and fix across all versions. Latest: v0.6.0 (May 26, 2026)
 - [Privacy Policy](https://agenvik.com/privacy-policy): How Agenvik collects, uses, and protects personal data
 - [Security Policy](https://agenvik.com/security-policy): Infrastructure security, data isolation, access controls, and vulnerability disclosure
 - [Terms & Conditions](https://agenvik.com/terms): Terms governing use of the Agenvik platform

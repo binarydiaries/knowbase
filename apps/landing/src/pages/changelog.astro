@@ -119,30 +119,80 @@ const typeConfig: Record<string, { label: string; classes: string }> = {
   fixed:    { label: 'Fixed',    classes: 'bg-emerald-50 text-emerald-700' },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  '@id': pageURL,
-  url: pageURL,
-  name: 'Changelog — Agenvik',
-  description: 'Every improvement, new feature, and fix shipped to Agenvik — your AI agent platform.',
-  isPartOf: { '@id': `${siteURL}/#website` },
-  about: { '@id': `${siteURL}/#organization` },
-  publisher: { '@id': `${siteURL}/#organization` },
-  dateModified: '2026-05-26',
-  breadcrumb: {
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
-      { '@type': 'ListItem', position: 2, name: 'Changelog', item: pageURL },
-    ],
+// SEO — richer title/description uses version + keywords for search relevance
+// AEO — ItemList schema makes each release a discrete, citable answer unit
+// GEO — SoftwareApplication schema lets AI engines cite our version history
+
+const jsonLd = [
+  // 1. WebPage — breadcrumb + speakable for voice/AI
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': pageURL,
+    url: pageURL,
+    name: 'Agenvik Changelog — Release Notes & New Features',
+    description: 'Full release history for Agenvik: every new feature, improvement, and fix across all versions. Latest release: v0.6.0 (May 26, 2026) — PDF knowledge source, website URL source, training reminder, conversation filter.',
+    isPartOf: { '@id': `${siteURL}/#website` },
+    about: { '@id': `${siteURL}/#organization` },
+    publisher: { '@id': `${siteURL}/#organization` },
+    dateModified: '2026-05-26',
+    datePublished: '2026-05-20',
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['#latest-release-summary', '#page-description'],
+    },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL },
+        { '@type': 'ListItem', position: 2, name: 'Changelog', item: pageURL },
+      ],
+    },
   },
-};
+
+  // 2. SoftwareApplication — tells AI engines the product + current version
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    '@id': `${siteURL}/#software`,
+    name: 'Agenvik',
+    url: siteURL,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description: 'AI agent platform — build agents from PDFs, text, Q&A, and websites. Deploy on your site, WhatsApp, or Slack without writing code.',
+    softwareVersion: '0.6.0',
+    datePublished: '2026-05-26',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+    },
+    publisher: { '@id': `${siteURL}/#organization` },
+  },
+
+  // 3. ItemList — each release as a citable ListItem (AEO: featured-snippet eligible)
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Agenvik Release History',
+    description: 'Chronological list of Agenvik product releases with feature summaries.',
+    url: pageURL,
+    numberOfItems: releases.length,
+    itemListElement: releases.map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: `Agenvik v${r.version} — ${r.date}`,
+      description: r.entries.map(e => e.title).join(', '),
+      url: `${pageURL}#v${r.version.replace(/\./g, '-')}`,
+    })),
+  },
+];
 ---
 
 <Layout
-  title="Changelog — Agenvik"
-  description="Every improvement, new feature, and fix shipped to Agenvik — your AI agent platform."
+  title="Agenvik Changelog — Release Notes & New Features"
+  description="Full release history for Agenvik. Latest: v0.6.0 (May 26, 2026) — PDF knowledge source, website URL crawling, training reminder, conversation filter. See every version since launch."
   jsonLd={jsonLd}
 >
   <main id="main-content" class="relative w-full bg-white pt-[68px]">
@@ -161,11 +211,27 @@ const jsonLd = {
     <div class="relative z-10 max-w-5xl mx-auto px-6 pt-14 pb-24">
 
       <!-- Page header -->
-      <div class="text-center mb-16">
+      <div class="text-center mb-10">
         <p class="text-xs font-semibold uppercase tracking-widest text-[#301B69]/50 mb-3">What's new</p>
         <h1 class="text-4xl md:text-5xl font-bold text-[#301B69] mb-4">Changelog</h1>
         <p id="page-description" class="text-[#301B69]/60 text-lg max-w-xl mx-auto">
           Every feature, improvement, and fix we've shipped — most recent first.
+        </p>
+      </div>
+
+      <!--
+        AEO: "Latest release" summary block.
+        Structured as a direct, factual answer — eligible for featured snippets
+        on queries like "What's new in Agenvik?" or "latest Agenvik update".
+        id="latest-release-summary" is referenced in the speakable schema above.
+      -->
+      <div id="latest-release-summary" class="mb-16 max-w-2xl mx-auto bg-[#301B69]/4 border border-[#301B69]/10 rounded-2xl p-6">
+        <p class="text-xs font-semibold uppercase tracking-widest text-[#301B69]/40 mb-2">Latest release</p>
+        <p class="text-sm font-semibold text-[#301B69] mb-1">
+          Agenvik v0.6.0 — released May 26, 2026
+        </p>
+        <p class="text-sm text-[#301B69]/60 leading-relaxed">
+          This release adds PDF and website URL knowledge sources so agents can be trained directly from uploaded documents or any public webpage. It also introduces a training reminder for new users and a conversation filter in the dashboard.
         </p>
       </div>
 
@@ -184,7 +250,7 @@ const jsonLd = {
 
         <div class="space-y-14">
           {releases.map((release) => (
-            <div class="group">
+            <div id={`v${release.version.replace(/\./g, '-')}`} class="group">
 
               <!-- Mobile: stacked layout -->
               <div class="md:hidden mb-3 flex items-center gap-3">

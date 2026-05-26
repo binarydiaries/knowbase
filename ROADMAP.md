@@ -8,43 +8,35 @@ Agenvik is targeting **SMBs and startups** in India. The platform already has a 
 
 ---
 
+## Shipped ✅
+
+| Feature | Version | Date |
+|---------|---------|------|
+| PDF Upload as Knowledge Source | v0.6.0 | May 26, 2026 |
+| URL / Website Crawl as Knowledge Source | v0.6.0 | May 26, 2026 |
+| Lead Generation (conversational capture) | v0.3.0 | Apr 20, 2026 |
+| Lead Generation plan gating (Starter+) | v0.4.0 | Apr 21, 2026 |
+| Multi-channel: Web, WhatsApp, Slack | v0.1.0 | May 20, 2026 |
+| Analytics dashboard | v0.1.0 | May 20, 2026 |
+| Razorpay billing + live subscription management | v0.4.0 | Apr 21, 2026 |
+| Bubble color + suggestion questions customisation | v0.5.0 | May 8, 2026 |
+| Dark mode | v0.5.0 | May 8, 2026 |
+
+---
+
 ## Tier 1 — Quick Wins (1–2 weeks each)
 
 High impact, low complexity. These close the most common "I went to a competitor instead" objections.
 
-### 1. PDF Upload as Knowledge Source
+### ~~1. PDF Upload as Knowledge Source~~ ✅ Shipped v0.6.0
 
-**Why**: Chatbase and CustomGPT are marketed primarily on this. Most SMBs have product manuals, policy docs, or onboarding guides as PDFs — the current text/Q&A-only KB is an immediate dealbreaker for a large portion of evaluating buyers.
-
-**How**:
-- Add `pdf` type to `DocumentContent` discriminated union in `document/model.ts`
-- Parse PDF → plain text using `pdf-parse` inside the indexing worker, before passing to the existing `embedDocument` path
-- Store raw file in R2/S3; store extracted text in Postgres as usual
-- Enforce per-plan file size limits (e.g. Free: none, Starter: 5 MB, Growth: 25 MB, Pro: 100 MB)
-
-**Plan gate**: Free tier locked to text/Q&A; PDF on Starter+
-
-**Critical files**:
-- `apps/backend/src/modules/document/model.ts`
-- `apps/backend/src/queue/indexing/indexing.worker.ts`
-- `apps/backend/src/modules/indexing/service.ts`
-- `apps/dashboard/src/widgets/` — file drag-drop in knowledge base UI
+PDF and website URL knowledge sources are live. Agents can be trained from uploaded PDFs (up to 200K chars) or any public webpage. Gated behind the `url_crawling` feature flag on Starter+.
 
 ---
 
-### 2. URL / Website Crawl as Knowledge Source
+### ~~2. URL / Website Crawl as Knowledge Source~~ ✅ Shipped v0.6.0
 
-**Why**: "Point it at my docs site and it works in 2 minutes" is the core value prop of Chatbase. Dramatically reduces time-to-value and opens the product to businesses whose knowledge lives on a website, not in documents.
-
-**How**:
-- Add `url` type to `DocumentContent` with `{ url: string, rawText: string, crawledAt: Date }`
-- Fetch URL → strip HTML with `cheerio` → extract visible body text → hand off to existing indexing pipeline
-- Store `recrawlAt` timestamp; BullMQ cron re-fetches stale sources
-- v1: single-URL only. v2: sitemap discovery (`/sitemap.xml`)
-
-**Plan gate**: Single URL on Starter+; automatic recrawl + sitemap on Growth+
-
-**Critical files**: Same as PDF — `document/model.ts`, `indexing.worker.ts`, `indexing/service.ts`
+See above — shipped alongside PDF in v0.6.0.
 
 ---
 
@@ -289,13 +281,13 @@ High-complexity features that create defensible long-term moats.
 
 ## Recommended Sequencing
 
-| Timeline | Ship | Why Now |
-|----------|------|---------|
-| Week 1–2 | PDF Upload + URL Crawl | Close the single biggest acquisition gap; both share the indexing pipeline |
-| Week 3–4 | Lead Webhook + Email Alerts | Extend existing infra (Resend + BullMQ already wired); improve lead gen value |
-| Week 5 | Conversation & Lead Export | Trivially useful; appears on every "missing features" list from prospects |
-| Month 2 | REST API + KB Management API | Shared API key infrastructure; unlocks developer and agency segment |
-| Month 2–3 | Human Handoff Inbox | Longest but unblocks support-team deals; conversation UI components already exist |
+| Timeline | Ship | Status |
+|----------|------|--------|
+| ~~Week 1–2~~ | ~~PDF Upload + URL Crawl~~ | ✅ Shipped v0.6.0 (May 26, 2026) |
+| Next | Lead Webhook + Email Alerts | Extends existing Resend + BullMQ infra; makes lead gen actually useful |
+| Next | Conversation & Lead Export | Appears on every "missing features" list from prospects |
+| Month 2 | REST API + KB Management API | Shared API key infra; unlocks developer and agency segment |
+| Month 2–3 | Human Handoff Inbox | Unblocks support-team deals; conversation UI components already exist |
 | Month 3 | Instagram Channel | Near-clone of WhatsApp module; targets core SMB audience |
 | Month 4+ | Multi-LLM, WhatsApp Broadcasts, KB Gaps, White-Label | Ship in order of customer demand signals |
 
@@ -317,14 +309,14 @@ High-complexity features that create defensible long-term moats.
 
 ## Verification Checklist
 
-| Feature | Test |
-|---------|------|
-| PDF Upload | Upload PDF with known content → train → ask PDF-specific question → verify correct answer |
-| URL Crawl | Add a public URL → wait for `indexed` status → ask question from that page → verify answer |
-| Lead Webhook | Configure a requestbin URL → trigger lead capture in widget → verify POST received with valid HMAC |
-| Email Alerts | Trigger fallback N times → verify batched alert email received with conversation link |
-| Export | Click export on conversations page → verify CSV with correct headers and all rows |
-| REST API | Create API key in dashboard → `POST /v1/chat/{channelId}` with Bearer token → verify chat response |
-| Human Handoff | Trigger "Talk to a human" in widget → verify conversation appears in Inbox → reply from dashboard → verify message in widget |
-| Instagram | Send DM to connected Instagram account → verify response routed through correct agent |
-| KB Gaps | Let agent hit fallback 10+ times → run suggestions job → verify Gaps tab shows missed questions + AI-drafted answers |
+| Feature | Test | Status |
+|---------|------|--------|
+| PDF Upload | Upload PDF with known content → train → ask PDF-specific question → verify correct answer | ✅ Shipped |
+| URL Crawl | Add a public URL → wait for `indexed` status → ask question from that page → verify answer | ✅ Shipped |
+| Lead Webhook | Configure a requestbin URL → trigger lead capture in widget → verify POST received with valid HMAC | Pending |
+| Email Alerts | Trigger fallback N times → verify batched alert email received with conversation link | Pending |
+| Export | Click export on conversations page → verify CSV with correct headers and all rows | Pending |
+| REST API | Create API key in dashboard → `POST /v1/chat/{channelId}` with Bearer token → verify chat response | Pending |
+| Human Handoff | Trigger "Talk to a human" in widget → verify conversation appears in Inbox → reply from dashboard → verify message in widget | Pending |
+| Instagram | Send DM to connected Instagram account → verify response routed through correct agent | Pending |
+| KB Gaps | Let agent hit fallback 10+ times → run suggestions job → verify Gaps tab shows missed questions + AI-drafted answers | Pending |

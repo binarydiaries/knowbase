@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.6.0] — 2026-05-26
+
+### Added
+- **PDF Knowledge Source** — Upload PDF files as knowledge sources; backend extracts text page-by-page via `unpdf` + `pdfjs-dist`, converts to Markdown for precise RAG chunking. Handles password-protected and image-only PDFs gracefully.
+- **Website URL Knowledge Source** — Crawl any public webpage as a knowledge source. SSRF-safe (DNS pre-validation, private IP blocking), 5 MB response cap, HTML noise-stripping, gated by `url_crawling` feature flag.
+- **Security Hardening** — Rate limiting (120 req/min), CORS locked to `ALLOWED_ORIGINS`, security headers via `elysia-helmet`, AES-256-GCM encryption at rest for Slack `botToken` and WhatsApp `accessToken`, startup env validation, Sentry PII disabled.
+- **Security Policy Page** — `/security-policy` page on the landing app covering infrastructure, data protection, and access controls. Added `/.well-known/security.txt`.
+- **Book a Demo** — Demo booking flow on the landing page; admin panel CRM section lists demo bookings via the generated SDK.
+- **Collapsible Admin Sidebar** — Admin nav reorganised into collapsible groups (Finance, System, CRM).
+- **Training Reminder Dialog** — One-time modal explaining the Train step fires after a user's first knowledge source is added (fires on success callback; persisted to `localStorage`).
+- **Landing v2** — Full redesign of the marketing site with updated hero, feature sections, pricing table, FAQ, and grid pattern. SEO, AEO, and GEO optimisations applied (structured FAQ schema, `llms.txt` for AI engine citation).
+- **INR / Rupee Pricing** — Pricing switched from USD to INR across the landing page and billing flows.
+- **Embed Code Widget** — Copy-paste embed snippet added to the dashboard channel settings.
+- **Conversation Filter** — Filter panel added to the conversations list in the dashboard.
+- **Docs Expansion** — Mintlify docs updated: all 24 pages have SEO-optimised titles/descriptions; knowledge-sources, subscriptions-limits, and FAQs pages overhauled with plan-limit tables and 5 comprehensive FAQ categories.
+
+### Changed
+- **Feature Flags** — All flags are now DB-driven (no env-based flags remain); README and CLAUDE.md updated with a single authoritative flag table.
+- **Admin Sidebar** — Flat nav replaced with collapsible grouped `NavAdmin` component.
+
+### Fixed
+- **PDF Edit Routing** — Clicking Edit on a PDF document no longer opens the Q&A sheet; edit is disabled with an explanatory tooltip.
+
+---
+
 ## [0.5.0] — 2026-05-08
 
 ### Added

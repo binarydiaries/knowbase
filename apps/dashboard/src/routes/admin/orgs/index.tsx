@@ -20,6 +20,7 @@ import { isAdminEmail } from '@/utils/adminAccess';
 
 type OrgRow = {
   orgId: string;
+  orgName: string | null;
   agentCount: number;
   conversationCount: number;
   messageCount: number;
@@ -207,7 +208,7 @@ function RouteComponent() {
                       <TableRow>
                         <TableHead {...thProps('orgId')}>
                           <span className="flex items-center">
-                            Org ID <SortIcon column="orgId" sortKey={sortKey} sortDir={sortDir} />
+                            Organization <SortIcon column="orgId" sortKey={sortKey} sortDir={sortDir} />
                           </span>
                         </TableHead>
                         <TableHead {...thProps('agentCount')} className="text-right cursor-pointer select-none">
@@ -247,7 +248,12 @@ function RouteComponent() {
                       ) : (
                         rows.map((row) => (
                           <TableRow key={row.orgId}>
-                            <TableCell className="font-mono text-xs">{row.orgId}</TableCell>
+                            <TableCell>
+                              <div className="font-medium">{row.orgName ?? row.orgId}</div>
+                              {row.orgName && (
+                                <div className="text-xs text-muted-foreground font-mono">{row.orgId}</div>
+                              )}
+                            </TableCell>
                             <TableCell className="text-right">{row.agentCount}</TableCell>
                             <TableCell className="text-right">{row.conversationCount}</TableCell>
                             <TableCell className="text-right">{row.messageCount}</TableCell>

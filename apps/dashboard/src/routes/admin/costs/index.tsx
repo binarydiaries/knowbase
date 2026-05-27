@@ -21,6 +21,7 @@ import { isAdminEmail } from '@/utils/adminAccess';
 type AdminCostsResponse = {
   data: Array<{
     orgId: string;
+    orgName: string | null;
     requestCount: number;
     inputTokens: number;
     outputTokens: number;
@@ -85,8 +86,9 @@ function RouteComponent() {
     }
 
     return [
-      ['Organization ID', 'Requests', 'Input Tokens', 'Output Tokens', 'Cached Input Tokens', 'Total Tokens', 'Cost (USD)'],
+      ['Organization', 'Organization ID', 'Requests', 'Input Tokens', 'Output Tokens', 'Cached Input Tokens', 'Total Tokens', 'Cost (USD)'],
       ...data.data.map((row) => [
+        row.orgName ?? row.orgId,
         row.orgId,
         String(row.requestCount),
         String(row.inputTokens),
@@ -206,7 +208,7 @@ function RouteComponent() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Organization ID</TableHead>
+                        <TableHead>Organization</TableHead>
                         <TableHead className="text-right">Requests</TableHead>
                         <TableHead className="text-right">Input Tokens</TableHead>
                         <TableHead className="text-right">Output Tokens</TableHead>
@@ -218,7 +220,12 @@ function RouteComponent() {
                     <TableBody>
                       {data?.data.map((row) => (
                         <TableRow key={row.orgId}>
-                          <TableCell className="font-medium">{row.orgId}</TableCell>
+                          <TableCell>
+                            <div className="font-medium">{row.orgName ?? row.orgId}</div>
+                            {row.orgName && (
+                              <div className="text-xs text-muted-foreground font-mono">{row.orgId}</div>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right">{row.requestCount}</TableCell>
                           <TableCell className="text-right">{row.inputTokens}</TableCell>
                           <TableCell className="text-right">{row.outputTokens}</TableCell>

@@ -4,6 +4,7 @@ import { agents } from '../../db/schema/agents';
 import { conversations } from '../../db/schema/conversations';
 import { messages } from '../../db/schema/messages';
 import { orgUsageMonthly } from '../../db/schema/orgUsageMonthly';
+import { resolveOrgNames } from '../../utils/clerkOrg.utils';
 
 function currentMonthKey() {
   return new Date().toISOString().slice(0, 7);
@@ -37,8 +38,12 @@ export abstract class AdminOrgsOverviewService {
 
     const usageByOrg = new Map(usageRows.map((r) => [r.orgId, r.assistantMessages]));
 
+    const orgIds = rows.map((r) => r.orgId);
+    const orgNames = await resolveOrgNames(orgIds);
+
     const data = rows.map((row) => ({
       orgId: row.orgId,
+      orgName: orgNames.get(row.orgId) ?? null,
       agentCount: row.agentCount,
       conversationCount: row.conversationCount,
       messageCount: Number(row.messageCount ?? 0),

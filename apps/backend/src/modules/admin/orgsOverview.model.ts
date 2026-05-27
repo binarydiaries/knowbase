@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 const AdminOrgsOverviewRowSchema = z.object({
   orgId: z.string(),
+  orgName: z.string().nullable(),
   agentCount: z.number(),
   conversationCount: z.number(),
   messageCount: z.number(),

@@ -27,7 +27,7 @@ function RouteComponent() {
     const { data: pricing } = usePricing();
 
 
-    console.log('pricing',pricing)
+    console.log('pricing',pricing,subscriptions)
 
     const checkoutMutation = useCheckoutMutation();
   const cancelMutation = useCancelMutation();
@@ -57,7 +57,20 @@ function RouteComponent() {
         )}
 
           <KQPrice
-              planIdentifier="pro-plan"
+              planIdentifier="free-plan"
+              billingPeriod="MONTHLY"
+              fallback={<p>Price not available</p>}
+          >
+              {({ formattedPrice, isFree, hasFreeTrial, trialPeriod }) => (
+                  <div>
+                      <h3>{formattedPrice}</h3>
+                      {hasFreeTrial && <p>{trialPeriod}-day free trial</p>}
+                  </div>
+              )}
+          </KQPrice>
+
+          <KQPrice
+      planIdentifier="starter   -plan"
               billingPeriod="MONTHLY"
               fallback={<p>Price not available</p>}
           >

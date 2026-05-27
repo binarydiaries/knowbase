@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Plug,
   Shield,
+  Users,
   // UserRound, // LEAD_GENERATION_DISABLED: uncomment to restore
 } from 'lucide-react';
 import { NavAdmin } from '@/components/NavAdmin/NavAdmin.tsx';
@@ -68,6 +69,7 @@ const adminGroups = [
   {
     label: 'CRM',
     items: [
+      { name: 'Orgs Overview', url: '/admin/orgs', icon: Users },
       { name: 'Demo Bookings', url: '/admin/demo-bookings', icon: CalendarCheck },
     ],
   },

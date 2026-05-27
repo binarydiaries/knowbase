@@ -1,6 +1,7 @@
 import { and, desc, gte, lt, sql, sum } from 'drizzle-orm';
 import { db } from '../../db';
 import { aiCostEvents } from '../../db/schema/aiCostEvents';
+import { resolveOrgNames } from '../../utils/clerkOrg.utils';
 
 function currentMonthKey() {
   return new Date().toISOString().slice(0, 7);
@@ -57,8 +58,12 @@ export abstract class AdminCostsService {
       .groupBy(aiCostEvents.orgId)
       .orderBy(desc(sql`sum(${aiCostEvents.costUsd})`));
 
+    const orgIds = rows.map((r) => r.orgId);
+    const orgNames = await resolveOrgNames(orgIds);
+
     const data = rows.map((row) => ({
       orgId: row.orgId,
+      orgName: orgNames.get(row.orgId) ?? null,
       requestCount: parseNumeric(row.requestCount),
       inputTokens: parseNumeric(row.inputTokens),
       outputTokens: parseNumeric(row.outputTokens),

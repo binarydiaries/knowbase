@@ -14,6 +14,7 @@ export const AdminCostByOrganizationQuerySchema = z.object({
 
 const AdminCostByOrganizationRowSchema = z.object({
   orgId: z.string(),
+  orgName: z.string().nullable(),
   requestCount: z.number(),
   inputTokens: z.number(),
   outputTokens: z.number(),

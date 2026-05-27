@@ -1311,7 +1311,9 @@ export type CreateDemoBookingSchema = {
     email: string;
     company: string;
     phone?: string;
+    category?: 'Customer Support' | 'E-commerce' | 'HR & Internal Tools' | 'Sales & Lead Generation' | 'Healthcare' | 'Education' | 'Real Estate' | 'Other';
     message?: string;
+    captchaToken: string;
 };
 
 export type LeadSchema = {
@@ -1378,6 +1380,7 @@ export type AdminCostByOrganizationQuerySchema = {
 export type AdminCostByOrganizationResponseSchema = {
     data: Array<{
         orgId: string;
+        orgName: string | null;
         requestCount: number;
         inputTokens: number;
         outputTokens: number;
@@ -1436,6 +1439,25 @@ export type QueueActionResponseSchema = {
     action: string;
     state?: string;
     documentId?: string;
+};
+
+export type AdminOrgsOverviewResponseSchema = {
+    data: Array<{
+        orgId: string;
+        orgName: string | null;
+        agentCount: number;
+        conversationCount: number;
+        messageCount: number;
+        lastActiveAt: string | null;
+        currentMonthMessages: number;
+    }>;
+    meta: {
+        orgCount: number;
+        agentCount: number;
+        conversationCount: number;
+        messageCount: number;
+        monthKey: string;
+    };
 };
 
 export type GetUsageMessagesDailyData = {
@@ -3350,3 +3372,28 @@ export type GetAdminDemoBookingsErrors = {
 };
 
 export type GetAdminDemoBookingsError = GetAdminDemoBookingsErrors[keyof GetAdminDemoBookingsErrors];
+
+export type GetAdminOrgsOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/orgs/overview';
+};
+
+export type GetAdminOrgsOverviewErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ForbiddenSchema;
+};
+
+export type GetAdminOrgsOverviewError = GetAdminOrgsOverviewErrors[keyof GetAdminOrgsOverviewErrors];
+
+export type GetAdminOrgsOverviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: AdminOrgsOverviewResponseSchema;
+};
+
+export type GetAdminOrgsOverviewResponse = GetAdminOrgsOverviewResponses[keyof GetAdminOrgsOverviewResponses];

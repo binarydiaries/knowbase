@@ -10,6 +10,7 @@ import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
 import { AdminDemoBookings } from './modules/admin/demoBookings';
 import { AdminFeatureFlags } from './modules/admin/featureFlags';
+import { AdminOrgsOverview } from './modules/admin/orgsOverview';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
 import { FeatureFlag } from './modules/featureFlag/featureFlag';
@@ -120,6 +121,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(AdminQueue)
   .use(AdminSubscriptions)
   .use(AdminDemoBookings)
+  .use(AdminOrgsOverview)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

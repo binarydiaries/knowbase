@@ -47,7 +47,7 @@ export abstract class AdminOrgsOverviewService {
       agentCount: row.agentCount,
       conversationCount: row.conversationCount,
       messageCount: Number(row.messageCount ?? 0),
-      lastActiveAt: row.lastActiveAt?.toISOString() ?? null,
+      lastActiveAt: row.lastActiveAt ?? null,
       currentMonthMessages: usageByOrg.get(row.orgId) ?? 0,
     }));
 

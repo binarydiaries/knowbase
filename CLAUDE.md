@@ -324,6 +324,7 @@ Available gstack skills:
 | `/retro` | Retrospective |
 | `/investigate` | Investigate a bug or issue |
 | `/document-release` | Document a release |
+| `/document-generate` | Generate documentation |
 | `/codex` | Codex agent task |
 | `/cso` | CSO-level security review |
 | `/autoplan` | Automatically generate a plan |

@@ -13,6 +13,7 @@ export type ChannelSchema = {
       inputPlaceholder?: string;
       primaryColor: string;
       allowedDomains: Array<string>;
+      avatarUrl?: string;
     };
   };
   createdAt: string;

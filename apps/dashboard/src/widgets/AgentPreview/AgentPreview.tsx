@@ -1,5 +1,5 @@
-import { useAuth } from '@clerk/clerk-react';
 import { useChat } from '@ai-sdk/react';
+import { useAuth } from '@clerk/clerk-react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
@@ -110,6 +110,7 @@ const AgentPreviewContent = ({
       onNewChat={onNewChat}
       brandLink={import.meta.env.VITE_LANDING_URL}
       suggestionQuestions={channelConfig?.suggestionQuestions}
+      avatarUrl={channelConfig?.avatarUrl}
     />
   );
 };

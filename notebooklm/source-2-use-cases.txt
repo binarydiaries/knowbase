@@ -1,0 +1,218 @@
+AGENVIK — USE CASES & CUSTOMER STORIES
+Source 2 of 3 for NotebookLM
+===============================
+
+USE CASE 1: SaaS Customer Support
+-----------------------------------
+Company type: A B2B SaaS product with a help center and documentation
+
+Problem:
+  Support team gets 200+ tickets per week. 70% are the same 15 questions:
+  "How do I reset my password?", "Where is the billing page?",
+  "How do I invite a teammate?", "What is the API rate limit?"
+  Engineers and founders are pulled into support instead of building.
+
+How Agenvik solves it:
+  - Upload the help center docs as PDFs
+  - Add common FAQ as Q&A pairs
+  - Train the agent
+  - Embed the web widget on the help center and dashboard
+  - Enable Slack bot for internal team questions
+
+Result:
+  - 70% of tickets deflected automatically
+  - Instant answers 24/7
+  - Support team focuses on complex issues only
+  - Customers get answers in seconds, not hours
+
+Specific Agenvik features used:
+  - PDF knowledge source (help center docs)
+  - Q&A knowledge source (common tickets)
+  - Web channel (embedded on app and help center)
+  - Slack channel (internal team knowledge bot)
+  - Analytics to identify remaining gaps in documentation
+
+
+USE CASE 2: E-Commerce Store
+------------------------------
+Company type: Online store selling niche products (skincare, electronics, fashion)
+
+Problem:
+  - 500 product variants with different specs, compatibility, and usage instructions
+  - Customers ask "Will this work with X?", "What's the return policy?", "When will it arrive?"
+  - Support is overwhelmed. Cart abandonment due to unanswered pre-purchase questions.
+  - No budget for a full support team.
+
+How Agenvik solves it:
+  - Upload product catalog as a PDF
+  - Add return policy, shipping policy as text sources
+  - Add top 30 pre-purchase questions as Q&A
+  - Enable web widget on product pages and checkout
+
+Result:
+  - Pre-purchase questions answered instantly → higher conversion
+  - Returns and shipping questions answered 24/7
+  - Support volume drops 60%
+  - Widget available on WhatsApp for customers who prefer messaging
+
+Specific Agenvik features used:
+  - PDF (product catalog)
+  - Text source (policies)
+  - Q&A source (pre-purchase FAQs)
+  - Web channel
+  - WhatsApp channel
+  - Lead generation (capture email during chat for cart recovery)
+
+
+USE CASE 3: Agency Building Chatbots for Clients
+--------------------------------------------------
+Company type: A digital marketing or web development agency
+
+Problem:
+  - Clients want AI chatbots but can't build them
+  - Building custom RAG systems for each client takes months
+  - Clients have different knowledge bases, different branding, different channels
+  - Ongoing maintenance is a nightmare
+
+How Agenvik solves it:
+  - Agency creates a separate agent per client
+  - Each client uploads their own content
+  - Agency configures branding (colors, name, avatar) per client
+  - Embed code is given to the client to paste on their site
+
+Result:
+  - Agency can onboard a new client chatbot in 1 day
+  - Recurring revenue from Agenvik subscription resold to clients
+  - No engineering required — pure configuration
+  - Clients can update their own knowledge base anytime
+
+Specific Agenvik features used:
+  - Multiple agents (one per client)
+  - Custom web channel branding per agent
+  - URL crawling (crawl client's existing website)
+  - Behavior customization (different tone per client)
+  - Subscription: Growth or Pro for multiple agents
+
+
+USE CASE 4: HR Internal Knowledge Bot
+---------------------------------------
+Company type: A mid-size company (50-500 employees) with an HR team
+
+Problem:
+  - HR gets asked the same questions every week:
+    "How many sick days do I have?", "What's the parental leave policy?",
+    "How do I submit an expense?", "When is the next performance review?"
+  - HR team spends 30% of time answering repetitive policy questions
+  - New hires are overwhelmed with onboarding information
+
+How Agenvik solves it:
+  - Upload employee handbook as PDF
+  - Add HR policies as text sources
+  - Add onboarding checklist as Q&A
+  - Deploy as Slack bot in #hr-questions channel
+  - Set tone to "Professional", verbosity to "Detailed"
+
+Result:
+  - Employees get instant answers in Slack
+  - HR team reclaims 30% of their time
+  - New hires can self-serve onboarding questions
+  - Consistent, policy-accurate answers every time
+
+Specific Agenvik features used:
+  - PDF (employee handbook)
+  - Text source (policies)
+  - Q&A source (onboarding FAQs)
+  - Slack channel (channel mode in #hr-questions)
+  - Behavior: Professional tone, Detailed verbosity
+
+
+USE CASE 5: Real Estate Agency
+--------------------------------
+Company type: Real estate agency listing properties and taking buyer/seller inquiries
+
+Problem:
+  - Website visitors ask about listings: "Is property X still available?",
+    "What's the price per sqft?", "Does it have parking?"
+  - Agents are in the field and can't respond instantly
+  - Leads are lost because nobody responds in the first 5 minutes
+
+How Agenvik solves it:
+  - Upload property listings as Q&A pairs or PDF
+  - Enable lead generation to capture name + email + phone
+  - Deploy web widget on website
+  - WhatsApp integration for mobile-first users
+
+Result:
+  - Every website visitor gets instant answers
+  - Lead capture happens 24/7
+  - Agent team follows up on captured leads next morning
+  - Response time: from hours to seconds
+
+Specific Agenvik features used:
+  - Q&A source (property listings, specs)
+  - Lead generation action (capture contact info)
+  - Web channel
+  - WhatsApp channel
+  - Leads tab (review all captured leads)
+  - Sentiment analytics (understand buyer mood)
+
+
+COMMON OBJECTIONS & ANSWERS
+-----------------------------
+
+Objection: "We already have a chatbot"
+Answer: Most chatbots use scripted decision trees — they only answer questions you pre-programmed.
+Agenvik uses real AI with RAG, so it can answer any question that's in your knowledge base,
+even questions you never anticipated. It's smarter and easier to maintain.
+
+Objection: "We use ChatGPT for support"
+Answer: ChatGPT doesn't know your specific product, policies, or pricing.
+Agenvik trains the AI on YOUR content only. It won't hallucinate or give generic answers —
+it answers from exactly what you uploaded.
+
+Objection: "We'll just build this ourselves"
+Answer: Building a RAG chatbot with multi-channel support, a management dashboard, analytics,
+lead capture, and training pipelines takes 3-6 months of engineering work.
+With Agenvik, you're live in 10 minutes.
+
+Objection: "What if the AI gets something wrong?"
+Answer: The AI only answers from the content you provide. If it doesn't find an answer
+in your knowledge base, it uses your configured fallback message (e.g., "I don't know —
+please contact us at support@yourcompany.com"). You're always in control.
+
+Objection: "It's too expensive"
+Answer: Compare to the cost of 1 support hire ($3,000-5,000/month salary + benefits).
+Agenvik deflects 60-80% of repetitive tickets at a fraction of that cost.
+There's also a free plan to start with no risk.
+
+Objection: "We only need a web widget, not WhatsApp/Slack"
+Answer: Start with just web. Enable other channels when you need them — it's one toggle.
+You're not paying for channels you don't use.
+
+
+CUSTOMER MOMENTS (hypothetical demo scenarios)
+------------------------------------------------
+
+Moment 1 — The "wow" moment
+  User types: "What is your return policy for damaged items?"
+  Agent instantly responds with the exact policy text from the uploaded PDF,
+  citing the specific section. Response streamed in real-time.
+  Reaction: "It actually read the document and found the right answer."
+
+Moment 2 — The confidence score
+  Support manager opens a conversation thread.
+  Sees that the agent answered a question with 94% confidence.
+  Sees another question got 42% confidence — that's a knowledge gap.
+  They add a new Q&A source addressing that gap, retrain, confidence jumps to 91%.
+
+Moment 3 — The lead capture
+  Website visitor chats: "I'm interested in your Pro plan."
+  Agent explains features, then smoothly asks: "Can I get your name and email
+  so our team can reach out with a personalized demo?"
+  Lead captured, linked to the conversation, visible in the Leads tab.
+
+Moment 4 — The multi-channel win
+  Same agent answering on web widget, WhatsApp, and Slack simultaneously.
+  A customer on the website asks a question — answered in 2 seconds.
+  A WhatsApp message arrives at 11pm — answered instantly, no human needed.
+  A Slack message in #support — answered before anyone opens it.

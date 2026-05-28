@@ -1,0 +1,172 @@
+AGENVIK — POSITIONING, COMPETITORS & MESSAGING
+Source 3 of 3 for NotebookLM
+=================================================
+
+POSITIONING STATEMENT
+----------------------
+For businesses that answer the same support questions over and over,
+Agenvik is a no-code AI chatbot builder that trains on your own content
+and deploys across your website, WhatsApp, and Slack in under 10 minutes.
+
+Unlike generic AI tools or scripted chatbots,
+Agenvik gives you a grounded AI that only answers from your knowledge base —
+accurate, on-brand, and always available.
+
+
+CATEGORY
+---------
+AI Customer Support Automation / Knowledge Base Chatbot Builder / RAG-as-a-Service
+
+
+TARGET AUDIENCE
+----------------
+Primary: SaaS founders and customer success leads at companies with 5-100 employees
+Secondary: E-commerce store owners, digital agencies, HR managers at mid-size companies
+Jobs to be done:
+  - Reduce support ticket volume without hiring more agents
+  - Be available 24/7 for customer questions
+  - Qualify and capture leads on the website
+  - Build a multi-channel presence without engineering effort
+
+
+COMPETITIVE LANDSCAPE
+----------------------
+
+VS. INTERCOM / ZENDESK AI
+  Intercom and Zendesk are full customer support platforms (ticketing, CRM, live chat).
+  Their AI features are add-ons to expensive platforms starting at $100-300+/month.
+  They require a lot of setup and are overkill for small teams.
+  Agenvik: purpose-built for AI-first support. Simpler, cheaper, faster to set up.
+  Agenvik wins on: price, simplicity, setup time, multi-channel from day one.
+
+VS. TIDIO / CRISP / FRESHCHAT
+  These are live chat tools with basic chatbot builders.
+  Their "AI" is mostly rule-based or keyword-matching — not true RAG.
+  They don't train on your specific knowledge base deeply.
+  Agenvik: real RAG (retrieval-augmented generation) with OpenAI embeddings.
+  Agenvik wins on: answer quality, knowledge base depth, multi-channel.
+
+VS. CHATBASE / CUSTOMGPT / SITEGPT
+  These are the closest direct competitors — RAG chatbot builders.
+  Most of them only deploy to web. WhatsApp/Slack integrations are limited or paid extras.
+  Some lack analytics, lead capture, or behavior customization.
+  Agenvik wins on: multi-channel (web + WhatsApp + Slack in one), richer analytics, lead capture.
+
+VS. BUILDING IN-HOUSE
+  Companies with engineering resources might build their own RAG chatbot.
+  Reality: building + maintaining embeddings, chunking, retrieval, streaming, multi-channel,
+  analytics, billing, and a management dashboard takes 3-6 months of eng time.
+  Agenvik is ready in 10 minutes and maintained for you.
+  Agenvik wins on: time to market, maintenance burden, total cost.
+
+VS. CHATGPT / CLAUDE DIRECTLY
+  People sometimes use AI chat tools manually for support. This doesn't scale.
+  These tools have no knowledge of your specific product.
+  Agenvik wins on: trained on your content, deployable, automated, branded.
+
+
+KEY DIFFERENTIATORS (ranked by importance)
+--------------------------------------------
+1. Multi-channel from one agent
+   Train once, deploy to web + WhatsApp + Slack. Most competitors do web only.
+
+2. Grounded AI (no hallucination)
+   Answers only from what you uploaded. Falls back gracefully when it doesn't know.
+
+3. No-code, 10-minute setup
+   Non-technical founders can set up a production-ready agent without any engineering.
+
+4. Real-time streaming responses
+   Feels fast and modern. Responses stream token-by-token, not after a 5-second wait.
+
+5. Rich analytics on paid plans
+   Sentiment, topics, confidence scores, country reach — tells you what your customers need.
+
+6. Lead capture built in
+   Convert support conversations into sales leads without a separate tool.
+
+7. Transparent confidence scoring
+   Every AI response includes a confidence score, so you know when to add more knowledge.
+
+
+MESSAGING PILLARS
+------------------
+Pillar 1: ACCURACY
+  "Your AI knows your business, not the entire internet."
+  The agent only answers from your content. No made-up answers. No off-topic tangents.
+
+Pillar 2: SIMPLICITY
+  "10 minutes from signup to live AI agent."
+  No coding, no training data labeling, no ML knowledge required.
+  Upload, train, embed. Done.
+
+Pillar 3: EVERYWHERE
+  "One agent. Web. WhatsApp. Slack."
+  Meet customers wherever they are. Don't make them come to you.
+
+Pillar 4: INSIGHT
+  "Know what your customers are really asking."
+  Analytics reveal knowledge gaps, sentiment trends, and top topics — so you keep improving.
+
+
+HEADLINE OPTIONS (for demo video / landing page)
+-------------------------------------------------
+- "Your AI support agent. Trained on your content. Live in 10 minutes."
+- "Stop answering the same questions. Let AI handle it."
+- "Train once. Deploy everywhere. Answer everything."
+- "The AI chatbot that actually knows your product."
+- "Build an AI support agent. No code. No engineers. 10 minutes."
+
+
+CALL TO ACTION OPTIONS
+-----------------------
+- "Start for free at agenvik.com"
+- "Build your first agent free — agenvik.com"
+- "Try it free. Your first agent is free forever."
+- "Get started free. No credit card required."
+
+
+DEMO VIDEO NARRATIVE ARC
+--------------------------
+Act 1 — The pain (0-15s)
+  Open with: "Your support team is drowning in the same questions. Again."
+  Show: An inbox full of repetitive tickets. A chat widget with no reply.
+  Emotion: frustration, recognition
+
+Act 2 — The reveal (15-35s)
+  "What if you could train an AI on your exact knowledge — and deploy it in 10 minutes?"
+  Show: Agenvik dashboard loading, clean and modern
+  Emotion: curiosity, relief
+
+Act 3 — The demo (35-80s)
+  Walk through: Create agent → Add PDF + Q&A → Click Train → Customize behavior → Enable web channel
+  Show the live preview answering a real question
+  Emotion: confidence, excitement
+
+Act 4 — The scale (80-95s)
+  Show: Same agent live on a website, answering on WhatsApp, answering in Slack
+  Show: Analytics page — conversations, sentiment, topics
+  Emotion: ambition, FOMO
+
+Act 5 — CTA (95-105s)
+  "Agenvik. Train once. Deploy everywhere."
+  "Start free at agenvik.com"
+  Emotion: action
+
+
+TONE GUIDE FOR VIDEO NARRATION
+--------------------------------
+- Confident, not arrogant
+- Conversational, not salesy
+- Specific, not vague ("10 minutes" not "quickly")
+- Benefit-first, not feature-first ("answer every question" not "RAG pipeline")
+- Short sentences. Active voice.
+- No buzzwords: avoid "revolutionary", "game-changing", "leverage", "synergy"
+
+
+SOCIAL PROOF HOOKS (hypothetical, for script writing)
+-------------------------------------------------------
+- "Support teams using Agenvik deflect 60-80% of repetitive tickets"
+- "Average setup time: 8 minutes from signup to first live response"
+- "Used by SaaS companies, e-commerce stores, and agencies"
+- "Agents answer questions in under 2 seconds, 24/7"

@@ -160,8 +160,9 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <slot />
 
     <script>
+      const channelId = import.meta.env.PUBLIC_CHANNEL_ID;
       window.AgenvikChat = {
-        channelId: "puh1ds4ejx477pcp4ojm8rv1",
+        channelId: channelId,
         primaryColor: "#301B69",
       };
     </script>

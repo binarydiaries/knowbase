@@ -1,4 +1,4 @@
-import { countDistinct, desc, eq, max, sql } from 'drizzle-orm';
+import { desc, eq, max, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { conversations } from '../../db/schema/conversations';
@@ -17,8 +17,8 @@ export abstract class AdminOrgsOverviewService {
     const rows = await db
       .select({
         orgId: agents.orgId,
-        agentCount: countDistinct(agents.id),
-        conversationCount: countDistinct(conversations.id),
+        agentCount: sql<number>`cast(count(distinct ${agents.id}) as int)`,
+        conversationCount: sql<number>`cast(count(distinct ${conversations.id}) as int)`,
         messageCount: sql<number>`cast(count(${messages.id}) as int)`,
         lastActiveAt: max(conversations.lastMessageAt),
       })

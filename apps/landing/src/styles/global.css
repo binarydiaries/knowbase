@@ -100,3 +100,9 @@
 .blog-prose a:hover {
   color: #b07cd1;
 }
+
+.blog-prose hr {
+  border: none;
+  border-top: 1px solid rgb(48 27 105 / 0.12);
+  margin: 2rem 0;
+}

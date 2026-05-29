@@ -67,7 +67,7 @@ Every buyer asks the same questions. And every day, you type the same answers �
 
 **The fix:** Pre-set answers to your 10 most common questions. Your assistant sends them instantly. You only step in when a buyer asks something specific — something that actually needs your expertise.
 
-*Agenvik handles your 10 repeat questions automatically, so you can focus on conversations that actually need you.* [See how it works →](https://app.agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
+*Agenvik handles your 10 repeat questions automatically, so you can focus on conversations that actually need you.* [See how it works →](https://agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
 
 ---
 
@@ -93,7 +93,7 @@ If you're not following up, you're invisible.
 
 **The fix:** A gentle follow-up when a buyer goes quiet — *"Hi, just checking in. Still interested in the property? Happy to answer any questions."* — sent automatically on day three and day seven. No extra charges. No manual work. You set it up once; it runs on its own.
 
-*Set up automatic follow-ups for your listings.* [Start free →](https://app.agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
+*Set up automatic follow-ups for your listings.* [Start free →](https://agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
 
 ---
 
@@ -109,7 +109,7 @@ Total setup: under 15 minutes. After that, it runs itself.
 
 **Free trial. No credit card. No setup fees.**
 
-[**Try Agenvik Free →**](https://app.agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
+[**Try Agenvik Free →**](https://agenvik.com?utm_source=blog&utm_medium=organic&utm_campaign=whatsapp-leads)
 
 ---
 
@@ -119,7 +119,7 @@ Total setup: under 15 minutes. After that, it runs itself.
 
 ### Publishing checklist
 
-- [ ] Replace `app.agenvik.com` with your actual trial/signup URL (appears 3× above)
+- [ ] Replace `agenvik.com` with your actual trial/signup URL (appears 3× above)
 - [ ] **Medium:** Paste this entire file, set canonical URL to `https://agenvik.com/blog/how-to-stop-losing-real-estate-leads-whatsapp` under Settings → Advanced
 - [ ] **Medium tags:** Real Estate, WhatsApp, India, Real Estate India, Lead Generation
 - [ ] **Landing blog:** already live at `/blog/how-to-stop-losing-real-estate-leads-whatsapp` (auto-picked up by Astro's `getCollection`)

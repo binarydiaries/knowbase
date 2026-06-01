@@ -246,19 +246,27 @@ export const orgSubscriptions = pgTable('org_subscriptions', {
   id: cuid2PrimaryKey,
   orgId: varchar({ length: 64 }).notNull(),
   plan: text().notNull().default('free'),
+  /** "active" = paid plan; everything else treated as free */
+  status: text().notNull().default('free'),
   ...timestamps,
 });
 
 // ── orgUsageMonthly ───────────────────────────────────────────────────────────
 
-export const orgUsageMonthly = pgTable('org_usage_monthly', {
-  id: cuid2PrimaryKey,
-  orgId: varchar({ length: 64 }).notNull(),
-  year: integer().notNull(),
-  month: integer().notNull(),
-  assistantMessages: integer().notNull().default(0),
-  ...timestamps,
-});
+export const orgUsageMonthly = pgTable(
+  'org_usage_monthly',
+  {
+    id: cuid2PrimaryKey,
+    orgId: varchar({ length: 64 }).notNull(),
+    /** Format: "YYYY-MM" (UTC), e.g. "2025-06" */
+    monthKey: text().notNull(),
+    assistantMessages: integer().notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [
+    index('org_usage_monthly_org_month_unique').on(t.orgId, t.monthKey),
+  ],
+);
 
 // ── aiCostEvents ──────────────────────────────────────────────────────────────
 

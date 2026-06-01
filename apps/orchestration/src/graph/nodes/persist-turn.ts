@@ -1,4 +1,5 @@
 import { AIMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db/index.js';
@@ -6,22 +7,29 @@ import {
   aiCostEvents,
   conversations,
   messages,
+  orgSubscriptions,
   orgUsageMonthly,
 } from '../../db/schema.js';
 import { computeConfidenceScore } from '../../rag/retrieval.js';
-import type { AgentState, AgentStateUpdate } from '../state.js';
-
-// ── Sentiment scoring ─────────────────────────────────────────────────────────
-
 import { createNanoLlm } from '../../integrations/llm.js';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { AgentState, AgentStateUpdate } from '../state.js';
 
 const nanoLlm = createNanoLlm();
 
-async function scoreSentiment(text: string): Promise<{ label: 'positive' | 'neutral' | 'negative'; score: number } | null> {
+function getUtcMonthKey(date = new Date()): string {
+  return date.toISOString().slice(0, 7); // "YYYY-MM"
+}
+
+// ── Sentiment scoring ─────────────────────────────────────────────────────────
+
+async function scoreSentiment(
+  text: string,
+): Promise<{ label: 'positive' | 'neutral' | 'negative'; score: number } | null> {
   try {
     const result = await nanoLlm.invoke([
-      new SystemMessage('Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1. Respond with JSON only: {"label":"positive|neutral|negative","score":0.0}'),
+      new SystemMessage(
+        'Classify the sentiment of this AI assistant response as positive, neutral, or negative, and give a confidence score between 0 and 1. Respond with JSON only: {"label":"positive|neutral|negative","score":0.0}',
+      ),
       new HumanMessage(`"${text}"`),
     ]);
     const raw = typeof result.content === 'string' ? result.content.trim() : '';
@@ -38,7 +46,9 @@ async function scoreSentiment(text: string): Promise<{ label: 'positive' | 'neut
 async function detectTopic(firstUserMessage: string): Promise<string | null> {
   try {
     const result = await nanoLlm.invoke([
-      new HumanMessage(`In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${firstUserMessage}"`),
+      new HumanMessage(
+        `In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${firstUserMessage}"`,
+      ),
     ]);
     const raw = typeof result.content === 'string' ? result.content.trim() : '';
     return raw.replace(/^["']|["']$/g, '') || null;
@@ -61,18 +71,20 @@ async function lookupCountry(ip: string | undefined): Promise<string | null> {
   }
 }
 
-// ── Plan check (simplified: org_subscriptions) ────────────────────────────────
+// ── Plan check ────────────────────────────────────────────────────────────────
 
 async function isFreePlan(orgId: string): Promise<boolean> {
   try {
-    const rows = await db
-      .select({ plan: sql<string>`plan` })
-      .from(sql`org_subscriptions`)
-      .where(sql`org_id = ${orgId}`)
-      .limit(1);
-    return (rows[0] as { plan?: string })?.plan === 'free';
+    const row = await db
+      .select({ status: orgSubscriptions.status })
+      .from(orgSubscriptions)
+      .where(eq(orgSubscriptions.orgId, orgId))
+      .limit(1)
+      .then((rows) => rows[0]);
+    // Paid plans have status = 'active'. Everything else (free, cancelled, etc.) is treated as free.
+    return row?.status !== 'active';
   } catch {
-    return true; // default to free on error
+    return true;
   }
 }
 
@@ -101,14 +113,14 @@ export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> 
   const sentiment = !free ? await scoreSentiment(response) : null;
 
   // ── Conversation upsert ───────────────────────────────────────────────────
-  const existingConversation = await db
-    .select({ id: conversations.id, createdAt: conversations.createdAt })
+  const existing = await db
+    .select({ id: conversations.id })
     .from(conversations)
     .where(eq(conversations.id, conversationId))
     .limit(1)
     .then((rows) => rows[0]);
 
-  const isNew = !existingConversation;
+  const isNew = !existing;
 
   if (isNew) {
     await db.insert(conversations).values({
@@ -163,29 +175,34 @@ export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> 
     },
   ]);
 
-  // ── Usage tracking ────────────────────────────────────────────────────────
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
+  // ── Usage tracking (same pattern as OrgUsageMonthlyService) ──────────────
+  const monthKey = getUtcMonthKey(now);
   await db
     .insert(orgUsageMonthly)
-    .values({ id: createId(), orgId, year, month, assistantMessages: 1 })
-    .onConflictDoUpdate({
-      target: [orgUsageMonthly.orgId, orgUsageMonthly.year, orgUsageMonthly.month],
-      set: { assistantMessages: sql`${orgUsageMonthly.assistantMessages} + 1` },
+    .values({ id: createId(), orgId, monthKey, assistantMessages: 0 })
+    .onConflictDoNothing();
+  await db
+    .update(orgUsageMonthly)
+    .set({
+      assistantMessages: sql`${orgUsageMonthly.assistantMessages} + 1`,
+      updatedAt: now,
     })
-    .catch(() => {});
+    .where(and(eq(orgUsageMonthly.orgId, orgId), eq(orgUsageMonthly.monthKey, monthKey)));
 
   // ── Fire-and-forget enrichment (new conversations, paid plans) ────────────
   if (isNew && !free) {
     void (async () => {
-      const [country, topic] = await Promise.allSettled([
+      const [countryResult, topicResult] = await Promise.allSettled([
         lookupCountry(ip),
         detectTopic(userMessage),
       ]);
       const updates: Record<string, unknown> = {};
-      if (country.status === 'fulfilled' && country.value) updates.country = country.value;
-      if (topic.status === 'fulfilled' && topic.value) updates.topic = topic.value;
+      if (countryResult.status === 'fulfilled' && countryResult.value) {
+        updates.country = countryResult.value;
+      }
+      if (topicResult.status === 'fulfilled' && topicResult.value) {
+        updates.topic = topicResult.value;
+      }
       if (Object.keys(updates).length > 0) {
         await db
           .update(conversations)

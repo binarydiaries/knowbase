@@ -17,6 +17,8 @@ import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
 import { featureFlagDefinitions } from './featureFlagDefinitions';
 import { orgFeatureFlags } from './orgFeatureFlags';
+import { workflows } from './workflows';
+import { workflowActions } from './workflowActions';
 
 export const relations = defineRelations(
   {
@@ -38,6 +40,8 @@ export const relations = defineRelations(
     slackConnections,
     featureFlagDefinitions,
     orgFeatureFlags,
+    workflows,
+    workflowActions,
   },
   (r) => ({
     agents: {
@@ -60,6 +64,10 @@ export const relations = defineRelations(
       leads: r.many.leads({
         from: r.agents.id,
         to: r.leads.agentId,
+      }),
+      workflows: r.many.workflows({
+        from: r.agents.id,
+        to: r.workflows.agentId,
       }),
     },
     documents: {
@@ -120,6 +128,22 @@ export const relations = defineRelations(
       channel: r.one.channels({
         from: r.leads.channelId,
         to: r.channels.id,
+      }),
+    },
+    workflows: {
+      agent: r.one.agents({
+        from: r.workflows.agentId,
+        to: r.agents.id,
+      }),
+      actions: r.many.workflowActions({
+        from: r.workflows.id,
+        to: r.workflowActions.workflowId,
+      }),
+    },
+    workflowActions: {
+      workflow: r.one.workflows({
+        from: r.workflowActions.workflowId,
+        to: r.workflows.id,
       }),
     },
     orgUsageDaily: {},

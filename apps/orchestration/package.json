@@ -1,0 +1,35 @@
+{
+  "name": "example-graph",
+  "version": "0.0.1",
+  "description": "A starter template for creating a LangGraph workflow.",
+  "packageManager": "yarn@1.22.22",
+  "main": "my_app/graph.ts",
+  "author": "Your Name",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx @langchain/langgraph-cli dev",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=\\.test\\.ts$ --testPathIgnorePatterns=\\.int\\.test\\.ts$",
+    "test:int": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=\\.int\\.test\\.ts$"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.36",
+    "@langchain/langgraph": "^1.2.5",
+    "zod": "^4.3.6"
+  },
+  "resolutions": {
+    "**/filelist/minimatch": "5.1.8"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.13",
+    "@types/jest": "^29.5.0",
+    "dotenv": "^17.3.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  }
+}

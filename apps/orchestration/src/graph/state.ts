@@ -1,5 +1,5 @@
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
-import type { BaseMessage } from '@langchain/core/messages';
+import type {BaseMessage, BaseMessageLike} from '@langchain/core/messages';
 
 /**
  * Explicit input schema — only `messages` is required from the caller.
@@ -7,7 +7,7 @@ import type { BaseMessage } from '@langchain/core/messages';
  * All other state fields are computed by the graph nodes.
  */
 export const InputAnnotation = Annotation.Root({
-  messages: Annotation<BaseMessage[], BaseMessage[]>({
+  messages: Annotation<BaseMessage[], BaseMessageLike[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),

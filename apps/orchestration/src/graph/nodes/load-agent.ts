@@ -1,5 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { IInternalState, IInternalUpdate } from '../../agent/state.js';
+import type { IInternalState, IInternalUpdate } from '../state.js';
 
 export async function loadAgent(
   _state: IInternalState,

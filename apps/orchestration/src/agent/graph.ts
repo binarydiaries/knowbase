@@ -4,7 +4,7 @@
  */
 import { StateGraph } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
-import {inputStateSchema, internalStateSchema, outputStateSchema} from "./state.js";
+import {graphConfigSchema, inputStateSchema, internalStateSchema, outputStateSchema} from "./state.js";
 
 /**
  * Define a node, these do the work of the graph and should have most of the logic.
@@ -89,6 +89,7 @@ const builder = new StateGraph({
   input: inputStateSchema,
   output: outputStateSchema,
   state: internalStateSchema,
+  context: graphConfigSchema,
 })
   // Add the nodes to do the work.
   // Chaining the nodes together in this way

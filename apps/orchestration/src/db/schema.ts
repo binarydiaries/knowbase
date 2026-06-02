@@ -1,6 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
 import {
-  boolean,
   index,
   integer,
   jsonb,
@@ -268,28 +267,3 @@ export const orgUsageMonthly = pgTable(
   ],
 );
 
-// ── aiCostEvents ──────────────────────────────────────────────────────────────
-
-export const aiCostEvents = pgTable('ai_cost_events', {
-  id: cuid2PrimaryKey,
-  orgId: varchar({ length: 64 }).notNull(),
-  agentId: text(),
-  conversationId: text(),
-  provider: text().notNull(),
-  model: text().notNull(),
-  inputTokens: integer().notNull().default(0),
-  outputTokens: integer().notNull().default(0),
-  metadata: jsonb().$type<Record<string, unknown>>().default({}),
-  ...timestamps,
-});
-
-// ── agentActions (legacy — kept for backward compat) ─────────────────────────
-
-export const agentActions = pgTable('agent_actions', {
-  id: cuid2PrimaryKey,
-  agentId: text().notNull().references(() => agents.id, { onDelete: 'cascade' }),
-  actionType: text().notNull(),
-  enabled: boolean().notNull().default(true),
-  config: jsonb().notNull().default({}),
-  ...timestamps,
-});

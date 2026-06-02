@@ -1,6 +1,20 @@
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
 
+/**
+ * Explicit input schema — only `messages` is required from the caller.
+ * LangGraph Studio uses this to show the chat input box instead of `{}`.
+ * All other state fields are computed by the graph nodes.
+ */
+export const InputAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[], BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+});
+
+// ── Domain types ─────────────────────────────────────────────────────────────
+
 export type AgentConfig = {
   systemPrompt: string;
   tone: string;
@@ -53,40 +67,19 @@ function mergeEntities(
   return merged;
 }
 
+// ── State annotation ─────────────────────────────────────────────────────────
+// Only graph-computed data lives here. Runtime identifiers (agentId, orgId,
+// conversationId, channelId, ip) live in configurable so the simulator works
+// with just { messages: [...] }.
+
 export const AgentStateAnnotation = Annotation.Root({
-  // ── Conversation ─────────────────────────────────────────────────────────
+  // ── Messages (the only required input) ────────────────────────────────────
   messages: Annotation<BaseMessage[], BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
-  conversationId: Annotation<string>({
-    reducer: (_, next) => next,
-    default: () => '',
-  }),
-  agentId: Annotation<string>({
-    reducer: (_, next) => next,
-    default: () => '',
-  }),
-  orgId: Annotation<string>({
-    reducer: (_, next) => next,
-    default: () => '',
-  }),
-  channelId: Annotation<string>({
-    reducer: (_, next) => next,
-    default: () => '',
-  }),
-  /** Raw user message (before reference resolution) */
-  userMessage: Annotation<string>({
-    reducer: (_, next) => next,
-    default: () => '',
-  }),
-  /** IP address for geo enrichment */
-  ip: Annotation<string | undefined>({
-    reducer: (_, next) => next,
-    default: () => undefined,
-  }),
 
-  // ── Loaded config ─────────────────────────────────────────────────────────
+  // ── Loaded agent config (set by loadAgent node) ───────────────────────────
   agentConfig: Annotation<AgentConfig | undefined>({
     reducer: (_, next) => next,
     default: () => undefined,
@@ -106,7 +99,7 @@ export const AgentStateAnnotation = Annotation.Root({
     default: () => undefined,
   }),
 
-  // ── Entity accumulation ───────────────────────────────────────────────────
+  // ── Entity accumulation (across turns) ───────────────────────────────────
   entities: Annotation<Record<string, unknown>>({
     reducer: mergeEntities,
     default: () => ({}),
@@ -117,6 +110,7 @@ export const AgentStateAnnotation = Annotation.Root({
   }),
 
   // ── RAG ───────────────────────────────────────────────────────────────────
+  /** Query after reference resolution — used for vector search */
   finalQuery: Annotation<string | undefined>({
     reducer: (_, next) => next,
     default: () => undefined,
@@ -126,13 +120,13 @@ export const AgentStateAnnotation = Annotation.Root({
     default: () => [],
   }),
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // ── Action results ────────────────────────────────────────────────────────
   actionResults: Annotation<Record<string, ActionResult>>({
     reducer: (existing, incoming) => ({ ...existing, ...incoming }),
     default: () => ({}),
   }),
 
-  // ── Output ────────────────────────────────────────────────────────────────
+  // ── Final response ────────────────────────────────────────────────────────
   response: Annotation<string | undefined>({
     reducer: (_, next) => next,
     default: () => undefined,
@@ -141,3 +135,11 @@ export const AgentStateAnnotation = Annotation.Root({
 
 export type AgentState = typeof AgentStateAnnotation.State;
 export type AgentStateUpdate = typeof AgentStateAnnotation.Update;
+
+// ── Helper: extract raw text from the last human message in state ─────────────
+export function getLastUserMessage(state: AgentState): string {
+  const lastMsg = [...state.messages].reverse().find(
+    (m) => m.getType() === 'human',
+  );
+  return typeof lastMsg?.content === 'string' ? lastMsg.content : '';
+}

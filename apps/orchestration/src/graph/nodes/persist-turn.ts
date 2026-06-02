@@ -1,17 +1,12 @@
-import { AIMessage } from '@langchain/core/messages';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db/index.js';
-import {
-  aiCostEvents,
-  conversations,
-  messages,
-  orgSubscriptions,
-  orgUsageMonthly,
-} from '../../db/schema.js';
-import { computeConfidenceScore } from '../../rag/retrieval.js';
+import { conversations, messages, orgSubscriptions, orgUsageMonthly } from '../../db/schema.js';
 import { createNanoLlm } from '../../integrations/llm.js';
+import { computeConfidenceScore } from '../../rag/retrieval.js';
+import { getLastUserMessage } from '../state.js';
 import type { AgentState, AgentStateUpdate } from '../state.js';
 
 const nanoLlm = createNanoLlm();
@@ -19,8 +14,6 @@ const nanoLlm = createNanoLlm();
 function getUtcMonthKey(date = new Date()): string {
   return date.toISOString().slice(0, 7); // "YYYY-MM"
 }
-
-// ── Sentiment scoring ─────────────────────────────────────────────────────────
 
 async function scoreSentiment(
   text: string,
@@ -41,13 +34,11 @@ async function scoreSentiment(
   }
 }
 
-// ── Topic enrichment ──────────────────────────────────────────────────────────
-
-async function detectTopic(firstUserMessage: string): Promise<string | null> {
+async function detectTopic(message: string): Promise<string | null> {
   try {
     const result = await nanoLlm.invoke([
       new HumanMessage(
-        `In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${firstUserMessage}"`,
+        `In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${message}"`,
       ),
     ]);
     const raw = typeof result.content === 'string' ? result.content.trim() : '';
@@ -56,8 +47,6 @@ async function detectTopic(firstUserMessage: string): Promise<string | null> {
     return null;
   }
 }
-
-// ── Geo enrichment ────────────────────────────────────────────────────────────
 
 async function lookupCountry(ip: string | undefined): Promise<string | null> {
   if (!ip || ip === '127.0.0.1' || ip === '::1') return null;
@@ -71,8 +60,6 @@ async function lookupCountry(ip: string | undefined): Promise<string | null> {
   }
 }
 
-// ── Plan check ────────────────────────────────────────────────────────────────
-
 async function isFreePlan(orgId: string): Promise<boolean> {
   try {
     const row = await db
@@ -81,35 +68,27 @@ async function isFreePlan(orgId: string): Promise<boolean> {
       .where(eq(orgSubscriptions.orgId, orgId))
       .limit(1)
       .then((rows) => rows[0]);
-    // Paid plans have status = 'active'. Everything else (free, cancelled, etc.) is treated as free.
     return row?.status !== 'active';
   } catch {
     return true;
   }
 }
 
-// ── Main persistTurn node ─────────────────────────────────────────────────────
+export async function persistTurn(state: AgentState, config: RunnableConfig): Promise<AgentStateUpdate> {
+  // thread_id is LangGraph's built-in key — it IS the conversationId
+  const conversationId = config.configurable?.thread_id as string;
+  const agentId = config.configurable?.agentId as string;
+  const channelId = config.configurable?.channelId as string;
+  const orgId = config.configurable?.orgId as string;
+  const ip = config.configurable?.ip as string | undefined;
 
-export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> {
-  const {
-    conversationId,
-    agentId,
-    channelId,
-    orgId,
-    userMessage,
-    finalQuery,
-    response,
-    ragChunks,
-    entities,
-    ip,
-  } = state;
+  const { response, ragChunks, entities, finalQuery } = state;
+  const userMessage = getLastUserMessage(state);
 
-  if (!response) return {};
+  if (!response || !conversationId || !agentId || !orgId) return {};
 
   const now = new Date();
   const free = await isFreePlan(orgId);
-
-  // ── Sentiment (paid plans only) ───────────────────────────────────────────
   const sentiment = !free ? await scoreSentiment(response) : null;
 
   // ── Conversation upsert ───────────────────────────────────────────────────
@@ -175,7 +154,7 @@ export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> 
     },
   ]);
 
-  // ── Usage tracking (same pattern as OrgUsageMonthlyService) ──────────────
+  // ── Usage tracking ────────────────────────────────────────────────────────
   const monthKey = getUtcMonthKey(now);
   await db
     .insert(orgUsageMonthly)
@@ -183,13 +162,10 @@ export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> 
     .onConflictDoNothing();
   await db
     .update(orgUsageMonthly)
-    .set({
-      assistantMessages: sql`${orgUsageMonthly.assistantMessages} + 1`,
-      updatedAt: now,
-    })
+    .set({ assistantMessages: sql`${orgUsageMonthly.assistantMessages} + 1`, updatedAt: now })
     .where(and(eq(orgUsageMonthly.orgId, orgId), eq(orgUsageMonthly.monthKey, monthKey)));
 
-  // ── Fire-and-forget enrichment (new conversations, paid plans) ────────────
+  // ── Fire-and-forget enrichment (new conversations, paid plans only) ────────
   if (isNew && !free) {
     void (async () => {
       const [countryResult, topicResult] = await Promise.allSettled([
@@ -197,12 +173,8 @@ export async function persistTurn(state: AgentState): Promise<AgentStateUpdate> 
         detectTopic(userMessage),
       ]);
       const updates: Record<string, unknown> = {};
-      if (countryResult.status === 'fulfilled' && countryResult.value) {
-        updates.country = countryResult.value;
-      }
-      if (topicResult.status === 'fulfilled' && topicResult.value) {
-        updates.topic = topicResult.value;
-      }
+      if (countryResult.status === 'fulfilled' && countryResult.value) updates.country = countryResult.value;
+      if (topicResult.status === 'fulfilled' && topicResult.value) updates.topic = topicResult.value;
       if (Object.keys(updates).length > 0) {
         await db
           .update(conversations)

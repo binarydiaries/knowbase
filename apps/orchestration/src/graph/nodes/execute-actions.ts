@@ -1,3 +1,4 @@
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { executeSaveLead } from '../../actions/save-lead.js';
 import { executeApiTrigger } from '../../actions/api-trigger.js';
 import { executeCalendarBooking } from '../../actions/calendar-booking.js';
@@ -35,12 +36,14 @@ async function executeAction(
   }
 }
 
-export async function executeActions(state: AgentState): Promise<AgentStateUpdate> {
-  const { activeWorkflow, agentId, conversationId, channelId, orgId, entities } = state;
+export async function executeActions(state: AgentState, config: RunnableConfig): Promise<AgentStateUpdate> {
+  const { activeWorkflow, entities } = state;
+  const agentId = (config.configurable?.agentId as string) ?? '';
+  const conversationId = (config.configurable?.thread_id as string) ?? '';  // thread_id = conversationId
+  const channelId = (config.configurable?.channelId as string) ?? '';
+  const orgId = (config.configurable?.orgId as string) ?? '';
 
-  if (!activeWorkflow || activeWorkflow.actions.length === 0) {
-    return {};
-  }
+  if (!activeWorkflow || activeWorkflow.actions.length === 0) return {};
 
   const ctx: ActionContext = { agentId, conversationId, channelId, orgId, entities };
   const results: Record<string, ActionResult> = {};
@@ -52,12 +55,9 @@ export async function executeActions(state: AgentState): Promise<AgentStateUpdat
       ),
     );
     for (const s of settled) {
-      if (s.status === 'fulfilled') {
-        results[s.value.id] = s.value.result;
-      }
+      if (s.status === 'fulfilled') results[s.value.id] = s.value.result;
     }
   } else {
-    // Sequential: each action receives prior results
     for (const action of activeWorkflow.actions) {
       results[action.id] = await executeAction(action, ctx, results);
     }

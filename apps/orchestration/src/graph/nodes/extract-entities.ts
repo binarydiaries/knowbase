@@ -1,34 +1,25 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { createNanoLlm } from '../../integrations/llm.js';
+import { getLastUserMessage } from '../state.js';
 import type { AgentState, AgentStateUpdate } from '../state.js';
 
 const llm = createNanoLlm();
 
-const SYSTEM_PROMPT = `You are an entity extractor. Your job is to extract structured information from a user's message.
+const SYSTEM_PROMPT = `You are an entity extractor. Extract structured information from the user's message.
 
-Extract only factual values the user explicitly provides. Common entities include:
-- name (person's name)
-- email (email address)
-- phone (phone number)
-- company (company or organization name)
-- Any other identifiable data the user mentions
+Common entities: name, email, phone, company, orderId, or any other data the user explicitly provides.
 
 Rules:
-- Return a JSON object with the extracted entities
-- Only include entities that are clearly present in the message
-- Do NOT infer or assume values
+- Return a JSON object with extracted entities only
+- Only include values clearly stated in the message — never infer
+- Omit keys with no value (do not use null)
 - Return {} if nothing to extract
-- Never include the word "null" as a value — omit the key instead
 
 Respond with ONLY the JSON object, no explanation.`;
 
 export async function extractEntities(state: AgentState): Promise<AgentStateUpdate> {
-  const lastMessage = state.messages[state.messages.length - 1];
-  if (!lastMessage) return {};
-
-  const userContent = typeof lastMessage.content === 'string'
-    ? lastMessage.content
-    : '';
+  const userContent = getLastUserMessage(state);
+  if (!userContent) return {};
 
   try {
     const result = await llm.invoke([

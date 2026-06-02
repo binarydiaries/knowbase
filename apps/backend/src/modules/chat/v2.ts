@@ -73,12 +73,9 @@ async function invokeGraph({
   const result = await client.runs.wait(conversationId, 'agent', {
     input: {
       messages: [{ role: 'human', content: message }],
-      conversationId,
-      agentId,
-      channelId,
-      orgId,
-      userMessage: message,
-      ip,
+    },
+    config: {
+      configurable: { agentId, channelId, orgId, ip },
     },
   });
 
@@ -107,12 +104,9 @@ async function streamGraph({
   const stream = client.runs.stream(conversationId, 'agent', {
     input: {
       messages: [{ role: 'human', content: message }],
-      conversationId,
-      agentId,
-      channelId,
-      orgId,
-      userMessage: message,
-      ip,
+    },
+    config: {
+      configurable: { agentId, channelId, orgId, ip },
     },
     streamMode: 'values',
   });

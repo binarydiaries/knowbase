@@ -1,14 +1,14 @@
-import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createNanoLlm } from '../../integrations/llm.js';
+import { getLastUserMessage } from '../state.js';
 import type { AgentState, AgentStateUpdate } from '../state.js';
 
 const llm = createNanoLlm();
 
-/** Patterns that suggest a data-entry reply — skip reference resolution for these */
 const DATA_ENTRY_PATTERNS = [
   /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/, // email
-  /^\+?[\d\s\-().]{7,15}$/, // phone
-  /^(?:my )?name(?:\s+is)?\s*[:\-]?\s*.+$/i, // name prefix
+  /^\+?[\d\s\-().]{7,15}$/,                           // phone
+  /^(?:my )?name(?:\s+is)?\s*[:\-]?\s*.+$/i,          // name prefix
 ];
 
 function looksLikeDataEntry(message: string): boolean {
@@ -18,24 +18,21 @@ function looksLikeDataEntry(message: string): boolean {
 }
 
 export async function rewriteQuery(state: AgentState): Promise<AgentStateUpdate> {
-  const lastMessage = state.messages[state.messages.length - 1];
-  const userContent = typeof lastMessage?.content === 'string' ? lastMessage.content : '';
+  const userContent = getLastUserMessage(state);
 
   // Find the last assistant message for reference resolution
-  const priorMessages = state.messages.slice(0, -1);
-  const lastAssistant = [...priorMessages]
+  const lastAssistant = [...state.messages]
     .reverse()
     .find((m) => m instanceof AIMessage || m.getType() === 'ai');
-  const lastAssistantContent = lastAssistant
-    ? (typeof lastAssistant.content === 'string' ? lastAssistant.content : '')
-    : '';
+  const lastAssistantContent =
+    typeof lastAssistant?.content === 'string' ? lastAssistant.content : '';
 
-  // Skip reference resolution for data-entry responses
+  // Skip if no prior assistant turn, or message is a data-entry response
   if (!lastAssistantContent || looksLikeDataEntry(userContent)) {
     return { finalQuery: userContent };
   }
 
-  // Check if the message has any pronouns that need resolving
+  // Skip if no pronouns/references to resolve
   const referenceWords = /\b(that|it|they|this|those|these|there|its|their)\b/i;
   if (!referenceWords.test(userContent)) {
     return { finalQuery: userContent };

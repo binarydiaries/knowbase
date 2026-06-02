@@ -1,10 +1,15 @@
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db/index.js';
-import { agents, behaviors, workflows, workflowActions } from '../../db/schema.js';
+import { behaviors, workflows, workflowActions } from '../../db/schema.js';
 import type { AgentState, AgentStateUpdate, WorkflowDef } from '../state.js';
 
-export async function loadAgent(state: AgentState): Promise<AgentStateUpdate> {
-  const { agentId } = state;
+export async function loadAgent(state: AgentState, config: RunnableConfig): Promise<AgentStateUpdate> {
+  const agentId = config.configurable?.agentId as string;
+
+  if (!agentId) {
+    throw new Error('loadAgent: agentId is required in config.configurable');
+  }
 
   // Load behavior (system prompt, tone, etc.)
   const behavior = await db
@@ -18,7 +23,7 @@ export async function loadAgent(state: AgentState): Promise<AgentStateUpdate> {
     throw new Error(`No behavior found for agent ${agentId}`);
   }
 
-  // Load workflows + their actions for this agent
+  // Load workflows + their actions
   const rawWorkflows = await db
     .select()
     .from(workflows)

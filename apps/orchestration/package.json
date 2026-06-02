@@ -1,0 +1,29 @@
+{
+  "name": "@knowbase/orchestration",
+  "version": "0.0.1",
+  "description": "LangGraph orchestration server for Agenvik v2 chat",
+  "packageManager": "bun@1.2.12",
+  "main": "my_app/graph.ts",
+  "author": "Agenvik",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx @langchain/langgraph-cli@latest dev",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.48",
+    "@langchain/langgraph": "^1.3.3",
+    "zod": "^4.4.3"
+  },
+  "resolutions": {
+    "**/filelist/minimatch": "5.1.8"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.13",
+    "dotenv": "^17.4.2",
+    "typescript": "^6.0.3"
+  }
+}

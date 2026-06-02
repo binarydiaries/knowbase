@@ -4,7 +4,7 @@
  */
 import { StateGraph } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
-import { StateAnnotation } from "./state.js";
+import {StateAnnotation, stateSchema} from "./state.js";
 
 /**
  * Define a node, these do the work of the graph and should have most of the logic.
@@ -85,7 +85,7 @@ export const route = (
 };
 
 // Finally, create the graph itself.
-const builder = new StateGraph(StateAnnotation)
+const builder = new StateGraph(stateSchema)
   // Add the nodes to do the work.
   // Chaining the nodes together in this way
   // updates the types of the StateGraph instance

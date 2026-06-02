@@ -1,5 +1,5 @@
 {
-  "name": "@knowbase/orchestration",
+  "name": "@knowbase/orchestration2",
   "version": "0.0.1",
   "description": "LangGraph orchestration server for Agenvik v2 chat",
   "packageManager": "bun@1.2.12",

@@ -1,7 +1,8 @@
 import { MessagesValue, StateSchema} from "@langchain/langgraph";
 import { z } from "zod";
 
-const agentConfig = z.object().optional()
+
+const agentConfig = z.object({}).optional()
 
 export const inputStateSchema = new StateSchema({
   messages: MessagesValue,
@@ -22,4 +23,5 @@ export const graphConfigSchema = z.object({
   ip: z.string().optional().describe('Client IP address (for geo enrichment, optional)'),
 });
 
-export type IInternalStateSchema = typeof internalStateSchema;
+export type IInternalState = typeof internalStateSchema.State;
+export type IInternalUpdate = typeof internalStateSchema.Update;

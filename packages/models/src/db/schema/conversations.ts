@@ -7,8 +7,12 @@ export const conversations = pgTable(
   'conversations',
   {
     id: cuid2PrimaryKey,
-    agentId: text().notNull().references(() => agents.id),
-    channelId: text().notNull().references(() => channels.id),
+    agentId: text()
+      .notNull()
+      .references(() => agents.id),
+    channelId: text()
+      .notNull()
+      .references(() => channels.id),
     lastUserQuestion: text().notNull(),
     lastAssistantUtterance: text().notNull(),
     lastMessageAt: timestamp({ withTimezone: true }).notNull(),

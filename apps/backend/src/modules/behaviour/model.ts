@@ -1,36 +1,11 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import { BehaviourSchema, UpdateBehaviourBody } from '@knowbase/models/schemas';
 
-const BehaviourTone = z.enum(['friendly', 'professional', 'neutral']);
-const BehaviourVerbosity = z.enum(['short', 'balanced', 'detailed']);
+export { BehaviourSchema, UpdateBehaviourBody };
 
-export const BehaviourSchema = z.object({
-  id: z.string(),
-  agentId: z.string(),
-  systemPrompt: z.string(),
-  tone: BehaviourTone,
-  verbosity: BehaviourVerbosity,
-  fallbackMessage: z.string(),
-  guardrails: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-const OneBehaviourResponse = z.object({
-  behaviour: BehaviourSchema,
-});
-
-const ManyBehaviourResponse = z.object({
-  behaviours: z.array(BehaviourSchema),
-});
-
-export const UpdateBehaviourBody = BehaviourSchema.pick({
-  tone: true,
-  systemPrompt: true,
-  guardrails: true,
-  verbosity: true,
-  fallbackMessage: true,
-}).partial();
+const OneBehaviourResponse = z.object({ behaviour: BehaviourSchema });
+const ManyBehaviourResponse = z.object({ behaviours: z.array(BehaviourSchema) });
 
 export const BehaviourModel = new Elysia().model({
   UpdateBehaviourBody,

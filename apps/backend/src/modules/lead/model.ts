@@ -1,20 +1,8 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import { LeadSchema } from '@knowbase/models/schemas';
 
-export const LeadSchema = z.object({
-  id: z.string(),
-  agentId: z.string(),
-  conversationId: z.string().nullable(),
-  channelId: z.string().nullable(),
-  orgId: z.string(),
-  name: z.string().nullable(),
-  email: z.string().nullable(),
-  phone: z.string().nullable(),
-  company: z.string().nullable(),
-  customFields: z.record(z.string(), z.string()),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export { LeadSchema };
 
 const LeadWithRelationsSchema = LeadSchema.extend({
   agent: z.object({ id: z.string(), name: z.string() }).nullable(),

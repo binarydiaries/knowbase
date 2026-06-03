@@ -9,7 +9,9 @@ export const channels = pgTable(
   'channels',
   {
     id: cuid2PrimaryKey,
-    agentId: text().notNull().references(() => agents.id),
+    agentId: text()
+      .notNull()
+      .references(() => agents.id),
     type: channelType().notNull(),
     enabled: boolean().notNull().default(false),
     config: jsonb().$type<object>().notNull(),

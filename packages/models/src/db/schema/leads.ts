@@ -8,7 +8,9 @@ export const leads = pgTable(
   'leads',
   {
     id: cuid2PrimaryKey,
-    agentId: text().notNull().references(() => agents.id, { onDelete: 'cascade' }),
+    agentId: text()
+      .notNull()
+      .references(() => agents.id, { onDelete: 'cascade' }),
     conversationId: text().references(() => conversations.id, { onDelete: 'set null' }),
     channelId: text().references(() => channels.id, { onDelete: 'set null' }),
     orgId: varchar({ length: 64 }).notNull(),

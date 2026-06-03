@@ -35,7 +35,9 @@ export const workflowActions = pgTable(
   'workflow_actions',
   {
     id: cuid2PrimaryKey,
-    workflowId: text().notNull().references(() => workflows.id, { onDelete: 'cascade' }),
+    workflowId: text()
+      .notNull()
+      .references(() => workflows.id, { onDelete: 'cascade' }),
     order: integer().notNull().default(0),
     actionType: workflowActionType().notNull(),
     config: jsonb().$type<WorkflowActionConfig>().notNull().default({}),

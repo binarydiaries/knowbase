@@ -3,7 +3,7 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema',
+  schema: '../../packages/models/src/db/schema',
   dialect: 'postgresql',
   dbCredentials: {
     // biome-ignore lint/style/noNonNullAssertion: Will fix it later

@@ -1,9 +1,14 @@
+import type { InferSelectModel } from 'drizzle-orm';
 import { index, integer, jsonb, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { clerkUserId, cuid2PrimaryKey, timestamps } from '../utils/columns.js';
 import { agents } from './agents.js';
 
 export const documentStatus = pgEnum('status', [
-  'ready', 'queue', 'indexing', 'indexed', 'failed',
+  'ready',
+  'queue',
+  'indexing',
+  'indexed',
+  'failed',
 ]);
 
 export const documents = pgTable(
@@ -17,7 +22,9 @@ export const documents = pgTable(
     status: documentStatus().notNull().default('ready'),
     lastIndexedVersion: integer(),
     lastTrainedAt: timestamp({ withTimezone: true }),
-    agentId: text().notNull().references(() => agents.id),
+    agentId: text()
+      .notNull()
+      .references(() => agents.id),
     createdBy: clerkUserId,
     ...timestamps,
   },
@@ -26,3 +33,5 @@ export const documents = pgTable(
     index('documents_agent_status_idx').on(table.agentId, table.status),
   ],
 );
+
+export type IDocument = InferSelectModel<typeof documents>;

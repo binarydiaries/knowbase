@@ -1,34 +1,11 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import {
+  AgentActionSchema,
+  LeadGenerationConfigSchema,
+} from '@knowbase/models/schemas';
 
-const LeadFieldConfigSchema = z.object({
-  collect: z.boolean(),
-  required: z.boolean(),
-});
-
-const LeadGenerationConfigSchema = z.object({
-  fields: z
-    .object({
-      name: LeadFieldConfigSchema.optional(),
-      email: LeadFieldConfigSchema.optional(),
-      phone: LeadFieldConfigSchema.optional(),
-      company: LeadFieldConfigSchema.optional(),
-    })
-    .optional(),
-  triggerInstructions: z.string().max(300).optional(),
-  successMessage: z.string().max(200).optional(),
-});
-
-export const AgentActionSchema = z.object({
-  id: z.string(),
-  agentId: z.string(),
-  actionType: z.enum(['lead_generation']),
-  enabled: z.boolean(),
-  config: LeadGenerationConfigSchema,
-  createdBy: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export { AgentActionSchema };
 
 export const CreateAgentActionBody = z.object({
   agentId: z.string(),

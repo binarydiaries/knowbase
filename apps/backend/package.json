@@ -18,6 +18,7 @@
     "studio": "npx drizzle-kit studio"
   },
   "dependencies": {
+    "@knowbase/models": "*",
     "@ai-sdk/openai": "^3.0.1",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "1.4.11",

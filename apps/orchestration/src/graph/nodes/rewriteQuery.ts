@@ -67,8 +67,6 @@ export const rewriteQuery: GraphNode<typeof State> = async (state) => {
     !REFERENCE_WORDS.test(userContent)
   ) {
     return {
-      // TODO: For testing only
-      messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
       finalQuery: userContent,
     };
   }
@@ -82,8 +80,6 @@ export const rewriteQuery: GraphNode<typeof State> = async (state) => {
   ]);
 
   return {
-    // TODO: For testing only
-    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
     finalQuery,
   };
 };

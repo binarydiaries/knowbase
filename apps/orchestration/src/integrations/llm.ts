@@ -32,9 +32,4 @@ export function createNanoLlm() {
     model: 'gpt-4o-mini',
     temperature: 0,
   });
-
-  // const agent = createAgent({
-  //   model: 'gpt-5.4',
-  //   tools: [getWeather],
-  // });
 }

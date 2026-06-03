@@ -11,6 +11,7 @@ export const State = new StateSchema({
   messages: MessagesValue,
   workflows: z.array(WorkflowWithActionsSchema),
   entities: z.record(z.string(), z.unknown()).default({}),
+  intent: z.enum(['general_chat', 'workflow']).default('general_chat'),
 });
 
 export const OutputState = new StateSchema({

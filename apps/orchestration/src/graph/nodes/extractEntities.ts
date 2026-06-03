@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
-import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
+import { createNanoLlm } from '../../integrations/llm.js';
 import { getLastUserMessage } from '../../utils/messages.js';
 import type { State } from '../state.js';
 
@@ -18,10 +18,8 @@ const ExtractEntityResponseSchema = z.object({
     .describe('List of entities extracted from the message'),
 });
 
-const structuredLlm = new ChatOpenAI({
-  model: 'gpt-4o-mini',
-  temperature: 0,
-}).withStructuredOutput(ExtractEntityResponseSchema, {
+const llm = createNanoLlm();
+const structuredLlm = llm.withStructuredOutput(ExtractEntityResponseSchema, {
   name: 'extract_entities',
   strict: true,
 });
@@ -45,8 +43,6 @@ export const extractEntities: GraphNode<typeof State> = async (state) => {
   );
 
   return {
-    // TODO: For testing only
-    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
     entities: entityMap,
   };
 };

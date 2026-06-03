@@ -10,6 +10,7 @@ export const State = new StateSchema({
   behaviour: BehaviourSchema,
   messages: MessagesValue,
   workflows: z.array(WorkflowWithActionsSchema),
+  entities: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const OutputState = new StateSchema({

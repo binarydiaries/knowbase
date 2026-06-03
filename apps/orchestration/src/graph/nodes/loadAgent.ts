@@ -24,8 +24,6 @@ export const loadAgent: GraphNode<typeof State> = async (_, config) => {
   });
 
   return {
-    // TODO: For testing only
-    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
     behaviour,
     workflows,
   };

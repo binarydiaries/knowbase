@@ -1,5 +1,5 @@
 import { BehaviourSchema, WorkflowWithActionsSchema } from '@knowbase/models';
-import { MessagesValue, StateSchema } from '@langchain/langgraph';
+import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 
 export const InputState = new StateSchema({
@@ -10,7 +10,12 @@ export const State = new StateSchema({
   behaviour: BehaviourSchema,
   messages: MessagesValue,
   workflows: z.array(WorkflowWithActionsSchema),
-  entities: z.record(z.string(), z.unknown()).default({}),
+
+  entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
+    inputSchema: z.record(z.string(), z.unknown()),
+    reducer: (current, next) => ({ ...current, ...next }),
+  }),
+
   intent: z.enum(['general_chat', 'workflow']).default('general_chat'),
 });
 

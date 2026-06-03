@@ -5,3 +5,4 @@ export * from './document.js';
 export * from './lead.js';
 export * from './message.js';
 export * from './subscription.js';
+export * from './workflow.js';

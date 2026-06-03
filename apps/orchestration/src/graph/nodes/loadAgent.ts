@@ -8,11 +8,11 @@ export const loadAgent: GraphNode<typeof State> = async (_, config) => {
   if (!agentId) {
     throw new Error('loadAgent: agentId is required in config.configurable');
   }
-  const behavior = await db.query.behaviors.findFirst({
+  const behaviour = await db.query.behaviors.findFirst({
     where: { agentId },
   });
 
-  if (!behavior) {
+  if (!behaviour) {
     throw new Error(`No behavior found for agent ${agentId}`);
   }
 
@@ -22,16 +22,10 @@ export const loadAgent: GraphNode<typeof State> = async (_, config) => {
       actions: true,
     },
   });
-  console.log('workflows', JSON.stringify(workflows));
 
   return {
     messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
-    agentConfig: {
-      systemPrompt: behavior.systemPrompt,
-      tone: behavior.tone,
-      verbosity: behavior.verbosity,
-      fallbackMessage: behavior.fallbackMessage,
-      guardrails: behavior.guardrails,
-    },
+    behaviour,
+    workflows,
   };
 };

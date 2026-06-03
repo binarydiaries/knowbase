@@ -1,23 +1,15 @@
+import { BehaviourSchema, WorkflowWithActionsSchema } from '@knowbase/models';
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
-
-const agentConfig = z
-  .object({
-    systemPrompt: z.string(),
-    tone: z.string(),
-    verbosity: z.string(),
-    fallbackMessage: z.string(),
-    guardrails: z.string().nullable(),
-  })
-  .optional();
 
 export const InputState = new StateSchema({
   messages: MessagesValue,
 });
 
 export const State = new StateSchema({
-  agentConfig: agentConfig,
+  behaviour: BehaviourSchema,
   messages: MessagesValue,
+  workflows: z.array(WorkflowWithActionsSchema),
 });
 
 export const OutputState = new StateSchema({

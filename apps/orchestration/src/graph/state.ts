@@ -2,6 +2,14 @@ import { BehaviourSchema, WorkflowWithActionsSchema } from '@knowbase/models';
 import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 
+export const RagChunkSchema = z.object({
+  similarity: z.number(),
+  content: z.string(),
+  documentId: z.string(),
+  documentVersion: z.number(),
+  chunkIndex: z.number(),
+});
+
 export const InputState = new StateSchema({
   messages: MessagesValue,
 });
@@ -16,6 +24,7 @@ export const State = new StateSchema({
   }),
   intent: z.enum(['general_chat', 'workflow']).default('general_chat'),
   finalQuery: z.string(),
+  ragChunks: z.array(RagChunkSchema),
 });
 
 export const OutputState = new StateSchema({

@@ -16,6 +16,14 @@ export const loadAgent: GraphNode<typeof State> = async (_, config) => {
     throw new Error(`No behavior found for agent ${agentId}`);
   }
 
+  const workflows = await db.query.workflows.findMany({
+    where: { agentId },
+    with: {
+      actions: true,
+    },
+  });
+  console.log('workflows', JSON.stringify(workflows));
+
   return {
     messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
     agentConfig: {

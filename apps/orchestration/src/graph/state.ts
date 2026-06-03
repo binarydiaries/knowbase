@@ -1,7 +1,15 @@
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 
-const agentConfig = z.object({}).optional();
+const agentConfig = z
+  .object({
+    systemPrompt: z.string(),
+    tone: z.string(),
+    verbosity: z.string(),
+    fallbackMessage: z.string(),
+    guardrails: z.string().nullable(),
+  })
+  .optional();
 
 export const InputState = new StateSchema({
   messages: MessagesValue,

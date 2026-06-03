@@ -1,4 +1,5 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { ragGraph } from '../subgraphs/rag.js';
 import { detectIntent } from './nodes/detectIntent.js';
 import { extractEntities } from './nodes/extractEntities.js';
 import { loadAgent } from './nodes/loadAgent.js';
@@ -10,10 +11,18 @@ export const builder = new StateGraph({
   state: State,
   context: ConfigSchema,
 })
+  // Nodes
   .addNode('loadAgent', loadAgent)
   .addNode('extractEntities', extractEntities)
   .addNode('detectIntent', detectIntent)
+  .addNode('ragSubgraph', ragGraph)
+
+  //Edges
   .addEdge(START, 'loadAgent')
   .addEdge('loadAgent', 'extractEntities')
   .addEdge('extractEntities', 'detectIntent')
-  .addEdge('detectIntent', END);
+  .addEdge('detectIntent', 'ragSubgraph')
+  .addEdge('ragSubgraph', END);
+
+// ConditionalEdges
+// .addConditionalEdges('detectIntent', 'ragSubgraph');

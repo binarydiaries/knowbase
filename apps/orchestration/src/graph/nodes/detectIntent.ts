@@ -76,8 +76,6 @@ export const detectIntent: GraphNode<typeof State> = async (state) => {
   //
   // return { intent: resolvedIntent };
   return {
-    // TODO: For testing only
-    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
     intent: 'general_chat',
   };
 };

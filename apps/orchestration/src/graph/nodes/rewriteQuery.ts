@@ -1,4 +1,8 @@
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { createNanoLlm } from '../../integrations/llm.js';
@@ -12,8 +16,8 @@ const RewriteQuerySchema = z.object({
     .string()
     .describe(
       'The user message with ambiguous pronouns or references resolved using ' +
-      'the previous assistant message. If nothing needed resolving, return the ' +
-      'original message verbatim.',
+        'the previous assistant message. If nothing needed resolving, return the ' +
+        'original message verbatim.',
     ),
 });
 
@@ -34,8 +38,8 @@ Rules:
 
 const DATA_ENTRY_PATTERNS = [
   /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/, // email
-  /^\+?[\d\s\-().]{7,15}$/,                           // phone number
-  /^(?:my )?name(?:\s+is)?\s*[:\-]?\s*.+$/i,          // "my name is …"
+  /^\+?[\d\s\-().]{7,15}$/, // phone number
+  /^(?:my )?name(?:\s+is)?\s*[:\-]?\s*.+$/i, // "my name is …"
 ];
 
 function looksLikeDataEntry(message: string): boolean {
@@ -62,16 +66,24 @@ export const rewriteQuery: GraphNode<typeof State> = async (state) => {
     looksLikeDataEntry(userContent) ||
     !REFERENCE_WORDS.test(userContent)
   ) {
-    return { finalQuery: userContent };
+    return {
+      // TODO: For testing only
+      messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
+      finalQuery: userContent,
+    };
   }
 
   const { finalQuery } = await structuredLlm.invoke([
     new SystemMessage(SYSTEM_PROMPT),
     new HumanMessage(
       `<previous_assistant_message>\n${lastAssistantContent}\n</previous_assistant_message>\n\n` +
-      `<user_message>\n${userContent}\n</user_message>`,
+        `<user_message>\n${userContent}\n</user_message>`,
     ),
   ]);
 
-  return { finalQuery };
+  return {
+    // TODO: For testing only
+    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
+    finalQuery,
+  };
 };

@@ -1,10 +1,7 @@
-import type { RunnableConfig } from '@langchain/core/runnables';
-import type { IInternalState, IInternalUpdate } from '../state.js';
+import type { GraphNode } from '@langchain/langgraph';
+import type { State } from '../state.js';
 
-export async function loadAgent(
-  _state: IInternalState,
-  _config: RunnableConfig,
-): Promise<IInternalUpdate> {
+export const loadAgent: GraphNode<typeof State> = async () => {
   // TODO: load agent config + workflows from DB using config.configurable.agentId
   return {};
-}
+};

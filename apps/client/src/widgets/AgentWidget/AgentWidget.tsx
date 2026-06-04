@@ -2,7 +2,7 @@ import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { useId, useState } from 'react';
-import { baseUrl } from '@/services/chat.ts';
+import { baseUrlV2 } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
@@ -36,7 +36,7 @@ const AgentWidgetContent = ({
   const { messages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: baseUrl,
+      api: `${baseUrlV2}/web`,
       prepareSendMessagesRequest({ messages, id }) {
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find((v) => v.type === 'text');

@@ -105,7 +105,7 @@ export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
           firstUserMessage: message,
         });
 
-        const stream = await ChatV2Service.streamPreview({
+        const stream = await ChatV2Service.stream({
           agentId: channel.agentId,
           conversationId: resolvedId,
           channelId,

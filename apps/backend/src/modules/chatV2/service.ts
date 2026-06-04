@@ -199,49 +199,56 @@ export abstract class ChatV2Service {
   }
 
   /**
-   * Streaming invoke for the dashboard preview.
-   * Uses streamMode:'messages' to get token-level deltas from LangGraph and
-   * converts them to AI SDK data stream format so useChat can parse them directly.
+   * Streaming invoke — used by both the web channel and the dashboard preview.
+   *
+   * Uses streamMode:'messages' for true token-level deltas and emits the AI SDK
+   * UI message stream format so useChat can parse it directly.
+   *
+   * The graph makes 3 LLM calls in order:
+   *   1. extractEntities  (nano, JSON output)
+   *   2. generateRagResponse  (main model — the real answer we stream)
+   *   3. scoreSentiment  (nano, JSON output)
+   * messages/metadata marks each call start; we target the second one.
+   * messages/partial content is cumulative — we compute deltas.
+   *
+   * onFinish fires after [DONE] so callers can trigger usage tracking and
+   * enrichment at the right time without buffering the stream.
    */
-  static async streamPreview({
+  static async stream({
     agentId,
     conversationId,
     channelId,
     orgId,
     message,
+    ip,
+    onFinish,
   }: {
     agentId: string;
     conversationId: string;
     channelId: string;
     orgId: string;
     message: string;
+    ip?: string;
+    onFinish?: () => void;
   }): Promise<ReadableStream> {
     const client = getClient();
     await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
 
     const lgStream = client.runs.stream(conversationId, 'agent', {
       input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId } },
+      config: { configurable: { agentId, channelId, orgId, ip } },
       streamMode: 'messages',
       multitaskStrategy: 'interrupt',
     });
 
     const msgId = crypto.randomUUID();
     const encoder = new TextEncoder();
-
-    // Emit a Server-Sent Event line
     const sse = (data: object | string) =>
       encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
 
     return new ReadableStream({
       async start(controller) {
         try {
-          // The graph makes 3 LLM calls in order:
-          //   1. extractEntities  (nano, JSON output)
-          //   2. generateRagResponse  (main model — the real answer)
-          //   3. scoreSentiment  (nano, JSON output)
-          // messages/metadata marks the start of each LLM call.
-          // messages/partial content is cumulative — compute deltas.
           let llmCallIndex = 0;
           let targetId: string | null = null;
           let prevContent = '';
@@ -269,7 +276,6 @@ export abstract class ChatV2Service {
             const delta = msg.content.slice(prevContent.length);
             prevContent = msg.content;
             if (delta) {
-              // Defer opening events until the first real token arrives
               if (!started) {
                 controller.enqueue(sse({ type: 'start' }));
                 controller.enqueue(sse({ type: 'start-step' }));
@@ -284,67 +290,6 @@ export abstract class ChatV2Service {
           controller.enqueue(sse({ type: 'finish-step' }));
           controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
           controller.enqueue(sse('[DONE]'));
-          controller.close();
-        } catch (err) {
-          controller.error(err);
-        }
-      },
-    });
-  }
-
-  /**
-   * Streaming invoke — used by the web channel.
-   * onFinish fires after the graph completes (after [DONE]) so callers can
-   * trigger usage and enrichment at the correct time without buffering the stream.
-   */
-  static async stream({
-    agentId,
-    conversationId,
-    channelId,
-    orgId,
-    message,
-    ip,
-    onFinish,
-  }: {
-    agentId: string;
-    conversationId: string;
-    channelId: string;
-    orgId: string;
-    message: string;
-    ip?: string;
-    onFinish?: () => void;
-  }): Promise<ReadableStream> {
-    const client = getClient();
-    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
-    const stream = client.runs.stream(conversationId, 'agent', {
-      input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId, ip } },
-      streamMode: 'values',
-      multitaskStrategy: 'interrupt',
-    });
-
-    return new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            if (chunk.event !== 'values') continue;
-            // Each 'values' event is a full state snapshot — extract the last AI message
-            const msgs = (chunk.data as { messages?: Array<{ type?: string; content?: string }> })
-              .messages ?? [];
-            const last = msgs.at(-1);
-            if (
-              (last?.type === 'ai' || last?.type === 'AIMessageChunk') &&
-              typeof last.content === 'string' &&
-              last.content
-            ) {
-              controller.enqueue(
-                new TextEncoder().encode(
-                  `data: ${JSON.stringify({ type: 'text', text: last.content })}\n\n`,
-                ),
-              );
-            }
-          }
-          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
           controller.close();
           onFinish?.();
         } catch (err) {

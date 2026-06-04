@@ -49,9 +49,14 @@ export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
 
   .post(
     '/whatsapp',
-    async ({ body, status }) => {
+    async ({ body, status, headers }) => {
+      const ip =
+        (headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+        (headers['x-real-ip'] as string | undefined) ??
+        undefined;
+
       try {
-        await ChatV2Service.sendWhatsApp(body);
+        await ChatV2Service.sendWhatsApp({ ...body, ip });
         return { ok: true };
       } catch (err) {
         return handleError(err, status);
@@ -62,9 +67,14 @@ export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
 
   .post(
     '/slack',
-    async ({ body, status }) => {
+    async ({ body, status, headers }) => {
+      const ip =
+        (headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+        (headers['x-real-ip'] as string | undefined) ??
+        undefined;
+
       try {
-        await ChatV2Service.sendSlack(body);
+        await ChatV2Service.sendSlack({ ...body, ip });
         return { ok: true };
       } catch (err) {
         return handleError(err, status);

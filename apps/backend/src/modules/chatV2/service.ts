@@ -5,6 +5,7 @@ import { ChannelService } from '../channel/service';
 import { ConversationService } from '../conversation/service';
 import { SlackConnectionService } from '../slack/connectionService';
 import { SubscriptionService } from '../subscription/service';
+import { OrgUsageMonthlyService } from '../subscription/usage';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 
 // ── Errors ────────────────────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ export class V2LimitError extends Error {
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Private helpers ───────────────────────────────────────────────────────────
 
 function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
   if (!allowedDomains.length) return true;
@@ -49,9 +50,50 @@ function getClient(): Client {
   return new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
 }
 
+/**
+ * Fire-and-forget: attach country (IP geo lookup) and topic (AI label) to a
+ * conversation. Mirrors v1 enrichConversationAsync. Only runs on paid plans.
+ */
+async function enrichConversationAsync({
+  conversationId,
+  firstUserMessage,
+  isNew,
+  ip,
+}: {
+  conversationId: string;
+  firstUserMessage: string;
+  isNew: boolean;
+  ip?: string;
+}): Promise<void> {
+  try {
+    if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+      try {
+        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
+        if (geoRes.ok) {
+          const geo = (await geoRes.json()) as { countryCode?: string };
+          if (geo.countryCode) {
+            await ConversationService.update(conversationId, { country: geo.countryCode });
+          }
+        }
+      } catch {
+        // Geo lookup is best-effort
+      }
+    }
+
+    // Topic labelling (isNew only) is handled inside the orchestration's persistTurn node
+    // once cost tracking is wired. Nothing to do here for now.
+  } catch {
+    // Enrichment is always best-effort
+  }
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 export abstract class ChatV2Service {
+  /**
+   * Non-streaming invoke — used by WhatsApp and Slack.
+   * Awaits graph completion and returns the assistant text.
+   */
   static async invoke({
     agentId,
     conversationId,
@@ -77,6 +119,12 @@ export abstract class ChatV2Service {
     return (result as { response?: string }).response ?? '';
   }
 
+  /**
+   * Streaming invoke — used by the web channel.
+   * Accepts an optional onFinish callback that fires once the graph completes
+   * (after the [DONE] sentinel), so callers can trigger usage tracking and
+   * enrichment at the right time without buffering the stream.
+   */
   static async stream({
     agentId,
     conversationId,
@@ -84,6 +132,7 @@ export abstract class ChatV2Service {
     orgId,
     message,
     ip,
+    onFinish,
   }: {
     agentId: string;
     conversationId: string;
@@ -91,6 +140,7 @@ export abstract class ChatV2Service {
     orgId: string;
     message: string;
     ip?: string;
+    onFinish?: () => void;
   }): Promise<ReadableStream> {
     const client = getClient();
 
@@ -115,12 +165,15 @@ export abstract class ChatV2Service {
           }
           controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
           controller.close();
+          onFinish?.();
         } catch (err) {
           controller.error(err);
         }
       },
     });
   }
+
+  // ── Web ───────────────────────────────────────────────────────────────────
 
   static async sendWeb({
     message,
@@ -154,6 +207,25 @@ export abstract class ChatV2Service {
       });
     }
 
+    // Resolve existing conversation — discard if it belongs to a different channel
+    // (same client-generated ID reused across agents in the same org).
+    const rawConversation = await ConversationService.single({ id: conversationId, orgId: channel.orgId });
+    const existing = rawConversation?.channelId === channelId ? rawConversation : undefined;
+    const isNew = !existing;
+
+    if (isNew) {
+      await ConversationService.create({
+        id: conversationId,
+        agentId: channel.agentId,
+        channelId,
+        lastUserQuestion: message,
+        lastAssistantUtterance: '',
+        lastMessageAt: new Date(),
+      });
+    }
+
+    const plan = await SubscriptionService.getPlan(channel.orgId);
+
     return ChatV2Service.stream({
       agentId: channel.agentId,
       conversationId,
@@ -161,8 +233,17 @@ export abstract class ChatV2Service {
       orgId: channel.orgId,
       message,
       ip,
+      onFinish: () => {
+        // Fire-and-forget post-stream tasks — mirror v1 onFinish behaviour
+        void OrgUsageMonthlyService.incrementAssistantMessages(channel.orgId);
+        if (plan !== 'free') {
+          void enrichConversationAsync({ conversationId, firstUserMessage: message, isNew, ip });
+        }
+      },
     });
   }
+
+  // ── WhatsApp ──────────────────────────────────────────────────────────────
 
   static async sendWhatsApp({
     channelId,
@@ -170,12 +251,14 @@ export abstract class ChatV2Service {
     senderPhone,
     message,
     messageId,
+    ip,
   }: {
     channelId: string;
     orgId: string;
     senderPhone: string;
     message: string;
     messageId?: string;
+    ip?: string;
   }): Promise<void> {
     const channel = await ChannelService.single({ id: channelId, orgId });
     if (!channel || channel.type !== 'whatsapp') throw new V2NotFoundError('WhatsApp channel not found');
@@ -192,6 +275,7 @@ export abstract class ChatV2Service {
     };
     const waBase = `https://graph.facebook.com/v19.0/${cfg.phoneNumberId}/messages`;
 
+    // Read receipt (blue ticks)
     if (messageId) {
       fetch(waBase, {
         method: 'POST',
@@ -200,6 +284,7 @@ export abstract class ChatV2Service {
       }).catch(() => {});
     }
 
+    // Typing indicator
     fetch(waBase, {
       method: 'POST',
       headers: waHeaders,
@@ -221,9 +306,11 @@ export abstract class ChatV2Service {
       });
     }
 
-    let conversation = await ConversationService.findByExternalId({ channelId, externalId: senderPhone });
-    if (!conversation) {
-      conversation = await ConversationService.create({
+    const existing = await ConversationService.findByExternalId({ channelId, externalId: senderPhone });
+    const isNew = !existing;
+    const conversation =
+      existing ??
+      (await ConversationService.create({
         id: createId(),
         agentId: channel.agentId,
         channelId,
@@ -231,15 +318,17 @@ export abstract class ChatV2Service {
         lastUserQuestion: message,
         lastAssistantUtterance: '',
         lastMessageAt: new Date(),
-      });
-    }
+      }));
+    if (!conversation) throw new V2NotFoundError('Failed to resolve conversation');
 
-    const response = await ChatV2Service.invoke({
+    // invoke awaits graph completion — persistTurn has already run by the time we return
+    const assistantText = await ChatV2Service.invoke({
       agentId: channel.agentId,
       conversationId: conversation.id,
       channelId,
       orgId,
       message,
+      ip,
     });
 
     await fetch(waBase, {
@@ -249,10 +338,24 @@ export abstract class ChatV2Service {
         messaging_product: 'whatsapp',
         to: senderPhone,
         type: 'text',
-        text: { body: response },
+        text: { body: assistantText },
       }),
     });
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    const plan = await SubscriptionService.getPlan(orgId);
+    if (plan !== 'free') {
+      void enrichConversationAsync({
+        conversationId: conversation.id,
+        firstUserMessage: message,
+        isNew,
+        ip,
+      });
+    }
   }
+
+  // ── Slack ─────────────────────────────────────────────────────────────────
 
   static async sendSlack({
     channelId,
@@ -260,12 +363,14 @@ export abstract class ChatV2Service {
     message,
     slackChannelId,
     threadTs,
+    ip,
   }: {
     channelId: string;
     orgId: string;
     message: string;
     slackChannelId: string;
     threadTs: string;
+    ip?: string;
   }): Promise<void> {
     const channel = await ChannelService.single({ id: channelId, orgId });
     if (!channel || channel.type !== 'slack') throw new V2NotFoundError('Slack channel not found');
@@ -281,6 +386,7 @@ export abstract class ChatV2Service {
       'Content-Type': 'application/json',
     };
 
+    // Post "Thinking…" placeholder before LLM call
     let placeholderTs: string | null = null;
     try {
       const res = await fetch('https://slack.com/api/chat.postMessage', {
@@ -290,7 +396,9 @@ export abstract class ChatV2Service {
       });
       const data = (await res.json()) as { ok: boolean; ts?: string };
       if (data.ok && data.ts) placeholderTs = data.ts;
-    } catch {}
+    } catch {
+      // Best-effort — proceed even if placeholder fails
+    }
 
     const limit = await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
     if (!limit.allowed) {
@@ -301,9 +409,11 @@ export abstract class ChatV2Service {
       });
     }
 
-    let conversation = await ConversationService.findByExternalId({ channelId, externalId: threadTs });
-    if (!conversation) {
-      conversation = await ConversationService.create({
+    const existing = await ConversationService.findByExternalId({ channelId, externalId: threadTs });
+    const isNew = !existing;
+    const conversation =
+      existing ??
+      (await ConversationService.create({
         id: createId(),
         agentId: channel.agentId,
         channelId,
@@ -311,8 +421,8 @@ export abstract class ChatV2Service {
         lastUserQuestion: message,
         lastAssistantUtterance: '',
         lastMessageAt: new Date(),
-      });
-    }
+      }));
+    if (!conversation) throw new V2NotFoundError('Failed to resolve conversation');
 
     const response = await ChatV2Service.invoke({
       agentId: channel.agentId,
@@ -320,8 +430,10 @@ export abstract class ChatV2Service {
       channelId,
       orgId,
       message,
+      ip,
     });
 
+    // Update placeholder or post new message
     if (placeholderTs) {
       fetch('https://slack.com/api/chat.update', {
         method: 'POST',
@@ -334,6 +446,18 @@ export abstract class ChatV2Service {
         headers: slackHeaders,
         body: JSON.stringify({ channel: slackChannelId, text: response, thread_ts: threadTs }),
       }).catch(() => {});
+    }
+
+    await OrgUsageMonthlyService.incrementAssistantMessages(orgId);
+
+    const plan = await SubscriptionService.getPlan(orgId);
+    if (plan !== 'free') {
+      void enrichConversationAsync({
+        conversationId: conversation.id,
+        firstUserMessage: message,
+        isNew,
+        ip,
+      });
     }
   }
 }

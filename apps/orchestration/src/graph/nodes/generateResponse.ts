@@ -46,12 +46,7 @@ Fallback message (use verbatim only when the Knowledge Base has no answer):
 
 export const generateRagResponse: GraphNode<typeof State> = async (state) => {
   const systemPrompt = buildSystemPrompt(state);
-
-  // Use rewritten query if available, otherwise fall back to the raw user message
   const query = state.finalQuery ?? getLastUserMessage(state);
-
-  // Exclude the current user message from history (it's the last element in state.messages)
-  // then add the rewritten query so it's never duplicated in the prompt
   const history = state.messages.slice(-11, -1);
 
   const result = await llm.invoke([

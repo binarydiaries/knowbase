@@ -66,6 +66,7 @@ const app = Sentry.withElysia(new Elysia())
         'baggage',
         'sentry-trace',
       ],
+      exposeHeaders: ['X-Vercel-AI-Data-Stream'],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   )

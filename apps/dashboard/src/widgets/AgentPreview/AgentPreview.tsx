@@ -8,13 +8,17 @@ import type { ChannelSchema } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
+type ChatVersion = 'v1' | 'v2';
+
 interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
+  version: ChatVersion;
   onNewChat: () => void;
 }
 
 const AgentPreviewContent = ({
   channelWeb,
+  version,
   onNewChat,
 }: IAgentPreviewContentProps) => {
   const { getToken } = useAuth();
@@ -36,10 +40,15 @@ const AgentPreviewContent = ({
       }
     : undefined;
 
+  const apiUrl =
+    version === 'v1'
+      ? `${import.meta.env.VITE_API_BASE}/chat/preview`
+      : `${import.meta.env.VITE_API_BASE}/v2/chat/preview`;
+
   const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: `${import.meta.env.VITE_API_BASE}/chat/preview`,
+      api: apiUrl,
       fetch: async (url, init) => {
         const token = await getToken();
         return fetch(url, {
@@ -118,10 +127,9 @@ const AgentPreviewContent = ({
 export const AgentPreview = () => {
   const { agentId } = useParams({ strict: false });
   const [chatKey, setChatKey] = useState(0);
+  const [version, setVersion] = useState<ChatVersion>('v1');
 
-  if (!agentId) {
-    throw new Error('agentId not available');
-  }
+  if (!agentId) throw new Error('agentId not available');
 
   const channelWeb = useChannels((state) =>
     state.channelsByAgentId[agentId]?.find(
@@ -129,15 +137,39 @@ export const AgentPreview = () => {
     ),
   );
 
-  if (!channelWeb) {
-    return null;
-  }
+  if (!channelWeb) return null;
+
+  const handleVersionChange = (v: ChatVersion) => {
+    setVersion(v);
+    setChatKey((k) => k + 1); // reset chat on version switch
+  };
 
   return (
-    <AgentPreviewContent
-      key={chatKey}
-      channelWeb={channelWeb}
-      onNewChat={() => setChatKey((k) => k + 1)}
-    />
+    <div className="flex flex-col gap-2 h-full">
+      <div className="flex items-center gap-1 self-end">
+        {(['v1', 'v2'] as ChatVersion[]).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => handleVersionChange(v)}
+            className={[
+              'px-3 py-1 rounded-md text-xs font-semibold transition-colors',
+              version === v
+                ? 'bg-[#301B69] text-white'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80',
+            ].join(' ')}
+          >
+            {v.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      <AgentPreviewContent
+        key={`${chatKey}-${version}`}
+        channelWeb={channelWeb}
+        version={version}
+        onNewChat={() => setChatKey((k) => k + 1)}
+      />
+    </div>
   );
 };

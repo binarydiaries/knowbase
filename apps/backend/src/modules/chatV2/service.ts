@@ -15,7 +15,6 @@
  */
 
 import { Client } from '@langchain/langgraph-sdk';
-import { createId } from '@paralleldrive/cuid2';
 import type { IChannelSlackConfig, IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ConversationService } from '../conversation/service';
@@ -66,15 +65,13 @@ function getClient(): Client {
   return new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
 }
 
+// ── Conversation helpers (also used by the preview route) ────────────────────
+
 /**
- * Find an existing conversation by externalId or create a bare placeholder row.
- * Returns { conversationId, isNew }.
- *
- * The row is intentionally sparse — persistTurn owns all subsequent field writes.
- * lastUserQuestion / lastAssistantUtterance are required NOT NULL, so we seed them
- * with the first user message and an empty string respectively.
+ * For WA / Slack: find by externalId or create.
+ * For web preview: find by id or create with conversationId as the row ID.
  */
-async function findOrCreateConversation({
+async function findOrCreateByExternalId({
   channelId,
   agentId,
   externalId,
@@ -84,12 +81,12 @@ async function findOrCreateConversation({
   agentId: string;
   externalId: string;
   firstUserMessage: string;
-}): Promise<{ conversationId: string; isNew: boolean }> {
+}): Promise<{ conversationId: string }> {
   const existing = await ConversationService.findByExternalId({ channelId, externalId });
-  if (existing) return { conversationId: existing.id, isNew: false };
+  if (existing) return { conversationId: existing.id };
 
   const created = await ConversationService.create({
-    id: createId(),
+    id: crypto.randomUUID(),
     agentId,
     channelId,
     externalId,
@@ -99,7 +96,7 @@ async function findOrCreateConversation({
   });
 
   if (!created) throw new V2NotFoundError('Failed to create conversation');
-  return { conversationId: created.id, isNew: true };
+  return { conversationId: created.id };
 }
 
 /**
@@ -132,6 +129,44 @@ async function enrichConversationAsync({
 
 export abstract class ChatV2Service {
   /**
+   * Used by the preview and web routes.
+   * The client sends its own session key (nanoid / useId format) as conversationId.
+   * We store that as externalId and generate a UUID for the DB id so LangGraph
+   * can use it directly as thread_id.
+   */
+  static async findOrCreate({
+    channelId,
+    agentId,
+    conversationId: clientSessionId,
+    orgId,
+    firstUserMessage,
+  }: {
+    channelId: string;
+    agentId: string;
+    conversationId: string;
+    orgId: string;
+    firstUserMessage: string;
+  }): Promise<{ conversationId: string }> {
+    const existing = await ConversationService.findByExternalId({
+      channelId,
+      externalId: clientSessionId,
+    });
+    if (existing) return { conversationId: existing.id };
+
+    const created = await ConversationService.create({
+      id: crypto.randomUUID(),
+      agentId,
+      channelId,
+      externalId: clientSessionId,
+      lastUserQuestion: firstUserMessage,
+      lastAssistantUtterance: '',
+      lastMessageAt: new Date(),
+    });
+    if (!created) throw new V2NotFoundError('Failed to create conversation');
+    return { conversationId: created.id };
+  }
+
+  /**
    * Non-streaming invoke — used by WhatsApp and Slack.
    * Awaits graph completion (including persistTurn) before returning.
    */
@@ -151,11 +186,110 @@ export abstract class ChatV2Service {
     ip?: string;
   }): Promise<string> {
     const client = getClient();
+    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
     const result = await client.runs.wait(conversationId, 'agent', {
       input: { messages: [{ role: 'human', content: message }] },
       config: { configurable: { agentId, channelId, orgId, ip } },
+      multitaskStrategy: 'interrupt',
     });
-    return (result as { response?: string }).response ?? '';
+    // OutputState has { messages: [...] } — last entry is the assistant response
+    const msgs = (result as { messages?: Array<{ type?: string; content?: string }> }).messages ?? [];
+    const last = msgs.at(-1);
+    return typeof last?.content === 'string' ? last.content : '';
+  }
+
+  /**
+   * Streaming invoke for the dashboard preview.
+   * Uses streamMode:'messages' to get token-level deltas from LangGraph and
+   * converts them to AI SDK data stream format so useChat can parse them directly.
+   */
+  static async streamPreview({
+    agentId,
+    conversationId,
+    channelId,
+    orgId,
+    message,
+  }: {
+    agentId: string;
+    conversationId: string;
+    channelId: string;
+    orgId: string;
+    message: string;
+  }): Promise<ReadableStream> {
+    const client = getClient();
+    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+
+    const lgStream = client.runs.stream(conversationId, 'agent', {
+      input: { messages: [{ role: 'human', content: message }] },
+      config: { configurable: { agentId, channelId, orgId } },
+      streamMode: 'messages',
+      multitaskStrategy: 'interrupt',
+    });
+
+    const msgId = crypto.randomUUID();
+    const encoder = new TextEncoder();
+
+    // Emit a Server-Sent Event line
+    const sse = (data: object | string) =>
+      encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
+
+    return new ReadableStream({
+      async start(controller) {
+        try {
+          // The graph makes 3 LLM calls in order:
+          //   1. extractEntities  (nano, JSON output)
+          //   2. generateRagResponse  (main model — the real answer)
+          //   3. scoreSentiment  (nano, JSON output)
+          // messages/metadata marks the start of each LLM call.
+          // messages/partial content is cumulative — compute deltas.
+          let llmCallIndex = 0;
+          let targetId: string | null = null;
+          let prevContent = '';
+          let started = false;
+
+          for await (const chunk of lgStream) {
+            if (chunk.event === 'messages/metadata') {
+              llmCallIndex++;
+              if (llmCallIndex === 2) {
+                targetId = Object.keys(chunk.data as Record<string, unknown>)[0] ?? null;
+                prevContent = '';
+              }
+              continue;
+            }
+
+            if (chunk.event !== 'messages/partial' || !targetId) continue;
+
+            const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
+              id?: string;
+              content?: string;
+            } | null;
+
+            if (msg?.id !== targetId || typeof msg.content !== 'string') continue;
+
+            const delta = msg.content.slice(prevContent.length);
+            prevContent = msg.content;
+            if (delta) {
+              // Defer opening events until the first real token arrives
+              if (!started) {
+                controller.enqueue(sse({ type: 'start' }));
+                controller.enqueue(sse({ type: 'start-step' }));
+                controller.enqueue(sse({ type: 'text-start', id: msgId }));
+                started = true;
+              }
+              controller.enqueue(sse({ type: 'text-delta', id: msgId, delta }));
+            }
+          }
+
+          controller.enqueue(sse({ type: 'text-end', id: msgId }));
+          controller.enqueue(sse({ type: 'finish-step' }));
+          controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
+          controller.enqueue(sse('[DONE]'));
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+    });
   }
 
   /**
@@ -181,21 +315,31 @@ export abstract class ChatV2Service {
     onFinish?: () => void;
   }): Promise<ReadableStream> {
     const client = getClient();
+    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
     const stream = client.runs.stream(conversationId, 'agent', {
       input: { messages: [{ role: 'human', content: message }] },
       config: { configurable: { agentId, channelId, orgId, ip } },
       streamMode: 'values',
+      multitaskStrategy: 'interrupt',
     });
 
     return new ReadableStream({
       async start(controller) {
         try {
           for await (const chunk of stream) {
-            const state = chunk.data as { response?: string };
-            if (state?.response) {
+            if (chunk.event !== 'values') continue;
+            // Each 'values' event is a full state snapshot — extract the last AI message
+            const msgs = (chunk.data as { messages?: Array<{ type?: string; content?: string }> })
+              .messages ?? [];
+            const last = msgs.at(-1);
+            if (
+              (last?.type === 'ai' || last?.type === 'AIMessageChunk') &&
+              typeof last.content === 'string' &&
+              last.content
+            ) {
               controller.enqueue(
                 new TextEncoder().encode(
-                  `data: ${JSON.stringify({ type: 'text', text: state.response })}\n\n`,
+                  `data: ${JSON.stringify({ type: 'text', text: last.content })}\n\n`,
                 ),
               );
             }
@@ -244,27 +388,19 @@ export abstract class ChatV2Service {
       });
     }
 
-    // Web: conversationId is client-generated. Look up to determine isNew.
-    const existing = await ConversationService.single({ id: conversationId, orgId: channel.orgId });
-    const isExisting = existing?.channelId === channelId;
+    const { conversationId: resolvedId } = await ChatV2Service.findOrCreate({
+      channelId,
+      agentId: channel.agentId,
+      conversationId,
+      orgId: channel.orgId,
+      firstUserMessage: message,
+    });
 
-    if (!isExisting) {
-      await ConversationService.create({
-        id: conversationId,
-        agentId: channel.agentId,
-        channelId,
-        lastUserQuestion: message,
-        lastAssistantUtterance: '',
-        lastMessageAt: new Date(),
-      });
-    }
-
-    const isNew = !isExisting;
     const plan = await SubscriptionService.getPlan(channel.orgId);
 
     return ChatV2Service.stream({
       agentId: channel.agentId,
-      conversationId,
+      conversationId: resolvedId,
       channelId,
       orgId: channel.orgId,
       message,
@@ -272,7 +408,7 @@ export abstract class ChatV2Service {
       onFinish: () => {
         void OrgUsageMonthlyService.incrementAssistantMessages(channel.orgId);
         if (plan !== 'free') {
-          void enrichConversationAsync({ conversationId, ip });
+          void enrichConversationAsync({ conversationId: resolvedId, ip });
         }
       },
     });
@@ -339,7 +475,7 @@ export abstract class ChatV2Service {
       });
     }
 
-    const { conversationId, isNew } = await findOrCreateConversation({
+    const { conversationId } = await findOrCreateByExternalId({
       channelId,
       agentId: channel.agentId,
       externalId: senderPhone,
@@ -429,7 +565,7 @@ export abstract class ChatV2Service {
       });
     }
 
-    const { conversationId, isNew } = await findOrCreateConversation({
+    const { conversationId } = await findOrCreateByExternalId({
       channelId,
       agentId: channel.agentId,
       externalId: threadTs,

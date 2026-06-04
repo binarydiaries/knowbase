@@ -24,8 +24,15 @@ export const SlackChatBodySchema = z.object({
   threadTs: z.string(),
 });
 
+export const PreviewBodySchema = z.object({
+  message: z.string().min(1),
+  channelId: z.string(),
+  conversationId: z.string(),
+});
+
 export const Model = new Elysia().model({
   WebChatBodySchema,
   WhatsAppChatBodySchema,
   SlackChatBodySchema,
+  PreviewBodySchema,
 });

@@ -17,14 +17,18 @@ export const InputState = new StateSchema({
 export const State = new StateSchema({
   behaviour: BehaviourSchema,
   messages: MessagesValue,
-  workflows: z.array(WorkflowWithActionsSchema),
+  // Loaded by loadAgent — defaults avoid undefined access before the node runs
+  workflows: z.array(WorkflowWithActionsSchema).default([]),
   entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
     inputSchema: z.record(z.string(), z.unknown()),
     reducer: (current, next) => ({ ...current, ...next }),
   }),
-  intent: z.enum(['general_chat', 'workflow']).default('general_chat'),
-  finalQuery: z.string(),
-  ragChunks: z.array(RagChunkSchema),
+  // z.string() (not enum) — intent names come from workflow.intentName which are dynamic
+  intent: z.string().default('general_chat'),
+  // Optional — rewriteQuery may be skipped; vectorSearch falls back to last user message
+  finalQuery: z.string().optional(),
+  // Default to empty — generateResponse guards on length
+  ragChunks: z.array(RagChunkSchema).default([]),
 });
 
 export const OutputState = new StateSchema({

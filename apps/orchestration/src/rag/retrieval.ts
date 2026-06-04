@@ -36,13 +36,17 @@ export async function similaritySearch(query: string, agentId: string) {
     chunkIndex: embeddings.chunkIndex,
   };
 
-  const agentFilter = eq(documents.agentId, agentId);
+  // Filter by agentId only — status filter was too aggressive and excluded
+  // documents that have valid embeddings but aren't currently in 'indexed' status
+  // (e.g. after an edit they revert to 'ready'). Embeddings are always valid
+  // for search if they exist; stale chunks are a separate concern.
+  const baseFilter = eq(documents.agentId, agentId);
 
   const primary = await db
     .select(selectFields)
     .from(embeddings)
     .innerJoin(documents, eq(embeddings.documentId, documents.id))
-    .where(and(gt(similarity, 0.35), agentFilter))
+    .where(and(gt(similarity, 0.35), baseFilter))
     .orderBy(desc(similarity))
     .limit(5);
 
@@ -52,7 +56,7 @@ export async function similaritySearch(query: string, agentId: string) {
     .select(selectFields)
     .from(embeddings)
     .innerJoin(documents, eq(embeddings.documentId, documents.id))
-    .where(and(gt(similarity, 0.2), agentFilter))
+    .where(and(gt(similarity, 0.2), baseFilter))
     .orderBy(desc(similarity))
     .limit(3);
 }

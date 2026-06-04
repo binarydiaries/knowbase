@@ -1,12 +1,11 @@
-import {
-  AIMessage,
-  HumanMessage,
-  SystemMessage,
-} from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { createNanoLlm } from '../../integrations/llm.js';
-import { getLastUserMessage } from '../../utils/messages.js';
+import {
+  getLastAssistantMessage,
+  getLastUserMessage,
+} from '../../utils/messages.js';
 import type { State } from '../state.js';
 
 const llm = createNanoLlm();
@@ -53,12 +52,9 @@ const REFERENCE_WORDS = /\b(that|it|they|this|those|these|there|its|their)\b/i;
 export const rewriteQuery: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);
 
-  // Find the last assistant message for reference resolution
-  const lastAssistant = [...state.messages]
-    .reverse()
-    .find((m) => m instanceof AIMessage || m.getType() === 'ai');
-  const lastAssistantContent =
-    typeof lastAssistant?.content === 'string' ? lastAssistant.content : '';
+  console.log('userContent', userContent);
+
+  const lastAssistantContent = getLastAssistantMessage(state);
 
   // Skip: no prior assistant turn, data-entry response, or no references to resolve
   if (

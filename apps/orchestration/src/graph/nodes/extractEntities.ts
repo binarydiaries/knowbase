@@ -33,6 +33,9 @@ const SYSTEM_PROMPT = `You are an entity extractor. Extract structured informati
 export const extractEntities: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);
 
+  // Nothing to extract from an empty message
+  if (!userContent) return { entities: {} };
+
   const { entities } = await structuredLlm.invoke([
     new SystemMessage(SYSTEM_PROMPT),
     new HumanMessage(userContent),

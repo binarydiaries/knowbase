@@ -51,9 +51,6 @@ const REFERENCE_WORDS = /\b(that|it|they|this|those|these|there|its|their)\b/i;
 
 export const rewriteQuery: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);
-
-  console.log('userContent', userContent);
-
   const lastAssistantContent = getLastAssistantMessage(state);
 
   // Skip: no prior assistant turn, data-entry response, or no references to resolve

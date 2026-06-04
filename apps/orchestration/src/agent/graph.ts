@@ -1,5 +1,5 @@
 import { builder } from '../graph/graph.js';
-import { checkpointer } from '../checkpointer.js';
+import { checkpointer } from '../db/checkpointer.js';
 
 await checkpointer.setup();
 

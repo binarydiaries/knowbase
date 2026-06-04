@@ -47,7 +47,7 @@ function looksLikeDataEntry(message: string): boolean {
   return DATA_ENTRY_PATTERNS.some((re) => re.test(clean));
 }
 
-const REFERENCE_WORDS = /\b(that|it|they|this|those|these|there|its|their)\b/i;
+const REFERENCE_WORDS = /\b(that|it|they|this|those|these|there|its|their|next|same|above|previous|earlier|mentioned)\b/i;
 
 export const rewriteQuery: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);

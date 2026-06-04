@@ -249,29 +249,46 @@ export abstract class ChatV2Service {
     return new ReadableStream({
       async start(controller) {
         try {
-          let llmCallIndex = 0;
+          // Structured-output calls (extractEntities, rewriteQuery, scoreSentiment)
+          // always produce JSON content starting with '{'. generateRagResponse produces
+          // natural language. We detect the target by content — not by call position —
+          // so multi-turn conversations where rewriteQuery fires an extra LLM call
+          // don't shift the index and accidentally stream the wrong call.
+          const skipIds = new Set<string>();
+          let pendingId: string | null = null;
           let targetId: string | null = null;
           let prevContent = '';
           let started = false;
 
           for await (const chunk of lgStream) {
             if (chunk.event === 'messages/metadata') {
-              llmCallIndex++;
-              if (llmCallIndex === 2) {
-                targetId = Object.keys(chunk.data as Record<string, unknown>)[0] ?? null;
-                prevContent = '';
-              }
+              pendingId = Object.keys(chunk.data as Record<string, unknown>)[0] ?? null;
               continue;
             }
 
-            if (chunk.event !== 'messages/partial' || !targetId) continue;
+            if (chunk.event !== 'messages/partial') continue;
 
             const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
               id?: string;
               content?: string;
             } | null;
 
-            if (msg?.id !== targetId || typeof msg.content !== 'string') continue;
+            if (!msg?.id || typeof msg.content !== 'string') continue;
+            if (skipIds.has(msg.id)) continue;
+
+            // First non-empty chunk from a call: classify it
+            if (msg.id !== targetId && msg.content.trim()) {
+              if (msg.content.trimStart().startsWith('{')) {
+                // Structured output — skip this call entirely
+                skipIds.add(msg.id);
+                continue;
+              }
+              // Natural language — this is generateRagResponse
+              targetId = msg.id;
+              prevContent = '';
+            }
+
+            if (msg.id !== targetId) continue;
 
             const delta = msg.content.slice(prevContent.length);
             prevContent = msg.content;

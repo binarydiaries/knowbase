@@ -30,11 +30,26 @@ const SYSTEM_PROMPT = `You are an entity extractor. Extract structured informati
 - Only include values explicitly stated — never infer
 - Return an empty list if nothing to extract`;
 
+/** True when at least one workflow has a save_lead action (entity capture required). */
+function needsEntityExtraction(state: typeof State.State): boolean {
+  return state.workflows.some((w) =>
+    w.actions.some((a) => a.actionType === 'save_lead'),
+  );
+}
+
+/** Pure questions and very short messages can't contain named entities. */
+function canContainEntities(message: string): boolean {
+  const clean = message.trim();
+  if (!clean || clean.endsWith('?') || clean.split(/\s+/).length < 3) return false;
+  return true;
+}
+
 export const extractEntities: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);
 
-  // Nothing to extract from an empty message
-  if (!userContent) return { entities: {} };
+  if (!userContent || !needsEntityExtraction(state) || !canContainEntities(userContent)) {
+    return { entities: {} };
+  }
 
   const { entities } = await structuredLlm.invoke([
     new SystemMessage(SYSTEM_PROMPT),
@@ -45,7 +60,5 @@ export const extractEntities: GraphNode<typeof State> = async (state) => {
     entities.map(({ key, value }) => [key, value]),
   );
 
-  return {
-    entities: entityMap,
-  };
+  return { entities: entityMap };
 };

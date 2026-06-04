@@ -3,8 +3,9 @@ import { ChatOpenAI } from '@langchain/openai';
 export type LlmProvider = 'openai' | 'anthropic' | 'gemini';
 
 /**
- * Returns a ChatModel instance based on the agent's configured provider.
- * Falls back to OpenAI gpt-4.1-mini when provider is unrecognised.
+ * Main model for RAG response generation.
+ * Matches the model used by the v1 backend chat service.
+ * Falls back to OpenAI when provider is unrecognised.
  */
 export function createLlm(provider: string = 'openai', modelName?: string) {
   switch (provider) {
@@ -15,21 +16,21 @@ export function createLlm(provider: string = 'openai', modelName?: string) {
         `[llm] provider "${provider}" not yet supported, falling back to openai`,
       );
       return new ChatOpenAI({
-        model: modelName ?? 'gpt-4o-mini',
+        model: modelName ?? 'gpt-4.1-mini',
         temperature: 0.3,
       });
     default:
       return new ChatOpenAI({
-        model: modelName ?? 'gpt-4o-mini',
+        model: modelName ?? 'gpt-4.1-mini',
         temperature: 0.3,
       });
   }
 }
 
-/** Nano/cheap model for utility calls (entity extraction, intent detection, etc.) */
+/** Nano/cheap model for utility calls (entity extraction, intent detection, rewriting, sentiment). */
 export function createNanoLlm() {
   return new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1-nano',
     temperature: 0,
   });
 }

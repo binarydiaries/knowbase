@@ -1,0 +1,74 @@
+import { Elysia } from 'elysia';
+import { Model } from './model';
+import {
+  ChatV2Service,
+  V2ForbiddenError,
+  V2LimitError,
+  V2NotFoundError,
+} from './service';
+
+function handleError(err: unknown, status: Function) {
+  if (err instanceof V2NotFoundError)
+    return status(404, { code: 'NOT_FOUND', message: err.message });
+  if (err instanceof V2ForbiddenError)
+    return status(403, { code: 'FORBIDDEN', message: err.message });
+  if (err instanceof V2LimitError)
+    return status(403, {
+      code: 'MESSAGE_LIMIT_REACHED',
+      message: err.message,
+      ...err.payload,
+    });
+  throw err;
+}
+
+export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
+  .use(Model)
+
+  .post(
+    '/web',
+    async ({ body, status, headers, set }) => {
+      const ip =
+        (headers['x-forwarded-for'] as string | undefined)
+          ?.split(',')[0]
+          ?.trim() ??
+        (headers['x-real-ip'] as string | undefined) ??
+        undefined;
+
+      try {
+        const stream = await ChatV2Service.sendWeb({ ...body, ip });
+        set.headers['Content-Type'] = 'text/event-stream';
+        set.headers['Cache-Control'] = 'no-cache';
+        set.headers['Connection'] = 'keep-alive';
+        return stream;
+      } catch (err) {
+        return handleError(err, status);
+      }
+    },
+    { body: 'WebChatBodySchema' },
+  )
+
+  .post(
+    '/whatsapp',
+    async ({ body, status }) => {
+      try {
+        await ChatV2Service.sendWhatsApp(body);
+        return { ok: true };
+      } catch (err) {
+        return handleError(err, status);
+      }
+    },
+    { body: 'WhatsAppChatBodySchema' },
+  )
+
+  .post(
+    '/slack',
+    async ({ body, status }) => {
+      try {
+        await ChatV2Service.sendSlack(body);
+        return { ok: true };
+      } catch (err) {
+        return handleError(err, status);
+      }
+    },
+    { body: 'SlackChatBodySchema' },
+  );

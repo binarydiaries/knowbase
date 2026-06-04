@@ -1,4 +1,7 @@
 import { builder } from '../graph/graph.js';
+import { checkpointer } from '../checkpointer.js';
 
-export const graph = builder.compile();
+await checkpointer.setup();
+
+export const graph = builder.compile({ checkpointer });
 graph.name = 'Agenvik Chat Agent';

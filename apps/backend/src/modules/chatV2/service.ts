@@ -53,6 +53,13 @@ export class V2LimitError extends Error {
   }
 }
 
+export class V2OrchestrationError extends Error {
+  constructor(msg = 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.') {
+    super(msg);
+    this.name = 'V2OrchestrationError';
+  }
+}
+
 // ── LangGraph client (singleton) ──────────────────────────────────────────────
 
 const client = new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
@@ -212,15 +219,20 @@ export abstract class ChatV2Service {
     ip?: string;
     isPaid?: boolean;
   }): Promise<string> {
-    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
-    const result = await client.runs.wait(conversationId, 'agent', {
-      input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
-      multitaskStrategy: 'interrupt',
-    });
-    const msgs = (result as { messages?: Array<{ type?: string; content?: string }> }).messages ?? [];
-    const last = msgs.at(-1);
-    return typeof last?.content === 'string' ? last.content : '';
+    try {
+      await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+      const result = await client.runs.wait(conversationId, 'agent', {
+        input: { messages: [{ role: 'human', content: message }] },
+        config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
+        multitaskStrategy: 'interrupt',
+      });
+      const msgs = (result as { messages?: Array<{ type?: string; content?: string }> }).messages ?? [];
+      const last = msgs.at(-1);
+      return typeof last?.content === 'string' ? last.content : '';
+    } catch (err) {
+      if (err instanceof V2OrchestrationError) throw err;
+      throw new V2OrchestrationError();
+    }
   }
 
   /**
@@ -256,15 +268,6 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
-
-    const lgStream = client.runs.stream(conversationId, 'agent', {
-      input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
-      streamMode: 'messages',
-      multitaskStrategy: 'interrupt',
-    });
-
     const msgId = crypto.randomUUID();
     const encoder = new TextEncoder();
     const sse = (data: object | string) =>
@@ -273,6 +276,15 @@ export abstract class ChatV2Service {
     return new ReadableStream({
       async start(controller) {
         try {
+          await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+
+          const lgStream = client.runs.stream(conversationId, 'agent', {
+            input: { messages: [{ role: 'human', content: message }] },
+            config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
+            streamMode: 'messages',
+            multitaskStrategy: 'interrupt',
+          });
+
           const skipIds = new Set<string>();
           let targetId: string | null = null;
           let prevContent = '';
@@ -327,8 +339,19 @@ export abstract class ChatV2Service {
           controller.enqueue(sse('[DONE]'));
           controller.close();
           onFinish?.();
-        } catch (err) {
-          controller.error(err);
+        } catch {
+          // Orchestration is down — emit a clean message instead of breaking the SSE connection
+          try {
+            controller.enqueue(sse({ type: 'text-start', id: msgId }));
+            controller.enqueue(sse({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' }));
+            controller.enqueue(sse({ type: 'text-end', id: msgId }));
+            controller.enqueue(sse({ type: 'finish-step' }));
+            controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
+            controller.enqueue(sse('[DONE]'));
+            controller.close();
+          } catch {
+            controller.close();
+          }
         }
       },
     });
@@ -471,15 +494,28 @@ export abstract class ChatV2Service {
       firstUserMessage: message,
     });
 
-    const response = await ChatV2Service.invoke({
-      agentId: channel.agentId,
-      conversationId,
-      channelId,
-      orgId,
-      message,
-      ip,
-      isPaid,
-    });
+    let response: string;
+    try {
+      response = await ChatV2Service.invoke({
+        agentId: channel.agentId,
+        conversationId,
+        channelId,
+        orgId,
+        message,
+        ip,
+        isPaid,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof V2OrchestrationError
+        ? err.message
+        : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
+      await fetch(waBase, {
+        method: 'POST',
+        headers: waHeaders,
+        body: JSON.stringify({ messaging_product: 'whatsapp', to: senderPhone, type: 'text', text: { body: errorMsg } }),
+      });
+      return;
+    }
 
     await fetch(waBase, {
       method: 'POST',
@@ -565,15 +601,36 @@ export abstract class ChatV2Service {
       firstUserMessage: message,
     });
 
-    const response = await ChatV2Service.invoke({
-      agentId: channel.agentId,
-      conversationId,
-      channelId,
-      orgId,
-      message,
-      ip,
-      isPaid,
-    });
+    let response: string;
+    try {
+      response = await ChatV2Service.invoke({
+        agentId: channel.agentId,
+        conversationId,
+        channelId,
+        orgId,
+        message,
+        ip,
+        isPaid,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof V2OrchestrationError
+        ? err.message
+        : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
+      if (placeholderTs) {
+        fetch('https://slack.com/api/chat.update', {
+          method: 'POST',
+          headers: slackHeaders,
+          body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: errorMsg }),
+        }).catch(() => {});
+      } else {
+        fetch('https://slack.com/api/chat.postMessage', {
+          method: 'POST',
+          headers: slackHeaders,
+          body: JSON.stringify({ channel: slackChannelId, text: errorMsg, thread_ts: threadTs }),
+        }).catch(() => {});
+      }
+      return;
+    }
 
     if (placeholderTs) {
       fetch('https://slack.com/api/chat.update', {

@@ -9,9 +9,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "langgraphjs dev",
+    "smith": "langgraphjs dev",
     "build": "tsc",
-    "start": "bun run src/server.ts",
+    "dev": "bun run src/server.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

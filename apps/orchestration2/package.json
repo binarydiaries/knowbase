@@ -9,7 +9,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bunx @langchain/langgraph-cli dev",
     "build": "tsc",
     "clean": "rm -rf dist"
   },

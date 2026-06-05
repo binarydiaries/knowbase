@@ -14,7 +14,7 @@
 
 import 'dotenv/config';
 import { Elysia, t } from 'elysia';
-import type { BaseMessage } from '@langchain/core/messages';
+import { toUIMessageStream } from '@ai-sdk/langchain';
 import { graph } from './agent/graph.js';
 
 const PORT = parseInt(process.env.PORT ?? '2024', 10);
@@ -77,50 +77,20 @@ new Elysia()
       set.headers['Cache-Control'] = 'no-cache';
       set.headers['Connection'] = 'keep-alive';
 
-      const encoder = new TextEncoder();
-
-      return new ReadableStream({
-        async start(controller) {
-          try {
-            // streamMode:'messages' yields [message, nodeMetadata] per token.
-            // message.id is stable per LLM call (run-<uuid>), which lets
-            // chatV2/service.ts distinguish structured-output calls (JSON) from
-            // the natural-language RAG response.
-            const lgStream = await graph.stream(body.input ?? {}, {
-              configurable: {
-                thread_id: params.threadId,
-                ...body.config?.configurable,
-              },
-              streamMode: 'messages',
-            });
-
-            for await (const chunk of lgStream) {
-              const [message] = chunk as [BaseMessage, Record<string, unknown>];
-              if (!message?.id) continue;
-
-              const content =
-                typeof message.content === 'string'
-                  ? message.content
-                  : JSON.stringify(message.content);
-
-              controller.enqueue(
-                encoder.encode(
-                  `event: messages/partial\ndata: ${JSON.stringify([{ id: message.id, content }])}\n\n`,
-                ),
-              );
-            }
-          } catch (err) {
-            console.error('[runs/stream]', err);
-            controller.enqueue(
-              encoder.encode(
-                `event: error\ndata: ${JSON.stringify({ error: String(err) })}\n\n`,
-              ),
-            );
-          }
-
-          controller.close();
+      const lgStream = await graph.stream(body.input ?? {}, {
+        configurable: {
+          thread_id: params.threadId,
+          ...body.config?.configurable,
         },
+        streamMode: ['values', 'messages'],
       });
+
+      // toUIMessageStream converts the LangGraph stream to the AI SDK
+      // data-stream protocol so the backend can proxy it directly to useChat.
+      // Cast needed: LangGraph's generic tuple type doesn't match the narrow
+      // AIMessageChunk signature but the adapter handles both at runtime.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return toUIMessageStream(lgStream as any);
     },
     {
       body: t.Object({

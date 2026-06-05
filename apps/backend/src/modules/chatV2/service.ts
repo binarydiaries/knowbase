@@ -249,6 +249,17 @@ export abstract class ChatV2Service {
    * onFinish fires after [DONE] so callers can trigger usage tracking and
    * enrichment at the right time without buffering the stream.
    */
+  /**
+   * Streaming invoke — used by both the web channel and the dashboard preview.
+   *
+   * The orchestration server uses @ai-sdk/langchain's toUIMessageStream to
+   * convert the LangGraph stream to the AI SDK data-stream protocol.
+   * We create the thread, POST to /runs/stream, and proxy the response body
+   * directly — no manual SSE parsing needed.
+   *
+   * onFinish fires after the stream closes so callers can trigger usage
+   * tracking and enrichment at the right time without buffering the stream.
+   */
   static async stream({
     agentId,
     conversationId,
@@ -268,93 +279,67 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    const msgId = crypto.randomUUID();
+    const orchestrationUrl = process.env.ORCHESTRATION_URL ?? 'http://localhost:2024';
     const encoder = new TextEncoder();
-    const sse = (data: object | string) =>
-      encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
 
-    return new ReadableStream({
-      async start(controller) {
-        try {
-          await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+    try {
+      // Ensure the thread exists before streaming
+      await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
 
-          const lgStream = client.runs.stream(conversationId, 'agent', {
+      const res = await fetch(
+        `${orchestrationUrl}/threads/${conversationId}/runs/stream`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             input: { messages: [{ role: 'human', content: message }] },
             config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
-            streamMode: 'messages',
-            multitaskStrategy: 'interrupt',
-          });
+            multitask_strategy: 'interrupt',
+          }),
+        },
+      );
 
-          const skipIds = new Set<string>();
-          let targetId: string | null = null;
-          let prevContent = '';
-          let started = false;
+      if (!res.ok || !res.body) {
+        throw new V2OrchestrationError();
+      }
 
-          // Stream lifecycle start — always emitted regardless of content
-          controller.enqueue(sse({ type: 'start' }));
-          controller.enqueue(sse({ type: 'start-step' }));
+      // Proxy the AI SDK data-stream from orchestration directly to the client.
+      // Wrap in a TransformStream so we can fire onFinish when the stream ends.
+      const { readable, writable } = new TransformStream();
+      const writer = writable.getWriter();
 
-          for await (const chunk of lgStream) {
-            if (chunk.event !== 'messages/partial') continue;
-
-            const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
-              id?: string;
-              content?: string;
-            } | null;
-
-            if (!msg?.id || typeof msg.content !== 'string') continue;
-            if (skipIds.has(msg.id)) continue;
-
-            // First non-empty chunk from a call: classify it
-            if (msg.id !== targetId && msg.content.trim()) {
-              if (msg.content.trimStart().startsWith('{')) {
-                // Structured output — skip this call entirely
-                skipIds.add(msg.id);
-                continue;
-              }
-              // Natural language — this is generateRagResponse
-              targetId = msg.id;
-              prevContent = '';
-            }
-
-            if (msg.id !== targetId) continue;
-
-            const delta = msg.content.slice(prevContent.length);
-            prevContent = msg.content;
-            if (delta) {
-              if (!started) {
-                controller.enqueue(sse({ type: 'text-start', id: msgId }));
-                started = true;
-              }
-              controller.enqueue(sse({ type: 'text-delta', id: msgId, delta }));
-            }
+      (async () => {
+        try {
+          for await (const chunk of res.body as unknown as AsyncIterable<Uint8Array>) {
+            await writer.write(chunk);
           }
+        } finally {
+          await writer.close().catch(() => {});
+          onFinish?.();
+        }
+      })();
 
-          // Only close the text part if it was opened
-          if (started) {
-            controller.enqueue(sse({ type: 'text-end', id: msgId }));
-          }
+      return readable;
+    } catch (err) {
+      if (err instanceof V2OrchestrationError) throw err;
+
+      // Orchestration is down — emit a clean error message in AI SDK format
+      const msgId = crypto.randomUUID();
+      const sse = (data: object | string) =>
+        encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
+
+      return new ReadableStream({
+        start(controller) {
+          controller.enqueue(sse({ type: 'text-start', id: msgId }));
+          controller.enqueue(sse({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' }));
+          controller.enqueue(sse({ type: 'text-end', id: msgId }));
           controller.enqueue(sse({ type: 'finish-step' }));
           controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
           controller.enqueue(sse('[DONE]'));
           controller.close();
-          onFinish?.();
-        } catch {
-          // Orchestration is down — emit a clean message instead of breaking the SSE connection
-          try {
-            controller.enqueue(sse({ type: 'text-start', id: msgId }));
-            controller.enqueue(sse({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' }));
-            controller.enqueue(sse({ type: 'text-end', id: msgId }));
-            controller.enqueue(sse({ type: 'finish-step' }));
-            controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
-            controller.enqueue(sse('[DONE]'));
-            controller.close();
-          } catch {
-            controller.close();
-          }
-        }
-      },
-    });
+        },
+      });
+    }
   }
 
   // ── Web ───────────────────────────────────────────────────────────────────

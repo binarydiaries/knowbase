@@ -265,27 +265,17 @@ export abstract class ChatV2Service {
   /**
    * Streaming invoke — used by both the web channel and the dashboard preview.
    *
-   * Uses streamMode:'messages' for true token-level deltas and emits the AI SDK
-   * UI message stream format so useChat can parse it directly.
+   * Orchestration emits `messages/partial` SSE events, each carrying a single
+   * incremental token delta (AIMessageChunk only — the final AIMessage is
+   * filtered server-side). This method reads those events and re-encodes them
+   * as the AI SDK data-stream protocol that useChat expects.
    *
-   * Structured-output calls (extractEntities, rewriteQuery, scoreSentiment) always
-   * produce JSON content starting with '{'. generateRagResponse produces natural
-   * language. We classify by content so multi-turn rewriteQuery firing an extra LLM
-   * call doesn't shift the index and accidentally stream the wrong call.
+   * Structured-output calls (rewriteQuery, extractEntities, scoreSentiment)
+   * emit JSON content starting with '{' — those are skipped so only the
+   * natural-language RAG response reaches the client.
    *
    * onFinish fires after [DONE] so callers can trigger usage tracking and
-   * enrichment at the right time without buffering the stream.
-   */
-  /**
-   * Streaming invoke — used by both the web channel and the dashboard preview.
-   *
-   * The orchestration server uses @ai-sdk/langchain's toUIMessageStream to
-   * convert the LangGraph stream to the AI SDK data-stream protocol.
-   * We create the thread, POST to /runs/stream, and proxy the response body
-   * directly — no manual SSE parsing needed.
-   *
-   * onFinish fires after the stream closes so callers can trigger usage
-   * tracking and enrichment at the right time without buffering the stream.
+   * enrichment at the right time.
    */
   static async stream({
     agentId,
@@ -306,81 +296,88 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    const orchestrationUrl =
-      process.env.ORCHESTRATION_URL ?? 'http://localhost:2024';
+    const msgId = crypto.randomUUID();
     const encoder = new TextEncoder();
+    const sse = (data: object | string) =>
+      encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
 
-    try {
-      // Ensure the thread exists before streaming
-      await client.threads.create({
-        threadId: conversationId,
-        ifExists: 'do_nothing',
-      });
+    return new ReadableStream({
+      async start(controller) {
+        const enqueue = (data: object | string) => controller.enqueue(sse(data));
 
-      const res = await fetch(
-        `${orchestrationUrl}/threads/${conversationId}/runs/stream`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        try {
+          await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+
+          const lgStream = client.runs.stream(conversationId, 'agent', {
             input: { messages: [{ role: 'human', content: message }] },
             config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
-            multitask_strategy: 'interrupt',
-          }),
-        },
-      );
+            streamMode: 'messages',
+            multitaskStrategy: 'interrupt',
+          });
 
-      if (!res.ok || !res.body) {
-        throw new V2OrchestrationError();
-      }
+          const skipIds = new Set<string>();
+          let targetId: string | null = null;
+          let started = false;
 
-      // Proxy the AI SDK data-stream from orchestration directly to the client.
-      // Wrap in a TransformStream so we can fire onFinish when the stream ends.
-      const { readable, writable } = new TransformStream();
-      const writer = writable.getWriter();
+          enqueue({ type: 'start' });
+          enqueue({ type: 'start-step' });
 
-      (async () => {
-        try {
-          for await (const chunk of res.body as unknown as AsyncIterable<Uint8Array>) {
-            await writer.write(chunk);
+          for await (const chunk of lgStream) {
+            if (chunk.event !== 'messages/partial') continue;
+
+            const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
+              id?: string;
+              content?: string;
+            } | null;
+
+            if (!msg?.id || typeof msg.content !== 'string' || !msg.content) continue;
+            if (skipIds.has(msg.id)) continue;
+
+            // First non-empty content from this call ID — classify it
+            if (msg.id !== targetId) {
+              if (msg.content.trimStart().startsWith('{')) {
+                // Structured-output call (JSON) — skip entirely
+                skipIds.add(msg.id);
+                continue;
+              }
+              // Natural-language RAG response — stream this call
+              targetId = msg.id;
+            }
+
+            if (msg.id !== targetId) continue;
+
+            // Each msg.content is already an incremental delta (AIMessageChunk).
+            // The orchestration server filters out the final AIMessage, so no
+            // cumulative-slice logic is needed here.
+            if (!started) {
+              enqueue({ type: 'text-start', id: msgId });
+              started = true;
+            }
+            enqueue({ type: 'text-delta', id: msgId, delta: msg.content });
           }
-        } finally {
-          await writer.close().catch(() => {});
-          onFinish?.();
-        }
-      })();
 
-      return readable;
-    } catch (err) {
-      console.error(err);
-      if (err instanceof V2OrchestrationError) throw err;
-
-      // Orchestration is down — emit a clean error message in AI SDK format
-      const msgId = crypto.randomUUID();
-      const sse = (data: object | string) =>
-        encoder.encode(
-          `data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`,
-        );
-
-      return new ReadableStream({
-        start(controller) {
-          controller.enqueue(sse({ type: 'text-start', id: msgId }));
-          controller.enqueue(
-            sse({
-              type: 'text-delta',
-              id: msgId,
-              delta:
-                'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.',
-            }),
-          );
-          controller.enqueue(sse({ type: 'text-end', id: msgId }));
-          controller.enqueue(sse({ type: 'finish-step' }));
-          controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
-          controller.enqueue(sse('[DONE]'));
+          if (started) enqueue({ type: 'text-end', id: msgId });
+          enqueue({ type: 'finish-step' });
+          enqueue({ type: 'finish', finishReason: 'stop' });
+          enqueue('[DONE]');
           controller.close();
-        },
-      });
-    }
+          onFinish?.();
+        } catch {
+          // Orchestration is down or threw — emit a clean error message
+          try {
+            enqueue({ type: 'text-start', id: msgId });
+            enqueue({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' });
+            enqueue({ type: 'text-end', id: msgId });
+            enqueue({ type: 'finish-step' });
+            enqueue({ type: 'finish', finishReason: 'stop' });
+            enqueue('[DONE]');
+            controller.close();
+          } catch {
+            controller.close();
+          }
+        }
+      },
+    });
   }
 
   // ── Web ───────────────────────────────────────────────────────────────────

@@ -14,8 +14,7 @@
 
 import 'dotenv/config';
 import { Elysia, t } from 'elysia';
-import { toUIMessageStream } from '@ai-sdk/langchain';
-import { createUIMessageStreamResponse } from 'ai';
+import { AIMessageChunk } from '@langchain/core/messages';
 import { graph } from './agent/graph.js';
 
 const PORT = parseInt(process.env.PORT ?? '2024', 10);
@@ -37,10 +36,10 @@ new Elysia()
       values: null,
     }),
     {
-      body: t.Object({
-        thread_id: t.Optional(t.String()),
-        if_exists: t.Optional(t.String()),
-      }),
+      body: t.Object(
+        { thread_id: t.Optional(t.String()), if_exists: t.Optional(t.String()) },
+        { additionalProperties: true },
+      ),
     },
   )
 
@@ -74,21 +73,59 @@ new Elysia()
   // ── POST /threads/:threadId/runs/stream ─────────────────────────────────────
   .post(
     '/threads/:threadId/runs/stream',
-    async ({ params, body }) => {
-      const lgStream = await graph.stream(body.input ?? {}, {
-        configurable: {
-          thread_id: params.threadId,
-          ...body.config?.configurable,
-        },
-        streamMode: ['values', 'messages'],
-      });
+    async ({ params, body, set }) => {
+      set.headers['Content-Type'] = 'text/event-stream';
+      set.headers['Cache-Control'] = 'no-cache';
+      set.headers['Connection'] = 'keep-alive';
 
-      // createUIMessageStreamResponse encodes the LangGraph stream as proper
-      // SSE (data: {...}\n\n) that useChat and the backend proxy can consume.
-      // Cast needed: LangGraph's generic tuple type doesn't narrow to AIMessageChunk.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return createUIMessageStreamResponse({
-        stream: toUIMessageStream(lgStream as any),
+      const encoder = new TextEncoder();
+
+      return new ReadableStream({
+        async start(controller) {
+          try {
+            // streamMode:'messages' yields [AIMessageChunk|AIMessage, nodeMetadata] per token.
+            // Only AIMessageChunk carries incremental deltas — the final AIMessage has the
+            // full concatenated content and must be skipped to avoid duplication.
+            const lgStream = await graph.stream(body.input ?? {}, {
+              configurable: {
+                thread_id: params.threadId,
+                ...body.config?.configurable,
+              },
+              streamMode: 'messages',
+            });
+
+            for await (const chunk of lgStream) {
+              const [message] = chunk as [unknown, Record<string, unknown>];
+              if (!message || typeof message !== 'object') continue;
+
+              const msg = message as { id?: string; content?: unknown };
+              if (!msg.id) continue;
+
+              // Skip the final AIMessage (full text) — only stream incremental chunks
+              if (!(message instanceof AIMessageChunk)) continue;
+
+              const content =
+                typeof msg.content === 'string'
+                  ? msg.content
+                  : JSON.stringify(msg.content);
+
+              controller.enqueue(
+                encoder.encode(
+                  `event: messages/partial\ndata: ${JSON.stringify([{ id: msg.id, content }])}\n\n`,
+                ),
+              );
+            }
+          } catch (err) {
+            console.error('[runs/stream]', err);
+            controller.enqueue(
+              encoder.encode(
+                `event: error\ndata: ${JSON.stringify({ error: String(err) })}\n\n`,
+              ),
+            );
+          }
+
+          controller.close();
+        },
       });
     },
     {

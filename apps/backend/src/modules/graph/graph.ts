@@ -12,13 +12,16 @@ const State = new StateSchema({
 });
 
 const mockLlm: GraphNode<typeof State> = (state) => {
-  return { messages: [{ role: 'ai', content: 'hello world' }] };
+  return {
+    messages: [{ role: 'assistant', content: 'Hi there! How are you?' }],
+  };
 };
 
-const graph = new StateGraph(State)
+const builder = new StateGraph(State)
   .addNode('mock_llm', mockLlm)
   .addEdge(START, 'mock_llm')
-  .addEdge('mock_llm', END)
-  .compile();
+  .addEdge('mock_llm', END);
 
-await graph.invoke({ messages: [{ role: 'user', content: 'hi!' }] });
+export const graph = builder.compile();
+
+// await graph.invoke({ messages: [{ role: 'user', content: 'hi!' }] });

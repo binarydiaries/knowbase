@@ -1,0 +1,9 @@
+{
+  "node_version": "22",
+  "graphs": {
+    "graph": "./src/modules/graph/graph.ts:graph"
+  },
+  "env": ".env",
+  "dependencies": ["."],
+  "image_distro": "wolfi"
+}

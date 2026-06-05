@@ -42,4 +42,5 @@ export const ConfigSchema = z.object({
     .string()
     .optional()
     .describe('Client IP address (for geo enrichment, optional)'),
+  isPaid: z.boolean().optional().describe('Whether the org is on a paid plan — gates sentiment scoring'),
 });

@@ -4,24 +4,28 @@
  * Responsibilities:
  *   1. Update conversation summary fields (lastUserQuestion, lastAssistantUtterance,
  *      lastMessageAt, entities)
- *   2. Score sentiment of the assistant response (paid plans: handled upstream by
- *      checking plan before invoking — for now always scored, cheap nano call)
- *   3. Insert user + assistant messages with full metadata
+ *   2. Insert user + assistant messages with full metadata
  *      (finalQuery, RAG sources, confidence score, sentiment)
+ *
+ * Sentiment scoring is gated on config.isPaid — only runs for paid orgs.
  *
  * The backend is responsible only for creating the bare conversation row the
  * first time (to satisfy the FK before this node runs). All subsequent writes
  * to the conversation and every message insert are owned here.
  */
 
+import { conversations, db, messages } from '@knowbase/models/db';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode, LangGraphRunnableConfig } from '@langchain/langgraph';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { conversations, db, messages } from '@knowbase/models/db';
 import { createNanoLlm } from '../../integrations/llm.js';
-import { getLastAssistantMessage, getLastUserMessage } from '../../utils/messages.js';
-import type { State } from '../state.js';
+import { computeConfidenceScore } from '../../rag/retrieval.js';
+import {
+  getLastAssistantMessage,
+  getLastUserMessage,
+} from '../../utils/messages.js';
+import { ConfigSchema, type State } from '../state.js';
 
 // ── Sentiment ─────────────────────────────────────────────────────────────────
 
@@ -29,9 +33,7 @@ const SentimentSchema = z.object({
   label: z
     .enum(['positive', 'neutral', 'negative'])
     .describe('Overall sentiment of the assistant response'),
-  score: z
-    .number()
-    .describe('Confidence score between 0 and 1'),
+  score: z.number().describe('Confidence score between 0 and 1'),
 });
 
 type Sentiment = z.infer<typeof SentimentSchema> | null;
@@ -46,7 +48,7 @@ async function scoreSentiment(assistantText: string): Promise<Sentiment> {
     return await sentimentLlm.invoke([
       new SystemMessage(
         'Classify the sentiment of the given AI assistant response. ' +
-        'Return the label (positive, neutral, or negative) and a confidence score between 0 and 1.',
+          'Return the label (positive, neutral, or negative) and a confidence score between 0 and 1.',
       ),
       new HumanMessage(assistantText),
     ]);
@@ -55,27 +57,24 @@ async function scoreSentiment(assistantText: string): Promise<Sentiment> {
   }
 }
 
-// ── Confidence score ──────────────────────────────────────────────────────────
-
-function computeConfidenceScore(chunks: { similarity: number }[]): number {
-  if (!chunks.length) return 0;
-  return chunks.reduce((acc, c) => acc + c.similarity, 0) / chunks.length;
-}
-
 // ── Node ──────────────────────────────────────────────────────────────────────
 
 export const persistTurn: GraphNode<typeof State> = async (state, config) => {
   const conversationId = (config as LangGraphRunnableConfig)?.configurable
     ?.thread_id as string | undefined;
 
-  if (!conversationId) return {};
+  if (!conversationId) {
+    throw new Error('persistTurn: thread_id must be set in configurable (it is the conversationId)');
+  }
+
+  const { isPaid } = ConfigSchema.parse(config.configurable);
 
   const userText = getLastUserMessage(state);
   const assistantText = getLastAssistantMessage(state);
 
   if (!userText || !assistantText) return {};
 
-  const sentiment = await scoreSentiment(assistantText);
+  const sentiment = isPaid ? await scoreSentiment(assistantText) : null;
   const confidenceScore = computeConfidenceScore(state.ragChunks);
 
   // Update conversation — backend only wrote the bare creation row

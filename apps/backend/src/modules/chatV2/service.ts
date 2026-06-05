@@ -15,17 +15,21 @@
  */
 
 import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
 import { Client } from '@langchain/langgraph-sdk';
-import type { IChannelSlackConfig, IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
+import { generateText } from 'ai';
+import { isDomainAllowed } from '../../utils/domain.utils';
 import { AgentService } from '../agent/service';
+import type {
+  IChannelSlackConfig,
+  IChannelWebConfig,
+  IChannelWhatsAppConfig,
+} from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ConversationService } from '../conversation/service';
 import { SlackConnectionService } from '../slack/connectionService';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
-import { isDomainAllowed } from '../../utils/domain.utils';
 
 // ── Errors ────────────────────────────────────────────────────────────────────
 
@@ -46,7 +50,11 @@ export class V2ForbiddenError extends Error {
 export class V2LimitError extends Error {
   constructor(
     msg: string,
-    readonly payload: { plan: string; messagesPerMonthLimit: number; messagesThisMonth: number },
+    readonly payload: {
+      plan: string;
+      messagesPerMonthLimit: number;
+      messagesThisMonth: number;
+    },
   ) {
     super(msg);
     this.name = 'V2LimitError';
@@ -54,7 +62,9 @@ export class V2LimitError extends Error {
 }
 
 export class V2OrchestrationError extends Error {
-  constructor(msg = 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.') {
+  constructor(
+    msg = 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.',
+  ) {
     super(msg);
     this.name = 'V2OrchestrationError';
   }
@@ -62,7 +72,9 @@ export class V2OrchestrationError extends Error {
 
 // ── LangGraph client (singleton) ──────────────────────────────────────────────
 
-const client = new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
+const client = new Client({
+  apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024',
+});
 
 // ── Nano LLM for topic labeling ───────────────────────────────────────────────
 
@@ -70,7 +82,10 @@ const nanoModel = openai('gpt-4.1-nano');
 
 // ── Guards ────────────────────────────────────────────────────────────────────
 
-async function assertAgentActive(agentId: string, orgId: string): Promise<void> {
+async function assertAgentActive(
+  agentId: string,
+  orgId: string,
+): Promise<void> {
   const agent = await AgentService.single({ id: agentId, orgId });
   if (!agent || agent.agentStatus !== 'active') {
     throw new V2NotFoundError('Agent not found or inactive');
@@ -93,7 +108,10 @@ async function findOrCreateByExternalId({
   externalId: string;
   firstUserMessage: string;
 }): Promise<{ conversationId: string; isNew: boolean }> {
-  const existing = await ConversationService.findByExternalId({ channelId, externalId });
+  const existing = await ConversationService.findByExternalId({
+    channelId,
+    externalId,
+  });
   if (existing) return { conversationId: existing.id, isNew: false };
 
   const created = await ConversationService.create({
@@ -127,11 +145,15 @@ async function enrichConversationAsync({
 }): Promise<void> {
   if (ip && ip !== '127.0.0.1' && ip !== '::1') {
     try {
-      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
+      const geoRes = await fetch(
+        `http://ip-api.com/json/${ip}?fields=countryCode`,
+      );
       if (geoRes.ok) {
         const geo = (await geoRes.json()) as { countryCode?: string };
         if (geo.countryCode) {
-          await ConversationService.update(conversationId, { country: geo.countryCode });
+          await ConversationService.update(conversationId, {
+            country: geo.countryCode,
+          });
         }
       }
     } catch {
@@ -220,13 +242,18 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
   }): Promise<string> {
     try {
-      await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+      await client.threads.create({
+        threadId: conversationId,
+        ifExists: 'do_nothing',
+      });
       const result = await client.runs.wait(conversationId, 'agent', {
         input: { messages: [{ role: 'human', content: message }] },
         config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
         multitaskStrategy: 'interrupt',
       });
-      const msgs = (result as { messages?: Array<{ type?: string; content?: string }> }).messages ?? [];
+      const msgs =
+        (result as { messages?: Array<{ type?: string; content?: string }> })
+          .messages ?? [];
       const last = msgs.at(-1);
       return typeof last?.content === 'string' ? last.content : '';
     } catch (err) {
@@ -279,12 +306,16 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    const orchestrationUrl = process.env.ORCHESTRATION_URL ?? 'http://localhost:2024';
+    const orchestrationUrl =
+      process.env.ORCHESTRATION_URL ?? 'http://localhost:2024';
     const encoder = new TextEncoder();
 
     try {
       // Ensure the thread exists before streaming
-      await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
+      await client.threads.create({
+        threadId: conversationId,
+        ifExists: 'do_nothing',
+      });
 
       const res = await fetch(
         `${orchestrationUrl}/threads/${conversationId}/runs/stream`,
@@ -321,17 +352,27 @@ export abstract class ChatV2Service {
 
       return readable;
     } catch (err) {
+      console.error(err);
       if (err instanceof V2OrchestrationError) throw err;
 
       // Orchestration is down — emit a clean error message in AI SDK format
       const msgId = crypto.randomUUID();
       const sse = (data: object | string) =>
-        encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
+        encoder.encode(
+          `data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`,
+        );
 
       return new ReadableStream({
         start(controller) {
           controller.enqueue(sse({ type: 'text-start', id: msgId }));
-          controller.enqueue(sse({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' }));
+          controller.enqueue(
+            sse({
+              type: 'text-delta',
+              id: msgId,
+              delta:
+                'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.',
+            }),
+          );
           controller.enqueue(sse({ type: 'text-end', id: msgId }));
           controller.enqueue(sse({ type: 'finish-step' }));
           controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
@@ -369,22 +410,29 @@ export abstract class ChatV2Service {
 
     await assertAgentActive(channel.agentId, channel.orgId);
 
-    const limit = await SubscriptionService.assertMessagesPerMonthLimitNotReached(channel.orgId);
+    const limit =
+      await SubscriptionService.assertMessagesPerMonthLimitNotReached(
+        channel.orgId,
+      );
     if (!limit.allowed) {
-      throw new V2LimitError(SubscriptionService.getMessageLimitReachedMessage(limit), {
-        plan: limit.plan,
-        messagesPerMonthLimit: limit.messagesPerMonthLimit,
-        messagesThisMonth: limit.messagesThisMonth,
-      });
+      throw new V2LimitError(
+        SubscriptionService.getMessageLimitReachedMessage(limit),
+        {
+          plan: limit.plan,
+          messagesPerMonthLimit: limit.messagesPerMonthLimit,
+          messagesThisMonth: limit.messagesThisMonth,
+        },
+      );
     }
 
-    const { conversationId: resolvedId, isNew } = await ChatV2Service.findOrCreate({
-      channelId,
-      agentId: channel.agentId,
-      conversationId,
-      orgId: channel.orgId,
-      firstUserMessage: message,
-    });
+    const { conversationId: resolvedId, isNew } =
+      await ChatV2Service.findOrCreate({
+        channelId,
+        agentId: channel.agentId,
+        conversationId,
+        orgId: channel.orgId,
+        firstUserMessage: message,
+      });
 
     const plan = await SubscriptionService.getPlan(channel.orgId);
     const isPaid = plan !== 'free';
@@ -400,7 +448,12 @@ export abstract class ChatV2Service {
       onFinish: () => {
         void OrgUsageMonthlyService.incrementAssistantMessages(channel.orgId);
         if (isPaid) {
-          void enrichConversationAsync({ conversationId: resolvedId, ip, isNew, firstUserMessage: message });
+          void enrichConversationAsync({
+            conversationId: resolvedId,
+            ip,
+            isNew,
+            firstUserMessage: message,
+          });
         }
       },
     });
@@ -424,10 +477,12 @@ export abstract class ChatV2Service {
     ip?: string;
   }): Promise<void> {
     const channel = await ChannelService.single({ id: channelId, orgId });
-    if (!channel || channel.type !== 'whatsapp') throw new V2NotFoundError('WhatsApp channel not found');
+    if (!channel || channel.type !== 'whatsapp')
+      throw new V2NotFoundError('WhatsApp channel not found');
 
     const cfg = channel.config as IChannelWhatsAppConfig;
-    if (!cfg.phoneNumberId) throw new V2NotFoundError('WhatsApp channel not configured');
+    if (!cfg.phoneNumberId)
+      throw new V2NotFoundError('WhatsApp channel not configured');
 
     const connection = await WhatsAppConnectionService.findByOrg(orgId);
     if (!connection) throw new V2NotFoundError('WhatsApp not connected');
@@ -445,7 +500,11 @@ export abstract class ChatV2Service {
       fetch(waBase, {
         method: 'POST',
         headers: waHeaders,
-        body: JSON.stringify({ messaging_product: 'whatsapp', status: 'read', message_id: messageId }),
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          status: 'read',
+          message_id: messageId,
+        }),
       }).catch(() => {});
     }
     fetch(waBase, {
@@ -460,13 +519,17 @@ export abstract class ChatV2Service {
       }),
     }).catch(() => {});
 
-    const limit = await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
+    const limit =
+      await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
     if (!limit.allowed) {
-      throw new V2LimitError(SubscriptionService.getMessageLimitReachedMessage(limit), {
-        plan: limit.plan,
-        messagesPerMonthLimit: limit.messagesPerMonthLimit,
-        messagesThisMonth: limit.messagesThisMonth,
-      });
+      throw new V2LimitError(
+        SubscriptionService.getMessageLimitReachedMessage(limit),
+        {
+          plan: limit.plan,
+          messagesPerMonthLimit: limit.messagesPerMonthLimit,
+          messagesThisMonth: limit.messagesThisMonth,
+        },
+      );
     }
 
     const plan = await SubscriptionService.getPlan(orgId);
@@ -491,13 +554,19 @@ export abstract class ChatV2Service {
         isPaid,
       });
     } catch (err) {
-      const errorMsg = err instanceof V2OrchestrationError
-        ? err.message
-        : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
+      const errorMsg =
+        err instanceof V2OrchestrationError
+          ? err.message
+          : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
       await fetch(waBase, {
         method: 'POST',
         headers: waHeaders,
-        body: JSON.stringify({ messaging_product: 'whatsapp', to: senderPhone, type: 'text', text: { body: errorMsg } }),
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: senderPhone,
+          type: 'text',
+          text: { body: errorMsg },
+        }),
       });
       return;
     }
@@ -516,7 +585,12 @@ export abstract class ChatV2Service {
     void OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
     if (isPaid) {
-      void enrichConversationAsync({ conversationId, ip, isNew, firstUserMessage: message });
+      void enrichConversationAsync({
+        conversationId,
+        ip,
+        isNew,
+        firstUserMessage: message,
+      });
     }
   }
 
@@ -538,10 +612,12 @@ export abstract class ChatV2Service {
     ip?: string;
   }): Promise<void> {
     const channel = await ChannelService.single({ id: channelId, orgId });
-    if (!channel || channel.type !== 'slack') throw new V2NotFoundError('Slack channel not found');
+    if (!channel || channel.type !== 'slack')
+      throw new V2NotFoundError('Slack channel not found');
 
     const cfg = channel.config as IChannelSlackConfig;
-    if (!cfg.slackChannelId) throw new V2NotFoundError('Slack channel not configured');
+    if (!cfg.slackChannelId)
+      throw new V2NotFoundError('Slack channel not configured');
 
     const connection = await SlackConnectionService.findByOrg(orgId);
     if (!connection) throw new V2NotFoundError('Slack not connected');
@@ -559,7 +635,11 @@ export abstract class ChatV2Service {
       const res = await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, text: '_Thinking…_', thread_ts: threadTs }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: '_Thinking…_',
+          thread_ts: threadTs,
+        }),
       });
       const data = (await res.json()) as { ok: boolean; ts?: string };
       if (data.ok && data.ts) placeholderTs = data.ts;
@@ -567,13 +647,17 @@ export abstract class ChatV2Service {
       // Best-effort — proceed even if placeholder fails
     }
 
-    const limit = await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
+    const limit =
+      await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
     if (!limit.allowed) {
-      throw new V2LimitError(SubscriptionService.getMessageLimitReachedMessage(limit), {
-        plan: limit.plan,
-        messagesPerMonthLimit: limit.messagesPerMonthLimit,
-        messagesThisMonth: limit.messagesThisMonth,
-      });
+      throw new V2LimitError(
+        SubscriptionService.getMessageLimitReachedMessage(limit),
+        {
+          plan: limit.plan,
+          messagesPerMonthLimit: limit.messagesPerMonthLimit,
+          messagesThisMonth: limit.messagesThisMonth,
+        },
+      );
     }
 
     const plan = await SubscriptionService.getPlan(orgId);
@@ -598,20 +682,29 @@ export abstract class ChatV2Service {
         isPaid,
       });
     } catch (err) {
-      const errorMsg = err instanceof V2OrchestrationError
-        ? err.message
-        : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
+      const errorMsg =
+        err instanceof V2OrchestrationError
+          ? err.message
+          : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.';
       if (placeholderTs) {
         fetch('https://slack.com/api/chat.update', {
           method: 'POST',
           headers: slackHeaders,
-          body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: errorMsg }),
+          body: JSON.stringify({
+            channel: slackChannelId,
+            ts: placeholderTs,
+            text: errorMsg,
+          }),
         }).catch(() => {});
       } else {
         fetch('https://slack.com/api/chat.postMessage', {
           method: 'POST',
           headers: slackHeaders,
-          body: JSON.stringify({ channel: slackChannelId, text: errorMsg, thread_ts: threadTs }),
+          body: JSON.stringify({
+            channel: slackChannelId,
+            text: errorMsg,
+            thread_ts: threadTs,
+          }),
         }).catch(() => {});
       }
       return;
@@ -621,20 +714,33 @@ export abstract class ChatV2Service {
       fetch('https://slack.com/api/chat.update', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: response }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          ts: placeholderTs,
+          text: response,
+        }),
       }).catch(() => {});
     } else {
       fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, text: response, thread_ts: threadTs }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: response,
+          thread_ts: threadTs,
+        }),
       }).catch(() => {});
     }
 
     void OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
     if (isPaid) {
-      void enrichConversationAsync({ conversationId, ip, isNew, firstUserMessage: message });
+      void enrichConversationAsync({
+        conversationId,
+        ip,
+        isNew,
+        firstUserMessage: message,
+      });
     }
   }
 }

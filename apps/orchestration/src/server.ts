@@ -15,6 +15,7 @@
 import 'dotenv/config';
 import { Elysia, t } from 'elysia';
 import { toUIMessageStream } from '@ai-sdk/langchain';
+import { createUIMessageStreamResponse } from 'ai';
 import { graph } from './agent/graph.js';
 
 const PORT = parseInt(process.env.PORT ?? '2024', 10);
@@ -56,27 +57,24 @@ new Elysia()
       return result;
     },
     {
-      body: t.Object({
-        assistant_id: t.Optional(t.String()),
-        input: t.Optional(t.Record(t.String(), t.Unknown())),
-        config: t.Optional(
-          t.Object({
-            configurable: t.Optional(t.Record(t.String(), t.Unknown())),
-          }),
-        ),
-        multitask_strategy: t.Optional(t.String()),
-      }),
+      body: t.Object(
+        {
+          input: t.Optional(t.Record(t.String(), t.Unknown())),
+          config: t.Optional(
+            t.Object({
+              configurable: t.Optional(t.Record(t.String(), t.Unknown())),
+            }),
+          ),
+        },
+        { additionalProperties: true },
+      ),
     },
   )
 
   // ── POST /threads/:threadId/runs/stream ─────────────────────────────────────
   .post(
     '/threads/:threadId/runs/stream',
-    async ({ params, body, set }) => {
-      set.headers['Content-Type'] = 'text/event-stream';
-      set.headers['Cache-Control'] = 'no-cache';
-      set.headers['Connection'] = 'keep-alive';
-
+    async ({ params, body }) => {
       const lgStream = await graph.stream(body.input ?? {}, {
         configurable: {
           thread_id: params.threadId,
@@ -85,25 +83,26 @@ new Elysia()
         streamMode: ['values', 'messages'],
       });
 
-      // toUIMessageStream converts the LangGraph stream to the AI SDK
-      // data-stream protocol so the backend can proxy it directly to useChat.
-      // Cast needed: LangGraph's generic tuple type doesn't match the narrow
-      // AIMessageChunk signature but the adapter handles both at runtime.
+      // createUIMessageStreamResponse encodes the LangGraph stream as proper
+      // SSE (data: {...}\n\n) that useChat and the backend proxy can consume.
+      // Cast needed: LangGraph's generic tuple type doesn't narrow to AIMessageChunk.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return toUIMessageStream(lgStream as any);
+      return createUIMessageStreamResponse({
+        stream: toUIMessageStream(lgStream as any),
+      });
     },
     {
-      body: t.Object({
-        assistant_id: t.Optional(t.String()),
-        input: t.Optional(t.Record(t.String(), t.Unknown())),
-        config: t.Optional(
-          t.Object({
-            configurable: t.Optional(t.Record(t.String(), t.Unknown())),
-          }),
-        ),
-        stream_mode: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-        multitask_strategy: t.Optional(t.String()),
-      }),
+      body: t.Object(
+        {
+          input: t.Optional(t.Record(t.String(), t.Unknown())),
+          config: t.Optional(
+            t.Object({
+              configurable: t.Optional(t.Record(t.String(), t.Unknown())),
+            }),
+          ),
+        },
+        { additionalProperties: true },
+      ),
     },
   )
 

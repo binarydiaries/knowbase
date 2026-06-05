@@ -265,10 +265,10 @@ export abstract class ChatV2Service {
   /**
    * Streaming invoke — used by both the web channel and the dashboard preview.
    *
-   * Orchestration emits `messages/partial` SSE events, each carrying a single
-   * incremental token delta (AIMessageChunk only — the final AIMessage is
-   * filtered server-side). This method reads those events and re-encodes them
-   * as the AI SDK data-stream protocol that useChat expects.
+   * Orchestration emits `messages/partial` SSE events. Each event carries the
+   * CUMULATIVE content of the AIMessageChunk so far (LangGraph accumulates in
+   * messages mode). We compute the true delta by slicing off the previously
+   * seen content for that call ID.
    *
    * Structured-output calls (rewriteQuery, extractEntities, scoreSentiment)
    * emit JSON content starting with '{' — those are skipped so only the
@@ -316,6 +316,9 @@ export abstract class ChatV2Service {
           });
 
           const skipIds = new Set<string>();
+          // prevContent tracks the cumulative content seen for the target call
+          // so we can slice off the new portion on each event.
+          const prevContent: Record<string, string> = {};
           let targetId: string | null = null;
           let started = false;
 
@@ -330,11 +333,11 @@ export abstract class ChatV2Service {
               content?: string;
             } | null;
 
-            if (!msg?.id || typeof msg.content !== 'string' || !msg.content) continue;
+            if (!msg?.id || typeof msg.content !== 'string') continue;
             if (skipIds.has(msg.id)) continue;
 
-            // First non-empty content from this call ID — classify it
-            if (msg.id !== targetId) {
+            // First event from this call ID — classify by content
+            if (msg.id !== targetId && !(msg.id in prevContent)) {
               if (msg.content.trimStart().startsWith('{')) {
                 // Structured-output call (JSON) — skip entirely
                 skipIds.add(msg.id);
@@ -342,18 +345,22 @@ export abstract class ChatV2Service {
               }
               // Natural-language RAG response — stream this call
               targetId = msg.id;
+              prevContent[msg.id] = '';
             }
 
             if (msg.id !== targetId) continue;
 
-            // Each msg.content is already an incremental delta (AIMessageChunk).
-            // The orchestration server filters out the final AIMessage, so no
-            // cumulative-slice logic is needed here.
+            // msg.content is CUMULATIVE — compute the new portion by slicing.
+            const delta = msg.content.slice(prevContent[msg.id]?.length ?? 0);
+            prevContent[msg.id] = msg.content;
+
+            if (!delta) continue;
+
             if (!started) {
               enqueue({ type: 'text-start', id: msgId });
               started = true;
             }
-            enqueue({ type: 'text-delta', id: msgId, delta: msg.content });
+            enqueue({ type: 'text-delta', id: msgId, delta });
           }
 
           if (started) enqueue({ type: 'text-end', id: msgId });

@@ -229,12 +229,10 @@ export abstract class ChatV2Service {
    * Uses streamMode:'messages' for true token-level deltas and emits the AI SDK
    * UI message stream format so useChat can parse it directly.
    *
-   * The graph makes 3 LLM calls in order:
-   *   1. extractEntities  (nano, JSON output)
-   *   2. generateRagResponse  (main model — the real answer we stream)
-   *   3. scoreSentiment  (nano, JSON output — paid only)
-   * messages/metadata marks each call start; we target the second one.
-   * messages/partial content is cumulative — we compute deltas.
+   * Structured-output calls (extractEntities, rewriteQuery, scoreSentiment) always
+   * produce JSON content starting with '{'. generateRagResponse produces natural
+   * language. We classify by content so multi-turn rewriteQuery firing an extra LLM
+   * call doesn't shift the index and accidentally stream the wrong call.
    *
    * onFinish fires after [DONE] so callers can trigger usage tracking and
    * enrichment at the right time without buffering the stream.
@@ -280,6 +278,10 @@ export abstract class ChatV2Service {
           let prevContent = '';
           let started = false;
 
+          // Stream lifecycle start — always emitted regardless of content
+          controller.enqueue(sse({ type: 'start' }));
+          controller.enqueue(sse({ type: 'start-step' }));
+
           for await (const chunk of lgStream) {
             if (chunk.event !== 'messages/partial') continue;
 
@@ -309,8 +311,6 @@ export abstract class ChatV2Service {
             prevContent = msg.content;
             if (delta) {
               if (!started) {
-                controller.enqueue(sse({ type: 'start' }));
-                controller.enqueue(sse({ type: 'start-step' }));
                 controller.enqueue(sse({ type: 'text-start', id: msgId }));
                 started = true;
               }
@@ -318,7 +318,10 @@ export abstract class ChatV2Service {
             }
           }
 
-          controller.enqueue(sse({ type: 'text-end', id: msgId }));
+          // Only close the text part if it was opened
+          if (started) {
+            controller.enqueue(sse({ type: 'text-end', id: msgId }));
+          }
           controller.enqueue(sse({ type: 'finish-step' }));
           controller.enqueue(sse({ type: 'finish', finishReason: 'stop' }));
           controller.enqueue(sse('[DONE]'));

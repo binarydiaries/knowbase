@@ -265,17 +265,12 @@ export abstract class ChatV2Service {
   /**
    * Streaming invoke — used by both the web channel and the dashboard preview.
    *
-   * Orchestration emits `messages/partial` SSE events. Each event carries the
-   * CUMULATIVE content of the AIMessageChunk so far (LangGraph accumulates in
-   * messages mode). We compute the true delta by slicing off the previously
-   * seen content for that call ID.
+   * The orchestration server uses the @ai-sdk/langchain adapter to convert
+   * the LangGraph stream to the AI SDK data-stream protocol directly.
+   * This method simply proxies that response body to the client — no SSE
+   * parsing, no delta computation, no format conversion needed here.
    *
-   * Structured-output calls (rewriteQuery, extractEntities, scoreSentiment)
-   * emit JSON content starting with '{' — those are skipped so only the
-   * natural-language RAG response reaches the client.
-   *
-   * onFinish fires after [DONE] so callers can trigger usage tracking and
-   * enrichment at the right time.
+   * onFinish fires when the stream closes (after [DONE]).
    */
   static async stream({
     agentId,
@@ -296,95 +291,40 @@ export abstract class ChatV2Service {
     isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    const msgId = crypto.randomUUID();
-    const encoder = new TextEncoder();
-    const sse = (data: object | string) =>
-      encoder.encode(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`);
+    const orchestrationUrl = process.env.ORCHESTRATION_URL ?? 'http://localhost:2024';
 
-    return new ReadableStream({
-      async start(controller) {
-        const enqueue = (data: object | string) => controller.enqueue(sse(data));
+    // Ensure thread exists, then stream — orchestration owns the AI SDK formatting.
+    await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
 
-        try {
-          await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
-
-          const lgStream = client.runs.stream(conversationId, 'agent', {
-            input: { messages: [{ role: 'human', content: message }] },
-            config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
-            streamMode: 'messages',
-            multitaskStrategy: 'interrupt',
-          });
-
-          const skipIds = new Set<string>();
-          // prevContent tracks the cumulative content seen for the target call
-          // so we can slice off the new portion on each event.
-          const prevContent: Record<string, string> = {};
-          let targetId: string | null = null;
-          let started = false;
-
-          enqueue({ type: 'start' });
-          enqueue({ type: 'start-step' });
-
-          for await (const chunk of lgStream) {
-            if (chunk.event !== 'messages/partial') continue;
-
-            const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
-              id?: string;
-              content?: string;
-            } | null;
-
-            if (!msg?.id || typeof msg.content !== 'string') continue;
-            if (skipIds.has(msg.id)) continue;
-
-            // First event from this call ID — classify by content
-            if (msg.id !== targetId && !(msg.id in prevContent)) {
-              if (msg.content.trimStart().startsWith('{')) {
-                // Structured-output call (JSON) — skip entirely
-                skipIds.add(msg.id);
-                continue;
-              }
-              // Natural-language RAG response — stream this call
-              targetId = msg.id;
-              prevContent[msg.id] = '';
-            }
-
-            if (msg.id !== targetId) continue;
-
-            // msg.content is CUMULATIVE — compute the new portion by slicing.
-            const delta = msg.content.slice(prevContent[msg.id]?.length ?? 0);
-            prevContent[msg.id] = msg.content;
-
-            if (!delta) continue;
-
-            if (!started) {
-              enqueue({ type: 'text-start', id: msgId });
-              started = true;
-            }
-            enqueue({ type: 'text-delta', id: msgId, delta });
-          }
-
-          if (started) enqueue({ type: 'text-end', id: msgId });
-          enqueue({ type: 'finish-step' });
-          enqueue({ type: 'finish', finishReason: 'stop' });
-          enqueue('[DONE]');
-          controller.close();
-          onFinish?.();
-        } catch {
-          // Orchestration is down or threw — emit a clean error message
-          try {
-            enqueue({ type: 'text-start', id: msgId });
-            enqueue({ type: 'text-delta', id: msgId, delta: 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment.' });
-            enqueue({ type: 'text-end', id: msgId });
-            enqueue({ type: 'finish-step' });
-            enqueue({ type: 'finish', finishReason: 'stop' });
-            enqueue('[DONE]');
-            controller.close();
-          } catch {
-            controller.close();
-          }
-        }
-      },
+    const res = await fetch(`${orchestrationUrl}/threads/${conversationId}/runs/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { messages: [{ role: 'human', content: message }] },
+        config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
+        multitask_strategy: 'interrupt',
+      }),
     });
+
+    if (!res.ok || !res.body) throw new V2OrchestrationError();
+
+    // Pipe orchestration's AI SDK SSE stream directly to the client.
+    // Wrap in TransformStream so onFinish fires when the stream closes.
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+
+    (async () => {
+      try {
+        for await (const chunk of res.body as unknown as AsyncIterable<Uint8Array>) {
+          await writer.write(chunk);
+        }
+      } finally {
+        await writer.close().catch(() => {});
+        onFinish?.();
+      }
+    })();
+
+    return readable;
   }
 
   // ── Web ───────────────────────────────────────────────────────────────────

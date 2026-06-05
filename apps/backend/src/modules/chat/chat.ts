@@ -4,19 +4,9 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
+import { isDomainAllowed } from '../../utils/domain.utils';
 import { Model } from './model';
 import { ChatService, DomainNotAllowedError, MessageLimitReachedError, NotFoundError } from './service';
-
-function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
-  if (!allowedDomains.length) return true;
-  if (!origin) return false;
-  try {
-    const host = new URL(origin).hostname;
-    return allowedDomains.includes(host);
-  } catch {
-    return false;
-  }
-}
 
 function handleChatError(error: unknown, status: Function) {
   if (error instanceof NotFoundError) {

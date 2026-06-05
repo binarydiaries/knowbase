@@ -3,7 +3,7 @@
  *
  * Responsibility split:
  *   Backend (here):
- *     - Channel validation, domain check, message limits
+ *     - Channel validation, domain check, agent status check, message limits
  *     - Find-or-create conversation row (needed to satisfy FK before calling LangGraph)
  *     - Call orchestration (stream or invoke)
  *     - Usage tracking (OrgUsageMonthlyService) after graph completes
@@ -14,14 +14,18 @@
  *     - All message inserts with full metadata (finalQuery, RAG sources, sentiment)
  */
 
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 import { Client } from '@langchain/langgraph-sdk';
 import type { IChannelSlackConfig, IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
+import { AgentService } from '../agent/service';
 import { ChannelService } from '../channel/service';
 import { ConversationService } from '../conversation/service';
 import { SlackConnectionService } from '../slack/connectionService';
 import { SubscriptionService } from '../subscription/service';
 import { OrgUsageMonthlyService } from '../subscription/usage';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
+import { isDomainAllowed } from '../../utils/domain.utils';
 
 // ── Errors ────────────────────────────────────────────────────────────────────
 
@@ -49,27 +53,27 @@ export class V2LimitError extends Error {
   }
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// ── LangGraph client (singleton) ──────────────────────────────────────────────
 
-function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
-  if (!allowedDomains.length) return true;
-  if (!origin) return false;
-  try {
-    return allowedDomains.includes(new URL(origin).hostname);
-  } catch {
-    return false;
+const client = new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
+
+// ── Nano LLM for topic labeling ───────────────────────────────────────────────
+
+const nanoModel = openai('gpt-4.1-nano');
+
+// ── Guards ────────────────────────────────────────────────────────────────────
+
+async function assertAgentActive(agentId: string, orgId: string): Promise<void> {
+  const agent = await AgentService.single({ id: agentId, orgId });
+  if (!agent || agent.agentStatus !== 'active') {
+    throw new V2NotFoundError('Agent not found or inactive');
   }
 }
 
-function getClient(): Client {
-  return new Client({ apiUrl: process.env.ORCHESTRATION_URL ?? 'http://localhost:2024' });
-}
-
-// ── Conversation helpers (also used by the preview route) ────────────────────
+// ── Conversation helpers ──────────────────────────────────────────────────────
 
 /**
  * For WA / Slack: find by externalId or create.
- * For web preview: find by id or create with conversationId as the row ID.
  */
 async function findOrCreateByExternalId({
   channelId,
@@ -81,9 +85,9 @@ async function findOrCreateByExternalId({
   agentId: string;
   externalId: string;
   firstUserMessage: string;
-}): Promise<{ conversationId: string }> {
+}): Promise<{ conversationId: string; isNew: boolean }> {
   const existing = await ConversationService.findByExternalId({ channelId, externalId });
-  if (existing) return { conversationId: existing.id };
+  if (existing) return { conversationId: existing.id, isNew: false };
 
   const created = await ConversationService.create({
     id: crypto.randomUUID(),
@@ -96,32 +100,53 @@ async function findOrCreateByExternalId({
   });
 
   if (!created) throw new V2NotFoundError('Failed to create conversation');
-  return { conversationId: created.id };
+  return { conversationId: created.id, isNew: true };
 }
 
 /**
- * Fire-and-forget: attach country (IP geo lookup) to a conversation.
- * Topic labelling is handled inside the orchestration's persistTurn node.
- * Only called on paid plans.
+ * Fire-and-forget: attach country (IP geo lookup) and topic label to a conversation.
+ * Topic label is only generated for new conversations. Paid plans only.
  */
 async function enrichConversationAsync({
   conversationId,
   ip,
+  isNew,
+  firstUserMessage,
 }: {
   conversationId: string;
   ip?: string;
+  isNew: boolean;
+  firstUserMessage: string;
 }): Promise<void> {
-  if (!ip || ip === '127.0.0.1' || ip === '::1') return;
-  try {
-    const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
-    if (geoRes.ok) {
-      const geo = (await geoRes.json()) as { countryCode?: string };
-      if (geo.countryCode) {
-        await ConversationService.update(conversationId, { country: geo.countryCode });
+  if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+    try {
+      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
+      if (geoRes.ok) {
+        const geo = (await geoRes.json()) as { countryCode?: string };
+        if (geo.countryCode) {
+          await ConversationService.update(conversationId, { country: geo.countryCode });
+        }
       }
+    } catch {
+      // Geo lookup is best-effort
     }
-  } catch {
-    // Geo lookup is best-effort
+  }
+
+  if (isNew) {
+    try {
+      const result = await generateText({
+        model: nanoModel,
+        prompt: `In 2-5 words, what topic is this question about? Reply with ONLY the topic label, nothing else.\n\n"${firstUserMessage}"`,
+        maxOutputTokens: 20,
+        temperature: 0,
+      });
+      const cleanTopic = result.text.trim().replace(/^["']|["']$/g, '');
+      if (cleanTopic) {
+        await ConversationService.update(conversationId, { topic: cleanTopic });
+      }
+    } catch {
+      // Topic is best-effort
+    }
   }
 }
 
@@ -146,12 +171,12 @@ export abstract class ChatV2Service {
     conversationId: string;
     orgId: string;
     firstUserMessage: string;
-  }): Promise<{ conversationId: string }> {
+  }): Promise<{ conversationId: string; isNew: boolean }> {
     const existing = await ConversationService.findByExternalId({
       channelId,
       externalId: clientSessionId,
     });
-    if (existing) return { conversationId: existing.id };
+    if (existing) return { conversationId: existing.id, isNew: false };
 
     const created = await ConversationService.create({
       id: crypto.randomUUID(),
@@ -163,7 +188,7 @@ export abstract class ChatV2Service {
       lastMessageAt: new Date(),
     });
     if (!created) throw new V2NotFoundError('Failed to create conversation');
-    return { conversationId: created.id };
+    return { conversationId: created.id, isNew: true };
   }
 
   /**
@@ -177,6 +202,7 @@ export abstract class ChatV2Service {
     orgId,
     message,
     ip,
+    isPaid,
   }: {
     agentId: string;
     conversationId: string;
@@ -184,15 +210,14 @@ export abstract class ChatV2Service {
     orgId: string;
     message: string;
     ip?: string;
+    isPaid?: boolean;
   }): Promise<string> {
-    const client = getClient();
     await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
     const result = await client.runs.wait(conversationId, 'agent', {
       input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId, ip } },
+      config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
       multitaskStrategy: 'interrupt',
     });
-    // OutputState has { messages: [...] } — last entry is the assistant response
     const msgs = (result as { messages?: Array<{ type?: string; content?: string }> }).messages ?? [];
     const last = msgs.at(-1);
     return typeof last?.content === 'string' ? last.content : '';
@@ -207,7 +232,7 @@ export abstract class ChatV2Service {
    * The graph makes 3 LLM calls in order:
    *   1. extractEntities  (nano, JSON output)
    *   2. generateRagResponse  (main model — the real answer we stream)
-   *   3. scoreSentiment  (nano, JSON output)
+   *   3. scoreSentiment  (nano, JSON output — paid only)
    * messages/metadata marks each call start; we target the second one.
    * messages/partial content is cumulative — we compute deltas.
    *
@@ -221,6 +246,7 @@ export abstract class ChatV2Service {
     orgId,
     message,
     ip,
+    isPaid,
     onFinish,
   }: {
     agentId: string;
@@ -229,14 +255,14 @@ export abstract class ChatV2Service {
     orgId: string;
     message: string;
     ip?: string;
+    isPaid?: boolean;
     onFinish?: () => void;
   }): Promise<ReadableStream> {
-    const client = getClient();
     await client.threads.create({ threadId: conversationId, ifExists: 'do_nothing' });
 
     const lgStream = client.runs.stream(conversationId, 'agent', {
       input: { messages: [{ role: 'human', content: message }] },
-      config: { configurable: { agentId, channelId, orgId, ip } },
+      config: { configurable: { agentId, channelId, orgId, ip, isPaid } },
       streamMode: 'messages',
       multitaskStrategy: 'interrupt',
     });
@@ -249,23 +275,12 @@ export abstract class ChatV2Service {
     return new ReadableStream({
       async start(controller) {
         try {
-          // Structured-output calls (extractEntities, rewriteQuery, scoreSentiment)
-          // always produce JSON content starting with '{'. generateRagResponse produces
-          // natural language. We detect the target by content — not by call position —
-          // so multi-turn conversations where rewriteQuery fires an extra LLM call
-          // don't shift the index and accidentally stream the wrong call.
           const skipIds = new Set<string>();
-          let pendingId: string | null = null;
           let targetId: string | null = null;
           let prevContent = '';
           let started = false;
 
           for await (const chunk of lgStream) {
-            if (chunk.event === 'messages/metadata') {
-              pendingId = Object.keys(chunk.data as Record<string, unknown>)[0] ?? null;
-              continue;
-            }
-
             if (chunk.event !== 'messages/partial') continue;
 
             const msg = (Array.isArray(chunk.data) ? chunk.data[0] : chunk.data) as {
@@ -341,6 +356,8 @@ export abstract class ChatV2Service {
       }
     }
 
+    await assertAgentActive(channel.agentId, channel.orgId);
+
     const limit = await SubscriptionService.assertMessagesPerMonthLimitNotReached(channel.orgId);
     if (!limit.allowed) {
       throw new V2LimitError(SubscriptionService.getMessageLimitReachedMessage(limit), {
@@ -350,7 +367,7 @@ export abstract class ChatV2Service {
       });
     }
 
-    const { conversationId: resolvedId } = await ChatV2Service.findOrCreate({
+    const { conversationId: resolvedId, isNew } = await ChatV2Service.findOrCreate({
       channelId,
       agentId: channel.agentId,
       conversationId,
@@ -359,6 +376,7 @@ export abstract class ChatV2Service {
     });
 
     const plan = await SubscriptionService.getPlan(channel.orgId);
+    const isPaid = plan !== 'free';
 
     return ChatV2Service.stream({
       agentId: channel.agentId,
@@ -367,10 +385,11 @@ export abstract class ChatV2Service {
       orgId: channel.orgId,
       message,
       ip,
+      isPaid,
       onFinish: () => {
         void OrgUsageMonthlyService.incrementAssistantMessages(channel.orgId);
-        if (plan !== 'free') {
-          void enrichConversationAsync({ conversationId: resolvedId, ip });
+        if (isPaid) {
+          void enrichConversationAsync({ conversationId: resolvedId, ip, isNew, firstUserMessage: message });
         }
       },
     });
@@ -401,6 +420,8 @@ export abstract class ChatV2Service {
 
     const connection = await WhatsAppConnectionService.findByOrg(orgId);
     if (!connection) throw new V2NotFoundError('WhatsApp not connected');
+
+    await assertAgentActive(channel.agentId, orgId);
 
     const waBase = `https://graph.facebook.com/v19.0/${cfg.phoneNumberId}/messages`;
     const waHeaders = {
@@ -437,14 +458,16 @@ export abstract class ChatV2Service {
       });
     }
 
-    const { conversationId } = await findOrCreateByExternalId({
+    const plan = await SubscriptionService.getPlan(orgId);
+    const isPaid = plan !== 'free';
+
+    const { conversationId, isNew } = await findOrCreateByExternalId({
       channelId,
       agentId: channel.agentId,
       externalId: senderPhone,
       firstUserMessage: message,
     });
 
-    // invoke waits for graph completion — persistTurn has run by the time this returns
     const response = await ChatV2Service.invoke({
       agentId: channel.agentId,
       conversationId,
@@ -452,6 +475,7 @@ export abstract class ChatV2Service {
       orgId,
       message,
       ip,
+      isPaid,
     });
 
     await fetch(waBase, {
@@ -467,9 +491,8 @@ export abstract class ChatV2Service {
 
     void OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
-    const plan = await SubscriptionService.getPlan(orgId);
-    if (plan !== 'free') {
-      void enrichConversationAsync({ conversationId, ip });
+    if (isPaid) {
+      void enrichConversationAsync({ conversationId, ip, isNew, firstUserMessage: message });
     }
   }
 
@@ -499,6 +522,8 @@ export abstract class ChatV2Service {
     const connection = await SlackConnectionService.findByOrg(orgId);
     if (!connection) throw new V2NotFoundError('Slack not connected');
 
+    await assertAgentActive(channel.agentId, orgId);
+
     const slackHeaders = {
       Authorization: `Bearer ${connection.botToken}`,
       'Content-Type': 'application/json',
@@ -527,7 +552,10 @@ export abstract class ChatV2Service {
       });
     }
 
-    const { conversationId } = await findOrCreateByExternalId({
+    const plan = await SubscriptionService.getPlan(orgId);
+    const isPaid = plan !== 'free';
+
+    const { conversationId, isNew } = await findOrCreateByExternalId({
       channelId,
       agentId: channel.agentId,
       externalId: threadTs,
@@ -541,6 +569,7 @@ export abstract class ChatV2Service {
       orgId,
       message,
       ip,
+      isPaid,
     });
 
     if (placeholderTs) {
@@ -559,9 +588,8 @@ export abstract class ChatV2Service {
 
     void OrgUsageMonthlyService.incrementAssistantMessages(orgId);
 
-    const plan = await SubscriptionService.getPlan(orgId);
-    if (plan !== 'free') {
-      void enrichConversationAsync({ conversationId, ip });
+    if (isPaid) {
+      void enrichConversationAsync({ conversationId, ip, isNew, firstUserMessage: message });
     }
   }
 }

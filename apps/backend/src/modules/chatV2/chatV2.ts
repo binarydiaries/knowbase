@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import type { Context } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ChannelService } from '../channel/service';
 import { Model } from './model';
@@ -23,21 +24,22 @@ function handleError(err: unknown, status: Function) {
   throw err;
 }
 
+function getClientIp(headers: Context['headers']): string | undefined {
+  return (
+    (headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+    (headers['x-real-ip'] as string | undefined) ??
+    undefined
+  );
+}
+
 export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
   .use(Model)
 
   .post(
     '/web',
     async ({ body, status, headers, set }) => {
-      const ip =
-        (headers['x-forwarded-for'] as string | undefined)
-          ?.split(',')[0]
-          ?.trim() ??
-        (headers['x-real-ip'] as string | undefined) ??
-        undefined;
-
       try {
-        const stream = await ChatV2Service.sendWeb({ ...body, ip });
+        const stream = await ChatV2Service.sendWeb({ ...body, ip: getClientIp(headers) });
         set.headers['Content-Type'] = 'text/event-stream';
         set.headers['Cache-Control'] = 'no-cache';
         set.headers['Connection'] = 'keep-alive';
@@ -52,13 +54,8 @@ export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
   .post(
     '/whatsapp',
     async ({ body, status, headers }) => {
-      const ip =
-        (headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
-        (headers['x-real-ip'] as string | undefined) ??
-        undefined;
-
       try {
-        await ChatV2Service.sendWhatsApp({ ...body, ip });
+        await ChatV2Service.sendWhatsApp({ ...body, ip: getClientIp(headers) });
         return { ok: true };
       } catch (err) {
         return handleError(err, status);
@@ -70,13 +67,8 @@ export const ChatV2 = new Elysia({ prefix: '/v2/chat', tags: ['Chats V2'] })
   .post(
     '/slack',
     async ({ body, status, headers }) => {
-      const ip =
-        (headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
-        (headers['x-real-ip'] as string | undefined) ??
-        undefined;
-
       try {
-        await ChatV2Service.sendSlack({ ...body, ip });
+        await ChatV2Service.sendSlack({ ...body, ip: getClientIp(headers) });
         return { ok: true };
       } catch (err) {
         return handleError(err, status);

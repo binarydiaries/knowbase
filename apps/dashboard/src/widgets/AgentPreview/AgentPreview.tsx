@@ -1,5 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import { useAuth } from '@clerk/clerk-react';
+import { Button } from '@knowbase/ui/components/button';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { useParams } from '@tanstack/react-router';
 import { DefaultChatTransport, type UIMessage } from 'ai';
@@ -8,14 +9,18 @@ import type { ChannelSchema } from '@/services';
 import { useChannels } from '@/store/useChannels.ts';
 import { parseChatError } from '@/utils/chatError.ts';
 
+type ChatVersion = 'v1' | 'v2';
+
 interface IAgentPreviewContentProps {
   channelWeb: ChannelSchema;
   onNewChat: () => void;
+  version: ChatVersion;
 }
 
 const AgentPreviewContent = ({
   channelWeb,
   onNewChat,
+  version,
 }: IAgentPreviewContentProps) => {
   const { getToken } = useAuth();
   const initialMessageId = useId();
@@ -36,10 +41,14 @@ const AgentPreviewContent = ({
       }
     : undefined;
 
+  const previewApi = version === 'v2'
+    ? `${import.meta.env.VITE_API_BASE}/chatv2/preview`
+    : `${import.meta.env.VITE_API_BASE}/chat/preview`;
+
   const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: `${import.meta.env.VITE_API_BASE}/chat/preview`,
+      api: previewApi,
       fetch: async (url, init) => {
         const token = await getToken();
         return fetch(url, {
@@ -118,6 +127,7 @@ const AgentPreviewContent = ({
 export const AgentPreview = () => {
   const { agentId } = useParams({ strict: false });
   const [chatKey, setChatKey] = useState(0);
+  const [version, setVersion] = useState<ChatVersion>('v1');
 
   if (!agentId) {
     throw new Error('agentId not available');
@@ -134,10 +144,36 @@ export const AgentPreview = () => {
   }
 
   return (
-    <AgentPreviewContent
-      key={chatKey}
-      channelWeb={channelWeb}
-      onNewChat={() => setChatKey((k) => k + 1)}
-    />
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex items-center gap-1 px-3 py-1.5 border-b shrink-0">
+        <span className="text-xs text-muted-foreground mr-2">Version</span>
+        <Button
+          size="xs"
+          variant={version === 'v1' ? 'default' : 'outline'}
+          onClick={() => {
+            setVersion('v1');
+            setChatKey((k) => k + 1);
+          }}
+        >
+          V1
+        </Button>
+        <Button
+          size="xs"
+          variant={version === 'v2' ? 'default' : 'outline'}
+          onClick={() => {
+            setVersion('v2');
+            setChatKey((k) => k + 1);
+          }}
+        >
+          V2
+        </Button>
+      </div>
+      <AgentPreviewContent
+        key={chatKey}
+        channelWeb={channelWeb}
+        version={version}
+        onNewChat={() => setChatKey((k) => k + 1)}
+      />
+    </div>
   );
 };

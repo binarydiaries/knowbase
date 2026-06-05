@@ -1,9 +1,7 @@
-import type { ConditionalEdgeRouter } from '@langchain/langgraph';
 import type { State } from './state.js';
 
-export const intentRouter: ConditionalEdgeRouter<
-  typeof State,
-  'general_chat' | 'workflow'
-> = () => {
-  return;
-};
+/** Routes after detectIntent — wired in once the workflow subgraph is ready. */
+export function intentRouter(_state: typeof State.State): 'general_chat' | 'workflow' {
+  // Stub: full routing logic lives with the workflow subgraph.
+  return 'general_chat';
+}

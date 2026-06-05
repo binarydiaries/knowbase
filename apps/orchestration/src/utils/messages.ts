@@ -13,7 +13,10 @@ export function getLastUserMessage(state: typeof State.State): string {
 
   // Multimodal content blocks array — pick the first text block
   if (Array.isArray(lastMsg.content)) {
-    return lastMsg.content.find((cb) => cb.type === 'text')?.text ?? '';
+    const block = lastMsg.content.find((cb) => cb.type === 'text') as
+      | { type: 'text'; text: string }
+      | undefined;
+    return block?.text ?? '';
   }
 
   return '';
@@ -31,7 +34,10 @@ export function getLastAssistantMessage(state: typeof State.State): string {
 
   // Multimodal content blocks array — pick the first text block
   if (Array.isArray(lastMsg.content)) {
-    return lastMsg.content.find((cb) => cb.type === 'text')?.text ?? '';
+    const block = lastMsg.content.find((cb) => cb.type === 'text') as
+      | { type: 'text'; text: string }
+      | undefined;
+    return block?.text ?? '';
   }
 
   return '';

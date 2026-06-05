@@ -43,7 +43,7 @@ const SaveLeadConfigSchema = z.object({
   successMessage: z.string().optional(),
 });
 
-export const WorkflowActionConfig = z.union([
+export const WorkflowActionConfigSchema = z.union([
   ApiTriggerConfigSchema,
   CalendarBookingConfigSchema,
   SaveLeadConfigSchema,
@@ -55,7 +55,7 @@ export const WorkflowActionSchema = z.object({
   workflowId: z.string(),
   order: z.number().int(),
   actionType: WorkflowActionType,
-  config: WorkflowActionConfig,
+  config: WorkflowActionConfigSchema,
   createdAt: z.date(),
   updatedAt: z.date(),
 });

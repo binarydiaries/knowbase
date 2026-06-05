@@ -12,7 +12,6 @@ COPY apps/orchestration/package.json ./apps/orchestration/
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/client/package.json ./apps/client/
 COPY apps/dashboard/package.json ./apps/dashboard/
-COPY apps/docs/package.json ./apps/docs/
 COPY apps/embed/package.json ./apps/embed/
 COPY apps/landing/package.json ./apps/landing/
 COPY apps/orchestration2/package.json ./apps/orchestration2/

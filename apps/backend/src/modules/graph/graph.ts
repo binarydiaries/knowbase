@@ -1,40 +1,18 @@
-import { SystemMessage } from '@langchain/core/messages';
-import {
-  END,
-  type GraphNode,
-  MessagesValue,
-  START,
-  StateGraph,
-  StateSchema,
-} from '@langchain/langgraph';
-import { ChatOpenAI } from '@langchain/openai';
+import { END, START, StateGraph } from '@langchain/langgraph';
+import { ConfigSchema } from './config';
+import { loadAgent } from './nodes/loadAgent';
+import { InputState, OutputState, State } from './state';
 
-const State = new StateSchema({
-  messages: MessagesValue,
-});
+const builder = new StateGraph({
+  input: InputState,
+  output: OutputState,
+  state: State,
+  context: ConfigSchema,
+})
+  .addNode('loadAgent', loadAgent)
+  .addEdge(START, 'loadAgent')
+  .addEdge('loadAgent', END);
 
-const mockLlm: GraphNode<typeof State> = async (state) => {
-  const llm = new ChatOpenAI({
-    model: 'gpt-4.1-nano',
-    temperature: 0,
-  });
-
-  const result = await llm.invoke([
-    new SystemMessage(
-      'Your joke teller, Whatever user say always make joke and fun of it',
-    ),
-    ...state.messages,
-  ]);
-  return {
-    messages: [result],
-  };
-};
-
-const builder = new StateGraph(State)
-  .addNode('mock_llm', mockLlm)
-  .addEdge(START, 'mock_llm')
-  .addEdge('mock_llm', END);
-
-export const graph = builder.compile();
-
-// await graph.invoke({ messages: [{ role: 'user', content: 'hi!' }] });
+const graph = builder.compile();
+graph.name = 'Agenvik Chat Graph';
+export { graph };

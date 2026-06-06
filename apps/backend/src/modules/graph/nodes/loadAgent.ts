@@ -8,6 +8,7 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
   //   return {};
   // }
 
+  console.log(config?.configurable?.thread_id, state.behaviour);
   const { agentId } = ConfigSchema.parse(config.configurable);
 
   if (!agentId) {

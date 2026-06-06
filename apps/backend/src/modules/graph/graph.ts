@@ -3,6 +3,7 @@ import { ConfigSchema } from './config';
 import { loadAgent } from './nodes/loadAgent';
 import { InputState, OutputState, State } from './state';
 import { ragGraph } from './subGraphs/ragGraph';
+import { checkpointer } from './utils/checkpointer';
 
 const builder = new StateGraph({
   input: InputState,
@@ -19,6 +20,6 @@ const builder = new StateGraph({
   .addEdge('loadAgent', 'ragGraph')
   .addEdge('ragGraph', END);
 
-const graph = builder.compile();
+const graph = builder.compile({ checkpointer });
 graph.name = 'Agenvik Chat Graph';
 export { graph };

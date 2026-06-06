@@ -4,9 +4,12 @@ import { ConfigSchema } from '../config';
 import type { State } from '../state';
 
 export const loadAgent: GraphNode<typeof State> = async (state, config) => {
-  // if (state.behaviour?.id && state.workflows) {
-  //   return {};
-  // }
+  if (
+    state.behaviour?.id
+    // && state.workflows
+  ) {
+    return {};
+  }
 
   console.log(config?.configurable?.thread_id, state.behaviour);
   const { agentId } = ConfigSchema.parse(config.configurable);

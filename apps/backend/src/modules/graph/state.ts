@@ -1,4 +1,4 @@
-import { MessagesValue, StateSchema } from '@langchain/langgraph';
+import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 import { BehaviourSchema } from '../behaviour/model';
 
@@ -17,10 +17,10 @@ export const InputState = new StateSchema({
 export const State = new StateSchema({
   behaviour: BehaviourSchema,
   messages: MessagesValue,
-  // entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
-  //   inputSchema: z.record(z.string(), z.unknown()),
-  //   reducer: (current, next) => ({ ...current, ...next }),
-  // }),
+  entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
+    inputSchema: z.record(z.string(), z.unknown()),
+    reducer: (current, next) => ({ ...current, ...next }),
+  }),
   // intent: z.string().default('general_chat'),
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),

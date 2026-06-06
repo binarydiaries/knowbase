@@ -10,12 +10,19 @@ export const RagChunkSchema = z.object({
   chunkIndex: z.number(),
 });
 
+// Checkpoint round-trip: dates are serialised to ISO strings by PostgresSaver.
+// Use coerce.date() so restored state validates correctly.
+const GraphBehaviourSchema = BehaviourSchema.extend({
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
 export const InputState = new StateSchema({
   messages: MessagesValue,
 });
 
 export const State = new StateSchema({
-  behaviour: BehaviourSchema,
+  behaviour: GraphBehaviourSchema,
   messages: MessagesValue,
   entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
     inputSchema: z.record(z.string(), z.unknown()),

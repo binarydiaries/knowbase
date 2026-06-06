@@ -19,6 +19,7 @@
     "smith": "bunx @langchain/langgraph-cli@latest dev"
   },
   "dependencies": {
+    "@ai-sdk/langchain": "^2.0.204",
     "@ai-sdk/openai": "^3.0.1",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "1.4.11",

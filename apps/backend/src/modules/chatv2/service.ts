@@ -1,5 +1,9 @@
-import { ChannelService } from '../channel/service';
+import { toUIMessageStream } from '@ai-sdk/langchain';
+import { HumanMessage } from '@langchain/core/messages';
+import { createUIMessageStreamResponse } from 'ai';
 import type { IChannelWebConfig } from '../channel/model';
+import { ChannelService } from '../channel/service';
+import { graph } from '../graph/graph';
 
 export class NotFoundError extends Error {
   constructor(message: string) {
@@ -74,8 +78,15 @@ export abstract class ChatV2Service {
     channelId: string;
     message: string;
     orgId: string;
-  }): Promise<Response> {
-    // TODO: wire up LangGraph pipeline here
-    throw new Error('Not implemented');
+  }) {
+    const stream = await graph.stream(
+      { messages: new HumanMessage(message) },
+      { streamMode: ['values', 'messages'] },
+    );
+
+    // Convert the LangGraph stream to UI message stream
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream(stream),
+    });
   }
 }

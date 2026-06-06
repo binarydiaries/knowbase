@@ -81,7 +81,7 @@ export abstract class ChatV2Service {
   }) {
     const stream = await graph.stream(
       { messages: new HumanMessage(message) },
-      { streamMode: ['values', 'messages'] },
+      { streamMode: ['values', 'messages'], configurable: { agentId } },
     );
 
     // Convert the LangGraph stream to UI message stream

@@ -1,22 +1,24 @@
 import { defineRelations } from 'drizzle-orm';
-import { aiCostEvents } from './aiCostEvents';
-import { demoBookings } from './demoBookings';
-import { behaviors } from './behaviors';
-import { channels } from './channels';
 import { agentActions } from './agentActions';
 import { agents } from './agents';
+import { aiCostEvents } from './aiCostEvents';
+import { behaviors } from './behaviors';
+import { channels } from './channels';
 import { conversations } from './conversations';
+import { demoBookings } from './demoBookings';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
+import { featureFlagDefinitions } from './featureFlagDefinitions';
 import { leads } from './leads';
 import { messages } from './messages';
+import { orgFeatureFlags } from './orgFeatureFlags';
+import { orgSubscriptions } from './orgSubscriptions';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
-import { orgSubscriptions } from './orgSubscriptions';
-import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
-import { featureFlagDefinitions } from './featureFlagDefinitions';
-import { orgFeatureFlags } from './orgFeatureFlags';
+import { whatsappConnections } from './whatsappConnections';
+import { workflowActions } from './workflowActions';
+import { workflows } from './workflows';
 
 export const relations = defineRelations(
   {
@@ -38,6 +40,8 @@ export const relations = defineRelations(
     slackConnections,
     featureFlagDefinitions,
     orgFeatureFlags,
+    workflows,
+    workflowActions,
   },
   (r) => ({
     agents: {
@@ -131,5 +135,18 @@ export const relations = defineRelations(
     featureFlagDefinitions: {},
     orgFeatureFlags: {},
     demoBookings: {},
+    workflows: {
+      agent: r.one.agents({ from: r.workflows.agentId, to: r.agents.id }),
+      actions: r.many.workflowActions({
+        from: r.workflows.id,
+        to: r.workflowActions.workflowId,
+      }),
+    },
+    workflowActions: {
+      workflow: r.one.workflows({
+        from: r.workflowActions.workflowId,
+        to: r.workflows.id,
+      }),
+    },
   }),
 );

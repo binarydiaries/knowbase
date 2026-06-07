@@ -4,10 +4,7 @@ import { ConfigSchema } from '../config';
 import type { State } from '../state';
 
 export const loadAgent: GraphNode<typeof State> = async (state, config) => {
-  if (
-    state.behaviour?.id
-    // && state.workflows
-  ) {
+  if (state.behaviour?.id && state.workflows) {
     return {};
   }
 
@@ -26,10 +23,10 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
     throw new Error(`No behavior found for agent ${agentId}`);
   }
 
-  // const workflows = await db.query.workflows.findMany({
-  //   where: { agentId },
-  //   with: { actions: true },
-  // });
+  const workflows = await db.query.workflows.findMany({
+    where: { agentId },
+    with: { actions: true },
+  });
 
-  return { behaviour };
+  return { behaviour, workflows };
 };

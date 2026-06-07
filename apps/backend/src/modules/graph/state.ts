@@ -1,8 +1,11 @@
 import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 import { BehaviourSchema } from '../behaviour/model';
+import {
+  WorkflowActionSchema,
+  WorkflowWithActionsSchema,
+} from '../workflow/model';
 import { INTENT_QUESTION_ANSWERING } from './intents';
-import { WorkflowActionSchema, WorkflowWithActionsSchema } from '../workflow/model';
 
 // Checkpoint round-trip: coerce date strings back to Date objects.
 const GraphWorkflowActionSchema = WorkflowActionSchema.extend({
@@ -47,6 +50,7 @@ export const State = new StateSchema({
   activeWorkflow: GraphWorkflowWithActionsSchema.optional(),
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),
+  missingFields: z.array(z.string()),
 });
 
 export const OutputState = new StateSchema({

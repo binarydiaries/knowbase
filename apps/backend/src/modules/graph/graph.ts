@@ -1,5 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ConfigSchema } from './config';
+import { detectIntent } from './nodes/detectIntent';
 import { extractEntities } from './nodes/extractEntities';
 import { loadAgent } from './nodes/loadAgent';
 import { InputState, OutputState, State } from './state';
@@ -15,12 +16,14 @@ const builder = new StateGraph({
   // Nodes
   .addNode('loadAgent', loadAgent)
   .addNode('extractEntities', extractEntities)
+  .addNode('detectIntent', detectIntent)
   .addNode('ragGraph', ragGraph)
 
   // Edges
   .addEdge(START, 'loadAgent')
   .addEdge('loadAgent', 'extractEntities')
-  .addEdge('extractEntities', 'ragGraph')
+  .addEdge('extractEntities', 'detectIntent')
+  .addEdge('detectIntent', 'ragGraph')
   .addEdge('ragGraph', END);
 
 const graph = builder.compile({ checkpointer });

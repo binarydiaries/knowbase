@@ -1,16 +1,16 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { checkRequirements } from '../nodes/checkRequirements';
 import { collectMissingData } from '../nodes/collectMissingData';
-import { executeAction } from '../nodes/executeAction';
+import { executeActions } from '../nodes/executeActions';
 import { loadWorkflow } from '../nodes/loadWorkflow';
 import { State } from '../state';
 
 function routeAfterRequirementCheck(
   state: typeof State.State,
-): 'collectMissingData' | 'executeAction' {
+): 'collectMissingData' | 'executeActions' {
   return state.missingFields.length > 0
     ? 'collectMissingData'
-    : 'executeAction';
+    : 'executeActions';
 }
 
 const graph = new StateGraph(State)
@@ -18,11 +18,11 @@ const graph = new StateGraph(State)
   .addNode('loadWorkflow', loadWorkflow)
   .addNode('checkRequirements', checkRequirements)
   .addNode('collectMissingData', collectMissingData)
-  .addNode('executeAction', executeAction)
+  .addNode('executeActions', executeActions)
 
   .addConditionalEdges('checkRequirements', routeAfterRequirementCheck, {
     collectMissingData: 'collectMissingData',
-    executeAction: 'executeAction',
+    executeActions: 'executeActions',
   })
 
   // Edges
@@ -30,6 +30,6 @@ const graph = new StateGraph(State)
   .addEdge('loadWorkflow', 'checkRequirements')
   .addEdge('checkRequirements', 'collectMissingData')
   .addEdge('collectMissingData', END)
-  .addEdge('executeAction', END);
+  .addEdge('executeActions', END);
 
 export const workflowGraph = graph.compile();

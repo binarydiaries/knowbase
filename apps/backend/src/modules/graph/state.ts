@@ -1,6 +1,7 @@
 import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 import { BehaviourSchema } from '../behaviour/model';
+import { INTENT_QUESTION_ANSWERING } from './intents';
 import { WorkflowActionSchema, WorkflowWithActionsSchema } from '../workflow/model';
 
 // Checkpoint round-trip: coerce date strings back to Date objects.
@@ -42,7 +43,7 @@ export const State = new StateSchema({
     inputSchema: z.record(z.string(), z.unknown()),
     reducer: (current, next) => ({ ...current, ...next }),
   }),
-  intent: z.string().default('general_chat'),
+  intent: z.string().default(INTENT_QUESTION_ANSWERING),
   activeWorkflow: GraphWorkflowWithActionsSchema.optional(),
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),

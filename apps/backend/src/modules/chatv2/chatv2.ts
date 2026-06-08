@@ -11,7 +11,10 @@ import {
   NotFoundError,
 } from './service';
 
-function handleChatError(error: unknown, status: Function) {
+function handleChatError(
+  error: unknown,
+  status: (code: number, body: { code: string; message: string }) => unknown,
+) {
   if (error instanceof NotFoundError) {
     return status(404, { code: 'NOT_FOUND', message: error.message });
   }

@@ -1,4 +1,4 @@
-import { index, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
+import { index, jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import {
   clerkUserId,
   cuid2PrimaryKey,
@@ -22,6 +22,7 @@ export const workflows = pgTable(
     intentName: text().notNull(),
     requiredFields: text().array().notNull().default([]),
     executionMode: workflowExecutionMode().notNull().default('sequential'),
+    config: jsonb().$type<{ success?: string; failure?: string }>(),
     createdBy: clerkUserId,
     ...timestamps,
   },

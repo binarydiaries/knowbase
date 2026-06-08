@@ -28,9 +28,7 @@ export type CalendarBookingConfig = {
   calendarId: string;
 };
 
-export type SaveLeadConfig = {
-  successMessage?: string;
-};
+export type SaveLeadConfig = Record<string, never>;
 
 export type WorkflowActionConfig =
   | ApiTriggerConfig

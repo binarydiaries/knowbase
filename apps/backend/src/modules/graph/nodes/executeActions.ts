@@ -11,7 +11,7 @@ type IActionResult = z.infer<typeof ActionResult>;
 async function executeAction(
   action: z.infer<typeof WorkflowActionSchema>,
   state: typeof State.State,
-  configurable?: Record<string, any>,
+  configurable?: Record<string, unknown>,
 ): Promise<IActionResult> {
   const { agentId, orgId, channelId, thread_id } =
     ConfigSchema.parse(configurable);

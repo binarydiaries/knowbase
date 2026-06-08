@@ -4,6 +4,15 @@ import { z } from 'zod';
 
 export const WorkflowExecutionMode = z.enum(['sequential', 'parallel']);
 
+export const WorkflowResponseConfigSchema = z.object({
+  success: z.string().optional(),
+  failure: z.string().optional(),
+});
+
+export type IWorkflowResponseConfig = z.infer<
+  typeof WorkflowResponseConfigSchema
+>;
+
 export const WorkflowSchema = z.object({
   id: z.string(),
   agentId: z.string(),
@@ -11,6 +20,7 @@ export const WorkflowSchema = z.object({
   intentName: z.string(),
   requiredFields: z.array(z.string()),
   executionMode: WorkflowExecutionMode,
+  config: WorkflowResponseConfigSchema.optional(),
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -39,9 +49,7 @@ const CalendarBookingConfigSchema = z.object({
   calendarId: z.string(),
 });
 
-const SaveLeadConfigSchema = z.object({
-  successMessage: z.string().optional(),
-});
+const SaveLeadConfigSchema = z.object({});
 
 export const WorkflowActionConfigSchema = z.union([
   ApiTriggerConfigSchema,

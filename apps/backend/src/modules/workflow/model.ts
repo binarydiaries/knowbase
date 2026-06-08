@@ -20,7 +20,7 @@ export const WorkflowSchema = z.object({
   intentName: z.string(),
   requiredFields: z.array(z.string()),
   executionMode: WorkflowExecutionMode,
-  config: WorkflowResponseConfigSchema.optional(),
+  config: WorkflowResponseConfigSchema.nullish(),
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

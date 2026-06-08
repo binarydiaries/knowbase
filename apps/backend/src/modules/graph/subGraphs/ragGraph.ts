@@ -1,5 +1,5 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { generateRagResponse } from '../nodes/generateResponse';
+import { generateRagResponse } from '../nodes/generateRagResponse';
 import { rewriteQuery } from '../nodes/rewriteQuery';
 import { vectorSearch } from '../nodes/vectorSearch';
 import { State } from '../state';

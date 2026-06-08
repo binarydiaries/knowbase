@@ -2,6 +2,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { checkRequirements } from '../nodes/checkRequirements';
 import { collectMissingData } from '../nodes/collectMissingData';
 import { executeActions } from '../nodes/executeActions';
+import { generateWorkflowResponse } from '../nodes/generateWorkflowResponse';
 import { loadWorkflow } from '../nodes/loadWorkflow';
 import { State } from '../state';
 
@@ -19,6 +20,7 @@ const graph = new StateGraph(State)
   .addNode('checkRequirements', checkRequirements)
   .addNode('collectMissingData', collectMissingData)
   .addNode('executeActions', executeActions)
+  .addNode('generateWorkflowResponse', generateWorkflowResponse)
 
   .addConditionalEdges('checkRequirements', routeAfterRequirementCheck, {
     collectMissingData: 'collectMissingData',
@@ -30,6 +32,7 @@ const graph = new StateGraph(State)
   .addEdge('loadWorkflow', 'checkRequirements')
   .addEdge('checkRequirements', 'collectMissingData')
   .addEdge('collectMissingData', END)
-  .addEdge('executeActions', END);
+  .addEdge('executeActions', 'generateWorkflowResponse')
+  .addEdge('generateWorkflowResponse', END);
 
 export const workflowGraph = graph.compile();

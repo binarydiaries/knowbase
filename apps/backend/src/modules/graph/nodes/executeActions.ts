@@ -27,19 +27,16 @@ async function executeAction(
           agentId,
           orgId,
           channelId,
-          conversationId: thread_id,
+          conversationId: 'ccec014d-7ff0-4777-bb3f-7dc2d34245d7',
           name,
           email,
           phone,
-        }).then(async (res) => ({
-          success: true,
-          data: { leadId: res.id },
-        }));
-      // return await executeSaveLead(action.config, ctx);
-      // case 'api_trigger':
-      //   return await executeApiTrigger(action.config, ctx, priorResults);
-      // case 'calendar_booking':
-      //   return await executeCalendarBooking(action.config, ctx);
+        }).then(async (res) => {
+          return {
+            success: true,
+            data: { leadId: res.id },
+          };
+        });
       default:
         return {
           success: false,
@@ -64,12 +61,15 @@ export const executeActions: GraphNode<typeof State> = async (
   const results: Record<string, IActionResult> = {};
 
   const settled = await Promise.allSettled(
-    activeWorkflow.actions.map((action) =>
-      executeAction(action, state, config.configurable).then((r) => ({
+    activeWorkflow.actions.map((action) => {
+      return executeAction(action, state, config.configurable).then((r) => ({
         id: action.id,
-        result: r,
-      })),
-    ),
+        result: {
+          ...r,
+          ...action.config,
+        },
+      }));
+    }),
   );
   for (const s of settled) {
     if (s.status === 'fulfilled') results[s.value.id] = s.value.result;

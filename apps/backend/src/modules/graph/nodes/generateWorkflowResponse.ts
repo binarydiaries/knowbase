@@ -38,7 +38,7 @@ Fallback message:
     parts.push(`Action results:\n${summary}`);
   }
   parts.push(
-    'Summarize the outcome naturally. If any action failed, acknowledge it and suggest next steps.',
+    'Summarize the outcome naturally. If any action failed, acknowledge it and suggest next steps. Keep straight to the point, Dont add anything else',
   );
 
   return parts.join('\n\n');

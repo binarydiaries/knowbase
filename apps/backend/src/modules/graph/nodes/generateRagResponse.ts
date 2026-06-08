@@ -58,8 +58,7 @@ export const generateRagResponse: GraphNode<typeof State> = async (state) => {
     new HumanMessage(query),
   ]);
 
-  const response = typeof result.content === 'string' ? result.content : '';
   return {
-    messages: new AIMessage(response),
+    messages: new AIMessage(result),
   };
 };

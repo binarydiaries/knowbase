@@ -50,7 +50,7 @@ export const State = new StateSchema({
   activeWorkflow: GraphWorkflowWithActionsSchema.optional(),
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),
-  missingFields: z.array(z.string()),
+  missingFields: z.array(z.string()).default([]),
 });
 
 export const OutputState = new StateSchema({

@@ -82,8 +82,8 @@ export abstract class ChatV2Service {
     const stream = await graph.stream(
       { messages: new HumanMessage(message) },
       {
-        streamMode: ['values', 'messages'],
-        configurable: { agentId, thread_id: conversationId },
+        streamMode: 'messages',
+        configurable: { agentId, orgId, channelId, thread_id: conversationId },
       },
     );
 

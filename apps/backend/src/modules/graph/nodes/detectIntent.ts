@@ -19,6 +19,10 @@ export const detectIntent: GraphNode<typeof State> = async (state) => {
 
   const userContent = getLastUserMessage(state);
 
+  if (!userContent) {
+    return { intent: INTENT_QUESTION_ANSWERING };
+  }
+
   const intentList = [
     INTENT_QUESTION_ANSWERING,
     ...workflows.map((w) => w.intentName),

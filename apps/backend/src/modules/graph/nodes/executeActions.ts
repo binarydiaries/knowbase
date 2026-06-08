@@ -78,15 +78,20 @@ export const executeActions: GraphNode<typeof State> = async (
   } else {
     const settled = await Promise.allSettled(
       activeWorkflow.actions.map((action) =>
-        executeAction(action, state, config.configurable).then((result) => ({
-          id: action.id,
-          result,
-        })),
+        executeAction(action, state, config.configurable),
       ),
     );
-    for (const s of settled) {
-      if (s.status === 'fulfilled') results[s.value.id] = s.value.result;
-    }
+    activeWorkflow.actions.forEach((action, i) => {
+      const s = settled[i];
+      results[action.id] =
+        s.status === 'fulfilled'
+          ? s.value
+          : {
+              success: false,
+              error:
+                s.reason instanceof Error ? s.reason.message : String(s.reason),
+            };
+    });
   }
 
   const succeeded = Object.values(results).every((r) => r.success);

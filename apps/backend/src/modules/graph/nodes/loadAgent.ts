@@ -8,10 +8,24 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
     return {};
   }
 
-  const { agentId } = ConfigSchema.parse(config.configurable);
+  const { agentId, orgId } = ConfigSchema.parse(config.configurable);
 
-  if (!agentId) {
-    throw new Error('loadAgent: agentId is required in config.configurable');
+  if (!agentId || !orgId) {
+    throw new Error(
+      'loadAgent: agentId and orgId are required in config.configurable',
+    );
+  }
+
+  // Verify the agent belongs to the requesting org — orgId lives on the
+  // agents table, not on behaviors/workflows, so we validate here first.
+  const agent = await db.query.agents.findFirst({
+    where: { id: agentId, orgId },
+  });
+
+  if (!agent) {
+    throw new Error(
+      `Agent ${agentId} not found or does not belong to this organisation`,
+    );
   }
 
   const behaviour = await db.query.behaviors.findFirst({

@@ -10,8 +10,17 @@ import { checkpointer } from './utils/checkpointer';
 
 const routeByIntent = (
   state: typeof State.State,
-): 'ragGraph' | 'workflowGraph' =>
-  state.intent === INTENT_QUESTION_ANSWERING ? 'ragGraph' : 'workflowGraph';
+): 'ragGraph' | 'workflowGraph' => {
+  if (state.intent === INTENT_QUESTION_ANSWERING) return 'ragGraph';
+  // Guard: if the detected intent doesn't map to a loaded workflow (e.g. the
+  // LLM emitted a stale value or the workflow was deleted mid-conversation),
+  // fall through to RAG rather than entering workflowGraph and producing a
+  // silent empty response.
+  const hasMatchingWorkflow = state.workflows.some(
+    (w) => w.intentName === state.intent,
+  );
+  return hasMatchingWorkflow ? 'workflowGraph' : 'ragGraph';
+};
 
 const builder = new StateGraph({
   input: InputState,

@@ -1,8 +1,4 @@
-import {
-  AIMessage,
-  HumanMessage,
-  SystemMessage,
-} from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import type { State } from '../state.js';
 import { createLlm } from '../utils/llm';
@@ -59,6 +55,6 @@ export const generateRagResponse: GraphNode<typeof State> = async (state) => {
   ]);
 
   return {
-    messages: new AIMessage(result),
+    messages: [result],
   };
 };

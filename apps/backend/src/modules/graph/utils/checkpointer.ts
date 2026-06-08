@@ -8,4 +8,4 @@ export const checkpointer = PostgresSaver.fromConnString(
 
 // Create LangGraph checkpoint tables if they don't exist.
 // Runs once at module import (top-level await, Bun/ESM-compatible).
-await checkpointer.setup();
+checkpointer.setup();

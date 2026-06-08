@@ -4,7 +4,7 @@ import { ConfigSchema } from '../config';
 import type { State } from '../state';
 
 export const loadAgent: GraphNode<typeof State> = async (state, config) => {
-  if (state.behaviour?.id && state.workflows) {
+  if (state.behaviour?.id) {
     return {};
   }
 

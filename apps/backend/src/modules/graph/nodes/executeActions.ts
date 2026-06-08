@@ -66,7 +66,22 @@ export const executeActions: GraphNode<typeof State> = async (
   config,
 ) => {
   const { activeWorkflow } = state;
-  if (!activeWorkflow || activeWorkflow.actions.length === 0) return {};
+  if (!activeWorkflow) return {};
+
+  // Workflow has no actions configured — still complete it cleanly so the
+  // checkpoint doesn't get stuck with a dangling activeWorkflow that would
+  // loop back into this node on every subsequent turn.
+  if (activeWorkflow.actions.length === 0) {
+    return {
+      activeWorkflow: undefined,
+      intent: INTENT_QUESTION_ANSWERING,
+      messages: [
+        new AIMessage(
+          activeWorkflow.config?.success?.trim() || DEFAULT_SUCCESS,
+        ),
+      ],
+    };
+  }
 
   const results: Record<string, IActionResult> = {};
 

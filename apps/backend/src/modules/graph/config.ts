@@ -4,6 +4,10 @@ export const ConfigSchema = z.object({
   agentId: z.string().optional().describe('Agent ID from the dashboard'),
   orgId: z.string().optional().describe('Clerk organisation ID'),
   channelId: z.string().optional().describe('Channel ID the message came from'),
+  thread_id: z
+    .string()
+    .optional()
+    .describe('Conversation ID the message came from'),
   ip: z
     .string()
     .optional()

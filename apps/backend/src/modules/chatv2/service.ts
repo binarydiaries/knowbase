@@ -5,6 +5,38 @@ import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { graph } from '../graph/graph';
 
+/**
+ * streamEvents v2 forces ALL LLM calls to stream, including internal pipeline
+ * nodes.  We block on_chat_model_stream events from nodes whose output must
+ * not reach the client.  Blocklist (not allowlist) so future nodes default to
+ * passing through.
+ *
+ * Node map (from reading both subgraph files):
+ *   main graph    : loadAgent · extractEntities · detectIntent · ragGraph · workflowGraph
+ *   ragGraph      : rewriteQuery · vectorSearch · generateResponse  ← streams to client
+ *   workflowGraph : loadWorkflow · checkRequirements · collectMissingData · executeActions
+ */
+const PIPELINE_NODES = new Set([
+  'extractEntities', // main graph — structured JSON, must not reach client
+  'detectIntent',    // main graph — structured JSON, must not reach client
+  'rewriteQuery',    // inside ragGraph — internal text rewrite, not user-visible
+]);
+
+// biome-ignore lint/suspicious/noExplicitAny: streamEvents yields untyped events
+type StreamEvent = any;
+
+async function* suppressPipelineNodes(
+  stream: AsyncIterable<StreamEvent>,
+): AsyncIterable<StreamEvent> {
+  for await (const event of stream) {
+    if (event.event === 'on_chat_model_stream') {
+      const node = event.metadata?.langgraph_node as string | undefined;
+      if (node && PIPELINE_NODES.has(node)) continue;
+    }
+    yield event;
+  }
+}
+
 export class NotFoundError extends Error {
   constructor(message: string) {
     super(message);
@@ -79,20 +111,16 @@ export abstract class ChatV2Service {
     message: string;
     orgId: string;
   }) {
-    // streamEvents v2 emits fine-grained LangChain lifecycle events.
-    // toUIMessageStream only emits text from `on_chat_model_stream` events.
-    // Non-streaming utility LLMs (extractEntities, detectIntent) never fire
-    // `on_chat_model_stream` — they only fire `on_chat_model_end` which
-    // toUIMessageStream ignores — so their JSON output never reaches the client.
-    // No filtering code required.
     return createUIMessageStreamResponse({
       stream: toUIMessageStream(
-        graph.streamEvents(
-          { messages: new HumanMessage(message) },
-          {
-            version: 'v2',
-            configurable: { agentId, orgId, channelId, thread_id: conversationId },
-          },
+        suppressPipelineNodes(
+          graph.streamEvents(
+            { messages: new HumanMessage(message) },
+            {
+              version: 'v2',
+              configurable: { agentId, orgId, channelId, thread_id: conversationId },
+            },
+          ),
         ),
       ),
     });

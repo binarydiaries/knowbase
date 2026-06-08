@@ -30,30 +30,15 @@ const SYSTEM_PROMPT = `You are an entity extractor. Extract structured informati
 - Only include values explicitly stated — never infer
 - Return an empty list if nothing to extract`;
 
-/** True when at least one workflow has a save_lead action (entity capture required). */
+/** True when at least one workflow requires fields (entity capture is needed). */
 function needsEntityExtraction(state: typeof State.State): boolean {
-  // return state.workflows.some((w) =>
-  //   w.actions.some((a) => a.actionType === 'save_lead'),
-  // );
-  return true;
+  return state.workflows.some((w) => w.requiredFields.length > 0);
 }
-
-// /** Pure questions and very short messages can't contain named entities. */
-// function canContainEntities(message: string): boolean {
-//   const clean = message.trim();
-//   if (!clean || clean.endsWith('?') || clean.split(/\s+/).length < 3)
-//     return false;
-//   return true;
-// }
 
 export const extractEntities: GraphNode<typeof State> = async (state) => {
   const userContent = getLastUserMessage(state);
 
-  if (
-    !userContent ||
-    !needsEntityExtraction(state)
-    // !canContainEntities(userContent)
-  ) {
+  if (!userContent || !needsEntityExtraction(state)) {
     return { entities: {} };
   }
 

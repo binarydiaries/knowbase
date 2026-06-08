@@ -1,12 +1,21 @@
+import { AIMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import type { z } from 'zod';
 import { LeadService } from '../../lead/service';
 import type { WorkflowActionSchema } from '../../workflow/model';
 import { ConfigSchema } from '../config';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
-import type { ActionResult, State } from '../state';
+import type { State } from '../state';
 
-type IActionResult = z.infer<typeof ActionResult>;
+const DEFAULT_SUCCESS = 'Done! Your request has been submitted.';
+const DEFAULT_FAILURE =
+  'Something went wrong. Please try again or contact support at hello@agenvik.com.';
+
+type IActionResult = {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+};
 
 async function executeAction(
   action: z.infer<typeof WorkflowActionSchema>,
@@ -80,11 +89,17 @@ export const executeActions: GraphNode<typeof State> = async (
     }
   }
 
+  const succeeded = Object.values(results).every((r) => r.success);
+  const workflowConfig = activeWorkflow.config;
+  const message = succeeded
+    ? workflowConfig?.success?.trim() || DEFAULT_SUCCESS
+    : workflowConfig?.failure?.trim() || DEFAULT_FAILURE;
+
   // Workflow is done — clear activeWorkflow and reset intent so the next
   // user message is not incorrectly routed back into this workflow.
   return {
-    actionResults: results,
     activeWorkflow: undefined,
     intent: INTENT_QUESTION_ANSWERING,
+    messages: [new AIMessage(message)],
   };
 };

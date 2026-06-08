@@ -27,12 +27,6 @@ export const RagChunkSchema = z.object({
   chunkIndex: z.number(),
 });
 
-export const ActionResult = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
-});
-
 // Checkpoint round-trip: dates are serialised to ISO strings by PostgresSaver.
 // Use coerce.date() so restored state validates correctly.
 const GraphBehaviourSchema = BehaviourSchema.extend({
@@ -57,7 +51,6 @@ export const State = new StateSchema({
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),
   missingFields: z.array(z.string()),
-  actionResults: z.record(z.string(), ActionResult),
 });
 
 export const OutputState = new StateSchema({

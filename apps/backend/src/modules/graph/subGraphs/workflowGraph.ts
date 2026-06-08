@@ -30,7 +30,6 @@ const graph = new StateGraph(State)
   // Edges
   .addEdge(START, 'loadWorkflow')
   .addEdge('loadWorkflow', 'checkRequirements')
-  .addEdge('checkRequirements', 'collectMissingData')
   .addEdge('collectMissingData', END)
   .addEdge('executeActions', 'generateWorkflowResponse')
   .addEdge('generateWorkflowResponse', END);

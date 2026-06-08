@@ -79,17 +79,22 @@ export abstract class ChatV2Service {
     message: string;
     orgId: string;
   }) {
-    const stream = await graph.stream(
-      { messages: new HumanMessage(message) },
-      {
-        streamMode: 'messages',
-        configurable: { agentId, orgId, channelId, thread_id: conversationId },
-      },
-    );
-
-    // Convert the LangGraph stream to UI message stream
+    // streamEvents v2 emits fine-grained LangChain lifecycle events.
+    // toUIMessageStream only emits text from `on_chat_model_stream` events.
+    // Non-streaming utility LLMs (extractEntities, detectIntent) never fire
+    // `on_chat_model_stream` — they only fire `on_chat_model_end` which
+    // toUIMessageStream ignores — so their JSON output never reaches the client.
+    // No filtering code required.
     return createUIMessageStreamResponse({
-      stream: toUIMessageStream(stream),
+      stream: toUIMessageStream(
+        graph.streamEvents(
+          { messages: new HumanMessage(message) },
+          {
+            version: 'v2',
+            configurable: { agentId, orgId, channelId, thread_id: conversationId },
+          },
+        ),
+      ),
     });
   }
 }

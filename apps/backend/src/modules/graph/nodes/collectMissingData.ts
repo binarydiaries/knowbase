@@ -1,9 +1,10 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import type { State } from '../state';
-import { createNanoLlm } from '../utils/llm';
+import { createStreamingNanoLlm } from '../utils/llm';
 
-const llm = createNanoLlm();
+// Streaming so the question reaches the client token-by-token via streamMode:'messages'.
+const llm = createStreamingNanoLlm();
 
 /**
  * Asks naturally for the next missing required field.

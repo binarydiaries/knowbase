@@ -33,6 +33,41 @@ async function* suppressPipelineNodes(
       const node = event.metadata?.langgraph_node as string | undefined;
       if (node && PIPELINE_NODES.has(node)) continue;
     }
+
+    // executeActions doesn't call an LLM — it constructs an AIMessage directly,
+    // so no on_chat_model_stream event ever fires for it.  Intercept the
+    // on_chain_end for that node and synthesise a fake streaming event so the
+    // success/failure message reaches the client.
+    if (
+      event.event === 'on_chain_end' &&
+      event.metadata?.langgraph_node === 'executeActions'
+    ) {
+      // biome-ignore lint/suspicious/noExplicitAny: untyped LangGraph output
+      const msgs: any[] = event.data?.output?.messages ?? [];
+      for (const msg of msgs) {
+        const text =
+          typeof msg?.content === 'string' ? msg.content.trim() : '';
+        if (text) {
+          yield {
+            event: 'on_chat_model_stream',
+            run_id: event.run_id,
+            name: 'executeActions',
+            data: {
+              chunk: {
+                content: text,
+                id: `execute-${event.run_id}`,
+              },
+            },
+            metadata: {
+              ...event.metadata,
+              langgraph_node: 'executeActions',
+            },
+          };
+        }
+      }
+      continue; // don't forward the raw on_chain_end
+    }
+
     yield event;
   }
 }

@@ -35,7 +35,6 @@ async function executeAction(
     const { name, email, phone, company } = state.entities as Record<string, string>;
     switch (action.actionType) {
       case 'save_lead':
-        console.log('[executeActions] save_lead called', { agentId, orgId, channelId, thread_id, name, email, phone, company });
         return LeadService.create({
           agentId,
           orgId,
@@ -45,13 +44,10 @@ async function executeAction(
           email,
           phone,
           company,
-        }).then((res) => {
-          console.log('[executeActions] save_lead result', { id: res?.id });
-          return { success: true, data: { leadId: res?.id } };
-        }).catch((err) => {
-          console.error('[executeActions] save_lead error', err);
-          return { success: false, error: err instanceof Error ? err.message : String(err) };
-        });
+        }).then((res) => ({
+          success: true,
+          data: { leadId: res.id },
+        }));
       default:
         return {
           success: false,

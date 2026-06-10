@@ -52,9 +52,9 @@ async function labelTopic(firstUserMessage: string): Promise<string | null> {
  * Only meaningful on the first turn; both lookups are best-effort.
  */
 export const enrichConversation: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id, ip } = config?.configurable ?? {};
+  const { thread_id, ip, isPaid } = config?.configurable ?? {};
 
-  if (!thread_id) return {};
+  if (!thread_id || !isPaid) return {};
 
   // New conversation = first HumanMessage + first AIMessage (length 2)
   const isNew = state.messages.length === 2;

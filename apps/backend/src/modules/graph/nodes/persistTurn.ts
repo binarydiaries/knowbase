@@ -8,7 +8,7 @@ import { scoreSentiment } from '../utils/scoring';
 import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 export const persistTurn: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id, orgId } = config?.configurable ?? {};
+  const { thread_id, orgId, isPaid } = config?.configurable ?? {};
 
   if (!thread_id || !orgId) return {};
 
@@ -26,7 +26,7 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
       }))
     : null;
 
-  const sentiment = assistantText ? await scoreSentiment(assistantText) : null;
+  const sentiment = isPaid && assistantText ? await scoreSentiment(assistantText) : null;
 
   await Promise.all([
     OrgUsageMonthlyService.incrementAssistantMessages(orgId),

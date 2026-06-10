@@ -1,15 +1,16 @@
 import type { GraphNode } from '@langchain/langgraph';
 import { ConversationService } from '../../conversation/service';
 import { MessageService } from '../../message/service';
+import { OrgUsageMonthlyService } from '../../subscription/usage';
 import type { State } from '../state';
 import { computeConfidenceScore } from '../utils/retrieval';
 import { scoreSentiment } from '../utils/scoring';
 import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 export const persistTurn: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id } = config?.configurable ?? {};
+  const { thread_id, orgId } = config?.configurable ?? {};
 
-  if (!thread_id) return {};
+  if (!thread_id || !orgId) return {};
 
   const userText = getLastUserMessage(state);
   const assistantText = getLastAssistantMessage(state);
@@ -28,6 +29,8 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
   const sentiment = assistantText ? await scoreSentiment(assistantText) : null;
 
   await Promise.all([
+    OrgUsageMonthlyService.incrementAssistantMessages(orgId),
+
     ConversationService.update(thread_id, {
       lastAssistantUtterance: assistantText,
     }),

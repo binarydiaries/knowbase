@@ -19,13 +19,11 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
   // Verify the agent belongs to the requesting org — orgId lives on the
   // agents table, not on behaviors/workflows, so we validate here first.
   const agent = await db.query.agents.findFirst({
-    where: { id: agentId, orgId },
+    where: { id: agentId, orgId, agentStatus: 'active' },
   });
 
   if (!agent) {
-    throw new Error(
-      `Agent ${agentId} not found or does not belong to this organisation`,
-    );
+    throw new Error(`Agent ${agentId} not found or inactive`);
   }
 
   const behaviour = await db.query.behaviors.findFirst({

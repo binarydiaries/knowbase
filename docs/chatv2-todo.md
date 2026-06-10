@@ -13,7 +13,9 @@
 - [x] Conversation persistence — `initConversation` node (first in graph) creates on new thread / updates lastUserQuestion + lastMessageAt on existing; uses `getLastUserMessage` from `graph/utils/messages.ts`
 - [x] Conversation persistence — `persistTurn` node (after ragGraph/workflowGraph) saves user + assistant messages to `messages` table and updates `lastAssistantUtterance`; includes RAG sources metadata and `finalQuery` systemMetadata
 - [x] Conversation enrichment — `enrichConversation` node runs in parallel with `persistTurn`; geo (IP → country) + topic label (nano LLM, new conversations only); fire-and-forget, gating for paid plans to be added later
+- [x] Agent status guard — `loadAgent` throws if `agentStatus !== 'active'`
 - [ ] AI cost tracking — call AiCostEventService.recordEvent for each LLM node (generateResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery)
+- [ ] Lead email notification — `executeActions` save_lead action doesn't fire email; revisit when notification model is redesigned
 - [x] Gating — sentiment scoring in `persistTurn` behind `isPaid` config flag
 - [x] Gating — enrichment (geo + topic) in `enrichConversation` behind `isPaid` config flag
 - [x] Fix hardcoded conversationId in executeActions — replaced stub with real thread_id from config
@@ -25,7 +27,7 @@
 
 - [ ] Wire up LangGraph pipeline in ChatV2Service.sendWeb (remove "Not implemented" stub)
 - [ ] Domain allowlist enforcement
-- [ ] Subscription guard — assertMessagesPerMonthLimitNotReached before invoking graph
+- [x] Subscription guard — `ChatV2Service.assertMessageLimit` throws `MessageLimitReachedError` and returns `isPaid`; called in `sendPreview` (and to be called in `sendWeb`)
 - [ ] Conversation enrichment — geo (IP → country) + topic labelling on new conversations
 - [ ] Sentiment scoring — on paid plans only
 

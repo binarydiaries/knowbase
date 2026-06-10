@@ -3,6 +3,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
 import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
+import { SubscriptionService } from '../subscription/service';
 import { graph } from '../graph/graph';
 import { suppressPipelineNodes } from '../graph/utils/stream';
 
@@ -28,6 +29,20 @@ export class MessageLimitReachedError extends Error {
 }
 
 export abstract class ChatV2Service {
+  /**
+   * Asserts the org hasn't hit their monthly message limit.
+   * Returns isPaid so callers can pass it to the graph config without a second query.
+   */
+  static async assertMessageLimit(orgId: string): Promise<{ isPaid: boolean }> {
+    const result = await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
+    if (!result.allowed) {
+      throw new MessageLimitReachedError(
+        SubscriptionService.getMessageLimitReachedMessage(result),
+      );
+    }
+    return { isPaid: result.plan !== 'free' };
+  }
+
   static async sendWeb({
     channelId,
     conversationId,
@@ -80,6 +95,8 @@ export abstract class ChatV2Service {
     message: string;
     orgId: string;
   }) {
+    const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
+
     return createUIMessageStreamResponse({
       stream: toUIMessageStream(
         suppressPipelineNodes(
@@ -87,7 +104,7 @@ export abstract class ChatV2Service {
             { messages: new HumanMessage(message) },
             {
               version: 'v2',
-              configurable: { agentId, orgId, channelId, thread_id: conversationId },
+              configurable: { agentId, orgId, channelId, thread_id: conversationId, isPaid },
             },
           ),
         ),

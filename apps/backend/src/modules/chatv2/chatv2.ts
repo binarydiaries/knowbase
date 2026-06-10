@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
+import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ModelV2 } from './model';
 import {
@@ -10,6 +11,16 @@ import {
   MessageLimitReachedError,
   NotFoundError,
 } from './service';
+
+function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
+  if (!allowedDomains.length) return true;
+  if (!origin) return false;
+  try {
+    return allowedDomains.includes(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
+}
 
 function handleChatError(error: unknown, status: Function) {
   if (error instanceof NotFoundError) {
@@ -61,6 +72,34 @@ export const ChatV2 = new Elysia({ prefix: '/chatv2', tags: ['Chats V2'] })
       body: 'ChatV2BodySchema',
       response: {
         200: z.any(),
+        403: 'ChatForbiddenResponse',
+        404: 'NotFoundResponse',
+      },
+    },
+  )
+  // ── Public channel info — fetched by the widget on load ───────────────────
+  .get(
+    '/channel',
+    async ({ query, status }) => {
+      const channel = await ChannelService.singleById(query.channelId);
+
+      if (!channel) {
+        return status(404, { code: 'NOT_FOUND', message: 'Channel not found or Invalid' });
+      }
+
+      if (channel.type === 'web') {
+        const config = channel.config as IChannelWebConfig;
+        if (!isDomainAllowed(query.parentOrigin, config.allowedDomains ?? [])) {
+          return status(403, { code: 'FORBIDDEN', message: 'Domain not allowed' });
+        }
+      }
+
+      return { channel: ChannelService.transformChannel(channel) };
+    },
+    {
+      query: 'ChatV2ChannelQueryParamSchema',
+      response: {
+        200: 'ChatV2ChannelResponseSchema',
         403: 'ChatForbiddenResponse',
         404: 'NotFoundResponse',
       },

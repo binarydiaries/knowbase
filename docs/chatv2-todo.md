@@ -12,8 +12,9 @@
 - [x] suppressPipelineNodes extracted to `graph/utils/stream.ts`
 - [x] Conversation persistence — `initConversation` node (first in graph) creates on new thread / updates lastUserQuestion + lastMessageAt on existing; uses `getLastUserMessage` from `graph/utils/messages.ts`
 - [x] Conversation persistence — `persistTurn` node (after ragGraph/workflowGraph) saves user + assistant messages to `messages` table and updates `lastAssistantUtterance`; includes RAG sources metadata and `finalQuery` systemMetadata
+- [x] Conversation enrichment — `enrichConversation` node runs in parallel with `persistTurn`; geo (IP → country) + topic label (nano LLM, new conversations only); fire-and-forget, gating for paid plans to be added later
 - [ ] AI cost tracking — call AiCostEventService.recordEvent for each LLM node (generateResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery)
-- [ ] Fix hardcoded conversationId in executeActions — replace stub with real thread_id from config
+- [x] Fix hardcoded conversationId in executeActions — replaced stub with real thread_id from config
 - [ ] Usage increment — call OrgUsageMonthlyService.incrementAssistantMessages after each completed turn
 
 ---

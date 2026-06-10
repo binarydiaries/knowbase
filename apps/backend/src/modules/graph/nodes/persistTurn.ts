@@ -54,5 +54,6 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
     ]),
   ]);
 
-  return {};
+  // Clear per-turn RAG state so stale chunks/query don't bleed into the next turn
+  return { ragChunks: [], finalQuery: undefined };
 };

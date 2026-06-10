@@ -23,13 +23,14 @@
 
 ---
 
-## sendWeb (after sendPreview is solid)
+## sendWeb (done)
 
-- [ ] Wire up LangGraph pipeline in ChatV2Service.sendWeb (remove "Not implemented" stub)
-- [ ] Domain allowlist enforcement
-- [x] Subscription guard — `ChatV2Service.assertMessageLimit` throws `MessageLimitReachedError` and returns `isPaid`; called in `sendPreview` (and to be called in `sendWeb`)
-- [ ] Conversation enrichment — geo (IP → country) + topic labelling on new conversations
-- [ ] Sentiment scoring — on paid plans only
+- [x] Wire up LangGraph pipeline in ChatV2Service.sendWeb
+- [x] Domain allowlist enforcement (was already in stub, preserved)
+- [x] Subscription guard — `assertMessageLimit` called; `MessageLimitReachedError` now carries full payload (plan, messagesPerMonthLimit, messagesThisMonth) matching response schema
+- [x] Conversation enrichment — handled by `enrichConversation` node (parallel, gated behind isPaid); ip passed through configurable
+- [x] Sentiment scoring — handled by `persistTurn` (gated behind isPaid)
+- [x] Public route `POST /chatv2` added (no AuthGuard); orgId + agentId sourced from channel record via `ChannelService.singleById`
 
 ---
 
@@ -42,7 +43,7 @@
 
 ## Client widget
 
-- [ ] Point apps/client at v2 endpoint once sendWeb is production-ready
+- [x] Point apps/client at v2 endpoint — `apps/client/src/services/chat.ts` baseUrl changed from `/chat` to `/chatv2`; `GET /chat/channel` kept on v1 (no change needed)
 
 ---
 

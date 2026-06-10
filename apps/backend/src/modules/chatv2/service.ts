@@ -22,7 +22,12 @@ export class DomainNotAllowedError extends Error {
 }
 
 export class MessageLimitReachedError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly payload: Awaited<
+      ReturnType<typeof SubscriptionService.assertMessagesPerMonthLimitNotReached>
+    >,
+  ) {
     super(message);
     this.name = 'MessageLimitReachedError';
   }
@@ -38,6 +43,7 @@ export abstract class ChatV2Service {
     if (!result.allowed) {
       throw new MessageLimitReachedError(
         SubscriptionService.getMessageLimitReachedMessage(result),
+        result,
       );
     }
     return { isPaid: result.plan !== 'free' };
@@ -78,8 +84,22 @@ export abstract class ChatV2Service {
       }
     }
 
-    // TODO: wire up LangGraph pipeline here
-    throw new Error('Not implemented');
+    const { orgId, agentId } = channel;
+    const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
+
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream(
+        suppressPipelineNodes(
+          graph.streamEvents(
+            { messages: new HumanMessage(message) },
+            {
+              version: 'v2',
+              configurable: { agentId, orgId, channelId, thread_id: conversationId, isPaid, ip },
+            },
+          ),
+        ),
+      ),
+    });
   }
 
   static async sendPreview({

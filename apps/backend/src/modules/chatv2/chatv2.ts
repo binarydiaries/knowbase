@@ -11,10 +11,7 @@ import {
   NotFoundError,
 } from './service';
 
-function handleChatError(
-  error: unknown,
-  status: (code: number, body: { code: string; message: string }) => unknown,
-) {
+function handleChatError(error: unknown, status: Function) {
   if (error instanceof NotFoundError) {
     return status(404, { code: 'NOT_FOUND', message: error.message });
   }
@@ -25,6 +22,9 @@ function handleChatError(
     return status(403, {
       code: 'MESSAGE_LIMIT_REACHED',
       message: error.message,
+      plan: error.payload.plan,
+      messagesPerMonthLimit: error.payload.messagesPerMonthLimit,
+      messagesThisMonth: error.payload.messagesThisMonth,
     });
   }
   throw error;
@@ -33,6 +33,40 @@ function handleChatError(
 export const ChatV2 = new Elysia({ prefix: '/chatv2', tags: ['Chats V2'] })
   .use(ModelV2)
   .use(ErrorModel)
+  // ── Public web endpoint — no AuthGuard (customer-facing widget) ────────────
+  .post(
+    '',
+    async ({ body, status, headers }) => {
+      const { message, channelId, conversationId, parentOrigin } = body;
+      const ip =
+        (headers['x-forwarded-for'] as string | undefined)
+          ?.split(',')[0]
+          ?.trim() ??
+        (headers['x-real-ip'] as string | undefined) ??
+        undefined;
+
+      try {
+        return await ChatV2Service.sendWeb({
+          channelId,
+          conversationId,
+          message,
+          parentOrigin,
+          ip,
+        });
+      } catch (error) {
+        return handleChatError(error, status);
+      }
+    },
+    {
+      body: 'ChatV2BodySchema',
+      response: {
+        200: z.any(),
+        403: 'ChatForbiddenResponse',
+        404: 'NotFoundResponse',
+      },
+    },
+  )
+  // ── Auth-guarded routes ────────────────────────────────────────────────────
   .use(AuthGuard)
   .post(
     '/preview',

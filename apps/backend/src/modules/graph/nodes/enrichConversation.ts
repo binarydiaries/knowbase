@@ -1,4 +1,5 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { ConversationService } from '../../conversation/service';
@@ -14,11 +15,6 @@ const TopicSchema = z.object({
   topic: z.string().describe('2-5 word topic label for the conversation'),
 });
 
-const topicLlm = createNanoLlm().withStructuredOutput(TopicSchema, {
-  name: 'label_topic',
-  strict: true,
-});
-
 async function lookupCountry(ip: string): Promise<string | null> {
   try {
     const res = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
@@ -30,8 +26,15 @@ async function lookupCountry(ip: string): Promise<string | null> {
   }
 }
 
-async function labelTopic(firstUserMessage: string): Promise<string | null> {
+async function labelTopic(
+  firstUserMessage: string,
+  config?: RunnableConfig | null,
+): Promise<string | null> {
   try {
+    const topicLlm = createNanoLlm(config, 'enrichConversation').withStructuredOutput(
+      TopicSchema,
+      { name: 'label_topic', strict: true },
+    );
     const { topic } = await topicLlm.invoke([
       new SystemMessage('In 2-5 words, what topic is this question about?'),
       new HumanMessage(`"${firstUserMessage}"`),
@@ -69,8 +72,7 @@ export const enrichConversation: GraphNode<typeof State> = async (state, config)
       }
 
       if (isNew) {
-        const firstUserMessage = getLastUserMessage(state);
-        const topic = await labelTopic(firstUserMessage);
+        const topic = await labelTopic(getLastUserMessage(state), config);
         if (topic) updates.topic = topic;
       }
 

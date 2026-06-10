@@ -26,7 +26,8 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
       }))
     : null;
 
-  const sentiment = isPaid && assistantText ? await scoreSentiment(assistantText) : null;
+  const sentiment =
+    isPaid && assistantText ? await scoreSentiment(assistantText, config) : null;
 
   await Promise.all([
     OrgUsageMonthlyService.incrementAssistantMessages(orgId),

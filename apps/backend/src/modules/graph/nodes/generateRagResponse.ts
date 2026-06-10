@@ -4,8 +4,6 @@ import type { State } from '../state.js';
 import { createLlm } from '../utils/llm';
 import { getLastUserMessage } from '../utils/messages';
 
-const llm = createLlm();
-
 function buildSystemPrompt(state: typeof State.State): string {
   const cfg = state.behaviour;
 
@@ -43,18 +41,16 @@ Fallback message (use verbatim only when the Knowledge Base has no answer):
   return parts.join('\n\n');
 }
 
-export const generateRagResponse: GraphNode<typeof State> = async (state) => {
+export const generateRagResponse: GraphNode<typeof State> = async (state, config) => {
   const systemPrompt = buildSystemPrompt(state);
   const query = state.finalQuery ?? getLastUserMessage(state);
   const history = state.messages.slice(-11, -1);
 
-  const result = await llm.invoke([
+  const result = await createLlm('openai', undefined, config, 'generateRagResponse').invoke([
     new SystemMessage(systemPrompt),
     ...history,
     new HumanMessage(query),
   ]);
 
-  return {
-    messages: [result],
-  };
+  return { messages: [result] };
 };

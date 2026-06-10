@@ -14,7 +14,7 @@
 - [x] Conversation persistence — `persistTurn` node (after ragGraph/workflowGraph) saves user + assistant messages to `messages` table and updates `lastAssistantUtterance`; includes RAG sources metadata and `finalQuery` systemMetadata
 - [x] Conversation enrichment — `enrichConversation` node runs in parallel with `persistTurn`; geo (IP → country) + topic label (nano LLM, new conversations only); fire-and-forget, gating for paid plans to be added later
 - [x] Agent status guard — `loadAgent` throws if `agentStatus !== 'active'`
-- [ ] AI cost tracking — call AiCostEventService.recordEvent for each LLM node (generateResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery)
+- [x] AI cost tracking — `CostTrackingHandler` LangChain callback in `graph/utils/cost.ts`; wired into all LLM nodes via `createCostCallback({ orgId, agentId, conversationId, nodeName })` passed to `createLlm` / `createNanoLlm` / `createStreamingNanoLlm` factory args; covers generateRagResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery, scoreSentiment, enrichConversation (topic label)
 - [ ] Lead email notification — `executeActions` save_lead action doesn't fire email; revisit when notification model is redesigned
 - [x] Gating — sentiment scoring in `persistTurn` behind `isPaid` config flag
 - [x] Gating — enrichment (geo + topic) in `enrichConversation` behind `isPaid` config flag

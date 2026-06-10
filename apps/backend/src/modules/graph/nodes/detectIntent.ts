@@ -8,9 +8,7 @@ import { getLastUserMessage } from '../utils/messages';
 
 export { INTENT_QUESTION_ANSWERING };
 
-const llm = createNanoLlm();
-
-export const detectIntent: GraphNode<typeof State> = async (state) => {
+export const detectIntent: GraphNode<typeof State> = async (state, config) => {
   const { workflows, activeWorkflow, missingFields } = state;
 
   if (!workflows || workflows.length === 0) {
@@ -36,9 +34,10 @@ export const detectIntent: GraphNode<typeof State> = async (state) => {
       ),
   });
 
-  const structuredLlm = llm.withStructuredOutput(IntentSchema, {
-    name: 'detect_intent',
-  });
+  const structuredLlm = createNanoLlm(config, 'detectIntent').withStructuredOutput(
+    IntentSchema,
+    { name: 'detect_intent' },
+  );
 
   // Build the base system prompt
   let systemPrompt = `You are an intent classifier. Classify the user's message into exactly one of the following intents:

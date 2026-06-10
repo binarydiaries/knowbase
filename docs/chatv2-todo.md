@@ -14,6 +14,8 @@
 - [x] Conversation persistence — `persistTurn` node (after ragGraph/workflowGraph) saves user + assistant messages to `messages` table and updates `lastAssistantUtterance`; includes RAG sources metadata and `finalQuery` systemMetadata
 - [x] Conversation enrichment — `enrichConversation` node runs in parallel with `persistTurn`; geo (IP → country) + topic label (nano LLM, new conversations only); fire-and-forget, gating for paid plans to be added later
 - [ ] AI cost tracking — call AiCostEventService.recordEvent for each LLM node (generateResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery)
+- [ ] Gating — sentiment scoring in `persistTurn` behind paid plan check (free plan → skip)
+- [ ] Gating — enrichment (geo + topic) in `enrichConversation` behind paid plan check (free plan → skip)
 - [x] Fix hardcoded conversationId in executeActions — replaced stub with real thread_id from config
 - [x] Usage increment — `OrgUsageMonthlyService.incrementAssistantMessages` called in `persistTurn` (inside Promise.all with conversation + message writes)
 

@@ -440,10 +440,15 @@ async function processInboundEvent(payload: {
     );
     if (!result?.enabled || !result.agent) return;
 
+    // Strip the bot mention tag (e.g. "<@U12345678>") from the start of the
+    // message so the intent classifier sees the clean user intent rather than
+    // the raw Slack mention syntax.
+    const cleanMessage = event.text.replace(/<@[A-Z0-9]+>\s*/g, '').trim();
+
     await ChatV2Service.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: event.text,
+      message: cleanMessage,
       slackChannelId,
       threadTs,
     });

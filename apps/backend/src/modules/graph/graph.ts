@@ -2,6 +2,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { ConfigSchema } from './config';
 import { detectIntent, INTENT_QUESTION_ANSWERING } from './nodes/detectIntent';
 import { extractEntities } from './nodes/extractEntities';
+import { initConversation } from './nodes/initConversation';
 import { loadAgent } from './nodes/loadAgent';
 import { InputState, OutputState, State } from './state';
 import { ragGraph } from './subGraphs/ragGraph';
@@ -29,6 +30,7 @@ const builder = new StateGraph({
   context: ConfigSchema,
 })
   // Nodes
+  .addNode('initConversation', initConversation)
   .addNode('loadAgent', loadAgent)
   .addNode('extractEntities', extractEntities)
   .addNode('detectIntent', detectIntent)
@@ -42,7 +44,8 @@ const builder = new StateGraph({
   })
 
   // Edges
-  .addEdge(START, 'loadAgent')
+  .addEdge(START, 'initConversation')
+  .addEdge('initConversation', 'loadAgent')
   .addEdge('loadAgent', 'extractEntities')
   .addEdge('extractEntities', 'detectIntent')
   .addEdge('ragGraph', END)

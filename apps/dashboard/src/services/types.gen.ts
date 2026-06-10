@@ -1206,172 +1206,12 @@ export type BadRequestResponse = {
     message: string;
 };
 
-export type AgentActionSchema = {
-    id: string;
-    agentId: string;
-    actionType: 'lead_generation';
-    enabled: boolean;
-    config: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
-        };
-        triggerInstructions?: string;
-        successMessage?: string;
-    };
-    createdBy: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export type CreateAgentActionBody = {
-    agentId: string;
-    actionType: 'lead_generation';
-    config: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
-        };
-        triggerInstructions?: string;
-        successMessage?: string;
-    };
-};
-
-export type UpdateAgentActionBody = {
-    enabled?: boolean;
-    config?: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
-        };
-        triggerInstructions?: string;
-        successMessage?: string;
-    };
-};
-
-export type GetAgentActionsQuery = {
-    agentId: string;
-};
-
-export type ManyAgentActionResponse = {
-    actions: Array<{
-        id: string;
-        agentId: string;
-        actionType: 'lead_generation';
-        enabled: boolean;
-        config: {
-            fields?: {
-                name?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                email?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                phone?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                company?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-            };
-            triggerInstructions?: string;
-            successMessage?: string;
-        };
-        createdBy: string;
-        createdAt: string;
-        updatedAt: string;
-    }>;
-};
-
-export type OneAgentActionResponse = {
-    action: {
-        id: string;
-        agentId: string;
-        actionType: 'lead_generation';
-        enabled: boolean;
-        config: {
-            fields?: {
-                name?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                email?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                phone?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                company?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-            };
-            triggerInstructions?: string;
-            successMessage?: string;
-        };
-        createdBy: string;
-        createdAt: string;
-        updatedAt: string;
-    };
-};
-
-export type DeleteActionResponse = {
-    success: boolean;
-};
-
 export type WorkflowSchema = {
     id: string;
     agentId: string;
     name: string;
     intentName: string;
+    triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
@@ -1415,6 +1255,7 @@ export type WorkflowWithActionsSchema = {
     agentId: string;
     name: string;
     intentName: string;
+    triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
@@ -1456,6 +1297,7 @@ export type CreateWorkflowBody = {
     agentId: string;
     name: string;
     intentName: string;
+    triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
@@ -1474,6 +1316,7 @@ export type CreateWorkflowBody = {
 export type UpdateWorkflowBody = {
     name?: string;
     intentName?: string;
+    triggerInstructions?: string;
     requiredFields?: Array<string>;
     config?: {
         success?: string;
@@ -1494,6 +1337,7 @@ export type OneWorkflowResponse = {
         agentId: string;
         name: string;
         intentName: string;
+        triggerInstructions: string;
         requiredFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
         config?: {
@@ -1538,6 +1382,7 @@ export type ManyWorkflowsResponse = {
         agentId: string;
         name: string;
         intentName: string;
+        triggerInstructions: string;
         requiredFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
         config?: {
@@ -3197,124 +3042,6 @@ export type DeleteSlackBindByChannelIdErrors = {
 };
 
 export type DeleteSlackBindByChannelIdError = DeleteSlackBindByChannelIdErrors[keyof DeleteSlackBindByChannelIdErrors];
-
-export type GetAgentActionsData = {
-    body?: never;
-    path?: never;
-    query: {
-        agentId: string;
-    };
-    url: '/agent-actions';
-};
-
-export type GetAgentActionsErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-};
-
-export type GetAgentActionsError = GetAgentActionsErrors[keyof GetAgentActionsErrors];
-
-export type GetAgentActionsResponses = {
-    /**
-     * Response for status 200
-     */
-    200: ManyAgentActionResponse;
-};
-
-export type GetAgentActionsResponse = GetAgentActionsResponses[keyof GetAgentActionsResponses];
-
-export type PostAgentActionsData = {
-    body: CreateAgentActionBody;
-    path?: never;
-    query?: never;
-    url: '/agent-actions';
-};
-
-export type PostAgentActionsErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-    /**
-     * Response for status 403
-     */
-    403: LeadGenerationForbiddenResponse;
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type PostAgentActionsError = PostAgentActionsErrors[keyof PostAgentActionsErrors];
-
-export type PostAgentActionsResponses = {
-    /**
-     * Response for status 200
-     */
-    200: OneAgentActionResponse;
-};
-
-export type PostAgentActionsResponse = PostAgentActionsResponses[keyof PostAgentActionsResponses];
-
-export type DeleteAgentActionsByIdData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/agent-actions/{id}';
-};
-
-export type DeleteAgentActionsByIdErrors = {
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type DeleteAgentActionsByIdError = DeleteAgentActionsByIdErrors[keyof DeleteAgentActionsByIdErrors];
-
-export type DeleteAgentActionsByIdResponses = {
-    /**
-     * Response for status 200
-     */
-    200: DeleteActionResponse;
-};
-
-export type DeleteAgentActionsByIdResponse = DeleteAgentActionsByIdResponses[keyof DeleteAgentActionsByIdResponses];
-
-export type PatchAgentActionsByIdData = {
-    body: UpdateAgentActionBody;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/agent-actions/{id}';
-};
-
-export type PatchAgentActionsByIdErrors = {
-    /**
-     * Response for status 403
-     */
-    403: LeadGenerationForbiddenResponse;
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type PatchAgentActionsByIdError = PatchAgentActionsByIdErrors[keyof PatchAgentActionsByIdErrors];
-
-export type PatchAgentActionsByIdResponses = {
-    /**
-     * Response for status 200
-     */
-    200: OneAgentActionResponse;
-};
-
-export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
 
 export type GetWorkflowsData = {
     body?: never;

@@ -7,9 +7,19 @@
  * passing through.
  *
  * Node map (from reading both subgraph files):
- *   main graph    : loadAgent · extractEntities · detectIntent · ragGraph · workflowGraph
+ *   main graph    : initConversation · loadAgent · extractEntities · detectIntent
+ *                   persistTurn · enrichConversation · ragGraph · workflowGraph
  *   ragGraph      : rewriteQuery · vectorSearch · generateResponse  ← streams to client
  *   workflowGraph : loadWorkflow · checkRequirements · collectMissingData · executeActions
+ *                   collectMissingData ← streams to client
+ *
+ * Nodes that make internal LLM calls (structured output / utility) must be
+ * listed here so their JSON output never reaches the client:
+ *   extractEntities  — entity extraction (structured JSON)
+ *   detectIntent     — intent classification (structured JSON)
+ *   rewriteQuery     — query rewriting (plain text, internal only)
+ *   persistTurn      — calls scoreSentiment internally (structured JSON)
+ *   enrichConversation — calls labelTopic internally (structured JSON)
  *
  * Special case — executeActions:
  *   This node constructs an AIMessage directly (no LLM call), so no
@@ -19,9 +29,13 @@
  */
 
 const PIPELINE_NODES = new Set([
-  'extractEntities', // main graph — structured JSON, must not reach client
-  'detectIntent', // main graph — structured JSON, must not reach client
-  'rewriteQuery', // inside ragGraph — internal text rewrite, not user-visible
+  // main graph
+  'extractEntities',    // structured JSON — entity extraction
+  'detectIntent',       // structured JSON — intent classification
+  'persistTurn',        // calls scoreSentiment (structured JSON) internally
+  'enrichConversation', // calls labelTopic (structured JSON) internally
+  // ragGraph
+  'rewriteQuery',       // internal text rewrite, not user-visible
 ]);
 
 // biome-ignore lint/suspicious/noExplicitAny: streamEvents yields untyped events

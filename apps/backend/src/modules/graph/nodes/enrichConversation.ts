@@ -57,10 +57,10 @@ async function labelTopic(
 export const enrichConversation: GraphNode<typeof State> = async (state, config) => {
   const { thread_id, ip, isPaid } = config?.configurable ?? {};
 
-  if (!thread_id || !isPaid) return {};
-
-  // New conversation = first HumanMessage + first AIMessage (length 2)
+  // Only enrich on the first turn (1 HumanMessage + 1 AIMessage = length 2).
+  // Country doesn't change mid-conversation; topic is set once per thread.
   const isNew = state.messages.length === 2;
+  if (!thread_id || !isPaid || !isNew) return {};
 
   void (async () => {
     try {
@@ -71,10 +71,8 @@ export const enrichConversation: GraphNode<typeof State> = async (state, config)
         if (country) updates.country = country;
       }
 
-      if (isNew) {
-        const topic = await labelTopic(getLastUserMessage(state), config);
-        if (topic) updates.topic = topic;
-      }
+      const topic = await labelTopic(getLastUserMessage(state), config);
+      if (topic) updates.topic = topic;
 
       if (Object.keys(updates).length) {
         await ConversationService.update(thread_id, updates);

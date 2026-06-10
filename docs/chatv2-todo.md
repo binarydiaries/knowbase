@@ -10,7 +10,8 @@
 - [x] Pipeline node leak fixed (extractEntities, detectIntent, rewriteQuery suppressed)
 - [x] executeActions success/failure message reaches client (on_chain_end synthesiser)
 - [x] suppressPipelineNodes extracted to `graph/utils/stream.ts`
-- [ ] Conversation persistence — save to DB after each turn (conversationId, lastUserQuestion, lastAssistantUtterance, lastMessageAt)
+- [x] Conversation persistence — `initConversation` node (first in graph) creates on new thread / updates lastUserQuestion + lastMessageAt on existing; uses `getLastUserMessage` from `graph/utils/messages.ts`
+- [ ] Conversation persistence — update `lastAssistantUtterance` after stream completes
 - [ ] AI cost tracking — call AiCostEventService.recordEvent for each LLM node (generateResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery)
 - [ ] Fix hardcoded conversationId in executeActions — replace stub with real thread_id from config
 - [ ] Usage increment — call OrgUsageMonthlyService.incrementAssistantMessages after each completed turn

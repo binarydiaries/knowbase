@@ -159,6 +159,7 @@ export function LeadCaptureDrawer({
           body: {
             name: payload.name,
             intentName: payload.intentName,
+            triggerInstructions: payload.triggerInstructions,
             requiredFields: payload.requiredFields,
             config: payload.config,
             actions: payload.actions,

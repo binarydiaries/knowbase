@@ -32,7 +32,7 @@ async function executeAction(
   }
 
   try {
-    const { name, email, phone } = state.entities as Record<string, string>;
+    const { name, email, phone, company } = state.entities as Record<string, string>;
     switch (action.actionType) {
       case 'save_lead':
         return LeadService.create({
@@ -43,6 +43,7 @@ async function executeAction(
           name,
           email,
           phone,
+          company,
         }).then((res) => ({
           success: true,
           data: { leadId: res.id },

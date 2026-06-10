@@ -323,6 +323,60 @@ export type ChannelWriteForbiddenResponse = {
     message: string;
 };
 
+export type ChatV2BodySchema = {
+    conversationId: string;
+    message: string;
+    channelId: string;
+    parentOrigin?: string;
+};
+
+export type ChatV2ChannelQueryParamSchema = {
+    channelId: string;
+    parentOrigin?: string;
+};
+
+export type ChatV2ChannelResponseSchema = {
+    channel: {
+        id: string;
+        agentId: string;
+        enabled: boolean;
+        channelStatus: 'inactive' | 'active' | 'error';
+        additional: {
+            type: 'web';
+            config: {
+                displayName: string;
+                subtitle?: string;
+                welcomeMessage: string;
+                suggestionQuestions?: Array<string>;
+                inputPlaceholder?: string;
+                primaryColor: string;
+                allowedDomains: Array<string>;
+                avatarUrl?: string;
+            };
+        } | {
+            type: 'whatsapp';
+            config: {
+                phoneNumberId?: string;
+                displayPhone?: string;
+            };
+        } | {
+            type: 'instagram';
+            config: {
+                [key: string]: never;
+            };
+        } | {
+            type: 'slack';
+            config: {
+                mode?: 'channel' | 'mention';
+                slackChannelId?: string;
+                slackChannelName?: string;
+            };
+        };
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
 export type MessageSchema = {
     id: string;
     conversationId: string;
@@ -1313,6 +1367,219 @@ export type DeleteActionResponse = {
     success: boolean;
 };
 
+export type WorkflowSchema = {
+    id: string;
+    agentId: string;
+    name: string;
+    intentName: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    } | null;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type WorkflowActionSchema = {
+    id: string;
+    workflowId: string;
+    order: number;
+    actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+    config: {
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+        url: string;
+        headers?: {
+            [key: string]: string;
+        };
+        bodyTemplate?: {
+            [key: string]: string;
+        };
+        responseInstructions?: string;
+    } | {
+        provider: 'google';
+        calendarId: string;
+    } | {
+        [key: string]: never;
+    } | {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type WorkflowWithActionsSchema = {
+    id: string;
+    agentId: string;
+    name: string;
+    intentName: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    } | null;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+    actions: Array<{
+        id: string;
+        workflowId: string;
+        order: number;
+        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        config: {
+            method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+            url: string;
+            headers?: {
+                [key: string]: string;
+            };
+            bodyTemplate?: {
+                [key: string]: string;
+            };
+            responseInstructions?: string;
+        } | {
+            provider: 'google';
+            calendarId: string;
+        } | {
+            [key: string]: never;
+        } | {
+            [key: string]: unknown;
+        };
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type CreateWorkflowBody = {
+    agentId: string;
+    name: string;
+    intentName: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    };
+    actions: Array<{
+        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        order: number;
+        config: {
+            [key: string]: unknown;
+        };
+    }>;
+};
+
+export type UpdateWorkflowBody = {
+    name?: string;
+    intentName?: string;
+    requiredFields?: Array<string>;
+    config?: {
+        success?: string;
+        failure?: string;
+    };
+    actions?: Array<{
+        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        order: number;
+        config: {
+            [key: string]: unknown;
+        };
+    }>;
+};
+
+export type OneWorkflowResponse = {
+    workflow: {
+        id: string;
+        agentId: string;
+        name: string;
+        intentName: string;
+        requiredFields: Array<string>;
+        executionMode: 'sequential' | 'parallel';
+        config?: {
+            success?: string;
+            failure?: string;
+        } | null;
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+        actions: Array<{
+            id: string;
+            workflowId: string;
+            order: number;
+            actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+            config: {
+                method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+                url: string;
+                headers?: {
+                    [key: string]: string;
+                };
+                bodyTemplate?: {
+                    [key: string]: string;
+                };
+                responseInstructions?: string;
+            } | {
+                provider: 'google';
+                calendarId: string;
+            } | {
+                [key: string]: never;
+            } | {
+                [key: string]: unknown;
+            };
+            createdAt: string;
+            updatedAt: string;
+        }>;
+    };
+};
+
+export type ManyWorkflowsResponse = {
+    workflows: Array<{
+        id: string;
+        agentId: string;
+        name: string;
+        intentName: string;
+        requiredFields: Array<string>;
+        executionMode: 'sequential' | 'parallel';
+        config?: {
+            success?: string;
+            failure?: string;
+        } | null;
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+        actions: Array<{
+            id: string;
+            workflowId: string;
+            order: number;
+            actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+            config: {
+                method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+                url: string;
+                headers?: {
+                    [key: string]: string;
+                };
+                bodyTemplate?: {
+                    [key: string]: string;
+                };
+                responseInstructions?: string;
+            } | {
+                provider: 'google';
+                calendarId: string;
+            } | {
+                [key: string]: never;
+            } | {
+                [key: string]: unknown;
+            };
+            createdAt: string;
+            updatedAt: string;
+        }>;
+    }>;
+};
+
+export type DeleteWorkflowResponse = {
+    success: boolean;
+};
+
 export type CreateDemoBookingSchema = {
     name: string;
     email: string;
@@ -1446,25 +1713,6 @@ export type QueueActionResponseSchema = {
     action: string;
     state?: string;
     documentId?: string;
-};
-
-export type AdminOrgsOverviewResponseSchema = {
-    data: Array<{
-        orgId: string;
-        orgName: string | null;
-        agentCount: number;
-        conversationCount: number;
-        messageCount: number;
-        lastActiveAt: string | null;
-        currentMonthMessages: number;
-    }>;
-    meta: {
-        orgCount: number;
-        agentCount: number;
-        conversationCount: number;
-        messageCount: number;
-        monthKey: string;
-    };
 };
 
 export type GetUsageMessagesDailyData = {
@@ -1794,6 +2042,64 @@ export type PostChatPreviewErrors = {
 export type PostChatPreviewError = PostChatPreviewErrors[keyof PostChatPreviewErrors];
 
 export type PostChatPreviewResponses = {
+    /**
+     * Response for status 200
+     */
+    200: unknown;
+};
+
+export type PostChatv2Data = {
+    body: ChatV2BodySchema;
+    path?: never;
+    query?: never;
+    url: '/chatv2';
+};
+
+export type PostChatv2Errors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostChatv2Error = PostChatv2Errors[keyof PostChatv2Errors];
+
+export type PostChatv2Responses = {
+    /**
+     * Response for status 200
+     */
+    200: unknown;
+};
+
+export type PostChatv2PreviewData = {
+    body: ChatV2BodySchema;
+    path?: never;
+    query?: never;
+    url: '/chatv2/preview';
+};
+
+export type PostChatv2PreviewErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostChatv2PreviewError = PostChatv2PreviewErrors[keyof PostChatv2PreviewErrors];
+
+export type PostChatv2PreviewResponses = {
     /**
      * Response for status 200
      */
@@ -3010,6 +3316,128 @@ export type PatchAgentActionsByIdResponses = {
 
 export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
 
+export type GetWorkflowsData = {
+    body?: never;
+    path?: never;
+    query: {
+        agentId: string;
+    };
+    url: '/workflows';
+};
+
+export type GetWorkflowsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetWorkflowsError = GetWorkflowsErrors[keyof GetWorkflowsErrors];
+
+export type GetWorkflowsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ManyWorkflowsResponse;
+};
+
+export type GetWorkflowsResponse = GetWorkflowsResponses[keyof GetWorkflowsResponses];
+
+export type PostWorkflowsData = {
+    body: CreateWorkflowBody;
+    path?: never;
+    query?: never;
+    url: '/workflows';
+};
+
+export type PostWorkflowsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: UnauthorizedSchema;
+    /**
+     * Response for status 403
+     */
+    403: LeadGenerationForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PostWorkflowsError = PostWorkflowsErrors[keyof PostWorkflowsErrors];
+
+export type PostWorkflowsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneWorkflowResponse;
+};
+
+export type PostWorkflowsResponse = PostWorkflowsResponses[keyof PostWorkflowsResponses];
+
+export type DeleteWorkflowsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workflows/{id}';
+};
+
+export type DeleteWorkflowsByIdErrors = {
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type DeleteWorkflowsByIdError = DeleteWorkflowsByIdErrors[keyof DeleteWorkflowsByIdErrors];
+
+export type DeleteWorkflowsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: DeleteWorkflowResponse;
+};
+
+export type DeleteWorkflowsByIdResponse = DeleteWorkflowsByIdResponses[keyof DeleteWorkflowsByIdResponses];
+
+export type PatchWorkflowsByIdData = {
+    body: UpdateWorkflowBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workflows/{id}';
+};
+
+export type PatchWorkflowsByIdErrors = {
+    /**
+     * Response for status 403
+     */
+    403: LeadGenerationForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type PatchWorkflowsByIdError = PatchWorkflowsByIdErrors[keyof PatchWorkflowsByIdErrors];
+
+export type PatchWorkflowsByIdResponses = {
+    /**
+     * Response for status 200
+     */
+    200: OneWorkflowResponse;
+};
+
+export type PatchWorkflowsByIdResponse = PatchWorkflowsByIdResponses[keyof PatchWorkflowsByIdResponses];
+
 export type PostDemoData = {
     body: CreateDemoBookingSchema;
     path?: never;
@@ -3395,12 +3823,3 @@ export type GetAdminOrgsOverviewErrors = {
 };
 
 export type GetAdminOrgsOverviewError = GetAdminOrgsOverviewErrors[keyof GetAdminOrgsOverviewErrors];
-
-export type GetAdminOrgsOverviewResponses = {
-    /**
-     * Response for status 200
-     */
-    200: AdminOrgsOverviewResponseSchema;
-};
-
-export type GetAdminOrgsOverviewResponse = GetAdminOrgsOverviewResponses[keyof GetAdminOrgsOverviewResponses];

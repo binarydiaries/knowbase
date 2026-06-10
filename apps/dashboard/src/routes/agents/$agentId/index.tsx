@@ -28,7 +28,7 @@ import { getAgentsById } from '@/services';
 import { useBehaviour } from '@/store/useBehaviour.ts';
 import { useChannels } from '@/store/useChannels.ts';
 import { useDocuments } from '@/store/useDocuments.ts';
-import ActionsCard from '@/widgets/ActionsCard/ActionsCard.tsx';
+import WorkflowsCard from '@/widgets/WorkflowsCard/WorkflowsCard.tsx';
 import { AgentMenuActions } from '@/widgets/AgentMenuActions/AgentMenuActions.tsx';
 import { AgentPreview } from '@/widgets/AgentPreview/AgentPreview.tsx';
 import { AgentUseWidget } from '@/widgets/AgentUseWidget/AgentUseWidget.tsx';
@@ -132,7 +132,7 @@ function RouteComponent() {
             <DocumentsWidget readOnly={readOnly} subscription={subscription} />
             {behaviour && <BehaviourCard readOnly={readOnly} />}
             <ChannelsAccordion readOnly={readOnly} />
-            <ActionsCard readOnly={readOnly} />
+            <WorkflowsCard readOnly={readOnly} />
           </div>
           <div className="w-130 shrink-0 flex-col gap-5 hidden md:flex overflow-hidden">
             <Badge variant="secondary" className="rounded-l-none">

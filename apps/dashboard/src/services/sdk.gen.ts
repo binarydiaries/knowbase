@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteAdminFeatureFlagsByFlagData, DeleteAdminFeatureFlagsByFlagErrors, DeleteAdminFeatureFlagsByFlagOrgsByOrgIdData, DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors, DeleteAgentActionsByIdData, DeleteAgentActionsByIdErrors, DeleteAgentActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, DeleteSlackBindByChannelIdData, DeleteSlackBindByChannelIdErrors, DeleteSlackConnectionData, DeleteSlackConnectionErrors, DeleteWhatsappBindByChannelIdData, DeleteWhatsappBindByChannelIdErrors, DeleteWhatsappConnectionData, DeleteWhatsappConnectionErrors, GetAdminCostsByOrganizationData, GetAdminCostsByOrganizationErrors, GetAdminCostsByOrganizationResponses, GetAdminDemoBookingsData, GetAdminDemoBookingsErrors, GetAdminFeatureFlagsByFlagOrgsData, GetAdminFeatureFlagsByFlagOrgsErrors, GetAdminFeatureFlagsData, GetAdminFeatureFlagsErrors, GetAdminOrgsOverviewData, GetAdminOrgsOverviewErrors, GetAdminOrgsOverviewResponses, GetAdminQueueCountsData, GetAdminQueueCountsErrors, GetAdminQueueCountsResponses, GetAdminQueueJobsData, GetAdminQueueJobsErrors, GetAdminQueueJobsResponses, GetAdminSubscriptionsData, GetAdminSubscriptionsErrors, GetAgentActionsData, GetAgentActionsErrors, GetAgentActionsResponses, GetAgentsByIdData, GetAgentsByIdErrors, GetAgentsByIdResponses, GetAgentsData, GetAgentsErrors, GetAgentsResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopAgentsData, GetAnalyticsTopAgentsErrors, GetAnalyticsTopAgentsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatChannelData, GetChatChannelErrors, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetFeatureFlagsData, GetFeatureFlagsErrors, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsErrors, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSlackConnectionData, GetSlackConnectionErrors, GetSlackOauthCallbackData, GetSlackOauthStartData, GetSlackOauthStartErrors, GetSubscriptionsPlansData, GetSubscriptionsPlansResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByAgentData, GetUsageKnowledgeByAgentErrors, GetUsageKnowledgeByAgentResponses, GetUsageMessagesByAgentData, GetUsageMessagesByAgentErrors, GetUsageMessagesByAgentResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, GetWebhookWhatsappData, GetWhatsappConnectionData, GetWhatsappConnectionErrors, GetWhatsappSetupInfoData, GetWhatsappSetupInfoErrors, GetWhatsappTestConnectionData, GetWhatsappTestConnectionErrors, PatchAgentActionsByIdData, PatchAgentActionsByIdErrors, PatchAgentActionsByIdResponses, PatchAgentsByIdData, PatchAgentsByIdErrors, PatchAgentsByIdResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PostAdminQueueJobsByJobIdExecuteData, PostAdminQueueJobsByJobIdExecuteErrors, PostAdminQueueJobsByJobIdExecuteResponses, PostAdminQueueJobsByJobIdRetryData, PostAdminQueueJobsByJobIdRetryErrors, PostAdminQueueJobsByJobIdRetryResponses, PostAdminSubscriptionsBulkSyncData, PostAdminSubscriptionsBulkSyncErrors, PostAdminSubscriptionsByOrgIdSyncData, PostAdminSubscriptionsByOrgIdSyncErrors, PostAgentActionsData, PostAgentActionsErrors, PostAgentActionsResponses, PostAgentsData, PostAgentsErrors, PostAgentsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatData, PostChatErrors, PostChatPreviewData, PostChatPreviewErrors, PostChatPreviewResponses, PostChatResponses, PostDemoData, PostDocumentsData, PostDocumentsErrors, PostDocumentsPdfData, PostDocumentsPdfErrors, PostDocumentsPdfPreviewData, PostDocumentsPdfPreviewErrors, PostDocumentsPdfPreviewResponses, PostDocumentsPdfResponses, PostDocumentsResponses, PostDocumentsUrlData, PostDocumentsUrlErrors, PostDocumentsUrlPreviewData, PostDocumentsUrlPreviewErrors, PostDocumentsUrlPreviewResponses, PostDocumentsUrlResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses, PostSlackBindData, PostSlackBindErrors, PostSubscriptionsCancelData, PostSubscriptionsCancelErrors, PostSubscriptionsCancelResponses, PostSubscriptionsCheckoutData, PostSubscriptionsCheckoutErrors, PostSubscriptionsCheckoutResponses, PostSubscriptionsWebhookByProviderData, PostWebhookSlackData, PostWebhookWhatsappData, PostWhatsappBindData, PostWhatsappBindErrors, PostWhatsappConnectData, PostWhatsappConnectErrors, PutAdminFeatureFlagsByFlagData, PutAdminFeatureFlagsByFlagErrors, PutAdminFeatureFlagsByFlagOrgsData, PutAdminFeatureFlagsByFlagOrgsErrors } from './types.gen';
+import type { DeleteAdminFeatureFlagsByFlagData, DeleteAdminFeatureFlagsByFlagErrors, DeleteAdminFeatureFlagsByFlagOrgsByOrgIdData, DeleteAdminFeatureFlagsByFlagOrgsByOrgIdErrors, DeleteAgentActionsByIdData, DeleteAgentActionsByIdErrors, DeleteAgentActionsByIdResponses, DeleteDocumentsByIdData, DeleteDocumentsByIdErrors, DeleteDocumentsByIdResponses, DeleteSlackBindByChannelIdData, DeleteSlackBindByChannelIdErrors, DeleteSlackConnectionData, DeleteSlackConnectionErrors, DeleteWhatsappBindByChannelIdData, DeleteWhatsappBindByChannelIdErrors, DeleteWhatsappConnectionData, DeleteWhatsappConnectionErrors, DeleteWorkflowsByIdData, DeleteWorkflowsByIdErrors, DeleteWorkflowsByIdResponses, GetAdminCostsByOrganizationData, GetAdminCostsByOrganizationErrors, GetAdminCostsByOrganizationResponses, GetAdminDemoBookingsData, GetAdminDemoBookingsErrors, GetAdminFeatureFlagsByFlagOrgsData, GetAdminFeatureFlagsByFlagOrgsErrors, GetAdminFeatureFlagsData, GetAdminFeatureFlagsErrors, GetAdminOrgsOverviewData, GetAdminOrgsOverviewErrors, GetAdminQueueCountsData, GetAdminQueueCountsErrors, GetAdminQueueCountsResponses, GetAdminQueueJobsData, GetAdminQueueJobsErrors, GetAdminQueueJobsResponses, GetAdminSubscriptionsData, GetAdminSubscriptionsErrors, GetAgentActionsData, GetAgentActionsErrors, GetAgentActionsResponses, GetAgentsByIdData, GetAgentsByIdErrors, GetAgentsByIdResponses, GetAgentsData, GetAgentsErrors, GetAgentsResponses, GetAnalyticsConversationsDailyData, GetAnalyticsConversationsDailyErrors, GetAnalyticsConversationsDailyResponses, GetAnalyticsCountryDistributionData, GetAnalyticsCountryDistributionErrors, GetAnalyticsCountryDistributionResponses, GetAnalyticsMessagesByChannelData, GetAnalyticsMessagesByChannelErrors, GetAnalyticsMessagesByChannelResponses, GetAnalyticsOverviewData, GetAnalyticsOverviewErrors, GetAnalyticsOverviewResponses, GetAnalyticsSentimentData, GetAnalyticsSentimentErrors, GetAnalyticsSentimentResponses, GetAnalyticsTopAgentsData, GetAnalyticsTopAgentsErrors, GetAnalyticsTopAgentsResponses, GetAnalyticsTopTopicsData, GetAnalyticsTopTopicsErrors, GetAnalyticsTopTopicsResponses, GetBehaviourData, GetBehaviourErrors, GetBehaviourResponses, GetChannelsByIdData, GetChannelsByIdErrors, GetChannelsByIdResponses, GetChannelsData, GetChannelsErrors, GetChannelsResponses, GetChatChannelData, GetChatChannelErrors, GetChatChannelResponses, GetConversationsData, GetConversationsErrors, GetConversationsResponses, GetDocumentsByIdData, GetDocumentsByIdErrors, GetDocumentsByIdResponses, GetDocumentsData, GetDocumentsErrors, GetDocumentsResponses, GetFeatureFlagsData, GetFeatureFlagsErrors, GetIndexingStatusData, GetIndexingStatusErrors, GetIndexingStatusResponses, GetLeadsData, GetLeadsErrors, GetLeadsResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GetSlackConnectionData, GetSlackConnectionErrors, GetSlackOauthCallbackData, GetSlackOauthStartData, GetSlackOauthStartErrors, GetSubscriptionsPlansData, GetSubscriptionsPlansResponses, GetSubscriptionsStatusData, GetSubscriptionsStatusErrors, GetSubscriptionsStatusResponses, GetUsageKnowledgeByAgentData, GetUsageKnowledgeByAgentErrors, GetUsageKnowledgeByAgentResponses, GetUsageMessagesByAgentData, GetUsageMessagesByAgentErrors, GetUsageMessagesByAgentResponses, GetUsageMessagesDailyData, GetUsageMessagesDailyErrors, GetUsageMessagesDailyResponses, GetWebhookWhatsappData, GetWhatsappConnectionData, GetWhatsappConnectionErrors, GetWhatsappSetupInfoData, GetWhatsappSetupInfoErrors, GetWhatsappTestConnectionData, GetWhatsappTestConnectionErrors, GetWorkflowsData, GetWorkflowsErrors, GetWorkflowsResponses, PatchAgentActionsByIdData, PatchAgentActionsByIdErrors, PatchAgentActionsByIdResponses, PatchAgentsByIdData, PatchAgentsByIdErrors, PatchAgentsByIdResponses, PatchBehaviourByIdData, PatchBehaviourByIdErrors, PatchBehaviourByIdResponses, PatchChannelsByIdData, PatchChannelsByIdErrors, PatchChannelsByIdResponses, PatchDocumentsByIdData, PatchDocumentsByIdErrors, PatchDocumentsByIdResponses, PatchWorkflowsByIdData, PatchWorkflowsByIdErrors, PatchWorkflowsByIdResponses, PostAdminQueueJobsByJobIdExecuteData, PostAdminQueueJobsByJobIdExecuteErrors, PostAdminQueueJobsByJobIdExecuteResponses, PostAdminQueueJobsByJobIdRetryData, PostAdminQueueJobsByJobIdRetryErrors, PostAdminQueueJobsByJobIdRetryResponses, PostAdminSubscriptionsBulkSyncData, PostAdminSubscriptionsBulkSyncErrors, PostAdminSubscriptionsByOrgIdSyncData, PostAdminSubscriptionsByOrgIdSyncErrors, PostAgentActionsData, PostAgentActionsErrors, PostAgentActionsResponses, PostAgentsData, PostAgentsErrors, PostAgentsResponses, PostChannelsData, PostChannelsErrors, PostChannelsResponses, PostChatData, PostChatErrors, PostChatPreviewData, PostChatPreviewErrors, PostChatPreviewResponses, PostChatResponses, PostChatv2Data, PostChatv2Errors, PostChatv2PreviewData, PostChatv2PreviewErrors, PostChatv2PreviewResponses, PostChatv2Responses, PostDemoData, PostDocumentsData, PostDocumentsErrors, PostDocumentsPdfData, PostDocumentsPdfErrors, PostDocumentsPdfPreviewData, PostDocumentsPdfPreviewErrors, PostDocumentsPdfPreviewResponses, PostDocumentsPdfResponses, PostDocumentsResponses, PostDocumentsUrlData, PostDocumentsUrlErrors, PostDocumentsUrlPreviewData, PostDocumentsUrlPreviewErrors, PostDocumentsUrlPreviewResponses, PostDocumentsUrlResponses, PostIndexingData, PostIndexingErrors, PostIndexingResponses, PostSlackBindData, PostSlackBindErrors, PostSubscriptionsCancelData, PostSubscriptionsCancelErrors, PostSubscriptionsCancelResponses, PostSubscriptionsCheckoutData, PostSubscriptionsCheckoutErrors, PostSubscriptionsCheckoutResponses, PostSubscriptionsWebhookByProviderData, PostWebhookSlackData, PostWebhookWhatsappData, PostWhatsappBindData, PostWhatsappBindErrors, PostWhatsappConnectData, PostWhatsappConnectErrors, PostWorkflowsData, PostWorkflowsErrors, PostWorkflowsResponses, PutAdminFeatureFlagsByFlagData, PutAdminFeatureFlagsByFlagErrors, PutAdminFeatureFlagsByFlagOrgsData, PutAdminFeatureFlagsByFlagOrgsErrors } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -97,6 +97,26 @@ export const getChatChannel = <ThrowOnError extends boolean = true>(options?: Op
 export const postChatPreview = <ThrowOnError extends boolean = true>(options: Options<PostChatPreviewData, ThrowOnError>) => (options.client ?? client).post<PostChatPreviewResponses, PostChatPreviewErrors, ThrowOnError>({
     responseType: 'json',
     url: '/chat/preview',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const postChatv2 = <ThrowOnError extends boolean = true>(options: Options<PostChatv2Data, ThrowOnError>) => (options.client ?? client).post<PostChatv2Responses, PostChatv2Errors, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatv2',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const postChatv2Preview = <ThrowOnError extends boolean = true>(options: Options<PostChatv2PreviewData, ThrowOnError>) => (options.client ?? client).post<PostChatv2PreviewResponses, PostChatv2PreviewErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/chatv2/preview',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -423,6 +443,38 @@ export const patchAgentActionsById = <ThrowOnError extends boolean = true>(optio
     }
 });
 
+export const getWorkflows = <ThrowOnError extends boolean = true>(options: Options<GetWorkflowsData, ThrowOnError>) => (options.client ?? client).get<GetWorkflowsResponses, GetWorkflowsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/workflows',
+    ...options
+});
+
+export const postWorkflows = <ThrowOnError extends boolean = true>(options: Options<PostWorkflowsData, ThrowOnError>) => (options.client ?? client).post<PostWorkflowsResponses, PostWorkflowsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/workflows',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const deleteWorkflowsById = <ThrowOnError extends boolean = true>(options: Options<DeleteWorkflowsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteWorkflowsByIdResponses, DeleteWorkflowsByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/workflows/{id}',
+    ...options
+});
+
+export const patchWorkflowsById = <ThrowOnError extends boolean = true>(options: Options<PatchWorkflowsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchWorkflowsByIdResponses, PatchWorkflowsByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/workflows/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const postDemo = <ThrowOnError extends boolean = true>(options: Options<PostDemoData, ThrowOnError>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
     url: '/demo/',
     ...options,
@@ -511,8 +563,4 @@ export const postAdminSubscriptionsBulkSync = <ThrowOnError extends boolean = tr
 
 export const getAdminDemoBookings = <ThrowOnError extends boolean = true>(options?: Options<GetAdminDemoBookingsData, ThrowOnError>) => (options?.client ?? client).get<unknown, GetAdminDemoBookingsErrors, ThrowOnError>({ url: '/admin/demo-bookings/', ...options });
 
-export const getAdminOrgsOverview = <ThrowOnError extends boolean = true>(options?: Options<GetAdminOrgsOverviewData, ThrowOnError>) => (options?.client ?? client).get<GetAdminOrgsOverviewResponses, GetAdminOrgsOverviewErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/admin/orgs/overview',
-    ...options
-});
+export const getAdminOrgsOverview = <ThrowOnError extends boolean = true>(options?: Options<GetAdminOrgsOverviewData, ThrowOnError>) => (options?.client ?? client).get<unknown, GetAdminOrgsOverviewErrors, ThrowOnError>({ url: '/admin/orgs/overview', ...options });

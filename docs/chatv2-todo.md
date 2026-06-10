@@ -4,7 +4,7 @@
 
 ---
 
-## sendPreview — in progress
+## sendPreview — done
 
 - [x] RAG streaming works end-to-end (suppressPipelineNodes + streamEvents v2)
 - [x] Pipeline node leak fixed (extractEntities, detectIntent, rewriteQuery suppressed)
@@ -23,7 +23,7 @@
 
 ---
 
-## sendWeb (done)
+## sendWeb — done
 
 - [x] Wire up LangGraph pipeline in ChatV2Service.sendWeb
 - [x] Domain allowlist enforcement (was already in stub, preserved)
@@ -34,16 +34,36 @@
 
 ---
 
-## WhatsApp + Slack (after sendWeb)
+## WhatsApp — done
 
-- [ ] sendWhatsApp — typing indicator, seen receipt, reply sending, conversation persistence
-- [ ] sendSlack — placeholder → update flow, conversation persistence
+- [x] sendWhatsApp — typing indicator (best-effort), seen receipt / blue ticks (best-effort), reply sending
+- [x] Conversation persistence — handled by `initConversation` node; thread_id = senderPhone
+- [x] Subscription guard — `assertMessageLimit` called
 
 ---
 
-## Client widget
+## Slack — done
 
-- [x] Point apps/client at v2 endpoint — `apps/client/src/services/chat.ts` baseUrl changed from `/chat` to `/chatv2`; `GET /chat/channel` kept on v1 (no change needed)
+- [x] sendSlack — thinking placeholder posted, updated with final response after graph.invoke
+- [x] app_mention bot-mention prefix stripped (`<@BOTID>` regex) before passing to graph
+- [x] Conversation persistence — handled by `initConversation` node; thread_id = threadTs
+- [x] Subscription guard — `assertMessageLimit` called
+
+---
+
+## Client widget — done
+
+- [x] Point apps/client at v2 endpoint — `apps/client/src/services/chat.ts` baseUrl changed from `/chat` to `/chatv2`
+- [x] `GET /chatv2/channel` added to backend; client `getChannel` uses v2 endpoint
+
+---
+
+## Remaining
+
+- [ ] **Lead email notification** — deferred; revisit when notification model is redesigned
+- [ ] **V1 cleanup** — delete `apps/backend/src/modules/chat/` (7 files) + remove `.use(Chat)` from `server.ts` once confirmed safe
+- [ ] **SDK regeneration** — regenerate dashboard `src/services/` from updated OpenAPI spec after all backend changes stabilise
+- [ ] **DB migration** — run `bun run db:migrate` in `apps/backend/` for `20260610001000_add_trigger_instructions`
 
 ---
 
@@ -52,4 +72,3 @@
 - v2 uses LangGraph checkpoint for multi-turn state — once message history is injected at graph start, the checkpointer handles mid-conversation continuity automatically
 - rewriteQuery in ragGraph replaces v1's standalone resolveReferences LLM call
 - suppressPipelineNodes in graph/utils/stream.ts handles both LLM suppression and executeActions message synthesis
-- Do NOT touch the hardcoded conversationId in executeActions until the fix task above is picked up (it's a test stub)

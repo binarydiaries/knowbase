@@ -33,6 +33,7 @@ export type IWorkflow = z.infer<typeof WorkflowSchema>;
 
 export const WorkflowActionType = z.enum([
   'save_lead',
+  'send_email',
   'api_trigger',
   'calendar_booking',
 ]);
@@ -52,9 +53,17 @@ const CalendarBookingConfigSchema = z.object({
 
 const SaveLeadConfigSchema = z.object({});
 
+export const SendEmailConfigSchema = z.object({
+  subject: z.string().optional(),
+  body: z.string().optional(),
+});
+
+export type ISendEmailConfig = z.infer<typeof SendEmailConfigSchema>;
+
 export const WorkflowActionConfigSchema = z.union([
   ApiTriggerConfigSchema,
   CalendarBookingConfigSchema,
+  SendEmailConfigSchema,
   SaveLeadConfigSchema,
   z.record(z.string(), z.unknown()),
 ]);

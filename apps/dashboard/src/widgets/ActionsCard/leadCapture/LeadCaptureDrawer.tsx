@@ -12,6 +12,7 @@ import {
 import { toast } from '@knowbase/ui/components/sonner';
 import { Switch } from '@knowbase/ui/components/switch';
 import { useMutation } from '@tanstack/react-query';
+import { Mail } from 'lucide-react';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -29,6 +30,7 @@ type WorkflowRow = {
   triggerInstructions: string;
   requiredFields: string[];
   config: { success?: string } | null;
+  actions: { actionType: string }[];
 };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -65,6 +67,7 @@ const schema = z.object({
     .string()
     .min(1, 'Success message is required')
     .max(300, 'Must be at most 300 characters'),
+  emailNotification: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -91,11 +94,25 @@ function workflowToFormValues(workflow: WorkflowRow): FormValues {
     },
     triggerInstructions: workflow.triggerInstructions || DEFAULT_TRIGGER,
     successMessage: workflow.config?.success ?? DEFAULT_SUCCESS,
+    emailNotification: workflow.actions.some((a) => a.actionType === 'send_email'),
   };
 }
 
 function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
   const requiredFields = FIELD_KEYS.filter((k) => values.fields[k].required);
+  const actions: { actionType: 'save_lead' | 'send_email'; order: number; config: Record<string, unknown> }[] = [
+    { actionType: 'save_lead', order: 0, config: {} },
+  ];
+  if (values.emailNotification) {
+    actions.push({
+      actionType: 'send_email',
+      order: 1,
+      config: {
+        ...(values.emailSubject?.trim() ? { subject: values.emailSubject.trim() } : {}),
+        ...(values.emailBody?.trim() ? { body: values.emailBody.trim() } : {}),
+      },
+    });
+  }
   return {
     agentId,
     name: 'Lead Generation',
@@ -104,7 +121,7 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
     requiredFields,
     executionMode: 'sequential' as const,
     config: { success: values.successMessage },
-    actions: [{ actionType: 'save_lead' as const, order: 0, config: {} }],
+    actions,
   };
 }
 
@@ -132,6 +149,7 @@ export function LeadCaptureDrawer({
             fields: defaultFieldValues(),
             triggerInstructions: DEFAULT_TRIGGER,
             successMessage: DEFAULT_SUCCESS,
+            emailNotification: false,
           },
     },
   );
@@ -144,6 +162,7 @@ export function LeadCaptureDrawer({
             fields: defaultFieldValues(),
             triggerInstructions: DEFAULT_TRIGGER,
             successMessage: DEFAULT_SUCCESS,
+            emailNotification: false,
           },
     );
   }, [workflow?.id, reset]);
@@ -270,6 +289,36 @@ export function LeadCaptureDrawer({
             placeholder="Thanks! We'll be in touch."
             maxLength={300}
           />
+
+          {/* Email notification */}
+          <div className="flex flex-col gap-3">
+            <Label className="text-sm font-medium">Notifications</Label>
+            <div className="rounded-lg border">
+              <Controller
+                control={control}
+                name="emailNotification"
+                render={({ field }) => (
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-md border p-1.5">
+                        <Mail className="size-3.5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Email notification</p>
+                        <p className="text-xs text-muted-foreground">
+                          Send an email to your account when a new lead is captured.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
+            </div>
+          </div>
         </div>
 
         <SheetFooter className="px-6 py-4 border-t mt-auto">

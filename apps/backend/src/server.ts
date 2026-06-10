@@ -6,7 +6,6 @@ import { helmet } from 'elysia-helmet';
 import { rateLimit } from 'elysia-rate-limit';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
-import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
 import { AdminDemoBookings } from './modules/admin/demoBookings';
 import { AdminFeatureFlags } from './modules/admin/featureFlags';
@@ -115,7 +114,6 @@ const app = Sentry.withElysia(new Elysia())
   .use(Subscription)
   .use(WhatsApp)
   .use(Slack)
-  .use(Action)
   .use(Workflow)
   .use(Demo)
   .use(Lead)

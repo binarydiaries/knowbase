@@ -1,5 +1,4 @@
 import { defineRelations } from 'drizzle-orm';
-import { agentActions } from './agentActions';
 import { agents } from './agents';
 import { aiCostEvents } from './aiCostEvents';
 import { behaviors } from './behaviors';
@@ -27,7 +26,6 @@ export const relations = defineRelations(
     demoBookings,
     channels,
     behaviors,
-    agentActions,
     documents,
     conversations,
     messages,
@@ -56,10 +54,6 @@ export const relations = defineRelations(
       documents: r.many.documents({
         from: r.agents.id,
         to: r.documents.agentId,
-      }),
-      agentActions: r.many.agentActions({
-        from: r.agents.id,
-        to: r.agentActions.agentId,
       }),
       leads: r.many.leads({
         from: r.agents.id,
@@ -104,12 +98,6 @@ export const relations = defineRelations(
       document: r.one.documents({
         from: r.embeddings.documentId,
         to: r.documents.id,
-      }),
-    },
-    agentActions: {
-      agent: r.one.agents({
-        from: r.agentActions.agentId,
-        to: r.agents.id,
       }),
     },
     leads: {

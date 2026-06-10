@@ -16,7 +16,6 @@ import { AiCostEventService } from '../admin/costEvent.service';
 import { referenceResolverPrompt } from './prompts';
 import { buildChatContext } from './context';
 import { handleLeadCapture, persistMessages } from './persistence';
-import { ActionService } from '../action/service';
 
 const model = openai('gpt-4.1-mini');
 const nanoModel = openai('gpt-4.1-nano');
@@ -292,8 +291,8 @@ export abstract class ChatService {
     });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
 
-    const enabledActions = await ActionService.getEnabledByAgent(agentId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+    // Lead capture is handled by V2 graph (workflows). V1 chat has no lead action.
+    const leadAction = undefined;
 
     // Load entities saved from PREVIOUS turns only — extracting from the
     // current message here would cause the model to say "I already have X"
@@ -432,8 +431,8 @@ export abstract class ChatService {
     });
     const { knowledgeBase, chunks } = await ChatService.getSearchChunks(finalQuery, agentId, orgId, conversationId);
 
-    const enabledActions = await ActionService.getEnabledByAgent(agentId);
-    const leadAction = enabledActions.find((a) => a.actionType === 'lead_generation');
+    // Lead capture is handled by V2 graph (workflows). V1 chat has no lead action.
+    const leadAction = undefined;
 
     const entities = leadAction ? ChatService.getStoredEntities(conversation) : undefined;
 

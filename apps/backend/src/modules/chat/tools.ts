@@ -1,6 +1,17 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import type { LeadGenerationConfig } from '../../db/schema/agentActions';
+
+type LeadFieldConfig = { collect: boolean; required: boolean };
+export type LeadGenerationConfig = {
+  fields?: {
+    name?: LeadFieldConfig;
+    email?: LeadFieldConfig;
+    phone?: LeadFieldConfig;
+    company?: LeadFieldConfig;
+  };
+  triggerInstructions?: string;
+  successMessage?: string;
+};
 
 export function buildLeadCaptureTool(config: LeadGenerationConfig) {
   const fields = config.fields ?? {

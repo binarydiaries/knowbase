@@ -5,7 +5,6 @@
  * `send()` (web) and `generateWhatsAppResponse()` (WhatsApp).
  */
 
-import type { ActionService } from '../action/service';
 import { MessageService } from '../message/service';
 import {
   buildActionsPrompt,
@@ -16,8 +15,10 @@ import {
 } from './prompts';
 import { buildLeadCaptureTool } from './tools';
 
+import type { LeadGenerationConfig } from './tools';
+
 type Behavior = Parameters<typeof buildBehaviorPrompt>[0];
-type LeadAction = Awaited<ReturnType<typeof ActionService.getEnabledByAgent>>[number];
+type LeadAction = { config: LeadGenerationConfig };
 
 export interface ChatContext {
   /** Vercel AI SDK tools object, or undefined when no actions are configured. */

@@ -18,6 +18,7 @@ export const WorkflowSchema = z.object({
   agentId: z.string(),
   name: z.string(),
   intentName: z.string(),
+  triggerInstructions: z.string(),
   requiredFields: z.array(z.string()),
   executionMode: WorkflowExecutionMode,
   config: WorkflowResponseConfigSchema.nullish(),

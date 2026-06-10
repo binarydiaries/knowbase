@@ -56,6 +56,7 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
           agentId: body.agentId,
           name: body.name,
           intentName: body.intentName,
+          triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
           executionMode: body.executionMode,
           config: body.config ?? null,
@@ -109,6 +110,7 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
         {
           name: body.name,
           intentName: body.intentName,
+          triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
           config: body.config ?? undefined,
         },

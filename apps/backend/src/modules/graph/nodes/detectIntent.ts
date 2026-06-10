@@ -39,13 +39,20 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
     { name: 'detect_intent' },
   );
 
-  // Build the base system prompt
+  // Build intent descriptions for the system prompt.
+  // triggerInstructions provides the human context for each workflow intent,
+  // giving the classifier real signal beyond just the slug name.
+  const workflowDescriptions = workflows
+    .map((w) => {
+      const instructions = w.triggerInstructions?.trim();
+      return `- "${w.intentName}": ${instructions || w.name}`;
+    })
+    .join('\n');
+
   let systemPrompt = `You are an intent classifier. Classify the user's message into exactly one of the following intents:
 
-${intentList.join('\n')}
-
-- "${INTENT_QUESTION_ANSWERING}" means the user is asking a general question and needs an informational answer.
-- Other intents represent specific business workflows (e.g. lead capture, booking).`;
+- "${INTENT_QUESTION_ANSWERING}": user is asking a general question and needs an informational answer
+${workflowDescriptions}`;
 
   // If a workflow is in progress, give the model the context it needs to
   // decide whether the user is answering the workflow question or going off-topic.

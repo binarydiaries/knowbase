@@ -20,6 +20,7 @@ export const workflows = pgTable(
       .references(() => agents.id, { onDelete: 'cascade' }),
     name: text().notNull(),
     intentName: text().notNull(),
+    triggerInstructions: text().notNull().default(''),
     requiredFields: text().array().notNull().default([]),
     executionMode: workflowExecutionMode().notNull().default('sequential'),
     config: jsonb().$type<{ success?: string; failure?: string }>(),

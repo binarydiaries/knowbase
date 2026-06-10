@@ -19,11 +19,14 @@ import { FormInput } from '@/components/FormInput/FormInput';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea';
 import { patchWorkflowsById, postWorkflows } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
+import { DEFAULT_SUCCESS, DEFAULT_TRIGGER, LEAD_GENERATION_INTENT } from './constants';
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
 type WorkflowRow = {
   id: string;
-  intentName: string;
+  triggerInstructions: string;
   requiredFields: string[];
   config: { success?: string } | null;
 };
@@ -40,10 +43,6 @@ const FIELD_LABELS: Record<FieldKey, string> = {
   company: 'Company',
 };
 
-const DEFAULT_INTENT =
-  'user wants to provide contact information or be contacted';
-const DEFAULT_SUCCESS = "Thanks! We'll be in touch.";
-
 // ── Form schema ───────────────────────────────────────────────────────────────
 
 const fieldSchema = z.object({
@@ -58,10 +57,10 @@ const schema = z.object({
     phone: fieldSchema,
     company: fieldSchema,
   }),
-  intentName: z
+  triggerInstructions: z
     .string()
-    .min(1, 'Trigger is required')
-    .max(300, 'Must be at most 300 characters'),
+    .max(300, 'Must be at most 300 characters')
+    .optional(),
   successMessage: z
     .string()
     .min(1, 'Success message is required')
@@ -86,20 +85,11 @@ function workflowToFormValues(workflow: WorkflowRow): FormValues {
   return {
     fields: {
       name: { collect: required.has('name'), required: required.has('name') },
-      email: {
-        collect: required.has('email'),
-        required: required.has('email'),
-      },
-      phone: {
-        collect: required.has('phone'),
-        required: required.has('phone'),
-      },
-      company: {
-        collect: required.has('company'),
-        required: required.has('company'),
-      },
+      email: { collect: required.has('email'), required: required.has('email') },
+      phone: { collect: required.has('phone'), required: required.has('phone') },
+      company: { collect: required.has('company'), required: required.has('company') },
     },
-    intentName: workflow.intentName,
+    triggerInstructions: workflow.triggerInstructions || DEFAULT_TRIGGER,
     successMessage: workflow.config?.success ?? DEFAULT_SUCCESS,
   };
 }
@@ -109,7 +99,8 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
   return {
     agentId,
     name: 'Lead Generation',
-    intentName: values.intentName,
+    intentName: LEAD_GENERATION_INTENT,
+    triggerInstructions: values.triggerInstructions || DEFAULT_TRIGGER,
     requiredFields,
     executionMode: 'sequential' as const,
     config: { success: values.successMessage },
@@ -119,7 +110,7 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function LeadGenerationDrawer({
+export function LeadCaptureDrawer({
   agentId,
   workflow,
   open,
@@ -139,7 +130,7 @@ export function LeadGenerationDrawer({
         ? workflowToFormValues(workflow)
         : {
             fields: defaultFieldValues(),
-            intentName: DEFAULT_INTENT,
+            triggerInstructions: DEFAULT_TRIGGER,
             successMessage: DEFAULT_SUCCESS,
           },
     },
@@ -151,7 +142,7 @@ export function LeadGenerationDrawer({
         ? workflowToFormValues(workflow)
         : {
             fields: defaultFieldValues(),
-            intentName: DEFAULT_INTENT,
+            triggerInstructions: DEFAULT_TRIGGER,
             successMessage: DEFAULT_SUCCESS,
           },
     );
@@ -255,18 +246,18 @@ export function LeadGenerationDrawer({
             </div>
           </div>
 
-          {/* Trigger */}
+          {/* Trigger instructions */}
           <div className="flex flex-col gap-1.5">
             <FormTextarea
-              name="intentName"
+              name="triggerInstructions"
               control={control}
               label="When to trigger"
-              placeholder="e.g. user wants to be contacted or provide their details"
+              placeholder="e.g. When asked for a demo, or when the user wants to be contacted"
               maxLength={300}
               rows={3}
             />
             <p className="text-xs text-muted-foreground -mt-1">
-              Describe when the agent should start collecting contact info.
+              Describe the situations when your agent should start collecting contact info.
             </p>
           </div>
 

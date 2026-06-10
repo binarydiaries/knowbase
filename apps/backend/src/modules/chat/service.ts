@@ -182,34 +182,22 @@ export abstract class ChatService {
     return {};
   }
 
+  // V1 entity storage was dropped when conversations.entities column was removed.
+  // These stubs preserve callers without breaking the V1 pipeline.
   static getStoredEntities(
-    conversation: typeof conversations.$inferSelect | null | undefined,
+    _conversation: typeof conversations.$inferSelect | null | undefined,
   ): Record<string, string> {
-    return (conversation?.entities as Record<string, string>) ?? {};
+    return {};
   }
 
-  static async extractAndSaveLeadEntities({
-    message,
-    conversation,
-    conversationId,
-  }: {
-    message: string;
-    conversation: typeof conversations.$inferSelect | null | undefined;
-    conversationId: string;
-  }): Promise<void> {
-    const lastAssistantUtterance = conversation?.lastAssistantUtterance;
-    if (!lastAssistantUtterance) return;
-
-    const extracted = ChatService.extractLeadFieldsHeuristically(message, lastAssistantUtterance);
-    if (!Object.keys(extracted).length) return;
-
-    const existing = (conversation?.entities as Record<string, string>) ?? {};
-    const merged = { ...existing, ...extracted };
-    try {
-      await ConversationService.update(conversationId, { entities: merged });
-    } catch (error) {
-      console.error('[entity-extraction] failed to save:', error);
-    }
+  static async extractAndSaveLeadEntities(
+    _args: {
+      message: string;
+      conversation: typeof conversations.$inferSelect | null | undefined;
+      conversationId: string;
+    },
+  ): Promise<void> {
+    // No-op: entity persistence moved to V2 graph (extractEntities node).
   }
 
   static async getAgent({ agentId, orgId }: { agentId: string; orgId: string }) {

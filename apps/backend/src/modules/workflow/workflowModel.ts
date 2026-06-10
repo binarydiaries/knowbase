@@ -13,7 +13,8 @@ const WorkflowActionInputSchema = z.object({
 export const CreateWorkflowBody = z.object({
   agentId: z.string(),
   name: z.string().min(1).max(100),
-  intentName: z.string().min(1).max(300),
+  intentName: z.string().min(1).max(100),
+  triggerInstructions: z.string().max(300).default(''),
   requiredFields: z.array(z.string()).default([]),
   executionMode: z.enum(['sequential', 'parallel']).default('sequential'),
   config: z
@@ -27,7 +28,8 @@ export const CreateWorkflowBody = z.object({
 
 export const UpdateWorkflowBody = z.object({
   name: z.string().min(1).max(100).optional(),
-  intentName: z.string().min(1).max(300).optional(),
+  intentName: z.string().min(1).max(100).optional(),
+  triggerInstructions: z.string().max(300).optional(),
   requiredFields: z.array(z.string()).optional(),
   config: z
     .object({

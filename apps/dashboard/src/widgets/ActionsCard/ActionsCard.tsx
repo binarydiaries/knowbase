@@ -12,6 +12,7 @@ import { useParams } from '@tanstack/react-router';
 import { LockIcon, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { deleteWorkflowsById, getWorkflows, postWorkflows } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 import { DEFAULT_SUCCESS, DEFAULT_TRIGGER, LEAD_GENERATION_INTENT } from './leadCapture/constants';
@@ -38,6 +39,8 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const queryClient = useQueryClient();
   const { plan } = useClerkPlan();
   const isLocked = plan === 'free';
+  const { data: flags } = useFeatureFlags();
+  const leadGenFlagEnabled = !!flags?.['lead_generation'];
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -105,6 +108,9 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     enableMutation.isPending ||
     disableMutation.isPending ||
     workflowsQuery.isLoading;
+
+  // Hide the entire card if the lead_generation feature flag is off
+  if (!leadGenFlagEnabled) return null;
 
   return (
     <>

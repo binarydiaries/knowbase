@@ -4,6 +4,7 @@ import { detectIntent, INTENT_QUESTION_ANSWERING } from './nodes/detectIntent';
 import { extractEntities } from './nodes/extractEntities';
 import { initConversation } from './nodes/initConversation';
 import { loadAgent } from './nodes/loadAgent';
+import { persistTurn } from './nodes/persistTurn';
 import { InputState, OutputState, State } from './state';
 import { ragGraph } from './subGraphs/ragGraph';
 import { workflowGraph } from './subGraphs/workflowGraph';
@@ -36,6 +37,7 @@ const builder = new StateGraph({
   .addNode('detectIntent', detectIntent)
   .addNode('ragGraph', ragGraph)
   .addNode('workflowGraph', workflowGraph)
+  .addNode('persistTurn', persistTurn)
 
   // Conditional
   .addConditionalEdges('detectIntent', routeByIntent, {
@@ -48,8 +50,9 @@ const builder = new StateGraph({
   .addEdge('initConversation', 'loadAgent')
   .addEdge('loadAgent', 'extractEntities')
   .addEdge('extractEntities', 'detectIntent')
-  .addEdge('ragGraph', END)
-  .addEdge('workflowGraph', END);
+  .addEdge('ragGraph', 'persistTurn')
+  .addEdge('workflowGraph', 'persistTurn')
+  .addEdge('persistTurn', END);
 
 const graph = builder.compile({ checkpointer });
 graph.name = 'Agenvik Chat Graph';

@@ -9,7 +9,7 @@ import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
 import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
-import { ChatService } from '../chat/service';
+import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { SlackConnectionService } from './connectionService';
 
@@ -426,7 +426,7 @@ async function processInboundEvent(payload: {
     );
     if (!result?.enabled || !result.agent) return;
 
-    await ChatService.sendSlack({
+    await ChatV2Service.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
       message: event.text,
@@ -440,7 +440,7 @@ async function processInboundEvent(payload: {
     );
     if (!result?.enabled || !result.agent) return;
 
-    await ChatService.sendSlack({
+    await ChatV2Service.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
       message: event.text,

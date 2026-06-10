@@ -1,12 +1,12 @@
 import { toUIMessageStream } from '@ai-sdk/langchain';
-import { HumanMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
-import type { IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
+import type { IChannelSlackConfig, IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { SubscriptionService } from '../subscription/service';
+import { SlackConnectionService } from '../slack/connectionService';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { graph } from '../graph/graph';
-import { AIMessage } from '@langchain/core/messages';
 import { suppressPipelineNodes } from '../graph/utils/stream';
 
 export class NotFoundError extends Error {
@@ -197,6 +197,86 @@ export abstract class ChatV2Service {
         text: { body: assistantText },
       }),
     });
+  }
+
+  static async sendSlack({
+    channelId,
+    orgId,
+    message,
+    slackChannelId,
+    threadTs,
+    ip,
+  }: {
+    channelId: string;
+    orgId: string;
+    message: string;
+    slackChannelId: string;
+    threadTs: string;
+    ip?: string;
+  }) {
+    const channel = await ChannelService.single({ id: channelId, orgId });
+    if (!channel || channel.type !== 'slack') {
+      throw new NotFoundError('Slack channel not found');
+    }
+    const config = channel.config as IChannelSlackConfig;
+    if (!config.slackChannelId) {
+      throw new NotFoundError('Slack channel not configured');
+    }
+
+    const connection = await SlackConnectionService.findByOrg(orgId);
+    if (!connection) {
+      throw new NotFoundError('Slack not connected for this org');
+    }
+
+    // threadTs is stable per Slack thread — use as thread_id directly
+    const thread_id = threadTs;
+
+    const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
+
+    const slackHeaders = {
+      Authorization: `Bearer ${connection.botToken}`,
+      'Content-Type': 'application/json',
+    };
+
+    // ── Thinking placeholder ──────────────────────────────────────────────
+    let placeholderTs: string | null = null;
+    try {
+      const res = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({ channel: slackChannelId, text: '_Thinking…_', thread_ts: threadTs }),
+      });
+      const data = (await res.json()) as { ok: boolean; ts?: string };
+      if (data.ok && data.ts) placeholderTs = data.ts;
+    } catch {
+      // Best-effort — proceed even if placeholder fails
+    }
+
+    // ── Invoke graph ──────────────────────────────────────────────────────
+    const finalState = await graph.invoke(
+      { messages: new HumanMessage(message) },
+      {
+        configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
+      },
+    );
+
+    const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+    const assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+
+    // ── Update placeholder or post new message ────────────────────────────
+    if (placeholderTs) {
+      await fetch('https://slack.com/api/chat.update', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: assistantText }),
+      });
+    } else {
+      await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: slackHeaders,
+        body: JSON.stringify({ channel: slackChannelId, text: assistantText, thread_ts: threadTs }),
+      });
+    }
   }
 
   static async sendPreview({

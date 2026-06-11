@@ -7,7 +7,7 @@ export type { ActionContext, IActionResult };
 type ActionHandler = (ctx: ActionContext) => Promise<IActionResult>;
 
 /**
- * Registry of all supported workflow action handlers.
+ * Registry of all supported intent action handlers.
  * Add a new entry here when introducing a new action type.
  */
 export const actionHandlers: Record<string, ActionHandler> = {

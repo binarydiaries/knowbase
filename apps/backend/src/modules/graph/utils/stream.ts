@@ -8,9 +8,9 @@
  *
  * Node map (from reading both subgraph files):
  *   main graph    : initConversation · loadAgent · extractEntities · detectIntent
- *                   persistTurn · enrichConversation · ragGraph · workflowGraph
+ *                   persistTurn · enrichConversation · ragGraph · intentGraph
  *   ragGraph      : rewriteQuery · vectorSearch · generateResponse  ← streams to client
- *   workflowGraph : loadWorkflow · checkRequirements · collectMissingData · executeActions
+ *   intentGraph   : loadIntent · checkRequirements · collectMissingData · executeActions
  *                   collectMissingData ← streams to client
  *
  * Nodes that make internal LLM calls (structured output / utility) must be

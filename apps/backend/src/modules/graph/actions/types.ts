@@ -16,7 +16,7 @@ export type ActionContext = {
   conversationId: string;
   /** Entities extracted from the conversation (name, email, phone, company, …) */
   entities: Record<string, string | null>;
-  /** Per-action config from the workflow definition */
+  /** Per-action config from the intent definition */
   config?: unknown;
   /** Results from actions that ran before this one (sequential mode only) */
   previousResults?: Record<string, IActionResult>;

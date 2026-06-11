@@ -62,7 +62,7 @@
 
 - [x] **Lead email notification** — done; `send_email` action type, toggle UI, generic queue
 - [x] **DB migration** — `20260610001000_add_trigger_instructions` applied successfully
-- [ ] **V1 cleanup** — delete `apps/backend/src/modules/chat/` (7 files) + remove `.use(Chat)` from `server.ts` once confirmed safe
+- [x] **V1 cleanup** — deleted `apps/backend/src/modules/chat/` (7 files: chat.ts, service.ts, context.ts, model.ts, persistence.ts, prompts.ts, tools.ts) + removed `.use(Chat)` from `server.ts`; SDK regenerated, stale `postChat`/`getChatChannel`/`postChatPreview` removed from generated client
 - [x] **workflow → intent rename** — DB tables (`workflows`→`intents`, `workflow_actions`→`intent_actions`), schema files, module folder (`src/modules/workflow/`→`src/modules/intent/`), graph state (`workflows`→`intents`, `activeWorkflow`→`activeIntent`), graph nodes (`loadWorkflow`→`loadIntent`, `workflowGraph`→`intentGraph`), all API routes (`/workflows`→`/intents`), SDK regenerated, dashboard updated
 - [x] **SDK regeneration** — dashboard `src/services/` regenerated
 

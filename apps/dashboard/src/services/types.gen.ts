@@ -140,19 +140,19 @@ export type CountryDistributionResponseSchema = {
     }>;
 };
 
-export type ChatBodySchema = {
+export type ChatV2BodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
     parentOrigin?: string;
 };
 
-export type ChatChannelQueryParamSchema = {
+export type ChatV2ChannelQueryParamSchema = {
     channelId: string;
     parentOrigin?: string;
 };
 
-export type ChatChannelResponseSchema = {
+export type ChatV2ChannelResponseSchema = {
     channel: {
         id: string;
         agentId: string;
@@ -321,60 +321,6 @@ export type ChannelWriteForbiddenResponse = {
 } | {
     code: 'PLAN_LIMIT_REACHED';
     message: string;
-};
-
-export type ChatV2BodySchema = {
-    conversationId: string;
-    message: string;
-    channelId: string;
-    parentOrigin?: string;
-};
-
-export type ChatV2ChannelQueryParamSchema = {
-    channelId: string;
-    parentOrigin?: string;
-};
-
-export type ChatV2ChannelResponseSchema = {
-    channel: {
-        id: string;
-        agentId: string;
-        enabled: boolean;
-        channelStatus: 'inactive' | 'active' | 'error';
-        additional: {
-            type: 'web';
-            config: {
-                displayName: string;
-                subtitle?: string;
-                welcomeMessage: string;
-                suggestionQuestions?: Array<string>;
-                inputPlaceholder?: string;
-                primaryColor: string;
-                allowedDomains: Array<string>;
-                avatarUrl?: string;
-            };
-        } | {
-            type: 'whatsapp';
-            config: {
-                phoneNumberId?: string;
-                displayPhone?: string;
-            };
-        } | {
-            type: 'instagram';
-            config: {
-                [key: string]: never;
-            };
-        } | {
-            type: 'slack';
-            config: {
-                mode?: 'channel' | 'mention';
-                slackChannelId?: string;
-                slackChannelName?: string;
-            };
-        };
-        createdAt: string;
-        updatedAt: string;
-    };
 };
 
 export type MessageSchema = {
@@ -1815,89 +1761,6 @@ export type GetAnalyticsCountryDistributionResponses = {
 };
 
 export type GetAnalyticsCountryDistributionResponse = GetAnalyticsCountryDistributionResponses[keyof GetAnalyticsCountryDistributionResponses];
-
-export type PostChatData = {
-    body: ChatBodySchema;
-    path?: never;
-    query?: never;
-    url: '/chat';
-};
-
-export type PostChatErrors = {
-    /**
-     * Response for status 403
-     */
-    403: ChatForbiddenResponse;
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type PostChatError = PostChatErrors[keyof PostChatErrors];
-
-export type PostChatResponses = {
-    /**
-     * Response for status 200
-     */
-    200: unknown;
-};
-
-export type GetChatChannelData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/chat/channel';
-};
-
-export type GetChatChannelErrors = {
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type GetChatChannelError = GetChatChannelErrors[keyof GetChatChannelErrors];
-
-export type GetChatChannelResponses = {
-    /**
-     * Response for status 200
-     */
-    200: ChatChannelResponseSchema;
-};
-
-export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
-
-export type PostChatPreviewData = {
-    body: ChatBodySchema;
-    path?: never;
-    query?: never;
-    url: '/chat/preview';
-};
-
-export type PostChatPreviewErrors = {
-    /**
-     * Response for status 401
-     */
-    401: UnauthorizedSchema;
-    /**
-     * Response for status 403
-     */
-    403: ChatForbiddenResponse;
-    /**
-     * Response for status 404
-     */
-    404: NotFoundResponse;
-};
-
-export type PostChatPreviewError = PostChatPreviewErrors[keyof PostChatPreviewErrors];
-
-export type PostChatPreviewResponses = {
-    /**
-     * Response for status 200
-     */
-    200: unknown;
-};
 
 export type PostChatv2Data = {
     body: ChatV2BodySchema;

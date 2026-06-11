@@ -17,7 +17,6 @@ import { Agent } from './modules/agent/agent';
 import { Analytics } from './modules/analytics/analytics';
 import { Behaviour } from './modules/behaviour/behaviour';
 import { Channel } from './modules/channel/channel';
-import { Chat } from './modules/chat/chat';
 import { ChatV2 } from './modules/chatv2/chatv2';
 import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
@@ -102,7 +101,6 @@ const app = Sentry.withElysia(new Elysia())
   )
   .use(UsageCharts)
   .use(Analytics)
-  .use(Chat)
   .use(ChatV2)
   .use(message)
   .use(Document)

@@ -1206,11 +1206,10 @@ export type BadRequestResponse = {
     message: string;
 };
 
-export type WorkflowSchema = {
+export type IntentSchema = {
     id: string;
     agentId: string;
     name: string;
-    intentName: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
@@ -1223,9 +1222,9 @@ export type WorkflowSchema = {
     updatedAt: string;
 };
 
-export type WorkflowActionSchema = {
+export type IntentActionSchema = {
     id: string;
-    workflowId: string;
+    intentId: string;
     order: number;
     actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
     config: {
@@ -1253,11 +1252,10 @@ export type WorkflowActionSchema = {
     updatedAt: string;
 };
 
-export type WorkflowWithActionsSchema = {
+export type IntentWithActionsSchema = {
     id: string;
     agentId: string;
     name: string;
-    intentName: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
@@ -1270,7 +1268,7 @@ export type WorkflowWithActionsSchema = {
     updatedAt: string;
     actions: Array<{
         id: string;
-        workflowId: string;
+        intentId: string;
         order: number;
         actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
         config: {
@@ -1299,10 +1297,9 @@ export type WorkflowWithActionsSchema = {
     }>;
 };
 
-export type CreateWorkflowBody = {
+export type CreateIntentBody = {
     agentId: string;
     name: string;
-    intentName: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
@@ -1319,9 +1316,8 @@ export type CreateWorkflowBody = {
     }>;
 };
 
-export type UpdateWorkflowBody = {
+export type UpdateIntentBody = {
     name?: string;
-    intentName?: string;
     triggerInstructions?: string;
     requiredFields?: Array<string>;
     config?: {
@@ -1337,12 +1333,11 @@ export type UpdateWorkflowBody = {
     }>;
 };
 
-export type OneWorkflowResponse = {
-    workflow: {
+export type OneIntentResponse = {
+    intent: {
         id: string;
         agentId: string;
         name: string;
-        intentName: string;
         triggerInstructions: string;
         requiredFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
@@ -1355,7 +1350,7 @@ export type OneWorkflowResponse = {
         updatedAt: string;
         actions: Array<{
             id: string;
-            workflowId: string;
+            intentId: string;
             order: number;
             actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
             config: {
@@ -1385,12 +1380,11 @@ export type OneWorkflowResponse = {
     };
 };
 
-export type ManyWorkflowsResponse = {
-    workflows: Array<{
+export type ManyIntentsResponse = {
+    intents: Array<{
         id: string;
         agentId: string;
         name: string;
-        intentName: string;
         triggerInstructions: string;
         requiredFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
@@ -1403,7 +1397,7 @@ export type ManyWorkflowsResponse = {
         updatedAt: string;
         actions: Array<{
             id: string;
-            workflowId: string;
+            intentId: string;
             order: number;
             actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
             config: {
@@ -1433,7 +1427,7 @@ export type ManyWorkflowsResponse = {
     }>;
 };
 
-export type DeleteWorkflowResponse = {
+export type DeleteIntentResponse = {
     success: boolean;
 };
 
@@ -3084,16 +3078,16 @@ export type DeleteSlackBindByChannelIdErrors = {
 
 export type DeleteSlackBindByChannelIdError = DeleteSlackBindByChannelIdErrors[keyof DeleteSlackBindByChannelIdErrors];
 
-export type GetWorkflowsData = {
+export type GetIntentsData = {
     body?: never;
     path?: never;
     query: {
         agentId: string;
     };
-    url: '/workflows';
+    url: '/intents';
 };
 
-export type GetWorkflowsErrors = {
+export type GetIntentsErrors = {
     /**
      * Response for status 401
      */
@@ -3104,25 +3098,25 @@ export type GetWorkflowsErrors = {
     404: NotFoundResponse;
 };
 
-export type GetWorkflowsError = GetWorkflowsErrors[keyof GetWorkflowsErrors];
+export type GetIntentsError = GetIntentsErrors[keyof GetIntentsErrors];
 
-export type GetWorkflowsResponses = {
+export type GetIntentsResponses = {
     /**
      * Response for status 200
      */
-    200: ManyWorkflowsResponse;
+    200: ManyIntentsResponse;
 };
 
-export type GetWorkflowsResponse = GetWorkflowsResponses[keyof GetWorkflowsResponses];
+export type GetIntentsResponse = GetIntentsResponses[keyof GetIntentsResponses];
 
-export type PostWorkflowsData = {
-    body: CreateWorkflowBody;
+export type PostIntentsData = {
+    body: CreateIntentBody;
     path?: never;
     query?: never;
-    url: '/workflows';
+    url: '/intents';
 };
 
-export type PostWorkflowsErrors = {
+export type PostIntentsErrors = {
     /**
      * Response for status 401
      */
@@ -3137,54 +3131,54 @@ export type PostWorkflowsErrors = {
     404: NotFoundResponse;
 };
 
-export type PostWorkflowsError = PostWorkflowsErrors[keyof PostWorkflowsErrors];
+export type PostIntentsError = PostIntentsErrors[keyof PostIntentsErrors];
 
-export type PostWorkflowsResponses = {
+export type PostIntentsResponses = {
     /**
      * Response for status 200
      */
-    200: OneWorkflowResponse;
+    200: OneIntentResponse;
 };
 
-export type PostWorkflowsResponse = PostWorkflowsResponses[keyof PostWorkflowsResponses];
+export type PostIntentsResponse = PostIntentsResponses[keyof PostIntentsResponses];
 
-export type DeleteWorkflowsByIdData = {
+export type DeleteIntentsByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/workflows/{id}';
+    url: '/intents/{id}';
 };
 
-export type DeleteWorkflowsByIdErrors = {
+export type DeleteIntentsByIdErrors = {
     /**
      * Response for status 404
      */
     404: NotFoundResponse;
 };
 
-export type DeleteWorkflowsByIdError = DeleteWorkflowsByIdErrors[keyof DeleteWorkflowsByIdErrors];
+export type DeleteIntentsByIdError = DeleteIntentsByIdErrors[keyof DeleteIntentsByIdErrors];
 
-export type DeleteWorkflowsByIdResponses = {
+export type DeleteIntentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: DeleteWorkflowResponse;
+    200: DeleteIntentResponse;
 };
 
-export type DeleteWorkflowsByIdResponse = DeleteWorkflowsByIdResponses[keyof DeleteWorkflowsByIdResponses];
+export type DeleteIntentsByIdResponse = DeleteIntentsByIdResponses[keyof DeleteIntentsByIdResponses];
 
-export type PatchWorkflowsByIdData = {
-    body: UpdateWorkflowBody;
+export type PatchIntentsByIdData = {
+    body: UpdateIntentBody;
     path: {
         id: string;
     };
     query?: never;
-    url: '/workflows/{id}';
+    url: '/intents/{id}';
 };
 
-export type PatchWorkflowsByIdErrors = {
+export type PatchIntentsByIdErrors = {
     /**
      * Response for status 403
      */
@@ -3195,16 +3189,16 @@ export type PatchWorkflowsByIdErrors = {
     404: NotFoundResponse;
 };
 
-export type PatchWorkflowsByIdError = PatchWorkflowsByIdErrors[keyof PatchWorkflowsByIdErrors];
+export type PatchIntentsByIdError = PatchIntentsByIdErrors[keyof PatchIntentsByIdErrors];
 
-export type PatchWorkflowsByIdResponses = {
+export type PatchIntentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: OneWorkflowResponse;
+    200: OneIntentResponse;
 };
 
-export type PatchWorkflowsByIdResponse = PatchWorkflowsByIdResponses[keyof PatchWorkflowsByIdResponses];
+export type PatchIntentsByIdResponse = PatchIntentsByIdResponses[keyof PatchIntentsByIdResponses];
 
 export type PostDemoData = {
     body: CreateDemoBookingSchema;

@@ -18,15 +18,16 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput/FormInput';
 import { FormTextarea } from '@/components/FormTextArea/FormTextArea';
-import { patchWorkflowsById, postWorkflows } from '@/services';
+import { patchIntentsById, postIntents } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 import { DEFAULT_SUCCESS, DEFAULT_TRIGGER, LEAD_GENERATION_INTENT } from './constants';
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type WorkflowRow = {
+type IntentRow = {
   id: string;
+  name: string;
   triggerInstructions: string;
   requiredFields: string[];
   config: { success?: string } | null;
@@ -83,8 +84,8 @@ function defaultFieldValues(): FormValues['fields'] {
   };
 }
 
-function workflowToFormValues(workflow: WorkflowRow): FormValues {
-  const required = new Set(workflow.requiredFields);
+function intentToFormValues(intent: IntentRow): FormValues {
+  const required = new Set(intent.requiredFields);
   return {
     fields: {
       name: { collect: required.has('name'), required: required.has('name') },
@@ -92,13 +93,13 @@ function workflowToFormValues(workflow: WorkflowRow): FormValues {
       phone: { collect: required.has('phone'), required: required.has('phone') },
       company: { collect: required.has('company'), required: required.has('company') },
     },
-    triggerInstructions: workflow.triggerInstructions || DEFAULT_TRIGGER,
-    successMessage: workflow.config?.success ?? DEFAULT_SUCCESS,
-    emailNotification: workflow.actions.some((a) => a.actionType === 'send_email'),
+    triggerInstructions: intent.triggerInstructions || DEFAULT_TRIGGER,
+    successMessage: intent.config?.success ?? DEFAULT_SUCCESS,
+    emailNotification: intent.actions.some((a) => a.actionType === 'send_email'),
   };
 }
 
-function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
+function formValuesToIntentPayload(values: FormValues, agentId: string) {
   const requiredFields = FIELD_KEYS.filter((k) => values.fields[k].required);
   const actions: { actionType: 'save_lead' | 'send_email'; order: number; config: Record<string, unknown> }[] = [
     { actionType: 'save_lead', order: 0, config: {} },
@@ -108,8 +109,7 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
   }
   return {
     agentId,
-    name: 'Lead Generation',
-    intentName: LEAD_GENERATION_INTENT,
+    name: LEAD_GENERATION_INTENT,
     triggerInstructions: values.triggerInstructions || DEFAULT_TRIGGER,
     requiredFields,
     executionMode: 'sequential' as const,
@@ -122,13 +122,13 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
 
 export function LeadCaptureDrawer({
   agentId,
-  workflow,
+  intent,
   open,
   onClose,
   onSaved,
 }: {
   agentId: string;
-  workflow: WorkflowRow | null;
+  intent: IntentRow | null;
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
@@ -136,8 +136,8 @@ export function LeadCaptureDrawer({
   const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>(
     {
       resolver: zodResolver(schema),
-      defaultValues: workflow
-        ? workflowToFormValues(workflow)
+      defaultValues: intent
+        ? intentToFormValues(intent)
         : {
             fields: defaultFieldValues(),
             triggerInstructions: DEFAULT_TRIGGER,
@@ -149,8 +149,8 @@ export function LeadCaptureDrawer({
 
   useEffect(() => {
     reset(
-      workflow
-        ? workflowToFormValues(workflow)
+      intent
+        ? intentToFormValues(intent)
         : {
             fields: defaultFieldValues(),
             triggerInstructions: DEFAULT_TRIGGER,
@@ -158,19 +158,18 @@ export function LeadCaptureDrawer({
             emailNotification: false,
           },
     );
-  }, [workflow?.id, reset]);
+  }, [intent?.id, reset]);
 
   const fieldsValues = watch('fields');
 
   const saveMutation = useMutation({
     mutationFn: (values: FormValues) => {
-      const payload = formValuesToWorkflowPayload(values, agentId);
-      if (workflow) {
-        return patchWorkflowsById({
-          path: { id: workflow.id },
+      const payload = formValuesToIntentPayload(values, agentId);
+      if (intent) {
+        return patchIntentsById({
+          path: { id: intent.id },
           body: {
             name: payload.name,
-            intentName: payload.intentName,
             triggerInstructions: payload.triggerInstructions,
             requiredFields: payload.requiredFields,
             config: payload.config,
@@ -178,7 +177,7 @@ export function LeadCaptureDrawer({
           },
         });
       }
-      return postWorkflows({ body: payload });
+      return postIntents({ body: payload });
     },
     onSuccess: () => {
       toast.success('Lead generation settings saved.');

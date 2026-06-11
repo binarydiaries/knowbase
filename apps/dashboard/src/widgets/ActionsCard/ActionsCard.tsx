@@ -13,17 +13,16 @@ import { LockIcon, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import { deleteWorkflowsById, getWorkflows, postWorkflows } from '@/services';
+import { deleteIntentsById, getIntents, postIntents } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
 import { DEFAULT_SUCCESS, DEFAULT_TRIGGER, LEAD_GENERATION_INTENT } from './leadCapture/constants';
 import { LeadCaptureDrawer } from './leadCapture/LeadCaptureDrawer';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type WorkflowRow = {
+type IntentRow = {
   id: string;
   name: string;
-  intentName: string;
   triggerInstructions: string;
   requiredFields: string[];
   config: { success?: string; failure?: string } | null;
@@ -44,29 +43,28 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const workflowsQuery = useQuery({
-    queryKey: ['workflows', agentId],
-    queryFn: () => getWorkflows({ query: { agentId } }),
+  const intentsQuery = useQuery({
+    queryKey: ['intents', agentId],
+    queryFn: () => getIntents({ query: { agentId } }),
   });
 
-  const workflows: WorkflowRow[] = (workflowsQuery.data?.data.workflows ?? []) as WorkflowRow[];
-  const leadGenWorkflow = workflows.find((w) =>
+  const intents: IntentRow[] = (intentsQuery.data?.data.intents ?? []) as IntentRow[];
+  const leadGenIntent = intents.find((w) =>
     w.actions.some((a) => a.actionType === 'save_lead'),
   ) ?? null;
 
-  const isEnabled = leadGenWorkflow !== null;
+  const isEnabled = leadGenIntent !== null;
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['workflows', agentId] });
+    queryClient.invalidateQueries({ queryKey: ['intents', agentId] });
 
-  // Enable: create default lead gen workflow
+  // Enable: create default lead gen intent
   const enableMutation = useMutation({
     mutationFn: () =>
-      postWorkflows({
+      postIntents({
         body: {
           agentId,
-          name: 'Lead Generation',
-          intentName: LEAD_GENERATION_INTENT,
+          name: LEAD_GENERATION_INTENT,
           triggerInstructions: DEFAULT_TRIGGER,
           requiredFields: ['name', 'email'],
           executionMode: 'sequential',
@@ -83,10 +81,10 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
   });
 
-  // Disable: delete the workflow
+  // Disable: delete the intent
   const disableMutation = useMutation({
     mutationFn: () =>
-      deleteWorkflowsById({ path: { id: leadGenWorkflow!.id } }),
+      deleteIntentsById({ path: { id: leadGenIntent!.id } }),
     onSuccess: () => {
       toast.success('Lead generation disabled.');
       invalidate();
@@ -107,7 +105,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const isPending =
     enableMutation.isPending ||
     disableMutation.isPending ||
-    workflowsQuery.isLoading;
+    intentsQuery.isLoading;
 
   // Hide the entire card if the lead_generation feature flag is off
   if (!leadGenFlagEnabled) return null;
@@ -173,7 +171,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
 
       <LeadCaptureDrawer
         agentId={agentId}
-        workflow={leadGenWorkflow}
+        intent={leadGenIntent}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onSaved={() => {

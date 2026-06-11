@@ -4,12 +4,12 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { AgentService } from '../agent/service';
 import { SubscriptionService } from '../subscription/service';
-import { WorkflowModel } from './workflowModel';
-import { WorkflowService } from './service';
+import { IntentModel } from './intentModel';
+import { IntentService } from './service';
 
-export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] })
+export const Intent = new Elysia({ prefix: '/intents', tags: ['Intents'] })
   .use(AuthGuard)
-  .use(WorkflowModel)
+  .use(IntentModel)
   .use(ErrorModel)
   .get(
     '',
@@ -19,13 +19,13 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
       if (!agent) {
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
       }
-      const workflows = await WorkflowService.listWithActions(agentId);
-      return { workflows };
+      const intents = await IntentService.listWithActions(agentId);
+      return { intents };
     },
     {
       query: z.object({ agentId: z.string() }),
       response: {
-        200: 'ManyWorkflowsResponse',
+        200: 'ManyIntentsResponse',
         404: 'NotFoundResponse',
       },
     },
@@ -33,7 +33,7 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
   .post(
     '',
     async ({ body, orgId, userId, status }) => {
-      // Lead gen workflows require Starter+ plan
+      // Lead gen intents require Starter+ plan
       const hasSaveLead = body.actions.some((a) => a.actionType === 'save_lead');
       if (hasSaveLead) {
         const access = await SubscriptionService.assertLeadGenerationAccess(orgId);
@@ -51,11 +51,10 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
         return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
       }
 
-      const workflow = await WorkflowService.create(
+      const intent = await IntentService.create(
         {
           agentId: body.agentId,
           name: body.name,
-          intentName: body.intentName,
           triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
           executionMode: body.executionMode,
@@ -69,12 +68,12 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
         })),
       );
 
-      return { workflow };
+      return { intent };
     },
     {
-      body: 'CreateWorkflowBody',
+      body: 'CreateIntentBody',
       response: {
-        200: 'OneWorkflowResponse',
+        200: 'OneIntentResponse',
         403: 'LeadGenerationForbiddenResponse',
         404: 'NotFoundResponse',
       },
@@ -84,12 +83,12 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
   .patch(
     '/:id',
     async ({ params, body, orgId, status }) => {
-      const existing = await WorkflowService.singleWithActions({
+      const existing = await IntentService.singleWithActions({
         id: params.id,
         orgId,
       });
       if (!existing) {
-        return status(404, { code: 'NOT_FOUND', message: 'Workflow not found' });
+        return status(404, { code: 'NOT_FOUND', message: 'Intent not found' });
       }
 
       // Re-check plan access if save_lead action is being added
@@ -105,11 +104,10 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
         }
       }
 
-      const workflow = await WorkflowService.update(
+      const intent = await IntentService.update(
         params.id,
         {
           name: body.name,
-          intentName: body.intentName,
           triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
           config: body.config ?? undefined,
@@ -121,12 +119,12 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
         })),
       );
 
-      return { workflow };
+      return { intent };
     },
     {
-      body: 'UpdateWorkflowBody',
+      body: 'UpdateIntentBody',
       response: {
-        200: 'OneWorkflowResponse',
+        200: 'OneIntentResponse',
         403: 'LeadGenerationForbiddenResponse',
       },
     },
@@ -134,19 +132,19 @@ export const Workflow = new Elysia({ prefix: '/workflows', tags: ['Workflows'] }
   .delete(
     '/:id',
     async ({ params, orgId, status }) => {
-      const existing = await WorkflowService.singleWithActions({
+      const existing = await IntentService.singleWithActions({
         id: params.id,
         orgId,
       });
       if (!existing) {
-        return status(404, { code: 'NOT_FOUND', message: 'Workflow not found' });
+        return status(404, { code: 'NOT_FOUND', message: 'Intent not found' });
       }
-      await WorkflowService.delete(params.id);
+      await IntentService.delete(params.id);
       return { success: true };
     },
     {
       response: {
-        200: 'DeleteWorkflowResponse',
+        200: 'DeleteIntentResponse',
       },
     },
   );

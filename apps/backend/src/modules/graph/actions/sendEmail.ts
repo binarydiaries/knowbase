@@ -2,7 +2,7 @@ import { clerkClient } from 'elysia-clerk';
 import { EmailService } from '../../../common/email/service';
 import { addEmailJob } from '../../../queue/email/email.queue';
 import { AgentService } from '../../agent/service';
-import { SendEmailConfigSchema } from '../../workflow/model';
+import { SendEmailConfigSchema } from '../../intent/model';
 import type { ActionContext, IActionResult } from './types';
 
 async function getClerkOwnerEmail(userId: string): Promise<string | null> {

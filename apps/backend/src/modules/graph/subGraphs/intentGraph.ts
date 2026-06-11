@@ -2,7 +2,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { checkRequirements } from '../nodes/checkRequirements';
 import { collectMissingData } from '../nodes/collectMissingData';
 import { executeActions } from '../nodes/executeActions';
-import { loadWorkflow } from '../nodes/loadWorkflow';
+import { loadIntent } from '../nodes/loadIntent';
 import { State } from '../state';
 
 function routeAfterRequirementCheck(
@@ -15,7 +15,7 @@ function routeAfterRequirementCheck(
 
 const graph = new StateGraph(State)
   // Nodes
-  .addNode('loadWorkflow', loadWorkflow)
+  .addNode('loadIntent', loadIntent)
   .addNode('checkRequirements', checkRequirements)
   .addNode('collectMissingData', collectMissingData)
   .addNode('executeActions', executeActions)
@@ -26,9 +26,9 @@ const graph = new StateGraph(State)
   })
 
   // Edges
-  .addEdge(START, 'loadWorkflow')
-  .addEdge('loadWorkflow', 'checkRequirements')
+  .addEdge(START, 'loadIntent')
+  .addEdge('loadIntent', 'checkRequirements')
   .addEdge('collectMissingData', END)
   .addEdge('executeActions', END);
 
-export const workflowGraph = graph.compile();
+export const intentGraph = graph.compile();

@@ -29,7 +29,7 @@ import { Slack } from './modules/slack/slack';
 import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
-import { Workflow } from './modules/workflow/workflow';
+import { Intent } from './modules/intent/intent';
 import { validateEnv } from './utils/env.utils';
 
 validateEnv();
@@ -114,7 +114,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(Subscription)
   .use(WhatsApp)
   .use(Slack)
-  .use(Workflow)
+  .use(Intent)
   .use(Demo)
   .use(Lead)
   .use(FeatureFlag)

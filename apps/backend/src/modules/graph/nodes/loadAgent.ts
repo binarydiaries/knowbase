@@ -17,7 +17,7 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
   }
 
   // Verify the agent belongs to the requesting org — orgId lives on the
-  // agents table, not on behaviors/workflows, so we validate here first.
+  // agents table, not on behaviors/intents, so we validate here first.
   const agent = await db.query.agents.findFirst({
     where: { id: agentId, orgId, agentStatus: 'active' },
   });
@@ -34,10 +34,10 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
     throw new Error(`No behavior found for agent ${agentId}`);
   }
 
-  const workflows = await db.query.workflows.findMany({
+  const intents = await db.query.intents.findMany({
     where: { agentId },
     with: { actions: true },
   });
 
-  return { behaviour, workflows };
+  return { behaviour, intents };
 };

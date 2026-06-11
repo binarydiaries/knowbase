@@ -16,8 +16,8 @@ import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
 import { slackConnections } from './slackConnections';
 import { whatsappConnections } from './whatsappConnections';
-import { workflowActions } from './workflowActions';
-import { workflows } from './workflows';
+import { intentActions } from './intentActions';
+import { intents } from './intents';
 
 export const relations = defineRelations(
   {
@@ -38,8 +38,8 @@ export const relations = defineRelations(
     slackConnections,
     featureFlagDefinitions,
     orgFeatureFlags,
-    workflows,
-    workflowActions,
+    intents,
+    intentActions,
   },
   (r) => ({
     agents: {
@@ -123,17 +123,17 @@ export const relations = defineRelations(
     featureFlagDefinitions: {},
     orgFeatureFlags: {},
     demoBookings: {},
-    workflows: {
-      agent: r.one.agents({ from: r.workflows.agentId, to: r.agents.id }),
-      actions: r.many.workflowActions({
-        from: r.workflows.id,
-        to: r.workflowActions.workflowId,
+    intents: {
+      agent: r.one.agents({ from: r.intents.agentId, to: r.agents.id }),
+      actions: r.many.intentActions({
+        from: r.intents.id,
+        to: r.intentActions.intentId,
       }),
     },
-    workflowActions: {
-      workflow: r.one.workflows({
-        from: r.workflowActions.workflowId,
-        to: r.workflows.id,
+    intentActions: {
+      intent: r.one.intents({
+        from: r.intentActions.intentId,
+        to: r.intents.id,
       }),
     },
   }),

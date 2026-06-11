@@ -1,7 +1,7 @@
 import { AIMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import type { z } from 'zod';
-import type { WorkflowActionSchema } from '../../workflow/model';
+import type { IntentActionSchema } from '../../intent/model';
 import { actionHandlers, type IActionResult } from '../actions';
 import { ConfigSchema } from '../config';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
@@ -12,7 +12,7 @@ const DEFAULT_FAILURE =
   'Something went wrong. Please try again or contact support at hello@agenvik.com.';
 
 async function executeAction(
-  action: z.infer<typeof WorkflowActionSchema>,
+  action: z.infer<typeof IntentActionSchema>,
   state: typeof State.State,
   configurable?: Record<string, unknown>,
   previousResults?: Record<string, IActionResult>,
@@ -47,32 +47,32 @@ async function executeAction(
 }
 
 export const executeActions: GraphNode<typeof State> = async (state, config) => {
-  const { activeWorkflow } = state;
-  if (!activeWorkflow) return {};
+  const { activeIntent } = state;
+  if (!activeIntent) return {};
 
-  // Workflow has no actions configured — still complete it cleanly so the
-  // checkpoint doesn't get stuck with a dangling activeWorkflow.
-  if (activeWorkflow.actions.length === 0) {
+  // Intent has no actions configured — still complete it cleanly so the
+  // checkpoint doesn't get stuck with a dangling activeIntent.
+  if (activeIntent.actions.length === 0) {
     return {
-      activeWorkflow: undefined,
+      activeIntent: undefined,
       intent: INTENT_QUESTION_ANSWERING,
-      messages: [new AIMessage(activeWorkflow.config?.success?.trim() || DEFAULT_SUCCESS)],
+      messages: [new AIMessage(activeIntent.config?.success?.trim() || DEFAULT_SUCCESS)],
     };
   }
 
   const results: Record<string, IActionResult> = {};
 
-  if (activeWorkflow.executionMode === 'sequential') {
-    for (const action of activeWorkflow.actions) {
+  if (activeIntent.executionMode === 'sequential') {
+    for (const action of activeIntent.actions) {
       // Pass accumulated results so later actions can reference data
       // produced by earlier ones (e.g. save_lead's leadId).
       results[action.id] = await executeAction(action, state, config.configurable, results);
     }
   } else {
     const settled = await Promise.allSettled(
-      activeWorkflow.actions.map((action) => executeAction(action, state, config.configurable)),
+      activeIntent.actions.map((action) => executeAction(action, state, config.configurable)),
     );
-    activeWorkflow.actions.forEach((action, i) => {
+    activeIntent.actions.forEach((action, i) => {
       const s = settled[i];
       results[action.id] =
         s.status === 'fulfilled'
@@ -82,14 +82,14 @@ export const executeActions: GraphNode<typeof State> = async (state, config) => 
   }
 
   const succeeded = Object.values(results).every((r) => r.success);
-  const workflowConfig = activeWorkflow.config;
+  const intentConfig = activeIntent.config;
   const message = succeeded
-    ? workflowConfig?.success?.trim() || DEFAULT_SUCCESS
-    : workflowConfig?.failure?.trim() || DEFAULT_FAILURE;
+    ? intentConfig?.success?.trim() || DEFAULT_SUCCESS
+    : intentConfig?.failure?.trim() || DEFAULT_FAILURE;
 
-  // Workflow is done — clear activeWorkflow and reset intent.
+  // Intent is done — clear activeIntent and reset intent.
   return {
-    activeWorkflow: undefined,
+    activeIntent: undefined,
     intent: INTENT_QUESTION_ANSWERING,
     messages: [new AIMessage(message)],
   };

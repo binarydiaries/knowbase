@@ -9,9 +9,9 @@ import { getLastUserMessage } from '../utils/messages';
 export { INTENT_QUESTION_ANSWERING };
 
 export const detectIntent: GraphNode<typeof State> = async (state, config) => {
-  const { workflows, activeWorkflow, missingFields } = state;
+  const { intents, activeIntent, missingFields } = state;
 
-  if (!workflows || workflows.length === 0) {
+  if (!intents || intents.length === 0) {
     return { intent: INTENT_QUESTION_ANSWERING };
   }
 
@@ -23,7 +23,7 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
 
   const intentList = [
     INTENT_QUESTION_ANSWERING,
-    ...workflows.map((w) => w.intentName),
+    ...intents.map((w) => w.name),
   ] as [string, ...string[]];
 
   const IntentSchema = z.object({
@@ -40,30 +40,30 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
   );
 
   // Build intent descriptions for the system prompt.
-  // triggerInstructions provides the human context for each workflow intent,
+  // triggerInstructions provides the human context for each intent,
   // giving the classifier real signal beyond just the slug name.
-  const workflowDescriptions = workflows
+  const intentDescriptions = intents
     .map((w) => {
       const instructions = w.triggerInstructions?.trim();
-      return `- "${w.intentName}": ${instructions || w.name}`;
+      return `- "${w.name}": ${instructions || w.name}`;
     })
     .join('\n');
 
   let systemPrompt = `You are an intent classifier. Classify the user's message into exactly one of the following intents:
 
 - "${INTENT_QUESTION_ANSWERING}": user is asking a general question and needs an informational answer
-${workflowDescriptions}`;
+${intentDescriptions}`;
 
-  // If a workflow is in progress, give the model the context it needs to
-  // decide whether the user is answering the workflow question or going off-topic.
-  if (activeWorkflow && missingFields && missingFields.length > 0) {
+  // If an intent is in progress, give the model the context it needs to
+  // decide whether the user is answering the intent question or going off-topic.
+  if (activeIntent && missingFields && missingFields.length > 0) {
     const nextField = missingFields[0];
     systemPrompt += `
 
-The assistant is currently collecting information for the "${activeWorkflow.intentName}" workflow.
+The assistant is currently collecting information for the "${activeIntent.name}" intent.
 The last question asked the user for their "${nextField}".
 
-If the user's message looks like an answer to that question (e.g. providing a name, email, or other personal detail), classify it as "${activeWorkflow.intentName}".
+If the user's message looks like an answer to that question (e.g. providing a name, email, or other personal detail), classify it as "${activeIntent.name}".
 If the user is clearly asking a general question unrelated to providing that information, classify it as "${INTENT_QUESTION_ANSWERING}".`;
   }
 

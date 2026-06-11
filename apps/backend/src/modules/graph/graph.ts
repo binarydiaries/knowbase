@@ -8,21 +8,21 @@ import { loadAgent } from './nodes/loadAgent';
 import { persistTurn } from './nodes/persistTurn';
 import { InputState, OutputState, State } from './state';
 import { ragGraph } from './subGraphs/ragGraph';
-import { workflowGraph } from './subGraphs/workflowGraph';
+import { intentGraph } from './subGraphs/intentGraph';
 import { checkpointer } from './utils/checkpointer';
 
 const routeByIntent = (
   state: typeof State.State,
-): 'ragGraph' | 'workflowGraph' => {
+): 'ragGraph' | 'intentGraph' => {
   if (state.intent === INTENT_QUESTION_ANSWERING) return 'ragGraph';
-  // Guard: if the detected intent doesn't map to a loaded workflow (e.g. the
-  // LLM emitted a stale value or the workflow was deleted mid-conversation),
-  // fall through to RAG rather than entering workflowGraph and producing a
+  // Guard: if the detected intent doesn't map to a loaded intent config (e.g. the
+  // LLM emitted a stale value or the intent was deleted mid-conversation),
+  // fall through to RAG rather than entering intentGraph and producing a
   // silent empty response.
-  const hasMatchingWorkflow = state.workflows.some(
-    (w) => w.intentName === state.intent,
+  const hasMatchingIntent = state.intents.some(
+    (w) => w.name === state.intent,
   );
-  return hasMatchingWorkflow ? 'workflowGraph' : 'ragGraph';
+  return hasMatchingIntent ? 'intentGraph' : 'ragGraph';
 };
 
 const builder = new StateGraph({
@@ -37,14 +37,14 @@ const builder = new StateGraph({
   .addNode('extractEntities', extractEntities)
   .addNode('detectIntent', detectIntent)
   .addNode('ragGraph', ragGraph)
-  .addNode('workflowGraph', workflowGraph)
+  .addNode('intentGraph', intentGraph)
   .addNode('persistTurn', persistTurn)
   .addNode('enrichConversation', enrichConversation)
 
   // Conditional
   .addConditionalEdges('detectIntent', routeByIntent, {
     ragGraph: 'ragGraph',
-    workflowGraph: 'workflowGraph',
+    intentGraph: 'intentGraph',
   })
 
   // Edges
@@ -54,8 +54,8 @@ const builder = new StateGraph({
   .addEdge('extractEntities', 'detectIntent')
   .addEdge('ragGraph', 'persistTurn')
   .addEdge('ragGraph', 'enrichConversation')
-  .addEdge('workflowGraph', 'persistTurn')
-  .addEdge('workflowGraph', 'enrichConversation')
+  .addEdge('intentGraph', 'persistTurn')
+  .addEdge('intentGraph', 'enrichConversation')
   .addEdge('persistTurn', END)
   .addEdge('enrichConversation', END);
 

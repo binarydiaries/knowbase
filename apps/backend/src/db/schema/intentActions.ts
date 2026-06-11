@@ -7,10 +7,11 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 import { cuid2PrimaryKey, timestamps } from '../../utils/columns.utils';
-import { workflows } from './workflows';
+import { intents } from './intents';
 
-export const workflowActionType = pgEnum('workflowActionType', [
+export const intentActionType = pgEnum('intentActionType', [
   'save_lead',
+  'send_email',
   'api_trigger',
   'calendar_booking',
 ]);
@@ -30,23 +31,23 @@ export type CalendarBookingConfig = {
 
 export type SaveLeadConfig = Record<string, never>;
 
-export type WorkflowActionConfig =
+export type IntentActionConfig =
   | ApiTriggerConfig
   | CalendarBookingConfig
   | SaveLeadConfig
   | Record<string, unknown>;
 
-export const workflowActions = pgTable(
-  'workflow_actions',
+export const intentActions = pgTable(
+  'intent_actions',
   {
     id: cuid2PrimaryKey,
-    workflowId: text()
+    intentId: text()
       .notNull()
-      .references(() => workflows.id, { onDelete: 'cascade' }),
+      .references(() => intents.id, { onDelete: 'cascade' }),
     order: integer().notNull().default(0),
-    actionType: workflowActionType().notNull(),
-    config: jsonb().$type<WorkflowActionConfig>().notNull().default({}),
+    actionType: intentActionType().notNull(),
+    config: jsonb().$type<IntentActionConfig>().notNull().default({}),
     ...timestamps,
   },
-  (t) => [index('workflow_actions_workflow_idx').on(t.workflowId)],
+  (t) => [index('intent_actions_intent_idx').on(t.intentId)],
 );

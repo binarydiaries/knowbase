@@ -63,7 +63,7 @@
 - [x] **Lead email notification** — done; `send_email` action type, toggle UI, generic queue
 - [x] **DB migration** — `20260610001000_add_trigger_instructions` applied successfully
 - [ ] **V1 cleanup** — delete `apps/backend/src/modules/chat/` (7 files) + remove `.use(Chat)` from `server.ts` once confirmed safe
-- [ ] **SDK regeneration** — regenerate dashboard `src/services/` from updated OpenAPI spec after all backend changes stabilise
+- [x] **SDK regeneration** — dashboard `src/services/` regenerated
 
 ---
 

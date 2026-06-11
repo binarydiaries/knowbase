@@ -104,14 +104,7 @@ function formValuesToWorkflowPayload(values: FormValues, agentId: string) {
     { actionType: 'save_lead', order: 0, config: {} },
   ];
   if (values.emailNotification) {
-    actions.push({
-      actionType: 'send_email',
-      order: 1,
-      config: {
-        ...(values.emailSubject?.trim() ? { subject: values.emailSubject.trim() } : {}),
-        ...(values.emailBody?.trim() ? { body: values.emailBody.trim() } : {}),
-      },
-    });
+    actions.push({ actionType: 'send_email', order: 1, config: {} });
   }
   return {
     agentId,

@@ -5,7 +5,7 @@ import { WorkflowActionSchema, WorkflowSchema, WorkflowWithActionsSchema } from 
 // ── Input schemas ─────────────────────────────────────────────────────────────
 
 const WorkflowActionInputSchema = z.object({
-  actionType: z.enum(['save_lead', 'api_trigger', 'calendar_booking']),
+  actionType: z.enum(['save_lead', 'send_email', 'api_trigger', 'calendar_booking']),
   order: z.number().int().min(0).default(0),
   config: z.record(z.string(), z.unknown()).default({}),
 });

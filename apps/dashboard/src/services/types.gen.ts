@@ -1311,7 +1311,7 @@ export type CreateWorkflowBody = {
         failure?: string;
     };
     actions: Array<{
-        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
         order: number;
         config: {
             [key: string]: unknown;
@@ -1329,7 +1329,7 @@ export type UpdateWorkflowBody = {
         failure?: string;
     };
     actions?: Array<{
-        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
         order: number;
         config: {
             [key: string]: unknown;

@@ -1227,7 +1227,7 @@ export type WorkflowActionSchema = {
     id: string;
     workflowId: string;
     order: number;
-    actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+    actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
     config: {
         method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
         url: string;
@@ -1241,6 +1241,9 @@ export type WorkflowActionSchema = {
     } | {
         provider: 'google';
         calendarId: string;
+    } | {
+        subject?: string;
+        body?: string;
     } | {
         [key: string]: never;
     } | {
@@ -1269,7 +1272,7 @@ export type WorkflowWithActionsSchema = {
         id: string;
         workflowId: string;
         order: number;
-        actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
         config: {
             method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
             url: string;
@@ -1283,6 +1286,9 @@ export type WorkflowWithActionsSchema = {
         } | {
             provider: 'google';
             calendarId: string;
+        } | {
+            subject?: string;
+            body?: string;
         } | {
             [key: string]: never;
         } | {
@@ -1351,7 +1357,7 @@ export type OneWorkflowResponse = {
             id: string;
             workflowId: string;
             order: number;
-            actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+            actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
             config: {
                 method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
                 url: string;
@@ -1365,6 +1371,9 @@ export type OneWorkflowResponse = {
             } | {
                 provider: 'google';
                 calendarId: string;
+            } | {
+                subject?: string;
+                body?: string;
             } | {
                 [key: string]: never;
             } | {
@@ -1396,7 +1405,7 @@ export type ManyWorkflowsResponse = {
             id: string;
             workflowId: string;
             order: number;
-            actionType: 'save_lead' | 'api_trigger' | 'calendar_booking';
+            actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
             config: {
                 method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
                 url: string;
@@ -1410,6 +1419,9 @@ export type ManyWorkflowsResponse = {
             } | {
                 provider: 'google';
                 calendarId: string;
+            } | {
+                subject?: string;
+                body?: string;
             } | {
                 [key: string]: never;
             } | {
@@ -1919,6 +1931,35 @@ export type PostChatv2Responses = {
      */
     200: unknown;
 };
+
+export type GetChatv2ChannelData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/chatv2/channel';
+};
+
+export type GetChatv2ChannelErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
+};
+
+export type GetChatv2ChannelError = GetChatv2ChannelErrors[keyof GetChatv2ChannelErrors];
+
+export type GetChatv2ChannelResponses = {
+    /**
+     * Response for status 200
+     */
+    200: ChatV2ChannelResponseSchema;
+};
+
+export type GetChatv2ChannelResponse = GetChatv2ChannelResponses[keyof GetChatv2ChannelResponses];
 
 export type PostChatv2PreviewData = {
     body: ChatV2BodySchema;

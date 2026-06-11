@@ -15,7 +15,7 @@
 - [x] Conversation enrichment — `enrichConversation` node runs in parallel with `persistTurn`; geo (IP → country) + topic label (nano LLM, new conversations only); fire-and-forget, gating for paid plans to be added later
 - [x] Agent status guard — `loadAgent` throws if `agentStatus !== 'active'`
 - [x] AI cost tracking — `CostTrackingHandler` LangChain callback in `graph/utils/cost.ts`; wired into all LLM nodes via `createCostCallback({ orgId, agentId, conversationId, nodeName })` passed to `createLlm` / `createNanoLlm` / `createStreamingNanoLlm` factory args; covers generateRagResponse, collectMissingData, extractEntities, detectIntent, rewriteQuery, scoreSentiment, enrichConversation (topic label)
-- [ ] Lead email notification — `executeActions` save_lead action doesn't fire email; revisit when notification model is redesigned
+- [x] Lead email notification — `send_email` workflow action type; toggle in `LeadCaptureDrawer`; generic `send-email` queue job; action handlers extracted to `graph/actions/`
 - [x] Gating — sentiment scoring in `persistTurn` behind `isPaid` config flag
 - [x] Gating — enrichment (geo + topic) in `enrichConversation` behind `isPaid` config flag
 - [x] Fix hardcoded conversationId in executeActions — replaced stub with real thread_id from config
@@ -60,10 +60,10 @@
 
 ## Remaining
 
-- [ ] **Lead email notification** — deferred; revisit when notification model is redesigned
+- [x] **Lead email notification** — done; `send_email` action type, toggle UI, generic queue
+- [x] **DB migration** — `20260610001000_add_trigger_instructions` applied successfully
 - [ ] **V1 cleanup** — delete `apps/backend/src/modules/chat/` (7 files) + remove `.use(Chat)` from `server.ts` once confirmed safe
 - [ ] **SDK regeneration** — regenerate dashboard `src/services/` from updated OpenAPI spec after all backend changes stabilise
-- [ ] **DB migration** — run `bun run db:migrate` in `apps/backend/` for `20260610001000_add_trigger_instructions`
 
 ---
 

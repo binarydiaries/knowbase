@@ -1,8 +1,8 @@
-export interface ILeadNotificationJob {
-  type: 'lead-notification';
-  leadId: string;
-  agentId: string;
-  orgId: string;
+export interface ISendEmailJob {
+  type: 'send-email';
+  to: string;
+  subject: string;
+  html: string;
 }
 
 export interface IDocumentEmailJob {
@@ -12,4 +12,5 @@ export interface IDocumentEmailJob {
   documentTitle: string;
 }
 
-export type IEmailJob = ILeadNotificationJob | IDocumentEmailJob;
+
+export type IEmailJob = ISendEmailJob | IDocumentEmailJob;

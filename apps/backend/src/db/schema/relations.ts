@@ -1,22 +1,23 @@
 import { defineRelations } from 'drizzle-orm';
+import { agents } from './agents';
 import { aiCostEvents } from './aiCostEvents';
-import { demoBookings } from './demoBookings';
 import { behaviors } from './behaviors';
 import { channels } from './channels';
-import { agentActions } from './agentActions';
-import { agents } from './agents';
 import { conversations } from './conversations';
+import { demoBookings } from './demoBookings';
 import { documents } from './documents';
 import { embeddings } from './embeddings';
+import { featureFlagDefinitions } from './featureFlagDefinitions';
 import { leads } from './leads';
 import { messages } from './messages';
+import { orgFeatureFlags } from './orgFeatureFlags';
+import { orgSubscriptions } from './orgSubscriptions';
 import { orgUsageDaily } from './orgUsageDaily';
 import { orgUsageMonthly } from './orgUsageMonthly';
-import { orgSubscriptions } from './orgSubscriptions';
-import { whatsappConnections } from './whatsappConnections';
 import { slackConnections } from './slackConnections';
-import { featureFlagDefinitions } from './featureFlagDefinitions';
-import { orgFeatureFlags } from './orgFeatureFlags';
+import { whatsappConnections } from './whatsappConnections';
+import { intentActions } from './intentActions';
+import { intents } from './intents';
 
 export const relations = defineRelations(
   {
@@ -25,7 +26,6 @@ export const relations = defineRelations(
     demoBookings,
     channels,
     behaviors,
-    agentActions,
     documents,
     conversations,
     messages,
@@ -38,6 +38,8 @@ export const relations = defineRelations(
     slackConnections,
     featureFlagDefinitions,
     orgFeatureFlags,
+    intents,
+    intentActions,
   },
   (r) => ({
     agents: {
@@ -52,10 +54,6 @@ export const relations = defineRelations(
       documents: r.many.documents({
         from: r.agents.id,
         to: r.documents.agentId,
-      }),
-      agentActions: r.many.agentActions({
-        from: r.agents.id,
-        to: r.agentActions.agentId,
       }),
       leads: r.many.leads({
         from: r.agents.id,
@@ -102,12 +100,6 @@ export const relations = defineRelations(
         to: r.documents.id,
       }),
     },
-    agentActions: {
-      agent: r.one.agents({
-        from: r.agentActions.agentId,
-        to: r.agents.id,
-      }),
-    },
     leads: {
       agent: r.one.agents({
         from: r.leads.agentId,
@@ -131,5 +123,18 @@ export const relations = defineRelations(
     featureFlagDefinitions: {},
     orgFeatureFlags: {},
     demoBookings: {},
+    intents: {
+      agent: r.one.agents({ from: r.intents.agentId, to: r.agents.id }),
+      actions: r.many.intentActions({
+        from: r.intents.id,
+        to: r.intentActions.intentId,
+      }),
+    },
+    intentActions: {
+      intent: r.one.intents({
+        from: r.intentActions.intentId,
+        to: r.intents.id,
+      }),
+    },
   }),
 );

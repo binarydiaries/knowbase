@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 
-export const baseUrl = `${import.meta.env.VITE_API_BASE}/chat`;
+/** Chat message endpoint — v2 pipeline */
+export const baseUrl = `${import.meta.env.VITE_API_BASE}/chatv2`;
 
 export const getChannel = async (
   channelId: string,

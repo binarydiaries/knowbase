@@ -140,19 +140,19 @@ export type CountryDistributionResponseSchema = {
     }>;
 };
 
-export type ChatBodySchema = {
+export type ChatV2BodySchema = {
     conversationId: string;
     message: string;
     channelId: string;
     parentOrigin?: string;
 };
 
-export type ChatChannelQueryParamSchema = {
+export type ChatV2ChannelQueryParamSchema = {
     channelId: string;
     parentOrigin?: string;
 };
 
-export type ChatChannelResponseSchema = {
+export type ChatV2ChannelResponseSchema = {
     channel: {
         id: string;
         agentId: string;
@@ -1152,164 +1152,228 @@ export type BadRequestResponse = {
     message: string;
 };
 
-export type AgentActionSchema = {
+export type IntentSchema = {
     id: string;
     agentId: string;
-    actionType: 'lead_generation';
-    enabled: boolean;
-    config: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
-        };
-        triggerInstructions?: string;
-        successMessage?: string;
-    };
+    name: string;
+    triggerInstructions: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    } | null;
     createdBy: string;
     createdAt: string;
     updatedAt: string;
 };
 
-export type CreateAgentActionBody = {
-    agentId: string;
-    actionType: 'lead_generation';
+export type IntentActionSchema = {
+    id: string;
+    intentId: string;
+    order: number;
+    actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
     config: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+        url: string;
+        headers?: {
+            [key: string]: string;
         };
-        triggerInstructions?: string;
-        successMessage?: string;
+        bodyTemplate?: {
+            [key: string]: string;
+        };
+        responseInstructions?: string;
+    } | {
+        provider: 'google';
+        calendarId: string;
+    } | {
+        subject?: string;
+        body?: string;
+    } | {
+        [key: string]: never;
+    } | {
+        [key: string]: unknown;
     };
+    createdAt: string;
+    updatedAt: string;
 };
 
-export type UpdateAgentActionBody = {
-    enabled?: boolean;
-    config?: {
-        fields?: {
-            name?: {
-                collect: boolean;
-                required: boolean;
-            };
-            email?: {
-                collect: boolean;
-                required: boolean;
-            };
-            phone?: {
-                collect: boolean;
-                required: boolean;
-            };
-            company?: {
-                collect: boolean;
-                required: boolean;
-            };
-        };
-        triggerInstructions?: string;
-        successMessage?: string;
-    };
-};
-
-export type GetAgentActionsQuery = {
+export type IntentWithActionsSchema = {
+    id: string;
     agentId: string;
-};
-
-export type ManyAgentActionResponse = {
+    name: string;
+    triggerInstructions: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    } | null;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
     actions: Array<{
         id: string;
-        agentId: string;
-        actionType: 'lead_generation';
-        enabled: boolean;
+        intentId: string;
+        order: number;
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
         config: {
-            fields?: {
-                name?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                email?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                phone?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                company?: {
-                    collect: boolean;
-                    required: boolean;
-                };
+            method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+            url: string;
+            headers?: {
+                [key: string]: string;
             };
-            triggerInstructions?: string;
-            successMessage?: string;
+            bodyTemplate?: {
+                [key: string]: string;
+            };
+            responseInstructions?: string;
+        } | {
+            provider: 'google';
+            calendarId: string;
+        } | {
+            subject?: string;
+            body?: string;
+        } | {
+            [key: string]: never;
+        } | {
+            [key: string]: unknown;
         };
-        createdBy: string;
         createdAt: string;
         updatedAt: string;
     }>;
 };
 
-export type OneAgentActionResponse = {
-    action: {
+export type CreateIntentBody = {
+    agentId: string;
+    name: string;
+    triggerInstructions: string;
+    requiredFields: Array<string>;
+    executionMode: 'sequential' | 'parallel';
+    config?: {
+        success?: string;
+        failure?: string;
+    };
+    actions: Array<{
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
+        order: number;
+        config: {
+            [key: string]: unknown;
+        };
+    }>;
+};
+
+export type UpdateIntentBody = {
+    name?: string;
+    triggerInstructions?: string;
+    requiredFields?: Array<string>;
+    config?: {
+        success?: string;
+        failure?: string;
+    };
+    actions?: Array<{
+        actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
+        order: number;
+        config: {
+            [key: string]: unknown;
+        };
+    }>;
+};
+
+export type OneIntentResponse = {
+    intent: {
         id: string;
         agentId: string;
-        actionType: 'lead_generation';
-        enabled: boolean;
-        config: {
-            fields?: {
-                name?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                email?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                phone?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-                company?: {
-                    collect: boolean;
-                    required: boolean;
-                };
-            };
-            triggerInstructions?: string;
-            successMessage?: string;
-        };
+        name: string;
+        triggerInstructions: string;
+        requiredFields: Array<string>;
+        executionMode: 'sequential' | 'parallel';
+        config?: {
+            success?: string;
+            failure?: string;
+        } | null;
         createdBy: string;
         createdAt: string;
         updatedAt: string;
+        actions: Array<{
+            id: string;
+            intentId: string;
+            order: number;
+            actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
+            config: {
+                method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+                url: string;
+                headers?: {
+                    [key: string]: string;
+                };
+                bodyTemplate?: {
+                    [key: string]: string;
+                };
+                responseInstructions?: string;
+            } | {
+                provider: 'google';
+                calendarId: string;
+            } | {
+                subject?: string;
+                body?: string;
+            } | {
+                [key: string]: never;
+            } | {
+                [key: string]: unknown;
+            };
+            createdAt: string;
+            updatedAt: string;
+        }>;
     };
 };
 
-export type DeleteActionResponse = {
+export type ManyIntentsResponse = {
+    intents: Array<{
+        id: string;
+        agentId: string;
+        name: string;
+        triggerInstructions: string;
+        requiredFields: Array<string>;
+        executionMode: 'sequential' | 'parallel';
+        config?: {
+            success?: string;
+            failure?: string;
+        } | null;
+        createdBy: string;
+        createdAt: string;
+        updatedAt: string;
+        actions: Array<{
+            id: string;
+            intentId: string;
+            order: number;
+            actionType: 'save_lead' | 'send_email' | 'api_trigger' | 'calendar_booking';
+            config: {
+                method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+                url: string;
+                headers?: {
+                    [key: string]: string;
+                };
+                bodyTemplate?: {
+                    [key: string]: string;
+                };
+                responseInstructions?: string;
+            } | {
+                provider: 'google';
+                calendarId: string;
+            } | {
+                subject?: string;
+                body?: string;
+            } | {
+                [key: string]: never;
+            } | {
+                [key: string]: unknown;
+            };
+            createdAt: string;
+            updatedAt: string;
+        }>;
+    }>;
+};
+
+export type DeleteIntentResponse = {
     success: boolean;
 };
 
@@ -1446,25 +1510,6 @@ export type QueueActionResponseSchema = {
     action: string;
     state?: string;
     documentId?: string;
-};
-
-export type AdminOrgsOverviewResponseSchema = {
-    data: Array<{
-        orgId: string;
-        orgName: string | null;
-        agentCount: number;
-        conversationCount: number;
-        messageCount: number;
-        lastActiveAt: string | null;
-        currentMonthMessages: number;
-    }>;
-    meta: {
-        orgCount: number;
-        agentCount: number;
-        conversationCount: number;
-        messageCount: number;
-        monthKey: string;
-    };
 };
 
 export type GetUsageMessagesDailyData = {
@@ -1717,14 +1762,14 @@ export type GetAnalyticsCountryDistributionResponses = {
 
 export type GetAnalyticsCountryDistributionResponse = GetAnalyticsCountryDistributionResponses[keyof GetAnalyticsCountryDistributionResponses];
 
-export type PostChatData = {
-    body: ChatBodySchema;
+export type PostChatv2Data = {
+    body: ChatV2BodySchema;
     path?: never;
     query?: never;
-    url: '/chat';
+    url: '/chatv2';
 };
 
-export type PostChatErrors = {
+export type PostChatv2Errors = {
     /**
      * Response for status 403
      */
@@ -1735,48 +1780,52 @@ export type PostChatErrors = {
     404: NotFoundResponse;
 };
 
-export type PostChatError = PostChatErrors[keyof PostChatErrors];
+export type PostChatv2Error = PostChatv2Errors[keyof PostChatv2Errors];
 
-export type PostChatResponses = {
+export type PostChatv2Responses = {
     /**
      * Response for status 200
      */
     200: unknown;
 };
 
-export type GetChatChannelData = {
+export type GetChatv2ChannelData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/chat/channel';
+    url: '/chatv2/channel';
 };
 
-export type GetChatChannelErrors = {
+export type GetChatv2ChannelErrors = {
+    /**
+     * Response for status 403
+     */
+    403: ChatForbiddenResponse;
     /**
      * Response for status 404
      */
     404: NotFoundResponse;
 };
 
-export type GetChatChannelError = GetChatChannelErrors[keyof GetChatChannelErrors];
+export type GetChatv2ChannelError = GetChatv2ChannelErrors[keyof GetChatv2ChannelErrors];
 
-export type GetChatChannelResponses = {
+export type GetChatv2ChannelResponses = {
     /**
      * Response for status 200
      */
-    200: ChatChannelResponseSchema;
+    200: ChatV2ChannelResponseSchema;
 };
 
-export type GetChatChannelResponse = GetChatChannelResponses[keyof GetChatChannelResponses];
+export type GetChatv2ChannelResponse = GetChatv2ChannelResponses[keyof GetChatv2ChannelResponses];
 
-export type PostChatPreviewData = {
-    body: ChatBodySchema;
+export type PostChatv2PreviewData = {
+    body: ChatV2BodySchema;
     path?: never;
     query?: never;
-    url: '/chat/preview';
+    url: '/chatv2/preview';
 };
 
-export type PostChatPreviewErrors = {
+export type PostChatv2PreviewErrors = {
     /**
      * Response for status 401
      */
@@ -1791,9 +1840,9 @@ export type PostChatPreviewErrors = {
     404: NotFoundResponse;
 };
 
-export type PostChatPreviewError = PostChatPreviewErrors[keyof PostChatPreviewErrors];
+export type PostChatv2PreviewError = PostChatv2PreviewErrors[keyof PostChatv2PreviewErrors];
 
-export type PostChatPreviewResponses = {
+export type PostChatv2PreviewResponses = {
     /**
      * Response for status 200
      */
@@ -2892,41 +2941,45 @@ export type DeleteSlackBindByChannelIdErrors = {
 
 export type DeleteSlackBindByChannelIdError = DeleteSlackBindByChannelIdErrors[keyof DeleteSlackBindByChannelIdErrors];
 
-export type GetAgentActionsData = {
+export type GetIntentsData = {
     body?: never;
     path?: never;
     query: {
         agentId: string;
     };
-    url: '/agent-actions';
+    url: '/intents';
 };
 
-export type GetAgentActionsErrors = {
+export type GetIntentsErrors = {
     /**
      * Response for status 401
      */
     401: UnauthorizedSchema;
+    /**
+     * Response for status 404
+     */
+    404: NotFoundResponse;
 };
 
-export type GetAgentActionsError = GetAgentActionsErrors[keyof GetAgentActionsErrors];
+export type GetIntentsError = GetIntentsErrors[keyof GetIntentsErrors];
 
-export type GetAgentActionsResponses = {
+export type GetIntentsResponses = {
     /**
      * Response for status 200
      */
-    200: ManyAgentActionResponse;
+    200: ManyIntentsResponse;
 };
 
-export type GetAgentActionsResponse = GetAgentActionsResponses[keyof GetAgentActionsResponses];
+export type GetIntentsResponse = GetIntentsResponses[keyof GetIntentsResponses];
 
-export type PostAgentActionsData = {
-    body: CreateAgentActionBody;
+export type PostIntentsData = {
+    body: CreateIntentBody;
     path?: never;
     query?: never;
-    url: '/agent-actions';
+    url: '/intents';
 };
 
-export type PostAgentActionsErrors = {
+export type PostIntentsErrors = {
     /**
      * Response for status 401
      */
@@ -2941,54 +2994,54 @@ export type PostAgentActionsErrors = {
     404: NotFoundResponse;
 };
 
-export type PostAgentActionsError = PostAgentActionsErrors[keyof PostAgentActionsErrors];
+export type PostIntentsError = PostIntentsErrors[keyof PostIntentsErrors];
 
-export type PostAgentActionsResponses = {
+export type PostIntentsResponses = {
     /**
      * Response for status 200
      */
-    200: OneAgentActionResponse;
+    200: OneIntentResponse;
 };
 
-export type PostAgentActionsResponse = PostAgentActionsResponses[keyof PostAgentActionsResponses];
+export type PostIntentsResponse = PostIntentsResponses[keyof PostIntentsResponses];
 
-export type DeleteAgentActionsByIdData = {
+export type DeleteIntentsByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/agent-actions/{id}';
+    url: '/intents/{id}';
 };
 
-export type DeleteAgentActionsByIdErrors = {
+export type DeleteIntentsByIdErrors = {
     /**
      * Response for status 404
      */
     404: NotFoundResponse;
 };
 
-export type DeleteAgentActionsByIdError = DeleteAgentActionsByIdErrors[keyof DeleteAgentActionsByIdErrors];
+export type DeleteIntentsByIdError = DeleteIntentsByIdErrors[keyof DeleteIntentsByIdErrors];
 
-export type DeleteAgentActionsByIdResponses = {
+export type DeleteIntentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: DeleteActionResponse;
+    200: DeleteIntentResponse;
 };
 
-export type DeleteAgentActionsByIdResponse = DeleteAgentActionsByIdResponses[keyof DeleteAgentActionsByIdResponses];
+export type DeleteIntentsByIdResponse = DeleteIntentsByIdResponses[keyof DeleteIntentsByIdResponses];
 
-export type PatchAgentActionsByIdData = {
-    body: UpdateAgentActionBody;
+export type PatchIntentsByIdData = {
+    body: UpdateIntentBody;
     path: {
         id: string;
     };
     query?: never;
-    url: '/agent-actions/{id}';
+    url: '/intents/{id}';
 };
 
-export type PatchAgentActionsByIdErrors = {
+export type PatchIntentsByIdErrors = {
     /**
      * Response for status 403
      */
@@ -2999,16 +3052,16 @@ export type PatchAgentActionsByIdErrors = {
     404: NotFoundResponse;
 };
 
-export type PatchAgentActionsByIdError = PatchAgentActionsByIdErrors[keyof PatchAgentActionsByIdErrors];
+export type PatchIntentsByIdError = PatchIntentsByIdErrors[keyof PatchIntentsByIdErrors];
 
-export type PatchAgentActionsByIdResponses = {
+export type PatchIntentsByIdResponses = {
     /**
      * Response for status 200
      */
-    200: OneAgentActionResponse;
+    200: OneIntentResponse;
 };
 
-export type PatchAgentActionsByIdResponse = PatchAgentActionsByIdResponses[keyof PatchAgentActionsByIdResponses];
+export type PatchIntentsByIdResponse = PatchIntentsByIdResponses[keyof PatchIntentsByIdResponses];
 
 export type PostDemoData = {
     body: CreateDemoBookingSchema;
@@ -3395,12 +3448,3 @@ export type GetAdminOrgsOverviewErrors = {
 };
 
 export type GetAdminOrgsOverviewError = GetAdminOrgsOverviewErrors[keyof GetAdminOrgsOverviewErrors];
-
-export type GetAdminOrgsOverviewResponses = {
-    /**
-     * Response for status 200
-     */
-    200: AdminOrgsOverviewResponseSchema;
-};
-
-export type GetAdminOrgsOverviewResponse = GetAdminOrgsOverviewResponses[keyof GetAdminOrgsOverviewResponses];

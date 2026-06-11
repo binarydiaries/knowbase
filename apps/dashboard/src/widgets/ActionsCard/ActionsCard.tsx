@@ -5,96 +5,110 @@ import {
   CardHeader,
   CardTitle,
 } from '@knowbase/ui/components/card';
-import { Separator } from '@knowbase/ui/components/separator';
-import { toast } from '@knowbase/ui/components/sonner';
 import { Switch } from '@knowbase/ui/components/switch';
+import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { LockIcon, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
-import {
-  getAgentActions,
-  patchAgentActionsById,
-  postAgentActions,
-} from '@/services';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { deleteIntentsById, getIntents, postIntents } from '@/services';
 import { getErrorMessage } from '@/utils/errorHelper';
+import { DEFAULT_SUCCESS, DEFAULT_TRIGGER, LEAD_GENERATION_INTENT } from './leadCapture/constants';
+import { LeadCaptureDrawer } from './leadCapture/LeadCaptureDrawer';
 
-// import { LeadGenerationConfigDrawer } from './LeadGenerationConfigDrawer'; // LEAD_GENERATION_DISABLED: uncomment to restore
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-// LEAD_GENERATION_DISABLED: uncomment to restore the lead_generation action type
-// const ACTION_TYPES = [
-//   {
-//     id: 'lead_generation' as const,
-//     label: 'Lead Generation',
-//     description: 'Capture contact info (name, email, phone) through natural conversation.',
-//     icon: UserRound,
-//   },
-// ];
-const ACTION_TYPES: Array<{
-  id: 'lead_generation';
-  label: string;
-  description: string;
-  icon: typeof UserRound;
-}> = [];
+type IntentRow = {
+  id: string;
+  name: string;
+  triggerInstructions: string;
+  requiredFields: string[];
+  config: { success?: string; failure?: string } | null;
+  actions: { actionType: string }[];
+};
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { agentId } = useParams({ strict: false });
   if (!agentId) throw new Error('agentId not available');
-  const queryClient = useQueryClient();
-  // const [configuringActionId, setConfiguringActionId] = useState<string | null>(
-  //   null,
-  // );
-  const { plan } = useClerkPlan();
-  const hasLeadGeneration = plan !== 'free';
 
-  const actionsQuery = useQuery({
-    queryKey: ['agent-actions', agentId],
-    queryFn: () => getAgentActions({ query: { agentId } }),
+  const queryClient = useQueryClient();
+  const { plan } = useClerkPlan();
+  const isLocked = plan === 'free';
+  const { data: flags } = useFeatureFlags();
+  const leadGenFlagEnabled = !!flags?.['lead_generation'];
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const intentsQuery = useQuery({
+    queryKey: ['intents', agentId],
+    queryFn: () => getIntents({ query: { agentId } }),
   });
 
-  const actions = actionsQuery.data?.data.actions ?? [];
+  const intents: IntentRow[] = (intentsQuery.data?.data.intents ?? []) as IntentRow[];
+  const leadGenIntent = intents.find((w) =>
+    w.actions.some((a) => a.actionType === 'save_lead'),
+  ) ?? null;
 
-  const getAction = (type: 'lead_generation') =>
-    actions.find((a) => a.actionType === type);
+  const isEnabled = leadGenIntent !== null;
 
-  const toggleMutation = useMutation({
-    mutationFn: async ({
-      type,
-      enabled,
-    }: {
-      type: 'lead_generation';
-      enabled: boolean;
-    }) => {
-      const existing = getAction(type);
-      if (existing) {
-        await patchAgentActionsById({
-          path: { id: existing.id },
-          body: { enabled },
-        });
-      } else {
-        await postAgentActions({
-          body: { agentId, actionType: type, config: {} },
-        });
-      }
-    },
-    onSuccess: (_, variables) => {
-      const actionLabel =
-        ACTION_TYPES.find((a) => a.id === variables.type)?.label ?? 'Action';
-      toast.success(
-        `${actionLabel} ${variables.enabled ? 'enabled' : 'disabled'}`,
-      );
-      queryClient.invalidateQueries({ queryKey: ['agent-actions', agentId] });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ['intents', agentId] });
+
+  // Enable: create default lead gen intent
+  const enableMutation = useMutation({
+    mutationFn: () =>
+      postIntents({
+        body: {
+          agentId,
+          name: LEAD_GENERATION_INTENT,
+          triggerInstructions: DEFAULT_TRIGGER,
+          requiredFields: ['name', 'email'],
+          executionMode: 'sequential',
+          config: { success: DEFAULT_SUCCESS },
+          actions: [{ actionType: 'save_lead', order: 0, config: {} }],
+        },
+      }),
+    onSuccess: () => {
+      toast.success('Lead generation enabled.');
+      invalidate();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
     },
   });
 
-  // const configuredAction = configuringActionId
-  //   ? getAction(configuringActionId as 'lead_generation')
-  //   : null;
+  // Disable: delete the intent
+  const disableMutation = useMutation({
+    mutationFn: () =>
+      deleteIntentsById({ path: { id: leadGenIntent!.id } }),
+    onSuccess: () => {
+      toast.success('Lead generation disabled.');
+      invalidate();
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
 
-  if (ACTION_TYPES.length === 0) return null;
+  const handleToggle = (checked: boolean) => {
+    if (checked) {
+      enableMutation.mutate();
+    } else {
+      disableMutation.mutate();
+    }
+  };
+
+  const isPending =
+    enableMutation.isPending ||
+    disableMutation.isPending ||
+    intentsQuery.isLoading;
+
+  // Hide the entire card if the lead_generation feature flag is off
+  if (!leadGenFlagEnabled) return null;
 
   return (
     <>
@@ -106,88 +120,65 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-0 p-0">
-          {ACTION_TYPES.map((actionType, index) => {
-            const action = getAction(actionType.id);
-            const isEnabled = action?.enabled ?? false;
-            const Icon = actionType.icon;
-            const isLocked =
-              actionType.id === 'lead_generation' && !hasLeadGeneration;
-
-            return (
-              <div key={actionType.id}>
-                {index > 0 && <Separator />}
-                <div
-                  className={`flex items-center justify-between px-6 py-4 ${isLocked ? 'opacity-60' : ''}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-md border p-2">
-                      <Icon className="size-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium">
-                          {actionType.label}
-                        </p>
-                        {isLocked && (
-                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border rounded-full px-2 py-0.5">
-                            <LockIcon className="size-3" />
-                            Starter+
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {isLocked
-                          ? 'Upgrade to Starter or above to enable lead generation.'
-                          : actionType.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {isEnabled && !isLocked && (
-                      <button
-                        type="button"
-                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        // onClick={() => setConfiguringActionId(actionType.id)}
-                        disabled={readOnly}
-                      >
-                        Configure
-                      </button>
-                    )}
-                    <Switch
-                      checked={isEnabled}
-                      disabled={
-                        readOnly || isLocked || toggleMutation.isPending
-                      }
-                      onCheckedChange={(checked) =>
-                        toggleMutation.mutate({
-                          type: actionType.id,
-                          enabled: checked,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
+          {/* Lead Generation row */}
+          <div
+            className={`flex items-center justify-between px-6 py-4 ${isLocked ? 'opacity-60' : ''}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-md border p-2">
+                <UserRound className="size-4 text-muted-foreground" />
               </div>
-            );
-          })}
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">Lead Generation</p>
+                  {isLocked && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border rounded-full px-2 py-0.5">
+                      <LockIcon className="size-3" />
+                      Starter+
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {isLocked
+                    ? 'Upgrade to Starter or above to enable lead generation.'
+                    : 'Capture contact info (name, email, phone) through natural conversation.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {isEnabled && !isLocked && !readOnly && (
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setDrawerOpen(true)}
+                >
+                  Configure
+                </button>
+              )}
+              <Switch
+                checked={isEnabled}
+                disabled={readOnly || isLocked || isPending}
+                onCheckedChange={handleToggle}
+              />
+            </div>
+          </div>
+
+          {/* Divider placeholder — more action types can be added below */}
+          {/* <Separator /> */}
         </CardContent>
       </Card>
 
-      {/* LEAD_GENERATION_DISABLED: uncomment to restore the config drawer
-      {configuredAction && (
-        <LeadGenerationConfigDrawer
-          action={configuredAction}
-          open={configuringActionId === 'lead_generation'}
-          onClose={() => setConfiguringActionId(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({
-              queryKey: ['agent-actions', agentId],
-            });
-            setConfiguringActionId(null);
-          }}
-        />
-      )}
-      */}
+      <LeadCaptureDrawer
+        agentId={agentId}
+        intent={leadGenIntent}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSaved={() => {
+          setDrawerOpen(false);
+          invalidate();
+        }}
+      />
     </>
   );
 };

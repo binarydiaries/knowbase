@@ -8,7 +8,7 @@ import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
-import { ChatService } from '../chat/service';
+import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from './connectionService';
 import { generateOrgVerifyToken, verifyOrgVerifyToken } from './verifyToken';
@@ -404,7 +404,7 @@ async function processInboundMessage(body: unknown) {
           await ChannelService.findByWhatsappPhoneNumberId(phoneNumberId);
         if (!result?.enabled || !result.agent) continue;
 
-        await ChatService.sendWhatsApp({
+        await ChatV2Service.sendWhatsApp({
           channelId: result.id,
           orgId: result.agent.orgId,
           senderPhone: msg.from,

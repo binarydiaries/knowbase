@@ -39,7 +39,7 @@ const AgentPreviewContent = ({
   const { messages, setMessages, sendMessage, status } = useChat({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
-      api: `${import.meta.env.VITE_API_BASE}/chat/preview`,
+      api: `${import.meta.env.VITE_API_BASE}/chatv2/preview`,
       fetch: async (url, init) => {
         const token = await getToken();
         return fetch(url, {
@@ -99,11 +99,16 @@ const AgentPreviewContent = ({
       isLoading={status === 'submitted'}
       inputDisabled={isUsageExhausted}
       alertMessage={alertMessage}
-      messages={messages.map((value) => ({
-        id: value.id,
-        message: value.parts.find((v) => v?.type === 'text')?.text || '',
-        type: value.role === 'user' ? 'user' : 'system',
-      }))}
+      messages={messages
+        .filter((m) => {
+          const text = m.parts.find((p) => p.type === 'text')?.text;
+          return typeof text === 'string' && text.trim().length > 0;
+        })
+        .map((value) => ({
+          id: value.id,
+          message: value.parts.find((v) => v?.type === 'text')?.text ?? '',
+          type: value.role === 'user' ? 'user' : 'system',
+        }))}
       onSendMessage={(message) => {
         sendMessage({ text: message }, { body: { channelId: channelWeb.id } });
       }}

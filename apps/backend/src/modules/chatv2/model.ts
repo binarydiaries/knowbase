@@ -2,24 +2,24 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { ChannelSchema } from '../channel/model';
 
-const ChatBodySchema = z.object({
+const ChatV2BodySchema = z.object({
   conversationId: z.string(),
   message: z.string(),
   channelId: z.string(),
   parentOrigin: z.string().optional(),
 });
 
-const ChatChannelQueryParamSchema = z.object({
+const ChatV2ChannelQueryParamSchema = z.object({
   channelId: z.string(),
   parentOrigin: z.string().optional(),
 });
 
-const ChatChannelResponseSchema = z.object({
+const ChatV2ChannelResponseSchema = z.object({
   channel: ChannelSchema,
 });
 
-export const Model = new Elysia().model({
-  ChatBodySchema,
-  ChatChannelQueryParamSchema,
-  ChatChannelResponseSchema,
+export const ModelV2 = new Elysia().model({
+  ChatV2BodySchema,
+  ChatV2ChannelQueryParamSchema,
+  ChatV2ChannelResponseSchema,
 });

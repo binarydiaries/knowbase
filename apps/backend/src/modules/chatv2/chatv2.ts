@@ -4,15 +4,19 @@ import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import type { IChannelWebConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
-import { Model } from './model';
-import { ChatService, DomainNotAllowedError, MessageLimitReachedError, NotFoundError } from './service';
+import { ModelV2 } from './model';
+import {
+  ChatV2Service,
+  DomainNotAllowedError,
+  MessageLimitReachedError,
+  NotFoundError,
+} from './service';
 
 function isDomainAllowed(origin: string | undefined, allowedDomains: string[]): boolean {
   if (!allowedDomains.length) return true;
   if (!origin) return false;
   try {
-    const host = new URL(origin).hostname;
-    return allowedDomains.includes(host);
+    return allowedDomains.includes(new URL(origin).hostname);
   } catch {
     return false;
   }
@@ -37,13 +41,14 @@ function handleChatError(error: unknown, status: Function) {
   throw error;
 }
 
-export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
-  .use(Model)
+export const ChatV2 = new Elysia({ prefix: '/chatv2', tags: ['Chats V2'] })
+  .use(ModelV2)
   .use(ErrorModel)
+  // ── Public web endpoint — no AuthGuard (customer-facing widget) ────────────
   .post(
     '',
     async ({ body, status, headers }) => {
-      const { message, channelId, conversationId } = body;
+      const { message, channelId, conversationId, parentOrigin } = body;
       const ip =
         (headers['x-forwarded-for'] as string | undefined)
           ?.split(',')[0]
@@ -52,11 +57,11 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
         undefined;
 
       try {
-        return await ChatService.sendWeb({
-          conversationId,
-          message: message,
+        return await ChatV2Service.sendWeb({
           channelId,
-          parentOrigin: body.parentOrigin,
+          conversationId,
+          message,
+          parentOrigin,
           ip,
         });
       } catch (error) {
@@ -64,7 +69,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       }
     },
     {
-      body: 'ChatBodySchema',
+      body: 'ChatV2BodySchema',
       response: {
         200: z.any(),
         403: 'ChatForbiddenResponse',
@@ -72,6 +77,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       },
     },
   )
+  // ── Public channel info — fetched by the widget on load ───────────────────
   .get(
     '/channel',
     async ({ query, status }) => {
@@ -88,18 +94,18 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
         }
       }
 
-      return {
-        channel: ChannelService.transformChannel(channel),
-      };
+      return { channel: ChannelService.transformChannel(channel) };
     },
     {
-      query: 'ChatChannelQueryParamSchema',
+      query: 'ChatV2ChannelQueryParamSchema',
       response: {
-        200: 'ChatChannelResponseSchema',
+        200: 'ChatV2ChannelResponseSchema',
+        403: 'ChatForbiddenResponse',
         404: 'NotFoundResponse',
       },
     },
   )
+  // ── Auth-guarded routes ────────────────────────────────────────────────────
   .use(AuthGuard)
   .post(
     '/preview',
@@ -112,7 +118,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       }
 
       try {
-        return await ChatService.send({
+        return await ChatV2Service.sendPreview({
           agentId: channel.agentId,
           conversationId,
           channelId,
@@ -124,7 +130,7 @@ export const Chat = new Elysia({ prefix: '/chat', tags: ['Chats'] })
       }
     },
     {
-      body: 'ChatBodySchema',
+      body: 'ChatV2BodySchema',
       response: {
         200: z.any(),
         403: 'ChatForbiddenResponse',

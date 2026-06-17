@@ -1,0 +1,57 @@
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, sans-serif">
+  <title>How Agenvik routes every message</title>
+  <desc>Every message is classified by intent, then routed to either answer a question from the knowledge base or run a multi-step business workflow.</desc>
+
+  <rect width="720" height="300" fill="#f8f7fc" rx="12"/>
+
+  <!-- Step 1: User message -->
+  <rect x="24" y="110" width="120" height="80" rx="10" fill="#301B69"/>
+  <text x="84" y="144" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">User</text>
+  <text x="84" y="160" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">Message</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="144" y1="150" x2="186" y2="150" stroke="#c4b8e8" stroke-width="2"/>
+  <polygon points="186,145 196,150 186,155" fill="#c4b8e8"/>
+
+  <!-- Step 2: Understand intent -->
+  <rect x="196" y="110" width="148" height="80" rx="10" fill="#ffffff" stroke="#c4b8e8" stroke-width="1.5"/>
+  <text x="270" y="140" font-size="11.5" font-weight="600" fill="#301B69" text-anchor="middle">Understand</text>
+  <text x="270" y="156" font-size="11.5" font-weight="600" fill="#301B69" text-anchor="middle">Intent</text>
+  <text x="270" y="176" font-size="10" fill="#7c6fa0" text-anchor="middle">What is the user trying to do?</text>
+
+  <!-- Arrow 2→diamond -->
+  <line x1="344" y1="150" x2="386" y2="150" stroke="#c4b8e8" stroke-width="2"/>
+  <polygon points="386,145 396,150 386,155" fill="#c4b8e8"/>
+
+  <!-- Decision diamond -->
+  <polygon points="446,115 496,150 446,185 396,150" fill="#ede9f8" stroke="#c4b8e8" stroke-width="1.5"/>
+  <text x="446" y="147" font-size="10.5" fill="#301B69" text-anchor="middle" font-weight="600">Route</text>
+  <text x="446" y="161" font-size="10.5" fill="#301B69" text-anchor="middle" font-weight="600">by intent</text>
+
+  <!-- Arrow up to Q&A -->
+  <line x1="446" y1="115" x2="446" y2="72" stroke="#c4b8e8" stroke-width="2"/>
+  <line x1="446" y1="72" x2="530" y2="72" stroke="#c4b8e8" stroke-width="2"/>
+  <polygon points="530,67 540,72 530,77" fill="#c4b8e8"/>
+  <text x="484" y="64" font-size="10" fill="#7c6fa0" text-anchor="middle">question</text>
+
+  <!-- Arrow down to Workflow -->
+  <line x1="446" y1="185" x2="446" y2="228" stroke="#c4b8e8" stroke-width="2"/>
+  <line x1="446" y1="228" x2="530" y2="228" stroke="#c4b8e8" stroke-width="2"/>
+  <polygon points="530,223 540,228 530,233" fill="#c4b8e8"/>
+  <text x="484" y="248" font-size="10" fill="#7c6fa0" text-anchor="middle">workflow</text>
+
+  <!-- Box: Answer from KB -->
+  <rect x="540" y="40" width="156" height="64" rx="10" fill="#ffffff" stroke="#c4b8e8" stroke-width="1.5"/>
+  <text x="618" y="66" font-size="11.5" font-weight="600" fill="#301B69" text-anchor="middle">Answer from</text>
+  <text x="618" y="82" font-size="11.5" font-weight="600" fill="#301B69" text-anchor="middle">Knowledge Base</text>
+  <text x="618" y="97" font-size="10" fill="#7c6fa0" text-anchor="middle">instant, accurate reply</text>
+
+  <!-- Box: Run workflow -->
+  <rect x="540" y="196" width="156" height="64" rx="10" fill="#301B69"/>
+  <text x="618" y="220" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">Run Multi-step</text>
+  <text x="618" y="236" font-size="11.5" font-weight="600" fill="#fff" text-anchor="middle">Workflow</text>
+  <text x="618" y="252" font-size="10" fill="#c4b8e8" text-anchor="middle">collect → validate → act</text>
+
+  <!-- Bottom caption -->
+  <text x="360" y="288" font-size="10.5" fill="#9985b5" text-anchor="middle">Every message follows this path — powered by LangGraph</text>
+</svg>

@@ -1,10 +1,10 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
 import type { State } from '../state';
 import { createNanoLlm } from '../utils/llm';
-import { getLastUserMessage } from '../utils/messages';
+import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 export { INTENT_QUESTION_ANSWERING };
 
@@ -13,15 +13,6 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
 
   if (!intents || intents.length === 0) {
     return { intent: INTENT_QUESTION_ANSWERING };
-  }
-
-  // Fast path: when we've already asked for optional fields and all required
-  // fields are satisfied, the user's next message is always a response to the
-  // optional ask (provide value or skip). Skip the LLM — a single-word company
-  // name like "Arokart" is ambiguous enough that nano models misclassify it as
-  // Q&A. We already know the intent context from state.
-  if (activeIntent && askedOptionalFields && !missingFields?.length) {
-    return { intent: activeIntent.name };
   }
 
   const userContent = getLastUserMessage(state);
@@ -85,10 +76,19 @@ If the user's message provides that information or declines to share it, classif
 If the user is clearly asking a general question, classify it as "${INTENT_QUESTION_ANSWERING}".`;
   }
 
-  const { intent } = await structuredLlm.invoke([
-    new SystemMessage(systemPrompt),
-    new HumanMessage(userContent),
-  ]);
+  // Include the previous assistant message when classifying mid-intent turns.
+  // "Arokart" alone is ambiguous; "Arokart" after "Can you share your company
+  // name?" is clearly providing the value. The LLM needs that context to
+  // distinguish a value/skip from an off-topic Q&A question.
+  const lastBotMessage = (activeIntent && (missingFields?.length || askedOptionalFields))
+    ? getLastAssistantMessage(state)
+    : null;
+
+  const classifyMessages = lastBotMessage
+    ? [new SystemMessage(systemPrompt), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
+    : [new SystemMessage(systemPrompt), new HumanMessage(userContent)];
+
+  const { intent } = await structuredLlm.invoke(classifyMessages);
 
   return { intent };
 };

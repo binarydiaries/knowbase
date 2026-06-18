@@ -15,6 +15,15 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
     return { intent: INTENT_QUESTION_ANSWERING };
   }
 
+  // Fast path: when we've already asked for optional fields and all required
+  // fields are satisfied, the user's next message is always a response to the
+  // optional ask (provide value or skip). Skip the LLM — a single-word company
+  // name like "Arokart" is ambiguous enough that nano models misclassify it as
+  // Q&A. We already know the intent context from state.
+  if (activeIntent && askedOptionalFields && !missingFields?.length) {
+    return { intent: activeIntent.name };
+  }
+
   const userContent = getLastUserMessage(state);
 
   if (!userContent) {

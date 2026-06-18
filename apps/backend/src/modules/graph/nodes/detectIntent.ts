@@ -9,7 +9,7 @@ import { getLastUserMessage } from '../utils/messages';
 export { INTENT_QUESTION_ANSWERING };
 
 export const detectIntent: GraphNode<typeof State> = async (state, config) => {
-  const { intents, activeIntent, missingFields } = state;
+  const { intents, activeIntent, missingFields, optionalMissingFields, askedOptionalFields } = state;
 
   if (!intents || intents.length === 0) {
     return { intent: INTENT_QUESTION_ANSWERING };
@@ -65,6 +65,15 @@ The last question asked the user for their "${nextField}".
 
 If the user's message looks like an answer to that question (e.g. providing a name, email, or other personal detail), classify it as "${activeIntent.name}".
 If the user is clearly asking a general question unrelated to providing that information, classify it as "${INTENT_QUESTION_ANSWERING}".`;
+  } else if (activeIntent && askedOptionalFields && optionalMissingFields && optionalMissingFields.length > 0) {
+    const fields = optionalMissingFields.join(', ');
+    systemPrompt += `
+
+The assistant is currently collecting information for the "${activeIntent.name}" intent.
+The last question asked the user for optional information: ${fields}.
+
+If the user's message provides that information or declines to share it, classify it as "${activeIntent.name}".
+If the user is clearly asking a general question, classify it as "${INTENT_QUESTION_ANSWERING}".`;
   }
 
   const { intent } = await structuredLlm.invoke([

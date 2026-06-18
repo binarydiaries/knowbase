@@ -24,9 +24,11 @@ const SYSTEM_PROMPT = `You are an entity extractor. Extract structured informati
 - Only include values explicitly stated — never infer
 - Return an empty list if nothing to extract`;
 
-/** True when at least one intent requires fields (entity capture is needed). */
+/** True when at least one intent collects fields (required or optional). */
 function needsEntityExtraction(state: typeof State.State): boolean {
-  return state.intents.some((w) => w.requiredFields.length > 0);
+  return state.intents.some(
+    (w) => w.requiredFields.length > 0 || (w.optionalFields?.length ?? 0) > 0,
+  );
 }
 
 export const extractEntities: GraphNode<typeof State> = async (state, config) => {

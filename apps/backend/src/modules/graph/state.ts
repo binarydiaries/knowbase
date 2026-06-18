@@ -51,6 +51,8 @@ export const State = new StateSchema({
   finalQuery: z.string().optional(),
   ragChunks: z.array(RagChunkSchema).default([]),
   missingFields: z.array(z.string()).default([]),
+  optionalMissingFields: z.array(z.string()).default([]),
+  askedOptionalFields: z.boolean().default(false),
 });
 
 export const OutputState = new StateSchema({

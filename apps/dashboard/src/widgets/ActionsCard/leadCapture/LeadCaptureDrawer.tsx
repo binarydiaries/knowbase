@@ -30,6 +30,7 @@ type IntentRow = {
   name: string;
   triggerInstructions: string;
   requiredFields: string[];
+  optionalFields: string[];
   config: { success?: string } | null;
   actions: { actionType: string }[];
 };
@@ -86,12 +87,13 @@ function defaultFieldValues(): FormValues['fields'] {
 
 function intentToFormValues(intent: IntentRow): FormValues {
   const required = new Set(intent.requiredFields);
+  const optional = new Set(intent.optionalFields ?? []);
   return {
     fields: {
-      name: { collect: required.has('name'), required: required.has('name') },
-      email: { collect: required.has('email'), required: required.has('email') },
-      phone: { collect: required.has('phone'), required: required.has('phone') },
-      company: { collect: required.has('company'), required: required.has('company') },
+      name: { collect: required.has('name') || optional.has('name'), required: required.has('name') },
+      email: { collect: required.has('email') || optional.has('email'), required: required.has('email') },
+      phone: { collect: required.has('phone') || optional.has('phone'), required: required.has('phone') },
+      company: { collect: required.has('company') || optional.has('company'), required: required.has('company') },
     },
     triggerInstructions: intent.triggerInstructions || DEFAULT_TRIGGER,
     successMessage: intent.config?.success ?? DEFAULT_SUCCESS,
@@ -101,6 +103,7 @@ function intentToFormValues(intent: IntentRow): FormValues {
 
 function formValuesToIntentPayload(values: FormValues, agentId: string) {
   const requiredFields = FIELD_KEYS.filter((k) => values.fields[k].required);
+  const optionalFields = FIELD_KEYS.filter((k) => values.fields[k].collect && !values.fields[k].required);
   const actions: { actionType: 'save_lead' | 'send_email'; order: number; config: Record<string, unknown> }[] = [
     { actionType: 'save_lead', order: 0, config: {} },
   ];
@@ -112,6 +115,7 @@ function formValuesToIntentPayload(values: FormValues, agentId: string) {
     name: LEAD_GENERATION_INTENT,
     triggerInstructions: values.triggerInstructions || DEFAULT_TRIGGER,
     requiredFields,
+    optionalFields,
     executionMode: 'sequential' as const,
     config: { success: values.successMessage },
     actions,
@@ -172,6 +176,7 @@ export function LeadCaptureDrawer({
             name: payload.name,
             triggerInstructions: payload.triggerInstructions,
             requiredFields: payload.requiredFields,
+            optionalFields: payload.optionalFields,
             config: payload.config,
             actions: payload.actions,
           },

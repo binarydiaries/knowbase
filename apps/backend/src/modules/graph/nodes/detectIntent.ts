@@ -1,15 +1,15 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
 import type { State } from '../state';
 import { createNanoLlm } from '../utils/llm';
-import { getLastUserMessage } from '../utils/messages';
+import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 export { INTENT_QUESTION_ANSWERING };
 
 export const detectIntent: GraphNode<typeof State> = async (state, config) => {
-  const { intents, activeIntent, missingFields } = state;
+  const { intents, activeIntent, missingFields, optionalMissingFields, askedOptionalFields } = state;
 
   if (!intents || intents.length === 0) {
     return { intent: INTENT_QUESTION_ANSWERING };
@@ -65,12 +65,30 @@ The last question asked the user for their "${nextField}".
 
 If the user's message looks like an answer to that question (e.g. providing a name, email, or other personal detail), classify it as "${activeIntent.name}".
 If the user is clearly asking a general question unrelated to providing that information, classify it as "${INTENT_QUESTION_ANSWERING}".`;
+  } else if (activeIntent && askedOptionalFields && optionalMissingFields && optionalMissingFields.length > 0) {
+    const fields = optionalMissingFields.join(', ');
+    systemPrompt += `
+
+The assistant is currently collecting information for the "${activeIntent.name}" intent.
+The last question asked the user for optional information: ${fields}.
+
+If the user's message provides that information or declines to share it, classify it as "${activeIntent.name}".
+If the user is clearly asking a general question, classify it as "${INTENT_QUESTION_ANSWERING}".`;
   }
 
-  const { intent } = await structuredLlm.invoke([
-    new SystemMessage(systemPrompt),
-    new HumanMessage(userContent),
-  ]);
+  // Include the previous assistant message when classifying mid-intent turns.
+  // "Arokart" alone is ambiguous; "Arokart" after "Can you share your company
+  // name?" is clearly providing the value. The LLM needs that context to
+  // distinguish a value/skip from an off-topic Q&A question.
+  const lastBotMessage = (activeIntent && (missingFields?.length || askedOptionalFields))
+    ? getLastAssistantMessage(state)
+    : null;
+
+  const classifyMessages = lastBotMessage
+    ? [new SystemMessage(systemPrompt), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
+    : [new SystemMessage(systemPrompt), new HumanMessage(userContent)];
+
+  const { intent } = await structuredLlm.invoke(classifyMessages);
 
   return { intent };
 };

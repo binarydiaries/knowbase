@@ -32,7 +32,14 @@ Fallback message (use verbatim only when the Knowledge Base has no answer):
     parts.push(`Restrictions:\n${cfg.guardrails}`);
   }
 
-  // 5. Knowledge Base — placed last, closest to the query
+  // 5. Known user context — personalize responses when name is available
+  const rawName = state.entities?.name as string | undefined;
+  const userName = rawName ? rawName.slice(0, 100).replace(/[\n\r]/g, ' ') : undefined;
+  if (userName) {
+    parts.push(`The user's name is ${userName}. Address them as ${userName} naturally when appropriate.`);
+  }
+
+  // 6. Knowledge Base — placed last, closest to the query
   if (hasChunks) {
     const kb = state.ragChunks.map((c) => c.content).join('\n---\n');
     parts.push(`Knowledge Base:\n${kb}`);

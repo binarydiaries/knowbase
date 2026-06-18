@@ -5,7 +5,7 @@ export const checkRequirements: GraphNode<typeof State> = (state) => {
   const { activeIntent, entities } = state;
 
   if (!activeIntent) {
-    return { missingFields: [] };
+    return { missingFields: [], optionalMissingFields: [] };
   }
 
   const missing = activeIntent.requiredFields.filter((field) => {
@@ -13,5 +13,10 @@ export const checkRequirements: GraphNode<typeof State> = (state) => {
     return value === undefined || value === null || value === '';
   });
 
-  return { missingFields: missing };
+  const optionalMissing = (activeIntent.optionalFields ?? []).filter((field) => {
+    const value = entities[field];
+    return value === undefined || value === null || value === '';
+  });
+
+  return { missingFields: missing, optionalMissingFields: optionalMissing };
 };

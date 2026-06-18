@@ -12,6 +12,9 @@ Agenvik is targeting **SMBs and startups** in India. The platform already has a 
 
 | Feature | Version | Date |
 |---------|---------|------|
+| Optional Lead Capture Fields (soft-ask, never block) | v0.7.0 | Jun 18, 2026 |
+| Batched Field Collection (ask all required fields at once) | v0.7.0 | Jun 18, 2026 |
+| Name Personalization in chat responses | v0.7.0 | Jun 18, 2026 |
 | PDF Upload as Knowledge Source | v0.6.0 | May 26, 2026 |
 | URL / Website Crawl as Knowledge Source | v0.6.0 | May 26, 2026 |
 | Lead Generation (conversational capture) | v0.3.0 | Apr 20, 2026 |

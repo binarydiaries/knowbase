@@ -1,9 +1,9 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import type { State } from '../state.js';
 import { createNanoLlm } from '../utils/llm';
-import { getLastUserMessage } from '../utils/messages';
+import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 const ExtractEntityResponseSchema = z.object({
   entities: z
@@ -18,15 +18,36 @@ const ExtractEntityResponseSchema = z.object({
     .describe('List of entities extracted from the message'),
 });
 
-const SYSTEM_PROMPT = `You are an entity extractor. Extract structured information from the user's message.
+const BASE_SYSTEM_PROMPT = `You are an entity extractor. Extract structured information from the user's message.
 - Return a list of {key, value} pairs for every entity clearly stated
 - Use concise snake_case keys: name, email, phone, company, order_id, date, etc.
 - Only include values explicitly stated — never infer
 - Return an empty list if nothing to extract`;
 
-/** True when at least one intent requires fields (entity capture is needed). */
+/** True when at least one intent collects fields (required or optional). */
 function needsEntityExtraction(state: typeof State.State): boolean {
-  return state.intents.some((w) => w.requiredFields.length > 0);
+  return state.intents.some(
+    (w) => w.requiredFields.length > 0 || (w.optionalFields?.length ?? 0) > 0,
+  );
+}
+
+/**
+ * Build a context-aware system prompt so the extractor knows which fields are
+ * expected. Without this, an opaque value like "Arokart" after the bot asked
+ * "what's your company name?" would not be labelled as `company`.
+ */
+function buildSystemPrompt(state: typeof State.State): string {
+  const { activeIntent, missingFields, optionalMissingFields, askedOptionalFields } = state;
+
+  if (activeIntent && missingFields && missingFields.length > 0) {
+    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user for: ${missingFields.join(', ')}. The user's reply is likely providing these values — label them with the matching keys.`;
+  }
+
+  if (activeIntent && askedOptionalFields && optionalMissingFields && optionalMissingFields.length > 0) {
+    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user if they'd like to share optional information: ${optionalMissingFields.join(', ')}. If the user's reply provides any of these values or clearly answers with a value for one of them, extract it using the matching key.`;
+  }
+
+  return BASE_SYSTEM_PROMPT;
 }
 
 export const extractEntities: GraphNode<typeof State> = async (state, config) => {
@@ -41,10 +62,18 @@ export const extractEntities: GraphNode<typeof State> = async (state, config) =>
     { name: 'extract_entities', strict: true },
   );
 
-  const { entities } = await structuredLlm.invoke([
-    new SystemMessage(SYSTEM_PROMPT),
-    new HumanMessage(userContent),
-  ]);
+  // When collecting mid-intent, include the previous bot question so the
+  // extractor can resolve ambiguous values (e.g. "Arokart" → company when the
+  // bot just asked "Can you share your company name?").
+  const { activeIntent, missingFields, askedOptionalFields } = state;
+  const inMidIntent = !!(activeIntent && (missingFields?.length || askedOptionalFields));
+  const lastBotMessage = inMidIntent ? getLastAssistantMessage(state) : null;
+
+  const messages = lastBotMessage
+    ? [new SystemMessage(buildSystemPrompt(state)), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
+    : [new SystemMessage(buildSystemPrompt(state)), new HumanMessage(userContent)];
+
+  const { entities } = await structuredLlm.invoke(messages);
 
   const entityMap = Object.fromEntries(
     entities.map(({ key, value }) => [key, value]),

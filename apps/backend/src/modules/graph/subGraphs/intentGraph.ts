@@ -8,9 +8,9 @@ import { State } from '../state';
 function routeAfterRequirementCheck(
   state: typeof State.State,
 ): 'collectMissingData' | 'executeActions' {
-  return state.missingFields.length > 0
-    ? 'collectMissingData'
-    : 'executeActions';
+  if (state.missingFields.length > 0) return 'collectMissingData';
+  if (state.optionalMissingFields.length > 0 && !state.askedOptionalFields) return 'collectMissingData';
+  return 'executeActions';
 }
 
 const graph = new StateGraph(State)

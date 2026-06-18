@@ -134,7 +134,7 @@ Every query is scoped by `orgId` (Clerk organisation ID). All database tables in
 
 ### Database schema (`src/db/schema/`)
 
-Key tables: `agents`, `channels`, `conversations`, `documents`, `embeddings`, `messages`, `behaviors`, `leads`, `whatsappConnections`, `slackConnections`, `orgSubscriptions`, `orgUsageDaily`, `orgUsageMonthly`, `agentActions`, `aiCostEvents`.
+Key tables: `agents`, `channels`, `conversations`, `documents`, `embeddings`, `messages`, `behaviors`, `leads`, `intents`, `intentActions`, `whatsappConnections`, `slackConnections`, `orgSubscriptions`, `orgUsageDaily`, `orgUsageMonthly`, `agentActions`, `aiCostEvents`, `featureFlagDefinitions`, `orgFeatureFlags`, `demoBookings`.
 
 Primary keys use CUID2 (`createId()`). All tables have `createdAt`/`updatedAt` with timezone.
 

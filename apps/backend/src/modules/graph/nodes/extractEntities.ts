@@ -1,9 +1,9 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import type { State } from '../state.js';
 import { createNanoLlm } from '../utils/llm';
-import { getLastUserMessage } from '../utils/messages';
+import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 const ExtractEntityResponseSchema = z.object({
   entities: z
@@ -62,10 +62,18 @@ export const extractEntities: GraphNode<typeof State> = async (state, config) =>
     { name: 'extract_entities', strict: true },
   );
 
-  const { entities } = await structuredLlm.invoke([
-    new SystemMessage(buildSystemPrompt(state)),
-    new HumanMessage(userContent),
-  ]);
+  // When collecting mid-intent, include the previous bot question so the
+  // extractor can resolve ambiguous values (e.g. "Arokart" → company when the
+  // bot just asked "Can you share your company name?").
+  const { activeIntent, missingFields, askedOptionalFields } = state;
+  const inMidIntent = !!(activeIntent && (missingFields?.length || askedOptionalFields));
+  const lastBotMessage = inMidIntent ? getLastAssistantMessage(state) : null;
+
+  const messages = lastBotMessage
+    ? [new SystemMessage(buildSystemPrompt(state)), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
+    : [new SystemMessage(buildSystemPrompt(state)), new HumanMessage(userContent)];
+
+  const { entities } = await structuredLlm.invoke(messages);
 
   const entityMap = Object.fromEntries(
     entities.map(({ key, value }) => [key, value]),

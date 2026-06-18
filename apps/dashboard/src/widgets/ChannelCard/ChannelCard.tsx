@@ -4,9 +4,10 @@ import { Button } from '@knowbase/ui/components/button';
 import { toast } from '@knowbase/ui/components/sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useRef, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Bot, Trash, Upload } from 'lucide-react';
 import {
   AGENT_LOCK_TOOLTIP,
   DisabledTooltip,
@@ -44,13 +45,13 @@ export const ChannelSchema = z.object({
     .max(500, 'Suggestion questions are too long (max 500 characters)')
     .optional(),
 
-  allowedDomains: z
-    .string()
-    .optional(),
+  allowedDomains: z.string().optional(),
 
   primaryColor: z
     .string()
     .regex(/^#([0-9A-Fa-f]{6})$/, 'Primary color must be a valid hex color'),
+
+  avatarUrl: z.string().optional(),
 });
 type ChannelFormValues = z.infer<typeof ChannelSchema>;
 const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
@@ -67,13 +68,16 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     ),
   );
   const channelAdditional = channelWeb?.additional;
-  const channelConfig = channelAdditional?.type === 'web' ? channelAdditional.config : undefined;
+  const channelConfig =
+    channelAdditional?.type === 'web' ? channelAdditional.config : undefined;
   const updateChannel = useChannels((s) => s.updateChannel);
 
   const {
     control,
     reset,
     handleSubmit,
+    setValue,
+    watch,
     formState: { isDirty },
   } = useForm<ChannelFormValues>({
     resolver: zodResolver(ChannelSchema),
@@ -86,8 +90,58 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
       suggestionQuestions: '',
       allowedDomains: '',
       primaryColor: '#915964',
+      avatarUrl: '',
     },
   });
+
+  const avatarUrl = watch('avatarUrl');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files are allowed');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 128;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setValue('avatarUrl', compressedBase64, { shouldDirty: true });
+          toast.success('Avatar uploaded and compressed successfully!');
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (channelConfig) {
@@ -96,9 +150,12 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
         subtitle: channelConfig.subtitle ?? '',
         welcomeMessage: channelConfig.welcomeMessage ?? '',
         inputPlaceholder: channelConfig.inputPlaceholder ?? '',
-        suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join('\n'),
+        suggestionQuestions: (channelConfig.suggestionQuestions ?? []).join(
+          '\n',
+        ),
         allowedDomains: (channelConfig.allowedDomains ?? []).join('\n'),
         primaryColor: channelConfig.primaryColor ?? '#915964',
+        avatarUrl: (channelConfig as { avatarUrl?: string }).avatarUrl ?? '',
       });
     }
   }, [channelConfig, reset]);
@@ -142,7 +199,10 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
     },
     onSuccess: () => {
       toast.success('Channel settings saved');
-      amplitude.track('Channel Settings Saved', { agent_id: agentId, channel_type: 'web' });
+      amplitude.track('Channel Settings Saved', {
+        agent_id: agentId,
+        channel_type: 'web',
+      });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -160,6 +220,61 @@ const ChannelCard = ({ readOnly = false }: { readOnly?: boolean }) => {
   return (
     <form onSubmit={handleSubmit(onSave)}>
       <div className="flex-col gap-5 flex">
+        {/* Avatar Uploader Widget (Compact) */}
+        <div className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/40 max-w-md">
+          <div className="size-10 rounded-full border border-border overflow-hidden bg-muted flex items-center justify-center shrink-0 shadow-sm relative">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Agent avatar preview"
+                className="size-full object-cover"
+              />
+            ) : (
+              <Bot className="size-5 text-muted-foreground opacity-70" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col">
+            <span className="text-xs font-semibold text-foreground leading-tight">Agent Avatar</span>
+            <span className="text-[10px] text-muted-foreground truncate leading-normal">
+              128x128px recommended (auto-compressed)
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+              disabled={readOnly}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="cursor-pointer gap-1.5 h-7 px-2.5 text-xs font-normal"
+              disabled={readOnly}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="size-3.5" />
+              Upload
+            </Button>
+            {avatarUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="cursor-pointer h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 flex items-center justify-center"
+                disabled={readOnly}
+                onClick={() => setValue('avatarUrl', '', { shouldDirty: true })}
+                title="Remove Avatar"
+              >
+                <Trash className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        </div>
+
         <FormInput
           name="displayName"
           control={control}

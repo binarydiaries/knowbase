@@ -22,8 +22,10 @@ import {
   MessageCircle,
   Plug,
   Shield,
-  // UserRound, // LEAD_GENERATION_DISABLED: uncomment to restore
+  UserRound,
+  Users,
 } from 'lucide-react';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { NavAdmin } from '@/components/NavAdmin/NavAdmin.tsx';
 import { NavMain } from '@/components/NavMain/NavMain.tsx';
 import { SidebarUsage } from '@/components/SidebarUsage/SidebarUsage.tsx';
@@ -35,11 +37,6 @@ const mainNav = [
   { name: 'Analytics', url: '/analytics', icon: LineChart },
   { name: 'Usage', url: '/usage', icon: Gauge },
   { name: 'Integrations', url: '/integrations', icon: Plug },
-];
-
-const inboxNav = [
-  { name: 'Conversations', url: '/conversations', icon: MessageCircle },
-  // { name: 'Leads', url: '/leads', icon: UserRound }, // LEAD_GENERATION_DISABLED: uncomment to restore
 ];
 
 const footerNav = [
@@ -68,6 +65,7 @@ const adminGroups = [
   {
     label: 'CRM',
     items: [
+      { name: 'Orgs Overview', url: '/admin/orgs', icon: Users },
       { name: 'Demo Bookings', url: '/admin/demo-bookings', icon: CalendarCheck },
     ],
   },
@@ -76,6 +74,13 @@ const adminGroups = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
   const isAdmin = isAdminEmail(user?.primaryEmailAddress?.emailAddress);
+  const { data: flags } = useFeatureFlags();
+  const leadGenEnabled = !!flags?.['lead_generation'];
+
+  const inboxNav = [
+    { name: 'Conversations', url: '/conversations', icon: MessageCircle },
+    ...(leadGenEnabled ? [{ name: 'Leads', url: '/leads', icon: UserRound }] : []),
+  ];
 
   return (
     <Sidebar collapsible="icon" {...props}>

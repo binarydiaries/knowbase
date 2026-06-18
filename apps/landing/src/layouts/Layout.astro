@@ -40,6 +40,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
 const appURL = import.meta.env.PUBLIC_APP_URL || 'https://app.agenvik.com';
 const isStaging = import.meta.env.PUBLIC_ENV === 'stage';
+const embedUrl = import.meta.env.PUBLIC_EMBED_URL;
 const robotsContent = isStaging
   ? 'noindex, nofollow'
   : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1';
@@ -160,12 +161,13 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <slot />
 
     <script>
+      const channelId = import.meta.env.PUBLIC_CHANNEL_ID;
       window.AgenvikChat = {
-        channelId: "puh1ds4ejx477pcp4ojm8rv1",
+        channelId: channelId,
         primaryColor: "#301B69",
       };
     </script>
-    <script src="https://embed.agenvik.com/embed.js" defer async></script>
+    <script src={`${embedUrl}/embed.js`} defer async></script>
   </body>
 </html>
 <style is:global>

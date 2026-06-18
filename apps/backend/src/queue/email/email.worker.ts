@@ -1,8 +1,6 @@
 import { type Job, Worker } from 'bullmq';
 import { clerkClient } from 'elysia-clerk';
 import { EmailService } from '../../common/email/service';
-import { AgentService } from '../../modules/agent/service';
-import { LeadService } from '../../modules/lead/service';
 import { connection } from '../connection';
 import { emailQueue } from './email.queue';
 import type { IEmailJob } from './email.types';
@@ -24,30 +22,8 @@ export const emailWorker = new Worker(
   async (job: Job<IEmailJob>) => {
     const data = job.data;
 
-    if (data.type === 'lead-notification') {
-      const [agent, leads] = await Promise.all([
-        AgentService.single({ id: data.agentId, orgId: data.orgId }),
-        LeadService.list({ orgId: data.orgId, agentId: data.agentId, limit: 1 }),
-      ]);
-
-      if (!agent?.createdBy) return;
-
-      const lead = leads.find((l) => l.id === data.leadId);
-      if (!lead) return;
-
-      const to = await getClerkUserEmail(agent.createdBy);
-      if (!to) return;
-
-      await EmailService.sendLeadNotification({
-        to,
-        agentName: agent.name,
-        lead: {
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          company: lead.company,
-        },
-      });
+    if (data.type === 'send-email') {
+      await EmailService.send({ to: data.to, subject: data.subject, html: data.html });
       return;
     }
 

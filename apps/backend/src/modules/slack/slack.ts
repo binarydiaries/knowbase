@@ -9,7 +9,7 @@ import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
 import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
-import { ChatService } from '../chat/service';
+import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { SlackConnectionService } from './connectionService';
 
@@ -426,7 +426,7 @@ async function processInboundEvent(payload: {
     );
     if (!result?.enabled || !result.agent) return;
 
-    await ChatService.sendSlack({
+    await ChatV2Service.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
       message: event.text,
@@ -440,10 +440,15 @@ async function processInboundEvent(payload: {
     );
     if (!result?.enabled || !result.agent) return;
 
-    await ChatService.sendSlack({
+    // Strip the bot mention tag (e.g. "<@U12345678>") from the start of the
+    // message so the intent classifier sees the clean user intent rather than
+    // the raw Slack mention syntax.
+    const cleanMessage = event.text.replace(/<@[A-Z0-9]+>\s*/g, '').trim();
+
+    await ChatV2Service.sendSlack({
       channelId: result.id,
       orgId: result.agent.orgId,
-      message: event.text,
+      message: cleanMessage,
       slackChannelId,
       threadTs,
     });

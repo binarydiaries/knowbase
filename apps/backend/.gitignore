@@ -48,3 +48,6 @@ server
 worker-server
 # Sentry Config File
 .sentryclirc
+
+# LangGraph API
+.langgraph_api

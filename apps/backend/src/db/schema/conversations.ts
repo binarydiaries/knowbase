@@ -19,7 +19,6 @@ export const conversations = pgTable(
     country: text(),
     topic: text(),
     externalId: text(),
-    entities: jsonb('entities').$type<Record<string, string>>(),
     ...timestamps,
   },
   (table) => [

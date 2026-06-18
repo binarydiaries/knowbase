@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.0] — 2026-06-18
+
+### Added
+- **Optional Lead Capture Fields** — Lead capture intents can now mark fields as optional. Optional fields are stored in the database, surfaced in the dashboard lead capture drawer, and soft-asked to users once during the conversation — they never block execution.
+- **Batched Field Collection** — When an intent needs multiple required fields, the assistant now asks for all of them in a single message instead of one at a time, reducing friction for users.
+- **Name Personalization** — When the user's name is captured, the assistant addresses them by name in all subsequent responses, including Q&A and data-collection prompts.
+
+### Fixed
+- **Intent Re-trigger** — Optional fields can now be collected again if the same intent is triggered a second time in the same conversation (the `askedOptionalFields` flag now resets on intent completion).
+- **Entity Extraction for Optional-Only Intents** — Entity extraction now runs even when an intent has only optional fields defined (previously skipped, silently dropping user-provided values).
+- **Intent Routing During Optional Collection** — The intent classifier now correctly recognises a user's reply to an optional-field ask as belonging to the active intent, rather than misrouting to Q&A.
+- **Prompt Injection Hardening** — User-supplied names extracted by the entity extractor are now sanitised (truncated to 100 chars, newlines stripped) before being interpolated into LLM system prompts.
+- **Field Validation** — Intent field names are now validated to be alphanumeric/hyphen only (max 100 chars each, max 20 fields per array), and the same field can no longer appear in both `requiredFields` and `optionalFields`.
+
+---
+
 ## [0.6.0] — 2026-05-26
 
 ### Added

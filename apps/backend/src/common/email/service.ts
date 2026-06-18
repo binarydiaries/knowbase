@@ -14,8 +14,7 @@ function getClient(): Resend | null {
   return resend;
 }
 
-export interface LeadNotificationData {
-  to: string;
+export interface LeadEmailContext {
   agentName: string;
   lead: {
     name: string | null;
@@ -23,6 +22,12 @@ export interface LeadNotificationData {
     phone: string | null;
     company: string | null;
   };
+  subject?: string;
+  body?: string;
+}
+
+export interface LeadNotificationData extends LeadEmailContext {
+  to: string;
 }
 
 export interface DocumentEmailData {
@@ -31,18 +36,27 @@ export interface DocumentEmailData {
 }
 
 export abstract class EmailService {
-  static async sendLeadNotification(data: LeadNotificationData): Promise<void> {
+  /** Generic send — the queue calls this; it knows nothing about leads or agents. */
+  static async send(data: { to: string; subject: string; html: string }): Promise<void> {
     const client = getClient();
     if (!client) return;
+    await client.emails.send({ from, to: data.to, subject: data.subject, html: data.html });
+  }
 
-    const displayName = data.lead.name ?? 'Anonymous';
+  /**
+   * Renders a lead-notification email to `{ subject, html }` without sending.
+   * Call this in the action executor to build the email before enqueuing.
+   */
+  static renderLeadNotification(ctx: LeadEmailContext): { subject: string; html: string } {
+    const displayName = ctx.lead.name ?? 'Anonymous';
+    const subject = ctx.subject?.trim() || `New lead captured: ${displayName}`;
+    const html = ctx.body?.trim() ? customBodyHtml(ctx.body, ctx) : leadNotificationHtml(ctx);
+    return { subject, html };
+  }
 
-    await client.emails.send({
-      from,
-      to: data.to,
-      subject: `New lead captured: ${displayName}`,
-      html: leadNotificationHtml(data),
-    });
+  static async sendLeadNotification(data: LeadNotificationData): Promise<void> {
+    const { subject, html } = EmailService.renderLeadNotification(data);
+    await EmailService.send({ to: data.to, subject, html });
   }
 
   static async sendDocumentIndexed(data: DocumentEmailData): Promise<void> {
@@ -95,7 +109,30 @@ function row(label: string, value: string | null): string {
   </tr>`;
 }
 
-function leadNotificationHtml(data: LeadNotificationData): string {
+/**
+ * Interpolates {{variable}} placeholders in a custom body string.
+ * Supported: {{name}}, {{email}}, {{phone}}, {{company}}, {{agent}}
+ */
+function interpolate(template: string, data: LeadEmailContext): string {
+  return template
+    .replace(/\{\{name\}\}/g, data.lead.name ?? '')
+    .replace(/\{\{email\}\}/g, data.lead.email ?? '')
+    .replace(/\{\{phone\}\}/g, data.lead.phone ?? '')
+    .replace(/\{\{company\}\}/g, data.lead.company ?? '')
+    .replace(/\{\{agent\}\}/g, data.agentName);
+}
+
+function customBodyHtml(body: string, data: LeadEmailContext): string {
+  const interpolated = interpolate(body, data);
+  // Preserve newlines as <br> for basic readability
+  const htmlBody = interpolated
+    .split('\n')
+    .map((line) => `<p style="margin:0 0 8px;font-size:14px">${line}</p>`)
+    .join('');
+  return wrap(htmlBody);
+}
+
+function leadNotificationHtml(data: LeadEmailContext): string {
   const { lead, agentName } = data;
   return wrap(`
 <h2 style="margin:0 0 16px">New lead captured</h2>

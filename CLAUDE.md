@@ -134,7 +134,7 @@ Every query is scoped by `orgId` (Clerk organisation ID). All database tables in
 
 ### Database schema (`src/db/schema/`)
 
-Key tables: `agents`, `channels`, `conversations`, `documents`, `embeddings`, `messages`, `behaviors`, `leads`, `whatsappConnections`, `slackConnections`, `orgSubscriptions`, `orgUsageDaily`, `orgUsageMonthly`, `agentActions`, `aiCostEvents`.
+Key tables: `agents`, `channels`, `conversations`, `documents`, `embeddings`, `messages`, `behaviors`, `leads`, `intents`, `intentActions`, `whatsappConnections`, `slackConnections`, `orgSubscriptions`, `orgUsageDaily`, `orgUsageMonthly`, `agentActions`, `aiCostEvents`, `featureFlagDefinitions`, `orgFeatureFlags`, `demoBookings`.
 
 Primary keys use CUID2 (`createId()`). All tables have `createdAt`/`updatedAt` with timezone.
 
@@ -335,3 +335,22 @@ Available gstack skills:
 | `/unfreeze` | Unfreeze the codebase |
 | `/gstack-upgrade` | Upgrade gstack |
 | `/learn` | Learning and onboarding session |
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
+
+Key routing rules:
+- Product ideas/brainstorming → invoke /office-hours
+- Strategy/scope → invoke /plan-ceo-review
+- Architecture → invoke /plan-eng-review
+- Design system/plan review → invoke /design-consultation or /plan-design-review
+- Full review pipeline → invoke /autoplan
+- Bugs/errors → invoke /investigate
+- QA/testing site behavior → invoke /qa or /qa-only
+- Code review/diff check → invoke /review
+- Visual polish → invoke /design-review
+- Ship/deploy/PR → invoke /ship or /land-and-deploy
+- Save progress → invoke /context-save
+- Resume context → invoke /context-restore
+- Author a backlog-ready spec/issue → invoke /spec

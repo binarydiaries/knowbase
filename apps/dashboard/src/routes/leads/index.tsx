@@ -38,6 +38,7 @@ import { AlertCircleIcon, ExternalLink, LockIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getAgents, getLeads } from '@/services';
 import { useClerkPlan } from '@/hooks/useClerkPlan';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 export const Route = createFileRoute('/leads/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -63,7 +64,9 @@ function RouteComponent() {
   const { page } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { plan, isLoading: planLoading } = useClerkPlan();
-  const hasLeadGeneration = plan !== 'free';
+  const { data: flags } = useFeatureFlags();
+  const leadGenFlagEnabled = !!flags?.['lead_generation'];
+  const hasLeadGeneration = leadGenFlagEnabled && plan !== 'free';
 
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(
     undefined,
@@ -146,9 +149,11 @@ function RouteComponent() {
             <div className="rounded-full border p-4">
               <LockIcon className="size-6 text-muted-foreground" />
             </div>
-            <h2 className="text-sm font-semibold">Lead Generation is a paid feature</h2>
+            <h2 className="text-sm font-semibold">Lead Generation is unavailable</h2>
             <p className="text-xs text-muted-foreground">
-              Upgrade to the Starter plan or above to capture and view leads from your AI agents.
+              {leadGenFlagEnabled
+                ? 'Upgrade to the Starter plan or above to capture and view leads from your AI agents.'
+                : 'Lead generation is not enabled for your account. Contact support to learn more.'}
             </p>
           </div>
         </div>

@@ -22,6 +22,7 @@ import { Route as ConversationsChar123ConversationIdChar125IndexRouteImport } fr
 import { Route as AgentsAgentIdIndexRouteImport } from './routes/agents/$agentId/index'
 import { Route as AdminSubscriptionsIndexRouteImport } from './routes/admin/subscriptions/index'
 import { Route as AdminQueueIndexRouteImport } from './routes/admin/queue/index'
+import { Route as AdminOrgsIndexRouteImport } from './routes/admin/orgs/index'
 import { Route as AdminFeatureFlagsIndexRouteImport } from './routes/admin/feature-flags/index'
 import { Route as AdminDemoBookingsIndexRouteImport } from './routes/admin/demo-bookings/index'
 import { Route as AdminCostsIndexRouteImport } from './routes/admin/costs/index'
@@ -92,6 +93,11 @@ const AdminQueueIndexRoute = AdminQueueIndexRouteImport.update({
   path: '/admin/queue/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrgsIndexRoute = AdminOrgsIndexRouteImport.update({
+  id: '/admin/orgs/',
+  path: '/admin/orgs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFeatureFlagsIndexRoute = AdminFeatureFlagsIndexRouteImport.update({
   id: '/admin/feature-flags/',
   path: '/admin/feature-flags/',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/demo-bookings/': typeof AdminDemoBookingsIndexRoute
   '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
+  '/admin/orgs/': typeof AdminOrgsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin/costs': typeof AdminCostsIndexRoute
   '/admin/demo-bookings': typeof AdminDemoBookingsIndexRoute
   '/admin/feature-flags': typeof AdminFeatureFlagsIndexRoute
+  '/admin/orgs': typeof AdminOrgsIndexRoute
   '/admin/queue': typeof AdminQueueIndexRoute
   '/admin/subscriptions': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId': typeof AgentsAgentIdIndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/admin/costs/': typeof AdminCostsIndexRoute
   '/admin/demo-bookings/': typeof AdminDemoBookingsIndexRoute
   '/admin/feature-flags/': typeof AdminFeatureFlagsIndexRoute
+  '/admin/orgs/': typeof AdminOrgsIndexRoute
   '/admin/queue/': typeof AdminQueueIndexRoute
   '/admin/subscriptions/': typeof AdminSubscriptionsIndexRoute
   '/agents/$agentId/': typeof AgentsAgentIdIndexRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin/costs/'
     | '/admin/demo-bookings/'
     | '/admin/feature-flags/'
+    | '/admin/orgs/'
     | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/admin/costs'
     | '/admin/demo-bookings'
     | '/admin/feature-flags'
+    | '/admin/orgs'
     | '/admin/queue'
     | '/admin/subscriptions'
     | '/agents/$agentId'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin/costs/'
     | '/admin/demo-bookings/'
     | '/admin/feature-flags/'
+    | '/admin/orgs/'
     | '/admin/queue/'
     | '/admin/subscriptions/'
     | '/agents/$agentId/'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   AdminCostsIndexRoute: typeof AdminCostsIndexRoute
   AdminDemoBookingsIndexRoute: typeof AdminDemoBookingsIndexRoute
   AdminFeatureFlagsIndexRoute: typeof AdminFeatureFlagsIndexRoute
+  AdminOrgsIndexRoute: typeof AdminOrgsIndexRoute
   AdminQueueIndexRoute: typeof AdminQueueIndexRoute
   AdminSubscriptionsIndexRoute: typeof AdminSubscriptionsIndexRoute
   AgentsAgentIdIndexRoute: typeof AgentsAgentIdIndexRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueueIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orgs/': {
+      id: '/admin/orgs/'
+      path: '/admin/orgs'
+      fullPath: '/admin/orgs/'
+      preLoaderRoute: typeof AdminOrgsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/feature-flags/': {
       id: '/admin/feature-flags/'
       path: '/admin/feature-flags'
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCostsIndexRoute: AdminCostsIndexRoute,
   AdminDemoBookingsIndexRoute: AdminDemoBookingsIndexRoute,
   AdminFeatureFlagsIndexRoute: AdminFeatureFlagsIndexRoute,
+  AdminOrgsIndexRoute: AdminOrgsIndexRoute,
   AdminQueueIndexRoute: AdminQueueIndexRoute,
   AdminSubscriptionsIndexRoute: AdminSubscriptionsIndexRoute,
   AgentsAgentIdIndexRoute: AgentsAgentIdIndexRoute,

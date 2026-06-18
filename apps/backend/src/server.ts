@@ -6,10 +6,10 @@ import { helmet } from 'elysia-helmet';
 import { rateLimit } from 'elysia-rate-limit';
 import { z } from 'zod';
 import type * as schemas from 'zod/src/v4/core/schemas';
-import { Action } from './modules/action/action';
 import { Admin } from './modules/admin/admin';
 import { AdminDemoBookings } from './modules/admin/demoBookings';
 import { AdminFeatureFlags } from './modules/admin/featureFlags';
+import { AdminOrgsOverview } from './modules/admin/orgsOverview';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
 import { FeatureFlag } from './modules/featureFlag/featureFlag';
@@ -17,7 +17,7 @@ import { Agent } from './modules/agent/agent';
 import { Analytics } from './modules/analytics/analytics';
 import { Behaviour } from './modules/behaviour/behaviour';
 import { Channel } from './modules/channel/channel';
-import { Chat } from './modules/chat/chat';
+import { ChatV2 } from './modules/chatv2/chatv2';
 import { Conversation } from './modules/conversation/conversation';
 import { Document } from './modules/document/document';
 import { Indexing } from './modules/indexing/indexing';
@@ -28,6 +28,7 @@ import { Slack } from './modules/slack/slack';
 import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
+import { Intent } from './modules/intent/intent';
 import { validateEnv } from './utils/env.utils';
 
 validateEnv();
@@ -100,7 +101,7 @@ const app = Sentry.withElysia(new Elysia())
   )
   .use(UsageCharts)
   .use(Analytics)
-  .use(Chat)
+  .use(ChatV2)
   .use(message)
   .use(Document)
   .use(Agent)
@@ -111,7 +112,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(Subscription)
   .use(WhatsApp)
   .use(Slack)
-  .use(Action)
+  .use(Intent)
   .use(Demo)
   .use(Lead)
   .use(FeatureFlag)
@@ -120,6 +121,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(AdminQueue)
   .use(AdminSubscriptions)
   .use(AdminDemoBookings)
+  .use(AdminOrgsOverview)
   .listen(process.env.PORT ?? 3000);
 
 console.log(

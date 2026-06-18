@@ -93,11 +93,15 @@ const AgentWidgetContent = ({
         window.parent.postMessage({ type: 'KB_CLOSE_CHAT' }, '*');
       }}
       brandLink={import.meta.env.VITE_LANDING_URL}
+      avatarUrl={channelConfig.avatarUrl}
     />
   );
 };
 
-export const AgentWidget = ({ channelSchema, parentOrigin }: IAgentWidgetProps) => {
+export const AgentWidget = ({
+  channelSchema,
+  parentOrigin,
+}: IAgentWidgetProps) => {
   const [chatKey, setChatKey] = useState(0);
 
   return (

@@ -33,7 +33,8 @@ Fallback message (use verbatim only when the Knowledge Base has no answer):
   }
 
   // 5. Known user context — personalize responses when name is available
-  const userName = state.entities?.name as string | undefined;
+  const rawName = state.entities?.name as string | undefined;
+  const userName = rawName ? rawName.slice(0, 100).replace(/[\n\r]/g, ' ') : undefined;
   if (userName) {
     parts.push(`The user's name is ${userName}. Address them as ${userName} naturally when appropriate.`);
   }

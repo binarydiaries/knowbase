@@ -56,6 +56,7 @@ export const executeActions: GraphNode<typeof State> = async (state, config) => 
     return {
       activeIntent: undefined,
       intent: INTENT_QUESTION_ANSWERING,
+      askedOptionalFields: false,
       messages: [new AIMessage(activeIntent.config?.success?.trim() || DEFAULT_SUCCESS)],
     };
   }
@@ -91,6 +92,7 @@ export const executeActions: GraphNode<typeof State> = async (state, config) => 
   return {
     activeIntent: undefined,
     intent: INTENT_QUESTION_ANSWERING,
+    askedOptionalFields: false,
     messages: [new AIMessage(message)],
   };
 };

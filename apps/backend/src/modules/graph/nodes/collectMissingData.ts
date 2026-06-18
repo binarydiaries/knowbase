@@ -10,7 +10,8 @@ export const collectMissingData: GraphNode<typeof State> = async (state, config)
     ? `${behaviour.systemPrompt}\nResponse tone: ${behaviour.tone}\nResponse verbosity: ${behaviour.verbosity}`
     : 'You are a helpful assistant.';
 
-  const userName = entities?.name as string | undefined;
+  const rawName = entities?.name as string | undefined;
+  const userName = rawName ? rawName.slice(0, 100).replace(/[\n\r]/g, ' ') : undefined;
   const nameCtx = userName ? `The user's name is ${userName}. Address them by name naturally.` : '';
 
   // Phase 1: collect required fields (batch when more than one)

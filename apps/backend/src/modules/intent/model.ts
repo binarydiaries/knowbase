@@ -17,6 +17,7 @@ export const IntentSchema = z.object({
   name: z.string(),
   triggerInstructions: z.string(),
   requiredFields: z.array(z.string()),
+  optionalFields: z.array(z.string()).default([]),
   executionMode: IntentExecutionMode,
   config: IntentResponseConfigSchema.nullish(),
   createdBy: z.string(),

@@ -57,6 +57,7 @@ export const Intent = new Elysia({ prefix: '/intents', tags: ['Intents'] })
           name: body.name,
           triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
+          optionalFields: body.optionalFields,
           executionMode: body.executionMode,
           config: body.config ?? null,
           createdBy: userId,
@@ -110,6 +111,7 @@ export const Intent = new Elysia({ prefix: '/intents', tags: ['Intents'] })
           name: body.name,
           triggerInstructions: body.triggerInstructions,
           requiredFields: body.requiredFields,
+          optionalFields: body.optionalFields,
           config: body.config ?? undefined,
         },
         body.actions?.map((a) => ({

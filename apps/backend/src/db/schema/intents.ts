@@ -21,6 +21,7 @@ export const intents = pgTable(
     name: text().notNull(),
     triggerInstructions: text().notNull().default(''),
     requiredFields: text().array().notNull().default([]),
+    optionalFields: text().array().notNull().default([]),
     executionMode: intentExecutionMode().notNull().default('sequential'),
     config: jsonb().$type<{ success?: string; failure?: string }>(),
     createdBy: clerkUserId,

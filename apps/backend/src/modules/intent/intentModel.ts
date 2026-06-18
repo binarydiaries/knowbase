@@ -15,6 +15,7 @@ export const CreateIntentBody = z.object({
   name: z.string().min(1).max(100),
   triggerInstructions: z.string().max(300).default(''),
   requiredFields: z.array(z.string()).default([]),
+  optionalFields: z.array(z.string()).default([]),
   executionMode: z.enum(['sequential', 'parallel']).default('sequential'),
   config: z
     .object({
@@ -29,6 +30,7 @@ export const UpdateIntentBody = z.object({
   name: z.string().min(1).max(100).optional(),
   triggerInstructions: z.string().max(300).optional(),
   requiredFields: z.array(z.string()).optional(),
+  optionalFields: z.array(z.string()).optional(),
   config: z
     .object({
       success: z.string().max(300).optional(),

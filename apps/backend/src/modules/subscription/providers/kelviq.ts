@@ -1,15 +1,15 @@
-import { InvalidRequestError, Kelviq } from '@kelviq/node-sdk';
+import { Kelviq, NotFoundError } from '@kelviq/node-sdk';
 import type {
   CheckoutResult,
   PaidPlanName,
   PaymentProvider,
-  SyncResult,
+  SubscriptionState,
 } from './types';
 
 const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
 
 interface CacheEntry {
-  result: SyncResult | null;
+  result: SubscriptionState | null;
   expiresAt: number;
 }
 
@@ -43,7 +43,6 @@ export class KelviqProvider implements PaymentProvider {
     return identifier;
   }
 
-  // Reads env vars at call time so the map stays accurate if vars are set after module import
   private planNameFromIdentifier(identifier: string): PaidPlanName | undefined {
     const pairs: Array<[string | undefined, PaidPlanName]> = [
       [process.env.KELVIQ_PLAN_STARTER, 'starter'],
@@ -55,11 +54,12 @@ export class KelviqProvider implements PaymentProvider {
 
   private async ensureCustomer(orgId: string, name?: string | null, email?: string | null): Promise<void> {
     try {
-      await this.client.customers.create({ customerId: orgId, name, email });
+      await this.client.customers.retrieve({ customerId: orgId });
+      return;
     } catch (err) {
-      if (err instanceof InvalidRequestError) return; // customer already exists
-      throw err;
+      if (!(err instanceof NotFoundError)) throw err;
     }
+    await this.client.customers.create({ customerId: orgId, name, email });
   }
 
   async createSubscription({
@@ -97,7 +97,7 @@ export class KelviqProvider implements PaymentProvider {
     });
   }
 
-  invalidateCachedState(orgId: string): void {
+  invalidateSubscriptionCache(orgId: string): void {
     this._cache.delete(orgId);
   }
 
@@ -110,7 +110,7 @@ export class KelviqProvider implements PaymentProvider {
     currentPeriodEnd: Date | null;
   }> {
     if (!orgId) throw new Error('orgId is required to fetch a Kelviq subscription');
-    const result = await this.syncSubscription(orgId);
+    const result = await this.getSubscription(orgId);
     if (!result) throw new Error(`No active subscription found for org ${orgId}`);
     return {
       status: result.status,
@@ -124,7 +124,7 @@ export class KelviqProvider implements PaymentProvider {
     orgId?: string,
   ): Promise<Date | null> {
     if (!orgId) return null;
-    const result = await this.syncSubscription(orgId);
+    const result = await this.getSubscription(orgId);
     return result?.currentPeriodEnd ?? null;
   }
 
@@ -134,7 +134,7 @@ export class KelviqProvider implements PaymentProvider {
     );
   }
 
-  async syncSubscription(orgId: string): Promise<SyncResult | null> {
+  async getSubscription(orgId: string): Promise<SubscriptionState | null> {
     const cached = this._cache.get(orgId);
     if (cached && cached.expiresAt > Date.now()) return cached.result;
 
@@ -147,10 +147,9 @@ export class KelviqProvider implements PaymentProvider {
 
     const results: any[] = data.results ?? [];
 
-    // Prefer non-terminal subscription; fall back to most recent
     const raw = results.find((s) => !TERMINAL.has((s.status ?? '').toLowerCase())) ?? results[0];
 
-    let result: SyncResult | null = null;
+    let result: SubscriptionState | null = null;
 
     if (raw) {
       const status = ((raw.status as string) ?? 'unknown').toLowerCase();

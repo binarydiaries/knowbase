@@ -49,10 +49,10 @@ function toRow(record: OrgSub) {
 async function syncOrgFromGateway(orgId: string) {
   const provider = getDefaultProvider();
 
-  if (provider.syncSubscription) {
+  if (provider.getSubscription) {
     // Kelviq: fetch live state directly — no subscriptionId needed
-    const live = await provider.syncSubscription(orgId);
-    if (!live) throw new Error(`No active subscription found for org ${orgId} in Kelviq`);
+    const live = await provider.getSubscription(orgId);
+    if (!live) throw new Error(`No subscription found for org ${orgId}`);
 
     const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
     const plan = TERMINAL.has(live.status) ? 'free' : live.plan;

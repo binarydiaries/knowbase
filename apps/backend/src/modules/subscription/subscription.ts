@@ -1,8 +1,8 @@
 import { Elysia } from 'elysia';
-import { clerkClient } from 'elysia-clerk';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
+import { fetchOrgUserInfo } from '../../utils/clerkOrg.utils';
 import { SubscriptionModel } from './model';
 import { type PaidPlanName, PLAN_ORDER, PLANS } from './plans';
 import {
@@ -15,7 +15,6 @@ import { SubscriptionService } from './service';
 
 const ACTIVE_STATUSES = new Set(['active', 'authenticated', 'pending_cancellation', 'halted']);
 
-// Used only by the Razorpay path
 async function upsertOrgSubscription(
   orgId: string,
   data: {
@@ -40,7 +39,6 @@ export const Subscription = new Elysia({
   tags: ['Subscription'],
 })
   .use(SubscriptionModel)
-  // PUBLIC — no auth required
   .get(
     '/plans',
     () => ({ plans: PLAN_ORDER.map((slug) => PLANS[slug]) }),
@@ -116,27 +114,14 @@ export const Subscription = new Elysia({
       const { plan } = body;
       const provider = getDefaultProvider();
 
-      if (provider.syncSubscription) {
-        // Kelviq: check live subscription state — no local DB
-        const existing = await provider.syncSubscription(orgId);
+      if (provider.getSubscription) {
+        const existing = await provider.getSubscription(orgId);
         if (existing && ACTIVE_STATUSES.has(existing.status)) {
           set.status = 400;
           throw new Error('Cancel your current subscription before subscribing to a new plan.');
         }
 
-        let name: string | null = null;
-        let email: string | null = null;
-        try {
-          const [org, user] = await Promise.all([
-            clerkClient.organizations.getOrganization({ organizationId: orgId }),
-            clerkClient.users.getUser(userId),
-          ]);
-          name = org.name ?? null;
-          email = user.primaryEmailAddress?.emailAddress ?? null;
-        } catch {
-          // best-effort — proceed without name/email
-        }
-
+        const { name, email } = await fetchOrgUserInfo(orgId, userId);
         const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId, name, email });
         return { provider: provider.name, subscriptionId: result.subscriptionId, clientToken: result.clientToken };
       }
@@ -185,15 +170,14 @@ export const Subscription = new Elysia({
       const { immediate } = body;
       const provider = getDefaultProvider();
 
-      if (provider.syncSubscription) {
-        // Kelviq: find active subscription live
-        const sub = await provider.syncSubscription(orgId);
+      if (provider.getSubscription) {
+        const sub = await provider.getSubscription(orgId);
         if (!sub || !ACTIVE_STATUSES.has(sub.status)) {
           set.status = 404;
           return { success: false };
         }
         await provider.cancelSubscription(sub.subscriptionId, { atPeriodEnd: !immediate });
-        provider.invalidateCachedState?.(orgId);
+        provider.invalidateSubscriptionCache?.(orgId);
         return { success: true };
       }
 

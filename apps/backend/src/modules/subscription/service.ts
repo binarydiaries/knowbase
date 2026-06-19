@@ -34,8 +34,8 @@ export abstract class SubscriptionService {
   private static async getState(orgId: string): Promise<SubscriptionState> {
     const provider = getDefaultProvider();
 
-    if (provider.syncSubscription) {
-      const result = await provider.syncSubscription(orgId).catch(() => null);
+    if (provider.getSubscription) {
+      const result = await provider.getSubscription(orgId).catch(() => null);
 
       if (!result || TERMINAL_STATUSES.has(result.status)) {
         return { plan: 'free', status: result?.status ?? null, currentPeriodEnd: null, pendingPlan: null };

@@ -17,9 +17,16 @@ export interface WebhookEvent {
   lastPaymentAmount?: number;
 }
 
+export interface SyncResult {
+  subscriptionId: string;
+  plan: PaidPlanName | 'free';
+  status: string;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+}
+
 export interface PaymentProvider {
   readonly name: string;
-  readonly signatureHeader: string;
   readonly clientToken: string;
   createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
@@ -33,6 +40,9 @@ export interface PaymentProvider {
   getSubscriptionPeriodEnd(subscriptionId: string, orgId?: string): Promise<Date | null>;
   /** Issue a partial refund for a payment. Amount in smallest currency unit. */
   issueRefund(paymentId: string, amount: number): Promise<void>;
-  /** Throws on invalid signature. Returns null for unknown/ignored events. */
-  parseWebhook(rawBody: string, signature: string, headers?: Record<string, string>): WebhookEvent | null;
+  /** Webhook-based providers: verify signature and parse event. */
+  readonly signatureHeader?: string;
+  parseWebhook?(rawBody: string, signature: string, headers?: Record<string, string>): WebhookEvent | null;
+  /** Pull-based providers: fetch the current subscription state directly from the gateway. */
+  syncSubscription?(orgId: string): Promise<SyncResult | null>;
 }

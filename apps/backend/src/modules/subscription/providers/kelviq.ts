@@ -1,14 +1,9 @@
-import {
-  InvalidRequestError,
-  Kelviq,
-  validateEvent,
-  WebhookVerificationError,
-} from '@kelviq/node-sdk';
+import { InvalidRequestError, Kelviq } from '@kelviq/node-sdk';
 import type {
   CheckoutResult,
   PaidPlanName,
   PaymentProvider,
-  WebhookEvent,
+  SyncResult,
 } from './types';
 
 const IDENTIFIER_TO_PLAN: Record<string, PaidPlanName> = {};
@@ -28,7 +23,6 @@ buildPlanMap();
 
 export class KelviqProvider implements PaymentProvider {
   readonly name = 'kelviq';
-  readonly signatureHeader = 'webhook-signature';
 
   private _client: Kelviq | null = null;
 
@@ -145,96 +139,38 @@ export class KelviqProvider implements PaymentProvider {
     );
   }
 
-  parseWebhook(
-    rawBody: string,
-    signature: string,
-    headers?: Record<string, string>,
-  ): WebhookEvent | null {
-    const secret = process.env.KELVIQ_WEBHOOK_SECRET;
-    if (!secret) throw new Error('KELVIQ_WEBHOOK_SECRET must be set');
+  async syncSubscription(orgId: string): Promise<SyncResult | null> {
+    const data = await this.client._request<{ results: any[] }>(
+      'GET',
+      '/subscriptions/',
+      undefined,
+      { customerId: orgId, pageSize: 50 },
+    );
 
-    let payload: Record<string, unknown>;
-    try {
-      payload = validateEvent(
-        rawBody,
-        { ...headers, 'webhook-signature': signature },
-        secret,
-      ) as Record<string, unknown>;
-    } catch (err) {
-      if (err instanceof WebhookVerificationError) {
-        throw new Error('Invalid Kelviq webhook signature');
-      }
-      throw err;
-    }
+    const results: any[] = data.results ?? [];
+    const ACTIVE_STATUSES = ['active', 'ACTIVE', 'authenticated', 'pending_cancellation'];
+    const sub =
+      results.find((s) => ACTIVE_STATUSES.includes(s.status ?? '')) ??
+      results[0];
 
-    const event = payload.type as string;
-    const obj = (payload as any)?.data?.object;
-    if (!obj) return null;
+    if (!sub) return null;
 
-    const orgId: string = obj.customerId;
-    if (!orgId) return null;
-
-    const subscriptionId: string = obj.subscriptionId ?? obj.id;
-    const planIdentifier: string =
-      obj.plan?.identifier ?? obj.planIdentifier ?? '';
+    const planIdentifier: string = sub.plan?.identifier ?? sub.planIdentifier ?? '';
     const planName = IDENTIFIER_TO_PLAN[planIdentifier];
-    const currentPeriodStart = obj.billingPeriodStartTime
-      ? new Date(obj.billingPeriodStartTime)
-      : undefined;
-    const currentPeriodEnd = obj.billingPeriodEndTime
-      ? new Date(obj.billingPeriodEndTime)
-      : undefined;
+    const isTerminal = ['cancelled', 'CANCELLED', 'expired', 'EXPIRED', 'completed'].includes(
+      sub.status ?? '',
+    );
 
-    switch (event) {
-      case 'subscription.created':
-      case 'invoice.paid':
-        return {
-          orgId,
-          plan: planName,
-          status: 'active',
-          subscriptionId,
-          currentPeriodStart,
-          currentPeriodEnd,
-          lastPaymentId: obj.orderId ?? obj.invoiceId,
-          lastPaymentAmount:
-            obj.amount !== undefined ? Number(obj.amount) : undefined,
-        };
-      case 'checkout.completed':
-        return {
-          orgId,
-          plan: planName,
-          status: 'active',
-          subscriptionId: obj.subscriptionId ?? subscriptionId,
-          currentPeriodStart,
-          currentPeriodEnd,
-        };
-      case 'subscription.cancelled':
-        return {
-          orgId,
-          plan: 'free',
-          status: 'cancelled',
-          subscriptionId,
-          currentPeriodEnd,
-        };
-      case 'subscription.plan_changed':
-        return {
-          orgId,
-          plan: planName,
-          status: 'active',
-          subscriptionId,
-          currentPeriodStart,
-          currentPeriodEnd,
-        };
-      case 'subscription.updated':
-        return {
-          orgId,
-          status: 'active',
-          subscriptionId,
-          currentPeriodStart,
-          currentPeriodEnd,
-        };
-      default:
-        return null;
-    }
+    return {
+      subscriptionId: sub.id as string,
+      plan: isTerminal || !planName ? 'free' : planName,
+      status: (sub.status as string ?? 'unknown').toLowerCase(),
+      currentPeriodStart: sub.billingPeriodStartTime
+        ? new Date(sub.billingPeriodStartTime)
+        : null,
+      currentPeriodEnd: sub.billingPeriodEndTime
+        ? new Date(sub.billingPeriodEndTime)
+        : null,
+    };
   }
 }

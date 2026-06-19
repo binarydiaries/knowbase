@@ -1,10 +1,6 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { Kelviq, InvalidRequestError, validateEvent, WebhookVerificationError } from '@kelviq/node-sdk';
 import type { CheckoutResult, PaymentProvider, PaidPlanName, WebhookEvent } from './types';
 
-const BASE_URL = 'https://api.kelviq.com/api/v1';
-
-// Reverse map: kelviq plan identifier → internal plan name
-// Built once at startup from env vars
 const IDENTIFIER_TO_PLAN: Record<string, PaidPlanName> = {};
 
 function buildPlanMap(): void {
@@ -24,14 +20,19 @@ export class KelviqProvider implements PaymentProvider {
   readonly name = 'kelviq';
   readonly signatureHeader = 'webhook-signature';
 
-  get clientToken(): string {
-    return process.env.KELVIQ_CLIENT_API_KEY ?? '';
+  private _client: Kelviq | null = null;
+
+  private get client(): Kelviq {
+    if (!this._client) {
+      const accessToken = process.env.KELVIQ_SERVER_API_KEY;
+      if (!accessToken) throw new Error('KELVIQ_SERVER_API_KEY must be set');
+      this._client = new Kelviq({ accessToken });
+    }
+    return this._client;
   }
 
-  private get serverKey(): string {
-    const key = process.env.KELVIQ_SERVER_API_KEY;
-    if (!key) throw new Error('KELVIQ_SERVER_API_KEY must be set');
-    return key;
+  get clientToken(): string {
+    return process.env.KELVIQ_CLIENT_API_KEY ?? '';
   }
 
   private getPlanIdentifier(plan: PaidPlanName): string {
@@ -44,28 +45,12 @@ export class KelviqProvider implements PaymentProvider {
     return identifier;
   }
 
-  private async request(method: string, path: string, body?: unknown): Promise<any> {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${this.serverKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`Kelviq API error ${res.status}: ${text}`);
-    }
-    return res.json();
-  }
-
   private async ensureCustomer(orgId: string): Promise<void> {
     try {
-      await this.request('POST', '/customers/', { customerId: orgId });
-    } catch (err: any) {
-      // 400 = customer already exists — safe to proceed
-      if (!err.message?.includes('400')) throw err;
+      await this.client.customers.create({ customerId: orgId });
+    } catch (err) {
+      if (err instanceof InvalidRequestError) return;
+      throw err;
     }
   }
 
@@ -73,7 +58,7 @@ export class KelviqProvider implements PaymentProvider {
     await this.ensureCustomer(orgId);
 
     const successUrl = `${process.env.APP_URL ?? ''}/subscriptions?success=true`;
-    const data = await this.request('POST', '/checkout/sessions/', {
+    const data = await this.client.checkout.createSession({
       planIdentifier: this.getPlanIdentifier(plan),
       chargePeriod: 'MONTHLY',
       customerId: orgId,
@@ -81,14 +66,16 @@ export class KelviqProvider implements PaymentProvider {
     });
 
     return {
-      subscriptionId: data.checkoutSessionId ?? data.id,
-      clientToken: data.checkoutUrl ?? '',
+      subscriptionId: data.checkoutSessionId,
+      clientToken: data.checkoutUrl,
     };
   }
 
   async cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void> {
-    const cancellationType = options?.atPeriodEnd ? 'CURRENT_PERIOD_ENDS' : 'IMMEDIATE';
-    await this.request('POST', `/subscriptions/${subscriptionId}/cancel/`, { cancellationType });
+    await this.client.subscriptions.cancel({
+      subscriptionId,
+      cancellationType: options?.atPeriodEnd ? 'CURRENT_PERIOD_ENDS' : 'IMMEDIATE',
+    });
   }
 
   async fetchSubscription(subscriptionId: string, orgId?: string): Promise<{
@@ -97,8 +84,13 @@ export class KelviqProvider implements PaymentProvider {
     currentPeriodEnd: Date | null;
   }> {
     if (!orgId) throw new Error('orgId is required to fetch a Kelviq subscription');
-    const data = await this.request('GET', `/subscriptions/?customer_id=${encodeURIComponent(orgId)}&page_size=50`);
-    const sub = (data.results ?? []).find((s: any) => s.id === subscriptionId);
+    const data = await this.client._request<{ results: any[] }>(
+      'GET',
+      '/subscriptions/',
+      undefined,
+      { customerId: orgId, pageSize: 50 },
+    );
+    const sub = data.results?.find((s: any) => s.id === subscriptionId);
     if (!sub) throw new Error(`Kelviq subscription ${subscriptionId} not found for org ${orgId}`);
     return {
       status: sub.status as string,
@@ -120,32 +112,20 @@ export class KelviqProvider implements PaymentProvider {
     const secret = process.env.KELVIQ_WEBHOOK_SECRET;
     if (!secret) throw new Error('KELVIQ_WEBHOOK_SECRET must be set');
 
-    const webhookId = headers?.['webhook-id'] ?? '';
-    const webhookTimestamp = headers?.['webhook-timestamp'] ?? '';
-    const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
-
-    const expected = createHmac('sha256', secret).update(signedContent).digest('hex');
-    // Kelviq prefixes the signature with "v1,"
-    const actualHex = signature.startsWith('v1,') ? signature.slice(3) : signature;
-
-    const expectedBuf = Buffer.from(expected, 'hex');
-    const actualBuf = Buffer.from(actualHex, 'hex');
-    if (expectedBuf.length !== actualBuf.length || !timingSafeEqual(expectedBuf, actualBuf)) {
-      throw new Error('Invalid Kelviq webhook signature');
-    }
-
-    let payload: any;
+    let payload: Record<string, unknown>;
     try {
-      payload = JSON.parse(rawBody);
-    } catch {
-      throw new Error('Invalid JSON in webhook body');
+      payload = validateEvent(rawBody, { ...headers, 'webhook-signature': signature }, secret) as Record<string, unknown>;
+    } catch (err) {
+      if (err instanceof WebhookVerificationError) {
+        throw new Error('Invalid Kelviq webhook signature');
+      }
+      throw err;
     }
 
     const event = payload.type as string;
-    const obj = payload?.data?.object;
+    const obj = (payload as any)?.data?.object;
     if (!obj) return null;
 
-    // customerId is set to orgId at subscription creation
     const orgId: string = obj.customerId;
     if (!orgId) return null;
 

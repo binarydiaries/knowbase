@@ -152,29 +152,47 @@ export class KelviqProvider implements PaymentProvider {
     );
 
     const results: any[] = data.results ?? [];
-    const ACTIVE_STATUSES = ['active', 'ACTIVE', 'authenticated', 'pending_cancellation'];
+    const TERMINAL = new Set(['cancelled', 'CANCELLED', 'expired', 'EXPIRED', 'completed', 'COMPLETED']);
+    const ACTIVE_STATUSES = new Set(['active', 'ACTIVE', 'authenticated', 'AUTHENTICATED']);
+
+    // Prefer non-terminal subscriptions; fall back to most recent
     const sub =
-      results.find((s) => ACTIVE_STATUSES.includes(s.status ?? '')) ??
+      results.find((s) => !TERMINAL.has(s.status ?? '')) ??
       results[0];
 
     if (!sub) return null;
 
     const planIdentifier: string = sub.plan?.identifier ?? sub.planIdentifier ?? '';
     const planName = IDENTIFIER_TO_PLAN[planIdentifier];
-    const isTerminal = ['cancelled', 'CANCELLED', 'expired', 'EXPIRED', 'completed'].includes(
-      sub.status ?? '',
-    );
+    const isTerminal = TERMINAL.has(sub.status ?? '');
+
+    // When cancelled with CURRENT_PERIOD_ENDS, Kelviq keeps status ACTIVE
+    // but sets endDate to the scheduled cancellation date.
+    const isPendingCancellation =
+      !isTerminal &&
+      ACTIVE_STATUSES.has(sub.status ?? '') &&
+      sub.endDate != null &&
+      new Date(sub.endDate) > new Date();
+
+    const effectiveStatus = isTerminal
+      ? (sub.status as string).toLowerCase()
+      : isPendingCancellation
+        ? 'pending_cancellation'
+        : (sub.status as string ?? 'unknown').toLowerCase();
+
+    // currentPeriodEnd: use endDate when pending cancellation (it's the actual last day)
+    const periodEnd = isPendingCancellation
+      ? sub.endDate
+      : sub.billingPeriodEndTime;
 
     return {
       subscriptionId: sub.id as string,
       plan: isTerminal || !planName ? 'free' : planName,
-      status: (sub.status as string ?? 'unknown').toLowerCase(),
+      status: effectiveStatus,
       currentPeriodStart: sub.billingPeriodStartTime
         ? new Date(sub.billingPeriodStartTime)
         : null,
-      currentPeriodEnd: sub.billingPeriodEndTime
-        ? new Date(sub.billingPeriodEndTime)
-        : null,
+      currentPeriodEnd: periodEnd ? new Date(periodEnd) : null,
     };
   }
 }

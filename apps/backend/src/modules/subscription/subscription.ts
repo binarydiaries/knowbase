@@ -13,7 +13,7 @@ import {
 } from './providers';
 import { SubscriptionService } from './service';
 
-const ACTIVE_STATUSES = new Set(['active', 'authenticated', 'pending_cancellation']);
+const ACTIVE_STATUSES = new Set(['active', 'authenticated', 'pending_cancellation', 'halted']);
 
 // Used only by the Razorpay path
 async function upsertOrgSubscription(
@@ -193,6 +193,7 @@ export const Subscription = new Elysia({
           return { success: false };
         }
         await provider.cancelSubscription(sub.subscriptionId, { atPeriodEnd: !immediate });
+        provider.invalidateCachedState?.(orgId);
         return { success: true };
       }
 

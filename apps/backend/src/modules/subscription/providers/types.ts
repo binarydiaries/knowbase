@@ -45,4 +45,6 @@ export interface PaymentProvider {
   parseWebhook?(rawBody: string, signature: string, headers?: Record<string, string>): WebhookEvent | null;
   /** Pull-based providers: fetch the current subscription state directly from the gateway. */
   syncSubscription?(orgId: string): Promise<SyncResult | null>;
+  /** Pull-based providers: evict a cached subscription state (call after cancel). */
+  invalidateCachedState?(orgId: string): void;
 }

@@ -6,31 +6,25 @@ import type {
   SyncResult,
 } from './types';
 
-const IDENTIFIER_TO_PLAN: Record<string, PaidPlanName> = {};
+const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
 
-function buildPlanMap(): void {
-  const pairs: Array<[string | undefined, PaidPlanName]> = [
-    [process.env.KELVIQ_PLAN_STARTER, 'starter'],
-    [process.env.KELVIQ_PLAN_GROWTH, 'growth'],
-    [process.env.KELVIQ_PLAN_PRO, 'pro'],
-  ];
-  for (const [identifier, name] of pairs) {
-    if (identifier) IDENTIFIER_TO_PLAN[identifier] = name;
-  }
+interface CacheEntry {
+  result: SyncResult | null;
+  expiresAt: number;
 }
-
-buildPlanMap();
 
 export class KelviqProvider implements PaymentProvider {
   readonly name = 'kelviq';
-
   private _client: Kelviq | null = null;
+  private readonly _cache = new Map<string, CacheEntry>();
+  private static readonly CACHE_TTL_MS = 60_000;
 
   private get client(): Kelviq {
     if (!this._client) {
       const accessToken = process.env.KELVIQ_SERVER_API_KEY;
       if (!accessToken) throw new Error('KELVIQ_SERVER_API_KEY must be set');
-      this._client = new Kelviq({ accessToken, environment: 'sandbox' });
+      const environment = process.env.ENV_KEY === 'production' ? 'production' : 'sandbox';
+      this._client = new Kelviq({ accessToken, environment });
     }
     return this._client;
   }
@@ -49,11 +43,21 @@ export class KelviqProvider implements PaymentProvider {
     return identifier;
   }
 
+  // Reads env vars at call time so the map stays accurate if vars are set after module import
+  private planNameFromIdentifier(identifier: string): PaidPlanName | undefined {
+    const pairs: Array<[string | undefined, PaidPlanName]> = [
+      [process.env.KELVIQ_PLAN_STARTER, 'starter'],
+      [process.env.KELVIQ_PLAN_GROWTH, 'growth'],
+      [process.env.KELVIQ_PLAN_PRO, 'pro'],
+    ];
+    return pairs.find(([id]) => id === identifier)?.[1];
+  }
+
   private async ensureCustomer(orgId: string, name?: string | null, email?: string | null): Promise<void> {
     try {
       await this.client.customers.create({ customerId: orgId, name, email });
     } catch (err) {
-      if (err instanceof InvalidRequestError) return;
+      if (err instanceof InvalidRequestError) return; // customer already exists
       throw err;
     }
   }
@@ -70,7 +74,6 @@ export class KelviqProvider implements PaymentProvider {
     email?: string | null;
   }): Promise<CheckoutResult> {
     await this.ensureCustomer(orgId, name, email);
-
     const successUrl = `${process.env.APP_URL ?? ''}/subscriptions?success=true`;
     const data = await this.client.checkout.createSession({
       planIdentifier: this.getPlanIdentifier(plan),
@@ -78,7 +81,6 @@ export class KelviqProvider implements PaymentProvider {
       customerId: orgId,
       successUrl,
     });
-
     return {
       subscriptionId: data.checkoutSessionId,
       clientToken: data.checkoutUrl,
@@ -91,50 +93,39 @@ export class KelviqProvider implements PaymentProvider {
   ): Promise<void> {
     await this.client.subscriptions.cancel({
       subscriptionId,
-      cancellationType: options?.atPeriodEnd
-        ? 'CURRENT_PERIOD_ENDS'
-        : 'IMMEDIATE',
+      cancellationType: options?.atPeriodEnd ? 'CURRENT_PERIOD_ENDS' : 'IMMEDIATE',
     });
   }
 
+  invalidateCachedState(orgId: string): void {
+    this._cache.delete(orgId);
+  }
+
   async fetchSubscription(
-    subscriptionId: string,
+    _subscriptionId: string,
     orgId?: string,
   ): Promise<{
     status: string;
     currentPeriodStart: Date | null;
     currentPeriodEnd: Date | null;
   }> {
-    if (!orgId)
-      throw new Error('orgId is required to fetch a Kelviq subscription');
-    const data = await this.client._request<{ results: any[] }>(
-      'GET',
-      '/subscriptions/',
-      undefined,
-      { customerId: orgId, pageSize: 50 },
-    );
-    const sub = data.results?.find((s: any) => s.id === subscriptionId);
-    if (!sub)
-      throw new Error(
-        `Kelviq subscription ${subscriptionId} not found for org ${orgId}`,
-      );
+    if (!orgId) throw new Error('orgId is required to fetch a Kelviq subscription');
+    const result = await this.syncSubscription(orgId);
+    if (!result) throw new Error(`No active subscription found for org ${orgId}`);
     return {
-      status: sub.status as string,
-      currentPeriodStart: sub.billingPeriodStartTime
-        ? new Date(sub.billingPeriodStartTime)
-        : null,
-      currentPeriodEnd: sub.billingPeriodEndTime
-        ? new Date(sub.billingPeriodEndTime)
-        : null,
+      status: result.status,
+      currentPeriodStart: result.currentPeriodStart,
+      currentPeriodEnd: result.currentPeriodEnd,
     };
   }
 
   async getSubscriptionPeriodEnd(
-    subscriptionId: string,
+    _subscriptionId: string,
     orgId?: string,
   ): Promise<Date | null> {
-    const sub = await this.fetchSubscription(subscriptionId, orgId);
-    return sub.currentPeriodEnd;
+    if (!orgId) return null;
+    const result = await this.syncSubscription(orgId);
+    return result?.currentPeriodEnd ?? null;
   }
 
   async issueRefund(_paymentId: string, _amount: number): Promise<void> {
@@ -144,6 +135,9 @@ export class KelviqProvider implements PaymentProvider {
   }
 
   async syncSubscription(orgId: string): Promise<SyncResult | null> {
+    const cached = this._cache.get(orgId);
+    if (cached && cached.expiresAt > Date.now()) return cached.result;
+
     const data = await this.client._request<{ results: any[] }>(
       'GET',
       '/subscriptions/',
@@ -152,47 +146,41 @@ export class KelviqProvider implements PaymentProvider {
     );
 
     const results: any[] = data.results ?? [];
-    const TERMINAL = new Set(['cancelled', 'CANCELLED', 'expired', 'EXPIRED', 'completed', 'COMPLETED']);
-    const ACTIVE_STATUSES = new Set(['active', 'ACTIVE', 'authenticated', 'AUTHENTICATED']);
 
-    // Prefer non-terminal subscriptions; fall back to most recent
-    const sub =
-      results.find((s) => !TERMINAL.has(s.status ?? '')) ??
-      results[0];
+    // Prefer non-terminal subscription; fall back to most recent
+    const raw = results.find((s) => !TERMINAL.has((s.status ?? '').toLowerCase())) ?? results[0];
 
-    if (!sub) return null;
+    let result: SyncResult | null = null;
 
-    const planIdentifier: string = sub.plan?.identifier ?? sub.planIdentifier ?? '';
-    const planName = IDENTIFIER_TO_PLAN[planIdentifier];
-    const isTerminal = TERMINAL.has(sub.status ?? '');
+    if (raw) {
+      const status = ((raw.status as string) ?? 'unknown').toLowerCase();
+      const isTerminal = TERMINAL.has(status);
 
-    // When cancelled with CURRENT_PERIOD_ENDS, Kelviq keeps status ACTIVE
-    // but sets endDate to the scheduled cancellation date.
-    const isPendingCancellation =
-      !isTerminal &&
-      ACTIVE_STATUSES.has(sub.status ?? '') &&
-      sub.endDate != null &&
-      new Date(sub.endDate) > new Date();
+      // When cancelled with CURRENT_PERIOD_ENDS, Kelviq keeps status ACTIVE
+      // but sets endDate to the scheduled cancellation date.
+      const isPendingCancellation =
+        !isTerminal &&
+        (status === 'active' || status === 'authenticated') &&
+        raw.endDate != null &&
+        new Date(raw.endDate) > new Date();
 
-    const effectiveStatus = isTerminal
-      ? (sub.status as string).toLowerCase()
-      : isPendingCancellation
-        ? 'pending_cancellation'
-        : (sub.status as string ?? 'unknown').toLowerCase();
+      const effectiveStatus = isPendingCancellation ? 'pending_cancellation' : status;
+      const planIdentifier: string = raw.plan?.identifier ?? raw.planIdentifier ?? '';
+      const planName = this.planNameFromIdentifier(planIdentifier);
+      const periodEnd = isPendingCancellation ? raw.endDate : raw.billingPeriodEndTime;
 
-    // currentPeriodEnd: use endDate when pending cancellation (it's the actual last day)
-    const periodEnd = isPendingCancellation
-      ? sub.endDate
-      : sub.billingPeriodEndTime;
+      result = {
+        subscriptionId: raw.id as string,
+        plan: isTerminal || !planName ? 'free' : planName,
+        status: effectiveStatus,
+        currentPeriodStart: raw.billingPeriodStartTime
+          ? new Date(raw.billingPeriodStartTime)
+          : null,
+        currentPeriodEnd: periodEnd ? new Date(periodEnd) : null,
+      };
+    }
 
-    return {
-      subscriptionId: sub.id as string,
-      plan: isTerminal || !planName ? 'free' : planName,
-      status: effectiveStatus,
-      currentPeriodStart: sub.billingPeriodStartTime
-        ? new Date(sub.billingPeriodStartTime)
-        : null,
-      currentPeriodEnd: periodEnd ? new Date(periodEnd) : null,
-    };
+    this._cache.set(orgId, { result, expiresAt: Date.now() + KelviqProvider.CACHE_TTL_MS });
+    return result;
   }
 }

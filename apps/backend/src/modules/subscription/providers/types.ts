@@ -23,16 +23,16 @@ export interface PaymentProvider {
   readonly clientToken: string;
   createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
-  /** Fetch live subscription details from the payment gateway. */
-  fetchSubscription(subscriptionId: string): Promise<{
+  /** Fetch live subscription details from the payment gateway. orgId required by some providers. */
+  fetchSubscription(subscriptionId: string, orgId?: string): Promise<{
     status: string;
     currentPeriodStart: Date | null;
     currentPeriodEnd: Date | null;
   }>;
-  /** Fetch the current period end date for an existing subscription. */
-  getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null>;
-  /** Issue a partial refund for a Razorpay payment. Amount in paise. */
-  issueRefund(paymentId: string, amountPaise: number): Promise<void>;
+  /** Fetch the current period end date for an existing subscription. orgId required by some providers. */
+  getSubscriptionPeriodEnd(subscriptionId: string, orgId?: string): Promise<Date | null>;
+  /** Issue a partial refund for a payment. Amount in smallest currency unit. */
+  issueRefund(paymentId: string, amount: number): Promise<void>;
   /** Throws on invalid signature. Returns null for unknown/ignored events. */
-  parseWebhook(rawBody: string, signature: string): WebhookEvent | null;
+  parseWebhook(rawBody: string, signature: string, headers?: Record<string, string>): WebhookEvent | null;
 }

@@ -62,10 +62,15 @@ export const Subscription = new Elysia({
 
     const rawBody = await request.text();
     const signature = request.headers.get(provider.signatureHeader) ?? '';
+    const extraHeaders: Record<string, string> = {};
+    for (const key of ['webhook-id', 'webhook-timestamp']) {
+      const val = request.headers.get(key);
+      if (val) extraHeaders[key] = val;
+    }
 
     let event: WebhookEvent | null;
     try {
-      event = provider.parseWebhook(rawBody, signature);
+      event = provider.parseWebhook(rawBody, signature, extraHeaders);
     } catch (err: any) {
       set.status = 400;
       return { error: err.message ?? 'Webhook verification failed' };
@@ -132,8 +137,10 @@ export const Subscription = new Elysia({
         );
       }
 
-      // Resume an incomplete checkout for the same plan rather than creating a duplicate
+      // Razorpay only: resume an incomplete checkout to avoid duplicate subscriptions.
+      // Kelviq checkout URLs expire, so always create a fresh session for other providers.
       if (
+        provider.name === 'razorpay' &&
         existing?.status === 'created' &&
         existing.providerSubscriptionId &&
         existing.plan === plan

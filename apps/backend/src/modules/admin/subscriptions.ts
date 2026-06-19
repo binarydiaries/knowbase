@@ -53,7 +53,7 @@ async function syncOrgFromGateway(orgId: string) {
   }
 
   const provider = getProvider(record.provider ?? 'razorpay');
-  const live = await provider.fetchSubscription(record.providerSubscriptionId);
+  const live = await provider.fetchSubscription(record.providerSubscriptionId, orgId);
 
   const isTerminal = live.status === 'cancelled' || live.status === 'completed' || live.status === 'expired';
   const plan = isTerminal ? 'free' : record.plan;

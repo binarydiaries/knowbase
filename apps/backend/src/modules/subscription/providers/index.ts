@@ -1,8 +1,10 @@
 import type { PaymentProvider } from './types';
 import { RazorpayProvider } from './razorpay';
+import { KelviqProvider } from './kelviq';
 
 const PROVIDERS: Record<string, PaymentProvider> = {
   razorpay: new RazorpayProvider(),
+  kelviq: new KelviqProvider(),
 };
 
 export function getProvider(name: string): PaymentProvider {

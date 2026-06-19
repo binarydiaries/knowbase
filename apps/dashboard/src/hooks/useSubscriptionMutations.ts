@@ -19,30 +19,37 @@ export function useCheckoutMutation() {
 
   return useMutation({
     mutationFn: async (plan: CheckoutBodySchema['plan']) => {
-      const loaded = await loadRazorpayScript();
-      if (!loaded)
-        throw new Error('Failed to load payment gateway. Please try again.');
-
       const res = await postSubscriptionsCheckout({ body: { plan } });
       const { provider, subscriptionId, clientToken } = res.data;
 
-      if (provider !== 'razorpay')
-        throw new Error(`Unsupported payment provider: ${provider}`);
+      if (provider === 'kelviq') {
+        // clientToken is the hosted checkout URL — redirect to complete payment
+        window.location.href = clientToken;
+        return { plan };
+      }
 
-      await new Promise<void>((resolve, reject) => {
-        const rzp = new (window as any).Razorpay({
-          key: clientToken,
-          subscription_id: subscriptionId,
-          name: 'Agenvik',
-          description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
-          theme: { color: '#301B69' },
-          handler: () => resolve(),
-          modal: { ondismiss: () => reject(new Error('dismissed')) },
+      if (provider === 'razorpay') {
+        const loaded = await loadRazorpayScript();
+        if (!loaded)
+          throw new Error('Failed to load payment gateway. Please try again.');
+
+        await new Promise<void>((resolve, reject) => {
+          const rzp = new (window as any).Razorpay({
+            key: clientToken,
+            subscription_id: subscriptionId,
+            name: 'Agenvik',
+            description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
+            theme: { color: '#301B69' },
+            handler: () => resolve(),
+            modal: { ondismiss: () => reject(new Error('dismissed')) },
+          });
+          rzp.open();
         });
-        rzp.open();
-      });
 
-      return { plan };
+        return { plan };
+      }
+
+      throw new Error(`Unsupported payment provider: ${provider}`);
     },
     onSuccess: ({ plan }) => {
       invalidate();

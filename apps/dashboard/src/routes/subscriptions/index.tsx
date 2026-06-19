@@ -13,7 +13,6 @@ import {
 } from '@/hooks/useSubscriptionMutations';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import type { CheckoutBodySchema } from '@/services';
-import {KQPrice, usePricing, useSubscriptions} from "@kelviq/react-sdk";
 
 export const Route = createFileRoute('/subscriptions/')({
   component: RouteComponent,
@@ -23,13 +22,8 @@ function RouteComponent() {
   const { plan, isPaid, isPendingCancellation, isHalted, currentPeriodEnd, pendingPlan } =
     useClerkPlan();
   const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
-    const { data: subscriptions } = useSubscriptions();
-    const { data: pricing } = usePricing();
 
-
-    console.log('pricing',pricing,subscriptions)
-
-    const checkoutMutation = useCheckoutMutation();
+  const checkoutMutation = useCheckoutMutation();
   const cancelMutation = useCancelMutation();
 
   const isBusy = checkoutMutation.isPending || cancelMutation.isPending;
@@ -55,32 +49,6 @@ function RouteComponent() {
         {isPendingCancellation && currentPeriodEnd && (
           <PendingCancellationBanner expiresOn={currentPeriodEnd} />
         )}
-
-          <KQPrice
-              planIdentifier="free-plan"
-              billingPeriod="MONTHLY"
-              fallback={<p>Price not available</p>}
-          >
-              {({ formattedPrice, isFree, hasFreeTrial, trialPeriod }) => (
-                  <div>
-                      <h3>{formattedPrice}</h3>
-                      {hasFreeTrial && <p>{trialPeriod}-day free trial</p>}
-                  </div>
-              )}
-          </KQPrice>
-
-          <KQPrice
-      planIdentifier="starter   -plan"
-              billingPeriod="MONTHLY"
-              fallback={<p>Price not available</p>}
-          >
-              {({ formattedPrice, isFree, hasFreeTrial, trialPeriod }) => (
-                  <div>
-                      <h3>{formattedPrice}</h3>
-                      {hasFreeTrial && <p>{trialPeriod}-day free trial</p>}
-                  </div>
-              )}
-          </KQPrice>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-w-6xl">
           {plansLoading

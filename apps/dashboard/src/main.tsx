@@ -20,7 +20,6 @@ import ReactDOM from 'react-dom/client';
 import { client } from '@/services/client.gen.ts';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
-import {KelviqProvider} from "@kelviq/react-sdk";
 
 const router = createRouter({ routeTree });
 
@@ -104,22 +103,11 @@ function AppWithTheme() {
         </div>
       </ClerkLoading>
       <SignedIn>
-        <KelviqProvider
-            customerId="keshav"
-            accessToken="client-3da1e810-14f1-414d-a9be-39d1f520d35a:ab69a984-3d68-40e2-9fe6-6c02cc8544b3"
-            productId="ae37347e-3ec1-4694-ba95-8fcdd1569e91"
-            // plansEnabled="free-plan,starter-plan" // optional: filter to specific plans
-            config={{
-              fetchPricingOnMount: true, // fetch pricing data on mount
-            }}
-            environment="sandbox"
-        >
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <RouterProvider router={router} />
           </TooltipProvider>
         </QueryClientProvider>
-        </KelviqProvider>
         <Toaster />
       </SignedIn>
       <SignedOut>

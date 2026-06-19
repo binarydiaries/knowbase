@@ -31,7 +31,7 @@ export class RazorpayProvider implements PaymentProvider {
     return planId;
   }
 
-  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult> {
+  async createSubscription({ plan, orgId }: { plan: PaidPlanName; orgId: string; name?: string | null; email?: string | null }): Promise<CheckoutResult> {
     const subscription = await this.getClient().subscriptions.create({
       plan_id: this.getPlanId(plan),
       total_count: 120,

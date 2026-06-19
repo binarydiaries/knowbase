@@ -28,7 +28,7 @@ export interface SyncResult {
 export interface PaymentProvider {
   readonly name: string;
   readonly clientToken: string;
-  createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
+  createSubscription(params: { plan: PaidPlanName; orgId: string; name?: string | null; email?: string | null }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
   /** Fetch live subscription details from the payment gateway. orgId required by some providers. */
   fetchSubscription(subscriptionId: string, orgId?: string): Promise<{

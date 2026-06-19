@@ -49,9 +49,9 @@ export class KelviqProvider implements PaymentProvider {
     return identifier;
   }
 
-  private async ensureCustomer(orgId: string): Promise<void> {
+  private async ensureCustomer(orgId: string, name?: string | null, email?: string | null): Promise<void> {
     try {
-      await this.client.customers.create({ customerId: orgId });
+      await this.client.customers.create({ customerId: orgId, name, email });
     } catch (err) {
       if (err instanceof InvalidRequestError) return;
       throw err;
@@ -61,11 +61,15 @@ export class KelviqProvider implements PaymentProvider {
   async createSubscription({
     plan,
     orgId,
+    name,
+    email,
   }: {
     plan: PaidPlanName;
     orgId: string;
+    name?: string | null;
+    email?: string | null;
   }): Promise<CheckoutResult> {
-    await this.ensureCustomer(orgId);
+    await this.ensureCustomer(orgId, name, email);
 
     const successUrl = `${process.env.APP_URL ?? ''}/subscriptions?success=true`;
     const data = await this.client.checkout.createSession({

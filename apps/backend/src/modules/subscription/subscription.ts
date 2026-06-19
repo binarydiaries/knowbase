@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { clerkClient } from 'elysia-clerk';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
@@ -111,7 +112,7 @@ export const Subscription = new Elysia({
   )
   .post(
     '/checkout',
-    async ({ body, orgId, set }) => {
+    async ({ body, orgId, userId, set }) => {
       const { plan } = body;
       const provider = getDefaultProvider();
 
@@ -123,7 +124,20 @@ export const Subscription = new Elysia({
           throw new Error('Cancel your current subscription before subscribing to a new plan.');
         }
 
-        const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId });
+        let name: string | null = null;
+        let email: string | null = null;
+        try {
+          const [org, user] = await Promise.all([
+            clerkClient.organizations.getOrganization({ organizationId: orgId }),
+            clerkClient.users.getUser(userId),
+          ]);
+          name = org.name ?? null;
+          email = user.primaryEmailAddress?.emailAddress ?? null;
+        } catch {
+          // best-effort — proceed without name/email
+        }
+
+        const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId, name, email });
         return { provider: provider.name, subscriptionId: result.subscriptionId, clientToken: result.clientToken };
       }
 

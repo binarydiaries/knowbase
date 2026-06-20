@@ -1158,6 +1158,7 @@ export type IntentSchema = {
     name: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
+    optionalFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
         success?: string;
@@ -1204,6 +1205,7 @@ export type IntentWithActionsSchema = {
     name: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
+    optionalFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
         success?: string;
@@ -1248,6 +1250,7 @@ export type CreateIntentBody = {
     name: string;
     triggerInstructions: string;
     requiredFields: Array<string>;
+    optionalFields: Array<string>;
     executionMode: 'sequential' | 'parallel';
     config?: {
         success?: string;
@@ -1266,6 +1269,7 @@ export type UpdateIntentBody = {
     name?: string;
     triggerInstructions?: string;
     requiredFields?: Array<string>;
+    optionalFields?: Array<string>;
     config?: {
         success?: string;
         failure?: string;
@@ -1286,6 +1290,7 @@ export type OneIntentResponse = {
         name: string;
         triggerInstructions: string;
         requiredFields: Array<string>;
+        optionalFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
         config?: {
             success?: string;
@@ -1333,6 +1338,7 @@ export type ManyIntentsResponse = {
         name: string;
         triggerInstructions: string;
         requiredFields: Array<string>;
+        optionalFields: Array<string>;
         executionMode: 'sequential' | 'parallel';
         config?: {
             success?: string;

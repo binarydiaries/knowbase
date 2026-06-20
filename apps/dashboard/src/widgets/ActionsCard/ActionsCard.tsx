@@ -25,6 +25,7 @@ type IntentRow = {
   name: string;
   triggerInstructions: string;
   requiredFields: string[];
+  optionalFields: string[];
   config: { success?: string; failure?: string } | null;
   actions: { actionType: string }[];
 };
@@ -67,6 +68,7 @@ const ActionsCard = ({ readOnly = false }: { readOnly?: boolean }) => {
           name: LEAD_GENERATION_INTENT,
           triggerInstructions: DEFAULT_TRIGGER,
           requiredFields: ['name', 'email'],
+          optionalFields: [],
           executionMode: 'sequential',
           config: { success: DEFAULT_SUCCESS },
           actions: [{ actionType: 'save_lead', order: 0, config: {} }],

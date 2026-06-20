@@ -1,5 +1,23 @@
 import { clerkClient } from 'elysia-clerk';
 
+export async function fetchOrgUserInfo(
+  orgId: string,
+  userId: string,
+): Promise<{ name: string | null; email: string | null }> {
+  try {
+    const [org, user] = await Promise.all([
+      clerkClient.organizations.getOrganization({ organizationId: orgId }),
+      clerkClient.users.getUser(userId),
+    ]);
+    return {
+      name: org.name ?? null,
+      email: user.primaryEmailAddress?.emailAddress ?? null,
+    };
+  } catch {
+    return { name: null, email: null };
+  }
+}
+
 export async function resolveOrgNames(orgIds: string[]): Promise<Map<string, string>> {
   if (orgIds.length === 0) return new Map();
 

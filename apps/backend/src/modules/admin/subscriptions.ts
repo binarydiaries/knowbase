@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
 import { AdminGuard } from '../../common/authGuard/adminGuard';
-import { getProvider } from '../subscription/providers';
+import { getDefaultProvider, getProvider } from '../subscription/providers';
 import { eq } from 'drizzle-orm';
 
 type OrgSub = typeof orgSubscriptions.$inferSelect;
@@ -47,27 +47,62 @@ function toRow(record: OrgSub) {
 }
 
 async function syncOrgFromGateway(orgId: string) {
-  const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
-  if (!record?.providerSubscriptionId) {
-    throw new Error(`No provider subscription for org ${orgId}`);
+  const provider = getDefaultProvider();
+
+  if (provider.getSubscription) {
+    // Kelviq: fetch live state directly — no subscriptionId needed
+    const live = await provider.getSubscription(orgId);
+    if (!live) throw new Error(`No subscription found for org ${orgId}`);
+
+    const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
+    const plan = TERMINAL.has(live.status) ? 'free' : live.plan;
+
+    await db
+      .insert(orgSubscriptions)
+      .values({
+        orgId,
+        plan,
+        status: live.status,
+        provider: provider.name,
+        providerSubscriptionId: live.subscriptionId,
+        currentPeriodStart: live.currentPeriodStart,
+        currentPeriodEnd: live.currentPeriodEnd,
+      })
+      .onConflictDoUpdate({
+        target: orgSubscriptions.orgId,
+        set: {
+          plan,
+          status: live.status,
+          provider: provider.name,
+          providerSubscriptionId: live.subscriptionId,
+          currentPeriodStart: live.currentPeriodStart,
+          currentPeriodEnd: live.currentPeriodEnd,
+          updatedAt: new Date(),
+        },
+      });
+  } else {
+    // Razorpay: needs providerSubscriptionId from local DB
+    const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+    if (!record?.providerSubscriptionId) {
+      throw new Error(`No provider subscription for org ${orgId}`);
+    }
+
+    const razorpay = getProvider(record.provider ?? 'razorpay');
+    const live = await razorpay.fetchSubscription(record.providerSubscriptionId, orgId);
+    const TERMINAL = new Set(['cancelled', 'completed', 'expired']);
+    const plan = TERMINAL.has(live.status) ? 'free' : record.plan;
+
+    await db
+      .update(orgSubscriptions)
+      .set({
+        status: live.status,
+        plan,
+        currentPeriodStart: live.currentPeriodStart ?? record.currentPeriodStart,
+        currentPeriodEnd: live.currentPeriodEnd ?? record.currentPeriodEnd,
+        updatedAt: new Date(),
+      })
+      .where(eq(orgSubscriptions.orgId, orgId));
   }
-
-  const provider = getProvider(record.provider ?? 'razorpay');
-  const live = await provider.fetchSubscription(record.providerSubscriptionId);
-
-  const isTerminal = live.status === 'cancelled' || live.status === 'completed' || live.status === 'expired';
-  const plan = isTerminal ? 'free' : record.plan;
-
-  await db
-    .update(orgSubscriptions)
-    .set({
-      status: live.status,
-      plan,
-      currentPeriodStart: live.currentPeriodStart ?? record.currentPeriodStart,
-      currentPeriodEnd: live.currentPeriodEnd ?? record.currentPeriodEnd,
-      updatedAt: new Date(),
-    })
-    .where(eq(orgSubscriptions.orgId, orgId));
 
   const updated = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
   return toRow(updated!);

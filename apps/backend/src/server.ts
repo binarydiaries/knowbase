@@ -33,16 +33,18 @@ import { validateEnv } from './utils/env.utils';
 
 validateEnv();
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.ENV_KEY ?? 'development',
-  sendDefaultPii: false,
-  enableLogs: true,
-  integrations: [
-    Sentry.consoleLoggingIntegration({ levels: ['warn', 'error'] }),
-  ],
-  tracesSampleRate: 0.2,
-});
+if (process.env.ENV_KEY === 'production') {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.ENV_KEY,
+    sendDefaultPii: false,
+    enableLogs: true,
+    integrations: [
+      Sentry.consoleLoggingIntegration({ levels: ['warn', 'error'] }),
+    ],
+    tracesSampleRate: 0.2,
+  });
+}
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())

@@ -8,7 +8,7 @@ export interface CheckoutResult {
 
 export interface WebhookEvent {
   orgId: string;
-  plan?: string; // undefined = don't update plan in DB
+  plan?: string;
   status: string;
   subscriptionId: string;
   currentPeriodStart?: Date;
@@ -17,22 +17,30 @@ export interface WebhookEvent {
   lastPaymentAmount?: number;
 }
 
+export interface SubscriptionState {
+  subscriptionId: string;
+  plan: PaidPlanName | 'free';
+  status: string;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+}
+
 export interface PaymentProvider {
   readonly name: string;
-  readonly signatureHeader: string;
   readonly clientToken: string;
-  createSubscription(params: { plan: PaidPlanName; orgId: string }): Promise<CheckoutResult>;
+  createSubscription(params: { plan: PaidPlanName; orgId: string; name?: string | null; email?: string | null }): Promise<CheckoutResult>;
   cancelSubscription(subscriptionId: string, options?: { atPeriodEnd?: boolean }): Promise<void>;
-  /** Fetch live subscription details from the payment gateway. */
-  fetchSubscription(subscriptionId: string): Promise<{
+  fetchSubscription(subscriptionId: string, orgId?: string): Promise<{
     status: string;
     currentPeriodStart: Date | null;
     currentPeriodEnd: Date | null;
   }>;
-  /** Fetch the current period end date for an existing subscription. */
-  getSubscriptionPeriodEnd(subscriptionId: string): Promise<Date | null>;
-  /** Issue a partial refund for a Razorpay payment. Amount in paise. */
-  issueRefund(paymentId: string, amountPaise: number): Promise<void>;
-  /** Throws on invalid signature. Returns null for unknown/ignored events. */
-  parseWebhook(rawBody: string, signature: string): WebhookEvent | null;
+  getSubscriptionPeriodEnd(subscriptionId: string, orgId?: string): Promise<Date | null>;
+  issueRefund(paymentId: string, amount: number): Promise<void>;
+  readonly signatureHeader?: string;
+  parseWebhook?(rawBody: string, signature: string, headers?: Record<string, string>): WebhookEvent | null;
+  /** Pull-based providers (e.g. Kelviq): fetch current subscription state live from the gateway. */
+  getSubscription?(orgId: string): Promise<SubscriptionState | null>;
+  /** Pull-based providers: evict cached subscription state, e.g. immediately after cancel. */
+  invalidateSubscriptionCache?(orgId: string): void;
 }

@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { db } from '../../db';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
+import { fetchOrgUserInfo } from '../../utils/clerkOrg.utils';
 import { SubscriptionModel } from './model';
 import { type PaidPlanName, PLAN_ORDER, PLANS } from './plans';
 import {
@@ -12,30 +13,25 @@ import {
 } from './providers';
 import { SubscriptionService } from './service';
 
-type OrgSubscriptionUpdate = {
-  plan?: string;
-  status?: string;
-  provider?: string;
-  providerSubscriptionId?: string;
-  currentPeriodStart?: Date | null;
-  currentPeriodEnd?: Date | null;
-  lastPaymentId?: string | null;
-};
+const ACTIVE_STATUSES = new Set(['active', 'authenticated', 'pending_cancellation', 'halted']);
 
 async function upsertOrgSubscription(
   orgId: string,
-  data: OrgSubscriptionUpdate,
+  data: {
+    plan?: string;
+    status?: string;
+    provider?: string;
+    providerSubscriptionId?: string;
+    currentPeriodStart?: Date | null;
+    currentPeriodEnd?: Date | null;
+    lastPaymentId?: string | null;
+  },
 ) {
-  const defined = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => v !== undefined),
-  );
+  const defined = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined));
   await db
     .insert(orgSubscriptions)
     .values({ orgId, ...data })
-    .onConflictDoUpdate({
-      target: orgSubscriptions.orgId,
-      set: { ...defined, updatedAt: new Date() },
-    });
+    .onConflictDoUpdate({ target: orgSubscriptions.orgId, set: { ...defined, updatedAt: new Date() } });
 }
 
 export const Subscription = new Elysia({
@@ -43,12 +39,9 @@ export const Subscription = new Elysia({
   tags: ['Subscription'],
 })
   .use(SubscriptionModel)
-  // PUBLIC — no auth required
   .get(
     '/plans',
-    () => ({
-      plans: PLAN_ORDER.map((slug) => PLANS[slug]),
-    }),
+    () => ({ plans: PLAN_ORDER.map((slug) => PLANS[slug]) }),
     { response: { 200: 'PlansResponseSchema' } },
   )
   .post('/webhook/:provider', async ({ params, request, set }) => {
@@ -60,12 +53,22 @@ export const Subscription = new Elysia({
       return { error: 'Unknown provider' };
     }
 
+    if (!provider.parseWebhook || !provider.signatureHeader) {
+      set.status = 400;
+      return { error: 'This provider does not support webhooks' };
+    }
+
     const rawBody = await request.text();
     const signature = request.headers.get(provider.signatureHeader) ?? '';
+    const extraHeaders: Record<string, string> = {};
+    for (const key of ['webhook-id', 'webhook-timestamp']) {
+      const val = request.headers.get(key);
+      if (val) extraHeaders[key] = val;
+    }
 
     let event: WebhookEvent | null;
     try {
-      event = provider.parseWebhook(rawBody, signature);
+      event = provider.parseWebhook(rawBody, signature, extraHeaders);
     } catch (err: any) {
       set.status = 400;
       return { error: err.message ?? 'Webhook verification failed' };
@@ -91,7 +94,6 @@ export const Subscription = new Elysia({
         ...(event.lastPaymentId ? { lastPaymentId: event.lastPaymentId } : {}),
       });
     } else {
-      // halted, paused, pending, etc. — update status only, keep plan
       await upsertOrgSubscription(event.orgId, {
         status: event.status,
         providerSubscriptionId: event.subscriptionId,
@@ -103,63 +105,50 @@ export const Subscription = new Elysia({
   .use(AuthGuard)
   .get(
     '/status',
-    async ({ orgId }) => {
-      return SubscriptionService.getStatus(orgId);
-    },
-    {
-      response: 'SubscriptionStatusSchema',
-    },
+    async ({ orgId }) => SubscriptionService.getStatus(orgId),
+    { response: 'SubscriptionStatusSchema' },
   )
   .post(
     '/checkout',
-    async ({ body, orgId, set }) => {
+    async ({ body, orgId, userId, set }) => {
       const { plan } = body;
       const provider = getDefaultProvider();
 
-      const existing = await db.query.orgSubscriptions.findFirst({
-        where: { orgId },
-      });
+      if (provider.getSubscription) {
+        const existing = await provider.getSubscription(orgId);
+        if (existing && ACTIVE_STATUSES.has(existing.status)) {
+          set.status = 400;
+          throw new Error('Cancel your current subscription before subscribing to a new plan.');
+        }
 
-      if (
-        existing?.providerSubscriptionId &&
-        ['active', 'authenticated', 'pending_cancellation'].includes(
-          existing.status ?? '',
-        )
-      ) {
+        const { name, email } = await fetchOrgUserInfo(orgId, userId);
+        const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId, name, email });
+        return { provider: provider.name, subscriptionId: result.subscriptionId, clientToken: result.clientToken };
+      }
+
+      // Razorpay: use local DB
+      const existing = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+
+      if (existing?.providerSubscriptionId && ACTIVE_STATUSES.has(existing.status ?? '')) {
         set.status = 400;
-        throw new Error(
-          'Cancel your current subscription before subscribing to a new plan.',
-        );
+        throw new Error('Cancel your current subscription before subscribing to a new plan.');
       }
 
-      // Resume an incomplete checkout for the same plan rather than creating a duplicate
-      if (
-        existing?.status === 'created' &&
-        existing.providerSubscriptionId &&
-        existing.plan === plan
-      ) {
-        return {
-          provider: provider.name,
-          subscriptionId: existing.providerSubscriptionId,
-          clientToken: provider.clientToken,
-        };
+      // Resume an incomplete checkout to avoid duplicate subscriptions
+      if (existing?.status === 'created' && existing.providerSubscriptionId && existing.plan === plan) {
+        return { provider: provider.name, subscriptionId: existing.providerSubscriptionId, clientToken: provider.clientToken };
       }
 
-      // If a different plan was started but not paid, clean up the orphaned Razorpay subscription
+      // Clean up orphaned subscription if plan changed mid-checkout
       if (existing?.status === 'created' && existing.providerSubscriptionId) {
         try {
-          await provider.cancelSubscription(existing.providerSubscriptionId, {
-            atPeriodEnd: false,
-          });
+          await provider.cancelSubscription(existing.providerSubscriptionId, { atPeriodEnd: false });
         } catch {
-          // best-effort — subscription may already be cancelled on Razorpay's side
+          // best-effort
         }
       }
 
-      const result = await provider.createSubscription({
-        plan: plan as PaidPlanName,
-        orgId,
-      });
+      const result = await provider.createSubscription({ plan: plan as PaidPlanName, orgId });
 
       await upsertOrgSubscription(orgId, {
         plan,
@@ -168,11 +157,7 @@ export const Subscription = new Elysia({
         providerSubscriptionId: result.subscriptionId,
       });
 
-      return {
-        provider: provider.name,
-        subscriptionId: result.subscriptionId,
-        clientToken: result.clientToken,
-      };
+      return { provider: provider.name, subscriptionId: result.subscriptionId, clientToken: result.clientToken };
     },
     {
       body: 'CheckoutBodySchema',
@@ -183,35 +168,34 @@ export const Subscription = new Elysia({
     '/cancel',
     async ({ body, orgId, set }) => {
       const { immediate } = body;
-      const record = await db.query.orgSubscriptions.findFirst({
-        where: { orgId },
-      });
+      const provider = getDefaultProvider();
 
-      if (
-        !record?.providerSubscriptionId ||
-        !['active', 'authenticated', 'halted', 'pending_cancellation'].includes(
-          record.status ?? '',
-        )
-      ) {
+      if (provider.getSubscription) {
+        const sub = await provider.getSubscription(orgId);
+        if (!sub || !ACTIVE_STATUSES.has(sub.status)) {
+          set.status = 404;
+          return { success: false };
+        }
+        await provider.cancelSubscription(sub.subscriptionId, { atPeriodEnd: !immediate });
+        provider.invalidateSubscriptionCache?.(orgId);
+        return { success: true };
+      }
+
+      // Razorpay: use local DB
+      const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+
+      if (!record?.providerSubscriptionId || !['active', 'authenticated', 'halted', 'pending_cancellation'].includes(record.status ?? '')) {
         set.status = 404;
         return { success: false };
       }
 
-      const provider = getProvider(record.provider ?? 'razorpay');
+      const razorpay = getProvider(record.provider ?? 'razorpay');
 
       if (immediate) {
-        await provider.cancelSubscription(record.providerSubscriptionId, {
-          atPeriodEnd: false,
-        });
-
-        await upsertOrgSubscription(orgId, {
-          plan: 'free',
-          status: 'cancelled',
-        });
+        await razorpay.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: false });
+        await upsertOrgSubscription(orgId, { plan: 'free', status: 'cancelled' });
       } else {
-        await provider.cancelSubscription(record.providerSubscriptionId, {
-          atPeriodEnd: true,
-        });
+        await razorpay.cancelSubscription(record.providerSubscriptionId, { atPeriodEnd: true });
         await upsertOrgSubscription(orgId, { status: 'pending_cancellation' });
       }
 

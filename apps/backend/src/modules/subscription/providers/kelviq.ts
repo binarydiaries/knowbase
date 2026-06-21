@@ -23,7 +23,8 @@ export class KelviqProvider implements PaymentProvider {
     if (!this._client) {
       const accessToken = process.env.KELVIQ_SERVER_API_KEY;
       if (!accessToken) throw new Error('KELVIQ_SERVER_API_KEY must be set');
-      const environment = process.env.ENV_KEY === 'production' ? 'production' : 'sandbox';
+      const environment =
+        process.env.ENV_KEY === 'prod' ? 'production' : 'sandbox';
       this._client = new Kelviq({ accessToken, environment });
     }
     return this._client;
@@ -52,7 +53,11 @@ export class KelviqProvider implements PaymentProvider {
     return pairs.find(([id]) => id === identifier)?.[1];
   }
 
-  private async ensureCustomer(orgId: string, name?: string | null, email?: string | null): Promise<void> {
+  private async ensureCustomer(
+    orgId: string,
+    name?: string | null,
+    email?: string | null,
+  ): Promise<void> {
     try {
       await this.client.customers.retrieve({ customerId: orgId });
       return;
@@ -93,7 +98,9 @@ export class KelviqProvider implements PaymentProvider {
   ): Promise<void> {
     await this.client.subscriptions.cancel({
       subscriptionId,
-      cancellationType: options?.atPeriodEnd ? 'CURRENT_PERIOD_ENDS' : 'IMMEDIATE',
+      cancellationType: options?.atPeriodEnd
+        ? 'CURRENT_PERIOD_ENDS'
+        : 'IMMEDIATE',
     });
   }
 
@@ -109,9 +116,11 @@ export class KelviqProvider implements PaymentProvider {
     currentPeriodStart: Date | null;
     currentPeriodEnd: Date | null;
   }> {
-    if (!orgId) throw new Error('orgId is required to fetch a Kelviq subscription');
+    if (!orgId)
+      throw new Error('orgId is required to fetch a Kelviq subscription');
     const result = await this.getSubscription(orgId);
-    if (!result) throw new Error(`No active subscription found for org ${orgId}`);
+    if (!result)
+      throw new Error(`No active subscription found for org ${orgId}`);
     return {
       status: result.status,
       currentPeriodStart: result.currentPeriodStart,
@@ -147,7 +156,9 @@ export class KelviqProvider implements PaymentProvider {
 
     const results: any[] = data.results ?? [];
 
-    const raw = results.find((s) => !TERMINAL.has((s.status ?? '').toLowerCase())) ?? results[0];
+    const raw =
+      results.find((s) => !TERMINAL.has((s.status ?? '').toLowerCase())) ??
+      results[0];
 
     let result: SubscriptionState | null = null;
 
@@ -163,10 +174,15 @@ export class KelviqProvider implements PaymentProvider {
         raw.endDate != null &&
         new Date(raw.endDate) > new Date();
 
-      const effectiveStatus = isPendingCancellation ? 'pending_cancellation' : status;
-      const planIdentifier: string = raw.plan?.identifier ?? raw.planIdentifier ?? '';
+      const effectiveStatus = isPendingCancellation
+        ? 'pending_cancellation'
+        : status;
+      const planIdentifier: string =
+        raw.plan?.identifier ?? raw.planIdentifier ?? '';
       const planName = this.planNameFromIdentifier(planIdentifier);
-      const periodEnd = isPendingCancellation ? raw.endDate : raw.billingPeriodEndTime;
+      const periodEnd = isPendingCancellation
+        ? raw.endDate
+        : raw.billingPeriodEndTime;
 
       result = {
         subscriptionId: raw.id as string,
@@ -179,7 +195,10 @@ export class KelviqProvider implements PaymentProvider {
       };
     }
 
-    this._cache.set(orgId, { result, expiresAt: Date.now() + KelviqProvider.CACHE_TTL_MS });
+    this._cache.set(orgId, {
+      result,
+      expiresAt: Date.now() + KelviqProvider.CACHE_TTL_MS,
+    });
     return result;
   }
 }

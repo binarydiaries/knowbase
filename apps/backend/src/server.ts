@@ -12,28 +12,28 @@ import { AdminFeatureFlags } from './modules/admin/featureFlags';
 import { AdminOrgsOverview } from './modules/admin/orgsOverview';
 import { AdminQueue } from './modules/admin/queue';
 import { AdminSubscriptions } from './modules/admin/subscriptions';
-import { FeatureFlag } from './modules/featureFlag/featureFlag';
 import { Agent } from './modules/agent/agent';
 import { Analytics } from './modules/analytics/analytics';
 import { Behaviour } from './modules/behaviour/behaviour';
 import { Channel } from './modules/channel/channel';
 import { ChatV2 } from './modules/chatv2/chatv2';
 import { Conversation } from './modules/conversation/conversation';
-import { Document } from './modules/document/document';
-import { Indexing } from './modules/indexing/indexing';
 import { Demo } from './modules/demo/demo';
+import { Document } from './modules/document/document';
+import { FeatureFlag } from './modules/featureFlag/featureFlag';
+import { Indexing } from './modules/indexing/indexing';
+import { Intent } from './modules/intent/intent';
 import { Lead } from './modules/lead/lead';
 import { message } from './modules/message/message';
 import { Slack } from './modules/slack/slack';
 import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
-import { Intent } from './modules/intent/intent';
 import { validateEnv } from './utils/env.utils';
 
 validateEnv();
 
-if (process.env.ENV_KEY === 'production') {
+if (process.env.ENV_KEY === 'prod') {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.ENV_KEY,

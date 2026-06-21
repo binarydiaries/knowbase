@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/elysia';
 
-if (process.env.ENV_KEY === 'production') {
+if (process.env.ENV_KEY === 'prod') {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.ENV_KEY,

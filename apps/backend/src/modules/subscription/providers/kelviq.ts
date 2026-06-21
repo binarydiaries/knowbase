@@ -6,7 +6,7 @@ import type {
   SubscriptionState,
 } from './types';
 
-const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
+const TERMINAL = new Set(['cancelled', 'canceled', 'expired', 'completed']);
 
 interface CacheEntry {
   result: SubscriptionState | null;

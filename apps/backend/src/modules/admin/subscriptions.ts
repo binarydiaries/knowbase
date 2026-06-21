@@ -54,7 +54,7 @@ async function syncOrgFromGateway(orgId: string) {
     const live = await provider.getSubscription(orgId);
     if (!live) throw new Error(`No subscription found for org ${orgId}`);
 
-    const TERMINAL = new Set(['cancelled', 'expired', 'completed']);
+    const TERMINAL = new Set(['cancelled', 'canceled', 'expired', 'completed']);
     const plan = TERMINAL.has(live.status) ? 'free' : live.plan;
 
     await db

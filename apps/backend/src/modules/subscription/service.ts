@@ -3,10 +3,11 @@ import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { documents } from '../../db/schema/documents';
 import { orgSubscriptions } from '../../db/schema/orgSubscriptions';
-import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
-import { PLANS, type PlanName } from './plans';
 import { FeatureFlagService } from '../featureFlag/service';
+import { PLANS, type PlanName } from './plans';
 import { getDefaultProvider } from './providers';
+import { OrgUsageDailyService, OrgUsageMonthlyService } from './usage';
+
 export type { PlanName } from './plans';
 
 const PLAN_NAMES = new Set<PlanName>(['free', 'starter', 'growth', 'pro']);
@@ -21,7 +22,12 @@ function normalizePlanName(value: unknown): PlanName | null {
   return null;
 }
 
-const TERMINAL_STATUSES = new Set(['cancelled', 'expired', 'completed']);
+const TERMINAL_STATUSES = new Set([
+  'cancelled',
+  'canceled',
+  'expired',
+  'completed',
+]);
 
 interface SubscriptionState {
   plan: PlanName;
@@ -38,20 +44,37 @@ export abstract class SubscriptionService {
       const result = await provider.getSubscription(orgId).catch(() => null);
 
       if (!result || TERMINAL_STATUSES.has(result.status)) {
-        return { plan: 'free', status: result?.status ?? null, currentPeriodEnd: null, pendingPlan: null };
+        return {
+          plan: 'free',
+          status: result?.status ?? null,
+          currentPeriodEnd: null,
+          pendingPlan: null,
+        };
       }
 
       const plan = normalizePlanName(result.plan) ?? 'free';
-      return { plan, status: result.status, currentPeriodEnd: result.currentPeriodEnd, pendingPlan: null };
+      return {
+        plan,
+        status: result.status,
+        currentPeriodEnd: result.currentPeriodEnd,
+        pendingPlan: null,
+      };
     }
 
     // Razorpay: read from local DB
-    const record = await db.query.orgSubscriptions.findFirst({ where: { orgId } });
+    const record = await db.query.orgSubscriptions.findFirst({
+      where: { orgId },
+    });
     const rawPlan = normalizePlanName(record?.plan) ?? 'free';
     const plan: PlanName = record?.status === 'created' ? 'free' : rawPlan;
     const pendingPlan: PlanName | null =
       record?.status === 'created' && rawPlan !== 'free' ? rawPlan : null;
-    return { plan, status: record?.status ?? null, currentPeriodEnd: record?.currentPeriodEnd ?? null, pendingPlan };
+    return {
+      plan,
+      status: record?.status ?? null,
+      currentPeriodEnd: record?.currentPeriodEnd ?? null,
+      pendingPlan,
+    };
   }
 
   static getLimits(plan: PlanName) {
@@ -65,7 +88,12 @@ export abstract class SubscriptionService {
 
   static async getStatus(orgId: string) {
     const state = await this.getState(orgId);
-    const { plan, status: subscriptionStatus, currentPeriodEnd, pendingPlan } = state;
+    const {
+      plan,
+      status: subscriptionStatus,
+      currentPeriodEnd,
+      pendingPlan,
+    } = state;
     const limits = this.getLimits(plan);
 
     const [{ value: activeAgentCount }] = await db
@@ -79,8 +107,10 @@ export abstract class SubscriptionService {
       .innerJoin(agents, eq(documents.agentId, agents.id))
       .where(eq(agents.orgId, orgId));
 
-    const trainingRunsToday = await OrgUsageDailyService.getTodayTrainingRuns(orgId);
-    const messagesThisMonth = await OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId);
+    const trainingRunsToday =
+      await OrgUsageDailyService.getTodayTrainingRuns(orgId);
+    const messagesThisMonth =
+      await OrgUsageMonthlyService.getCurrentMonthAssistantMessages(orgId);
 
     return {
       plan,
@@ -96,29 +126,46 @@ export abstract class SubscriptionService {
       trainingRunsPerDayLimit: limits.trainingRunsPerDay,
       trainingRunsToday,
       isOverLimit: activeAgentCount > limits.agents,
-      hasReachedKnowledgeSourceLimit: knowledgeSourceCount >= limits.knowledgeSources,
-      hasReachedMessagesPerMonthLimit: messagesThisMonth >= limits.messagesPerMonth,
-      hasReachedTrainingRunsPerDayLimit: trainingRunsToday >= limits.trainingRunsPerDay,
+      hasReachedKnowledgeSourceLimit:
+        knowledgeSourceCount >= limits.knowledgeSources,
+      hasReachedMessagesPerMonthLimit:
+        messagesThisMonth >= limits.messagesPerMonth,
+      hasReachedTrainingRunsPerDayLimit:
+        trainingRunsToday >= limits.trainingRunsPerDay,
     };
   }
 
-  static hasReachedAgentLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+  static hasReachedAgentLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return status.activeAgentCount >= status.activeAgentLimit;
   }
 
-  static isAgentLocked({ subscriptionStatus }: { subscriptionStatus: Awaited<ReturnType<typeof SubscriptionService.getStatus>> }) {
+  static isAgentLocked({
+    subscriptionStatus,
+  }: {
+    subscriptionStatus: Awaited<
+      ReturnType<typeof SubscriptionService.getStatus>
+    >;
+  }) {
     return subscriptionStatus.isOverLimit;
   }
 
-  static hasReachedKnowledgeSourceLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+  static hasReachedKnowledgeSourceLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return status.hasReachedKnowledgeSourceLimit;
   }
 
-  static hasReachedTrainingRunsPerDayLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+  static hasReachedTrainingRunsPerDayLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return status.hasReachedTrainingRunsPerDayLimit;
   }
 
-  static hasReachedMessagesPerMonthLimit(status: Awaited<ReturnType<typeof this.getStatus>>) {
+  static hasReachedMessagesPerMonthLimit(
+    status: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return status.hasReachedMessagesPerMonthLimit;
   }
 
@@ -130,15 +177,21 @@ export abstract class SubscriptionService {
     return `Your organization is over the ${s.plan} plan limit of ${s.activeAgentLimit} active agent${s.activeAgentLimit === 1 ? '' : 's'}. Archive active agents or upgrade your subscription to edit agent settings.`;
   }
 
-  static getKnowledgeSourceLimitReachedMessage(s: Awaited<ReturnType<typeof this.getStatus>>) {
+  static getKnowledgeSourceLimitReachedMessage(
+    s: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return `Your ${s.plan} plan allows up to ${s.knowledgeSourceLimit} knowledge sources. Delete knowledge sources or upgrade your subscription to add more.`;
   }
 
-  static getTrainingLimitReachedMessage(s: Awaited<ReturnType<typeof this.getStatus>>) {
+  static getTrainingLimitReachedMessage(
+    s: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return `Your ${s.plan} plan allows ${s.trainingRunsPerDayLimit} training runs per day. This limit resets at 00:00 UTC.`;
   }
 
-  static getMessageLimitReachedMessage(s: Awaited<ReturnType<typeof this.getStatus>>) {
+  static getMessageLimitReachedMessage(
+    s: Awaited<ReturnType<typeof this.getStatus>>,
+  ) {
     return `Your ${s.plan} plan allows ${s.messagesPerMonthLimit} assistant messages per month. This limit resets at 00:00 UTC on the first day of each month.`;
   }
 
@@ -169,16 +222,29 @@ export abstract class SubscriptionService {
 
   static async assertAgentLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
-    return { allowed: !this.hasReachedAgentLimit(subscriptionStatus) as boolean, ...subscriptionStatus };
+    return {
+      allowed: !this.hasReachedAgentLimit(subscriptionStatus) as boolean,
+      ...subscriptionStatus,
+    };
   }
 
   static async assertKnowledgeSourceLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
-    return { allowed: !this.hasReachedKnowledgeSourceLimit(subscriptionStatus) as boolean, ...subscriptionStatus };
+    return {
+      allowed: !this.hasReachedKnowledgeSourceLimit(
+        subscriptionStatus,
+      ) as boolean,
+      ...subscriptionStatus,
+    };
   }
 
   static async assertMessagesPerMonthLimitNotReached(orgId: string) {
     const subscriptionStatus = await this.getStatus(orgId);
-    return { allowed: !this.hasReachedMessagesPerMonthLimit(subscriptionStatus) as boolean, ...subscriptionStatus };
+    return {
+      allowed: !this.hasReachedMessagesPerMonthLimit(
+        subscriptionStatus,
+      ) as boolean,
+      ...subscriptionStatus,
+    };
   }
 }

@@ -18,5 +18,6 @@ export const checkRequirements: GraphNode<typeof State> = (state) => {
     return value === undefined || value === null || value === '';
   });
 
+  console.log('[DEBUG checkRequirements] intent=%s entities=%s required=%s → missing=%s optionalMissing=%s', activeIntent.name, JSON.stringify(entities), JSON.stringify(activeIntent.requiredFields), JSON.stringify(missing), JSON.stringify(optionalMissing));
   return { missingFields: missing, optionalMissingFields: optionalMissing };
 };

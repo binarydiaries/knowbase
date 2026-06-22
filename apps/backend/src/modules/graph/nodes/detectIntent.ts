@@ -90,5 +90,6 @@ If the user is clearly asking a general question, classify it as "${INTENT_QUEST
 
   const { intent } = await structuredLlm.invoke(classifyMessages);
 
+  console.log('[DEBUG detectIntent] input=%s activeIntent=%s missingFields=%s → intent=%s', userContent.slice(0, 80), activeIntent?.name ?? 'none', JSON.stringify(missingFields), intent);
   return { intent };
 };

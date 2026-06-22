@@ -230,6 +230,7 @@ export abstract class ChatV2Service {
 
     // threadTs is stable per Slack thread — use as thread_id directly
     const thread_id = threadTs;
+    console.log('[DEBUG sendSlack] thread_id=%s message=%s', thread_id, message.slice(0, 80));
 
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
 
@@ -246,30 +247,40 @@ export abstract class ChatV2Service {
         headers: slackHeaders,
         body: JSON.stringify({ channel: slackChannelId, text: '_Thinking…_', thread_ts: threadTs }),
       });
-      const data = (await res.json()) as { ok: boolean; ts?: string };
+      const data = (await res.json()) as { ok: boolean; ts?: string; error?: string };
+      console.log('[DEBUG sendSlack] thinking placeholder:', data.ok ? `posted ts=${data.ts}` : `failed error=${data.error}`);
       if (data.ok && data.ts) placeholderTs = data.ts;
-    } catch {
-      // Best-effort — proceed even if placeholder fails
+    } catch (e) {
+      console.error('[DEBUG sendSlack] thinking placeholder exception:', e);
     }
 
     // ── Invoke graph ──────────────────────────────────────────────────────
-    const finalState = await graph.invoke(
-      { messages: new HumanMessage(message) },
-      {
-        configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
-      },
-    );
-
-    const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
-    const assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+    console.log('[DEBUG sendSlack] invoking graph agentId=%s', channel.agentId);
+    let assistantText = '';
+    try {
+      const finalState = await graph.invoke(
+        { messages: new HumanMessage(message) },
+        {
+          configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
+        },
+      );
+      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+      console.log('[DEBUG sendSlack] graph done assistantText=%s', assistantText.slice(0, 120));
+    } catch (err) {
+      console.error('[DEBUG sendSlack] graph.invoke failed:', err);
+      assistantText = 'Sorry, something went wrong. Please try again.';
+    }
 
     // ── Update placeholder or post new message ────────────────────────────
     if (placeholderTs) {
-      await fetch('https://slack.com/api/chat.update', {
+      const updateRes = await fetch('https://slack.com/api/chat.update', {
         method: 'POST',
         headers: slackHeaders,
         body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: assistantText }),
       });
+      const updateData = (await updateRes.json()) as { ok: boolean; error?: string };
+      console.log('[DEBUG sendSlack] chat.update:', updateData.ok ? 'ok' : `failed error=${updateData.error}`);
     } else {
       await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',

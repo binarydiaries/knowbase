@@ -79,5 +79,6 @@ export const extractEntities: GraphNode<typeof State> = async (state, config) =>
     entities.map(({ key, value }) => [key, value]),
   );
 
+  console.log('[DEBUG extractEntities] input=%s extracted=%s', userContent.slice(0, 80), JSON.stringify(entityMap));
   return { entities: entityMap };
 };

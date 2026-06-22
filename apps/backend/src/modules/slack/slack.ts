@@ -409,21 +409,30 @@ async function processInboundEvent(payload: {
   if (payload.type !== 'event_callback') return;
 
   const event = payload.event;
-  if (!event || !event.user || !event.text || !event.channel || !event.ts)
+  console.log('[DEBUG slack] event received:', JSON.stringify({ type: event?.type, subtype: event?.subtype, bot_id: event?.bot_id, user: event?.user, text: event?.text?.slice(0, 80), channel: event?.channel, ts: event?.ts, thread_ts: event?.thread_ts }));
+
+  if (!event || !event.user || !event.text || !event.channel || !event.ts) {
+    console.log('[DEBUG slack] early return: missing required fields');
     return;
+  }
 
   // Ignore bot messages and message edits/deletes
-  if (event.bot_id || event.subtype) return;
+  if (event.bot_id || event.subtype) {
+    console.log('[DEBUG slack] early return: bot_id=%s subtype=%s', event.bot_id, event.subtype);
+    return;
+  }
 
   const slackChannelId = event.channel;
   // Thread anchor: use existing thread_ts if in a thread, otherwise start one from event.ts
   const threadTs = event.thread_ts ?? event.ts;
+  console.log('[DEBUG slack] processing type=%s channel=%s threadTs=%s text=%s', event.type, slackChannelId, threadTs, event.text?.slice(0, 80));
 
   if (event.type === 'message') {
     const result = await ChannelService.findBySlackChannelId(
       slackChannelId,
       'channel',
     );
+    console.log('[DEBUG slack] channel lookup (mode=channel):', result ? `found id=${result.id} enabled=${result.enabled}` : 'not found');
     if (!result?.enabled || !result.agent) return;
 
     await ChatV2Service.sendSlack({
@@ -438,6 +447,7 @@ async function processInboundEvent(payload: {
       slackChannelId,
       'mention',
     );
+    console.log('[DEBUG slack] channel lookup (mode=mention):', result ? `found id=${result.id} enabled=${result.enabled}` : 'not found');
     if (!result?.enabled || !result.agent) return;
 
     // Strip the bot mention tag (e.g. "<@U12345678>") from the start of the
@@ -452,5 +462,7 @@ async function processInboundEvent(payload: {
       slackChannelId,
       threadTs,
     });
+  } else {
+    console.log('[DEBUG slack] unhandled event type:', event.type);
   }
 }

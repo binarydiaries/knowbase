@@ -7,11 +7,14 @@ import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
+import { logger } from '../../utils/logger.utils';
 import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { SlackConnectionService } from './connectionService';
+
+const log = logger.child({ module: 'slack' });
 
 const BadRequestResponse = z.object({
   code: z.string(),
@@ -34,6 +37,10 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         const ts = headers['x-slack-request-timestamp'] ?? '';
 
         if (!verifySlackSignature(sig, ts, rawBody)) {
+          log.warn(
+            { contentType },
+            'slash command signature verification failed',
+          );
           return new Response(
             JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
             { status: 403, headers: { 'Content-Type': 'application/json' } },
@@ -66,6 +73,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
 
       // URL verification — no signature check required by Slack on this event
       if (payload.type === 'url_verification') {
+        log.debug('url_verification challenge received');
         return new Response(JSON.stringify({ challenge: payload.challenge }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -78,13 +86,23 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       const ts = headers['x-slack-request-timestamp'] ?? '';
 
       if (!verifySlackSignature(sig, ts, rawBody)) {
+        log.warn(
+          { type: payload.type, teamId: payload.team_id },
+          'event signature verification failed',
+        );
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
 
-      void processInboundEvent(payload).catch(console.error);
+      log.debug(
+        { type: payload.type, teamId: payload.team_id },
+        'webhook event received',
+      );
+      void processInboundEvent(payload).catch((err) =>
+        log.error({ err }, 'processInboundEvent failed'),
+      );
       return new Response('OK', { status: 200 });
     },
     { body: t.Any() },
@@ -114,6 +132,10 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       });
 
       if (!tokenRes.ok) {
+        log.error(
+          { status: tokenRes.status, orgId },
+          'oauth.v2.access request failed',
+        );
         return Response.redirect(
           `${process.env.APP_URL}/integrations?slack_error=1`,
         );
@@ -128,7 +150,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       };
 
       if (!tokenData.ok || !tokenData.access_token || !tokenData.team) {
-        console.error('[Slack OAuth] exchange failed:', tokenData.error);
+        log.error({ orgId, error: tokenData.error }, 'oauth exchange failed');
         return Response.redirect(
           `${process.env.APP_URL}/integrations?slack_error=1`,
         );
@@ -140,6 +162,8 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         teamName: tokenData.team.name,
         botUserId: tokenData.bot_user_id ?? '',
       });
+
+      log.info({ orgId, teamId: tokenData.team.id }, 'slack oauth connected');
 
       return Response.redirect(
         `${process.env.APP_URL}/integrations?slack_connected=1`,
@@ -406,63 +430,125 @@ async function processInboundEvent(payload: {
     thread_ts?: string;
   };
 }) {
-  if (payload.type !== 'event_callback') return;
+  if (payload.type !== 'event_callback') {
+    log.debug({ type: payload.type }, 'ignoring non-event_callback payload');
+    return;
+  }
 
   const event = payload.event;
-  console.log('[DEBUG slack] event received:', JSON.stringify({ type: event?.type, subtype: event?.subtype, bot_id: event?.bot_id, user: event?.user, text: event?.text?.slice(0, 80), channel: event?.channel, ts: event?.ts, thread_ts: event?.thread_ts }));
+  log.debug(
+    {
+      type: event?.type,
+      subtype: event?.subtype,
+      bot_id: event?.bot_id,
+      user: event?.user,
+      text: event?.text?.slice(0, 80),
+      channel: event?.channel,
+      ts: event?.ts,
+      thread_ts: event?.thread_ts,
+    },
+    'event received',
+  );
 
   if (!event || !event.user || !event.text || !event.channel || !event.ts) {
-    console.log('[DEBUG slack] early return: missing required fields');
+    log.debug('skipping event — missing required fields');
     return;
   }
 
   // Ignore bot messages and message edits/deletes
   if (event.bot_id || event.subtype) {
-    console.log('[DEBUG slack] early return: bot_id=%s subtype=%s', event.bot_id, event.subtype);
+    log.debug(
+      { bot_id: event.bot_id, subtype: event.subtype },
+      'skipping bot/edited message',
+    );
     return;
   }
 
   const slackChannelId = event.channel;
   // Thread anchor: use existing thread_ts if in a thread, otherwise start one from event.ts
   const threadTs = event.thread_ts ?? event.ts;
-  console.log('[DEBUG slack] processing type=%s channel=%s threadTs=%s text=%s', event.type, slackChannelId, threadTs, event.text?.slice(0, 80));
+  log.debug(
+    {
+      type: event.type,
+      slackChannelId,
+      threadTs,
+      text: event.text?.slice(0, 80),
+    },
+    'processing event',
+  );
 
   if (event.type === 'message') {
     const result = await ChannelService.findBySlackChannelId(
       slackChannelId,
       'channel',
     );
-    console.log('[DEBUG slack] channel lookup (mode=channel):', result ? `found id=${result.id} enabled=${result.enabled}` : 'not found');
-    if (!result?.enabled || !result.agent) return;
+    if (!result?.enabled || !result.agent) {
+      log.warn(
+        {
+          slackChannelId,
+          mode: 'channel',
+          found: !!result,
+          enabled: result?.enabled,
+        },
+        'no enabled channel bound to slackChannelId — message dropped',
+      );
+      return;
+    }
+    log.debug(
+      { channelId: result.id, orgId: result.agent.orgId },
+      'dispatching to ChatV2Service.sendSlack',
+    );
 
-    await ChatV2Service.sendSlack({
-      channelId: result.id,
-      orgId: result.agent.orgId,
-      message: event.text,
-      slackChannelId,
-      threadTs,
-    });
+    try {
+      await ChatV2Service.sendSlack({
+        channelId: result.id,
+        orgId: result.agent.orgId,
+        message: event.text,
+        slackChannelId,
+        threadTs,
+      });
+    } catch (err) {
+      log.error({ err, channelId: result.id }, 'sendSlack failed');
+    }
   } else if (event.type === 'app_mention') {
     const result = await ChannelService.findBySlackChannelId(
       slackChannelId,
       'mention',
     );
-    console.log('[DEBUG slack] channel lookup (mode=mention):', result ? `found id=${result.id} enabled=${result.enabled}` : 'not found');
-    if (!result?.enabled || !result.agent) return;
+    if (!result?.enabled || !result.agent) {
+      log.warn(
+        {
+          slackChannelId,
+          mode: 'mention',
+          found: !!result,
+          enabled: result?.enabled,
+        },
+        'no enabled channel bound to slackChannelId — mention dropped',
+      );
+      return;
+    }
+    log.debug(
+      { channelId: result.id, orgId: result.agent.orgId },
+      'dispatching to ChatV2Service.sendSlack',
+    );
 
     // Strip the bot mention tag (e.g. "<@U12345678>") from the start of the
     // message so the intent classifier sees the clean user intent rather than
     // the raw Slack mention syntax.
     const cleanMessage = event.text.replace(/<@[A-Z0-9]+>\s*/g, '').trim();
 
-    await ChatV2Service.sendSlack({
-      channelId: result.id,
-      orgId: result.agent.orgId,
-      message: cleanMessage,
-      slackChannelId,
-      threadTs,
-    });
+    try {
+      await ChatV2Service.sendSlack({
+        channelId: result.id,
+        orgId: result.agent.orgId,
+        message: cleanMessage,
+        slackChannelId,
+        threadTs,
+      });
+    } catch (err) {
+      log.error({ err, channelId: result.id }, 'sendSlack failed');
+    }
   } else {
-    console.log('[DEBUG slack] unhandled event type:', event.type);
+    log.debug({ type: event.type }, 'unhandled event type');
   }
 }

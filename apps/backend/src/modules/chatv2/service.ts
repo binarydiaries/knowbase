@@ -316,27 +316,37 @@ export abstract class ChatV2Service {
     threadTs: string;
     ip?: string;
   }) {
+    log.debug(
+      { channelId, orgId, slackChannelId, threadTs },
+      'sendSlack start',
+    );
+
     const channel = await ChannelService.single({ id: channelId, orgId });
     if (!channel || channel.type !== 'slack') {
+      log.warn(
+        { channelId, orgId, found: !!channel, type: channel?.type },
+        'Slack channel not found',
+      );
       throw new NotFoundError('Slack channel not found');
     }
     const config = channel.config as IChannelSlackConfig;
     if (!config.slackChannelId) {
+      log.warn(
+        { channelId, orgId },
+        'Slack channel missing slackChannelId config',
+      );
       throw new NotFoundError('Slack channel not configured');
     }
 
     const connection = await SlackConnectionService.findByOrg(orgId);
     if (!connection) {
+      log.warn({ orgId }, 'Slack connection not found for org');
       throw new NotFoundError('Slack not connected for this org');
     }
 
     // threadTs is stable per Slack thread — use as thread_id directly
     const thread_id = threadTs;
-    console.log(
-      '[DEBUG sendSlack] thread_id=%s message=%s',
-      thread_id,
-      message.slice(0, 80),
-    );
+    log.debug({ thread_id, message: message.slice(0, 80) }, 'thread resolved');
 
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
 
@@ -362,17 +372,24 @@ export abstract class ChatV2Service {
         ts?: string;
         error?: string;
       };
-      console.log(
-        '[DEBUG sendSlack] thinking placeholder:',
-        data.ok ? `posted ts=${data.ts}` : `failed error=${data.error}`,
-      );
-      if (data.ok && data.ts) placeholderTs = data.ts;
-    } catch (e) {
-      console.error('[DEBUG sendSlack] thinking placeholder exception:', e);
+      if (data.ok && data.ts) {
+        placeholderTs = data.ts;
+        log.debug({ ts: data.ts }, 'thinking placeholder posted');
+      } else {
+        log.warn(
+          { status: res.status, error: data.error },
+          'thinking placeholder failed',
+        );
+      }
+    } catch (err) {
+      log.error({ err }, 'thinking placeholder request failed');
     }
 
     // ── Invoke graph ──────────────────────────────────────────────────────
-    console.log('[DEBUG sendSlack] invoking graph agentId=%s', channel.agentId);
+    log.debug(
+      { channelId, orgId, thread_id, agentId: channel.agentId },
+      'invoking graph',
+    );
     let assistantText = '';
     try {
       const finalState = await graph.invoke(
@@ -392,12 +409,26 @@ export abstract class ChatV2Service {
         .reverse()
         .find((m) => AIMessage.isInstance(m));
       assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
-      console.log(
-        '[DEBUG sendSlack] graph done assistantText=%s',
-        assistantText.slice(0, 120),
-      );
+
+      if (!assistantText) {
+        log.warn(
+          {
+            channelId,
+            orgId,
+            thread_id,
+            hasLastAI: !!lastAI,
+            contentType: typeof lastAI?.content,
+          },
+          'graph produced empty assistantText — Slack reply will be blank',
+        );
+      } else {
+        log.debug(
+          { channelId, orgId, thread_id, length: assistantText.length },
+          'graph produced assistant reply',
+        );
+      }
     } catch (err) {
-      console.error('[DEBUG sendSlack] graph.invoke failed:', err);
+      log.error({ err, channelId, orgId, thread_id }, 'graph.invoke failed');
       assistantText = 'Sorry, something went wrong. Please try again.';
     }
 
@@ -416,12 +447,25 @@ export abstract class ChatV2Service {
         ok: boolean;
         error?: string;
       };
-      console.log(
-        '[DEBUG sendSlack] chat.update:',
-        updateData.ok ? 'ok' : `failed error=${updateData.error}`,
-      );
+      if (updateData.ok) {
+        log.debug(
+          { channelId, orgId, slackChannelId, ts: placeholderTs },
+          'chat.update succeeded',
+        );
+      } else {
+        log.error(
+          {
+            status: updateRes.status,
+            error: updateData.error,
+            channelId,
+            orgId,
+            slackChannelId,
+          },
+          'chat.update failed',
+        );
+      }
     } else {
-      await fetch('https://slack.com/api/chat.postMessage', {
+      const postRes = await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: slackHeaders,
         body: JSON.stringify({
@@ -430,6 +474,27 @@ export abstract class ChatV2Service {
           thread_ts: threadTs,
         }),
       });
+      const postData = (await postRes.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+      if (postData.ok) {
+        log.debug(
+          { channelId, orgId, slackChannelId },
+          'chat.postMessage succeeded',
+        );
+      } else {
+        log.error(
+          {
+            status: postRes.status,
+            error: postData.error,
+            channelId,
+            orgId,
+            slackChannelId,
+          },
+          'chat.postMessage failed',
+        );
+      }
     }
   }
 

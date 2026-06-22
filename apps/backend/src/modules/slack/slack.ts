@@ -25,70 +25,22 @@ export const Slack = new Elysia({ tags: ['Slack'] })
   .use(ErrorModel)
 
   // ─── POST /webhook/slack — Inbound events + slash commands ────────────────
-  .post(
-    '/webhook/slack',
-    async ({ body, headers, request }) => {
-      const contentType = headers['content-type'] ?? '';
+  .post('/webhook/slack', async ({ headers, request }) => {
+    // Read the raw bytes ourselves, before any schema-driven body parsing
+    // can consume the stream — Slack's HMAC is computed over the exact
+    // bytes it sent, and re-serializing a parsed object (or cloning a
+    // request whose body was already read) never reproduces them.
+    const rawBody = await request.text();
+    const contentType = headers['content-type'] ?? '';
+    const sig = headers['x-slack-signature'] ?? '';
+    const ts = headers['x-slack-request-timestamp'] ?? '';
 
-      // ── Slash commands (application/x-www-form-urlencoded) ────────────────
-      if (contentType.includes('application/x-www-form-urlencoded')) {
-        const rawBody = await request.clone().text();
-        const sig = headers['x-slack-signature'] ?? '';
-        const ts = headers['x-slack-request-timestamp'] ?? '';
-
-        if (!verifySlackSignature(sig, ts, rawBody)) {
-          log.warn(
-            { contentType },
-            'slash command signature verification failed',
-          );
-          return new Response(
-            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-            { status: 403, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
-
-        // Acknowledge immediately to beat Slack's 3-second timeout
-        return new Response('{}', {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-
-      // ── Events API (application/json) ─────────────────────────────────────
-      const payload = body as {
-        type?: string;
-        challenge?: string;
-        event?: {
-          type?: string;
-          user?: string;
-          text?: string;
-          channel?: string;
-          bot_id?: string;
-          subtype?: string;
-          ts?: string;
-          thread_ts?: string;
-        };
-        team_id?: string;
-      };
-
-      // URL verification — no signature check required by Slack on this event
-      if (payload.type === 'url_verification') {
-        log.debug('url_verification challenge received');
-        return new Response(JSON.stringify({ challenge: payload.challenge }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Verify signature for all other events
-      const rawBody = JSON.stringify(body);
-      const sig = headers['x-slack-signature'] ?? '';
-      const ts = headers['x-slack-request-timestamp'] ?? '';
-
+    // ── Slash commands (application/x-www-form-urlencoded) ────────────────
+    if (contentType.includes('application/x-www-form-urlencoded')) {
       if (!verifySlackSignature(sig, ts, rawBody)) {
         log.warn(
-          { type: payload.type, teamId: payload.team_id },
-          'event signature verification failed',
+          { contentType },
+          'slash command signature verification failed',
         );
         return new Response(
           JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
@@ -96,17 +48,68 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         );
       }
 
-      log.debug(
+      // Acknowledge immediately to beat Slack's 3-second timeout
+      return new Response('{}', {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ── Events API (application/json) ─────────────────────────────────────
+    let payload: {
+      type?: string;
+      challenge?: string;
+      event?: {
+        type?: string;
+        user?: string;
+        text?: string;
+        channel?: string;
+        bot_id?: string;
+        subtype?: string;
+        ts?: string;
+        thread_ts?: string;
+      };
+      team_id?: string;
+    };
+    try {
+      payload = JSON.parse(rawBody);
+    } catch (err) {
+      log.error({ err }, 'failed to parse webhook JSON body');
+      return new Response(
+        JSON.stringify({ code: 'BAD_REQUEST', message: 'Invalid JSON body' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
+
+    // URL verification — no signature check required by Slack on this event
+    if (payload.type === 'url_verification') {
+      log.debug('url_verification challenge received');
+      return new Response(JSON.stringify({ challenge: payload.challenge }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!verifySlackSignature(sig, ts, rawBody)) {
+      log.warn(
         { type: payload.type, teamId: payload.team_id },
-        'webhook event received',
+        'event signature verification failed',
       );
-      void processInboundEvent(payload).catch((err) =>
-        log.error({ err }, 'processInboundEvent failed'),
+      return new Response(
+        JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
       );
-      return new Response('OK', { status: 200 });
-    },
-    { body: t.Any() },
-  )
+    }
+
+    log.debug(
+      { type: payload.type, teamId: payload.team_id },
+      'webhook event received',
+    );
+    void processInboundEvent(payload).catch((err) =>
+      log.error({ err }, 'processInboundEvent failed'),
+    );
+    return new Response('OK', { status: 200 });
+  })
 
   // ─── OAuth callback — browser redirect after Slack approval ──────────────
   .get(

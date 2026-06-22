@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
+import { logger } from '../../utils/logger.utils';
 import { AgentService } from '../agent/service';
 import { FeatureFlagService } from '../featureFlag/service';
 import { SubscriptionService } from '../subscription/service';
@@ -10,13 +11,17 @@ import { pdfToMarkdown } from './pdfUtils';
 import { DocumentService } from './service';
 import { urlToText } from './urlUtils';
 
+const log = logger.child({ module: 'document' });
+
 const URL_CRAWLING_FLAG = 'url_crawling';
 
 export const Document = new Elysia({
   prefix: '/documents',
   tags: ['Document'],
 })
-  .onError(({ error }) => console.log(error))
+  .onError(({ error }) =>
+    log.error({ err: error }, 'unhandled document route error'),
+  )
   .use(AuthGuard)
   .use(DocumentModel)
   .use(ErrorModel)
@@ -113,7 +118,9 @@ export const Document = new Elysia({
 
       let result: Awaited<ReturnType<typeof pdfToMarkdown>>;
       try {
-        result = await pdfToMarkdown(new Uint8Array(await body.file.arrayBuffer()));
+        result = await pdfToMarkdown(
+          new Uint8Array(await body.file.arrayBuffer()),
+        );
       } catch (err) {
         const msg = err instanceof Error ? err.message.toLowerCase() : '';
         if (msg.includes('password')) {
@@ -128,7 +135,8 @@ export const Document = new Elysia({
       if (!result.markdown.trim()) {
         return status(422, {
           code: 'PDF_EMPTY',
-          message: 'No text found in this PDF. Image-only PDFs are not supported.',
+          message:
+            'No text found in this PDF. Image-only PDFs are not supported.',
         });
       }
 
@@ -170,7 +178,10 @@ export const Document = new Elysia({
       if (SubscriptionService.hasReachedKnowledgeSourceLimit(subscription)) {
         return status(403, {
           code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED',
-          message: SubscriptionService.getKnowledgeSourceLimitReachedMessage(subscription),
+          message:
+            SubscriptionService.getKnowledgeSourceLimitReachedMessage(
+              subscription,
+            ),
           plan: subscription.plan,
           knowledgeSourceLimit: subscription.knowledgeSourceLimit,
           knowledgeSourceCount: subscription.knowledgeSourceCount,
@@ -199,9 +210,15 @@ export const Document = new Elysia({
   .post(
     '/url/preview',
     async ({ body, orgId, status }) => {
-      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(
+        URL_CRAWLING_FLAG,
+        orgId,
+      );
       if (!urlCrawlingEnabled) {
-        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+        return status(403, {
+          code: 'FORBIDDEN',
+          message: 'URL crawling is not enabled for your organisation.',
+        });
       }
 
       const agent = await AgentService.single({ id: body.agentId, orgId });
@@ -215,15 +232,24 @@ export const Document = new Elysia({
       } catch (err) {
         const code = (err as { code?: string }).code ?? 'FETCH_FAILED';
         const messages: Record<string, string> = {
-          INVALID_URL: 'Please enter a valid public URL (starting with https://).',
+          INVALID_URL:
+            'Please enter a valid public URL (starting with https://).',
           PRIVATE_HOST: 'Only public URLs are supported.',
           DNS_FAILED: 'Could not resolve this domain. Please check the URL.',
           FETCH_TIMEOUT: 'The page took too long to load. Try a different URL.',
-          FETCH_FAILED: 'Could not fetch this page. The site may be blocking bots.',
+          FETCH_FAILED:
+            'Could not fetch this page. The site may be blocking bots.',
           NOT_HTML: 'This URL does not return a web page.',
         };
         return status(422, {
-          code: code as 'INVALID_URL' | 'FETCH_FAILED' | 'FETCH_TIMEOUT' | 'NOT_HTML' | 'PRIVATE_HOST' | 'DNS_FAILED' | 'PAGE_EMPTY',
+          code: code as
+            | 'INVALID_URL'
+            | 'FETCH_FAILED'
+            | 'FETCH_TIMEOUT'
+            | 'NOT_HTML'
+            | 'PRIVATE_HOST'
+            | 'DNS_FAILED'
+            | 'PAGE_EMPTY',
           message: messages[code] ?? 'Could not fetch this page.',
         });
       }
@@ -231,7 +257,8 @@ export const Document = new Elysia({
       if (result.charCount < 50) {
         return status(422, {
           code: 'PAGE_EMPTY' as const,
-          message: 'Very little text was found on this page. Try a different URL.',
+          message:
+            'Very little text was found on this page. Try a different URL.',
         });
       }
 
@@ -255,9 +282,15 @@ export const Document = new Elysia({
   .post(
     '/url',
     async ({ body, userId, orgId, status }) => {
-      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(URL_CRAWLING_FLAG, orgId);
+      const urlCrawlingEnabled = await FeatureFlagService.isEnabled(
+        URL_CRAWLING_FLAG,
+        orgId,
+      );
       if (!urlCrawlingEnabled) {
-        return status(403, { code: 'FORBIDDEN', message: 'URL crawling is not enabled for your organisation.' });
+        return status(403, {
+          code: 'FORBIDDEN',
+          message: 'URL crawling is not enabled for your organisation.',
+        });
       }
 
       const agent = await AgentService.single({ id: body.agentId, orgId });
@@ -279,7 +312,10 @@ export const Document = new Elysia({
       if (SubscriptionService.hasReachedKnowledgeSourceLimit(subscription)) {
         return status(403, {
           code: 'KNOWLEDGE_SOURCE_LIMIT_REACHED',
-          message: SubscriptionService.getKnowledgeSourceLimitReachedMessage(subscription),
+          message:
+            SubscriptionService.getKnowledgeSourceLimitReachedMessage(
+              subscription,
+            ),
           plan: subscription.plan,
           knowledgeSourceLimit: subscription.knowledgeSourceLimit,
           knowledgeSourceCount: subscription.knowledgeSourceCount,
@@ -289,7 +325,11 @@ export const Document = new Elysia({
       const document = await DocumentService.create({
         agentId: body.agentId,
         title: body.title,
-        contentSerialized: { url: body.url, rawText: body.rawText, crawledAt: new Date().toISOString() },
+        contentSerialized: {
+          url: body.url,
+          rawText: body.rawText,
+          crawledAt: new Date().toISOString(),
+        },
         type: 'url',
         createdBy: userId,
       });

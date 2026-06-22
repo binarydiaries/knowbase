@@ -1,4 +1,7 @@
 import { Resend } from 'resend';
+import { logger } from '../../utils/logger.utils';
+
+const log = logger.child({ module: 'email' });
 
 const apiKey = process.env.RESEND_API_KEY;
 const from = 'Agenvik <noreply@agenvik.com>';
@@ -7,7 +10,7 @@ let resend: Resend | null = null;
 
 function getClient(): Resend | null {
   if (!apiKey) {
-    console.warn('[EmailService] RESEND_API_KEY is not set — skipping email');
+    log.warn('RESEND_API_KEY is not set — skipping email');
     return null;
   }
   if (!resend) resend = new Resend(apiKey);
@@ -37,20 +40,34 @@ export interface DocumentEmailData {
 
 export abstract class EmailService {
   /** Generic send — the queue calls this; it knows nothing about leads or agents. */
-  static async send(data: { to: string; subject: string; html: string }): Promise<void> {
+  static async send(data: {
+    to: string;
+    subject: string;
+    html: string;
+  }): Promise<void> {
     const client = getClient();
     if (!client) return;
-    await client.emails.send({ from, to: data.to, subject: data.subject, html: data.html });
+    await client.emails.send({
+      from,
+      to: data.to,
+      subject: data.subject,
+      html: data.html,
+    });
   }
 
   /**
    * Renders a lead-notification email to `{ subject, html }` without sending.
    * Call this in the action executor to build the email before enqueuing.
    */
-  static renderLeadNotification(ctx: LeadEmailContext): { subject: string; html: string } {
+  static renderLeadNotification(ctx: LeadEmailContext): {
+    subject: string;
+    html: string;
+  } {
     const displayName = ctx.lead.name ?? 'Anonymous';
     const subject = ctx.subject?.trim() || `New lead captured: ${displayName}`;
-    const html = ctx.body?.trim() ? customBodyHtml(ctx.body, ctx) : leadNotificationHtml(ctx);
+    const html = ctx.body?.trim()
+      ? customBodyHtml(ctx.body, ctx)
+      : leadNotificationHtml(ctx);
     return { subject, html };
   }
 
@@ -62,8 +79,6 @@ export abstract class EmailService {
   static async sendDocumentIndexed(data: DocumentEmailData): Promise<void> {
     const client = getClient();
     if (!client) return;
-
-    console.log('coming here ', from, data);
 
     await client.emails.send({
       from,

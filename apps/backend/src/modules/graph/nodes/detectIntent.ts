@@ -1,15 +1,28 @@
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
+import { logger } from '../../../utils/logger.utils';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
 import type { State } from '../state';
 import { createNanoLlm } from '../utils/llm';
 import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
+const log = logger.child({ module: 'graph', node: 'detectIntent' });
+
 export { INTENT_QUESTION_ANSWERING };
 
 export const detectIntent: GraphNode<typeof State> = async (state, config) => {
-  const { intents, activeIntent, missingFields, optionalMissingFields, askedOptionalFields } = state;
+  const {
+    intents,
+    activeIntent,
+    missingFields,
+    optionalMissingFields,
+    askedOptionalFields,
+  } = state;
 
   if (!intents || intents.length === 0) {
     return { intent: INTENT_QUESTION_ANSWERING };
@@ -34,10 +47,10 @@ export const detectIntent: GraphNode<typeof State> = async (state, config) => {
       ),
   });
 
-  const structuredLlm = createNanoLlm(config, 'detectIntent').withStructuredOutput(
-    IntentSchema,
-    { name: 'detect_intent' },
-  );
+  const structuredLlm = createNanoLlm(
+    config,
+    'detectIntent',
+  ).withStructuredOutput(IntentSchema, { name: 'detect_intent' });
 
   // Build intent descriptions for the system prompt.
   // triggerInstructions provides the human context for each intent,
@@ -65,7 +78,12 @@ The last question asked the user for their "${nextField}".
 
 If the user's message looks like an answer to that question (e.g. providing a name, email, or other personal detail), classify it as "${activeIntent.name}".
 If the user is clearly asking a general question unrelated to providing that information, classify it as "${INTENT_QUESTION_ANSWERING}".`;
-  } else if (activeIntent && askedOptionalFields && optionalMissingFields && optionalMissingFields.length > 0) {
+  } else if (
+    activeIntent &&
+    askedOptionalFields &&
+    optionalMissingFields &&
+    optionalMissingFields.length > 0
+  ) {
     const fields = optionalMissingFields.join(', ');
     systemPrompt += `
 
@@ -80,15 +98,29 @@ If the user is clearly asking a general question, classify it as "${INTENT_QUEST
   // "Arokart" alone is ambiguous; "Arokart" after "Can you share your company
   // name?" is clearly providing the value. The LLM needs that context to
   // distinguish a value/skip from an off-topic Q&A question.
-  const lastBotMessage = (activeIntent && (missingFields?.length || askedOptionalFields))
-    ? getLastAssistantMessage(state)
-    : null;
+  const lastBotMessage =
+    activeIntent && (missingFields?.length || askedOptionalFields)
+      ? getLastAssistantMessage(state)
+      : null;
 
   const classifyMessages = lastBotMessage
-    ? [new SystemMessage(systemPrompt), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
+    ? [
+        new SystemMessage(systemPrompt),
+        new AIMessage(lastBotMessage),
+        new HumanMessage(userContent),
+      ]
     : [new SystemMessage(systemPrompt), new HumanMessage(userContent)];
 
   const { intent } = await structuredLlm.invoke(classifyMessages);
 
+  log.debug(
+    {
+      input: userContent.slice(0, 80),
+      activeIntent: activeIntent?.name ?? 'none',
+      missingFields,
+      intent,
+    },
+    'intent detected',
+  );
   return { intent };
 };

@@ -1,9 +1,16 @@
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
+import { logger } from '../../../utils/logger.utils';
 import type { State } from '../state.js';
 import { createNanoLlm } from '../utils/llm';
 import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
+
+const log = logger.child({ module: 'graph', node: 'extractEntities' });
 
 const ExtractEntityResponseSchema = z.object({
   entities: z
@@ -37,41 +44,67 @@ function needsEntityExtraction(state: typeof State.State): boolean {
  * "what's your company name?" would not be labelled as `company`.
  */
 function buildSystemPrompt(state: typeof State.State): string {
-  const { activeIntent, missingFields, optionalMissingFields, askedOptionalFields } = state;
+  const {
+    activeIntent,
+    missingFields,
+    optionalMissingFields,
+    askedOptionalFields,
+  } = state;
 
   if (activeIntent && missingFields && missingFields.length > 0) {
     return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user for: ${missingFields.join(', ')}. The user's reply is likely providing these values — label them with the matching keys.`;
   }
 
-  if (activeIntent && askedOptionalFields && optionalMissingFields && optionalMissingFields.length > 0) {
+  if (
+    activeIntent &&
+    askedOptionalFields &&
+    optionalMissingFields &&
+    optionalMissingFields.length > 0
+  ) {
     return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user if they'd like to share optional information: ${optionalMissingFields.join(', ')}. If the user's reply provides any of these values or clearly answers with a value for one of them, extract it using the matching key.`;
   }
 
   return BASE_SYSTEM_PROMPT;
 }
 
-export const extractEntities: GraphNode<typeof State> = async (state, config) => {
+export const extractEntities: GraphNode<typeof State> = async (
+  state,
+  config,
+) => {
   const userContent = getLastUserMessage(state);
 
   if (!userContent || !needsEntityExtraction(state)) {
     return { entities: {} };
   }
 
-  const structuredLlm = createNanoLlm(config, 'extractEntities').withStructuredOutput(
-    ExtractEntityResponseSchema,
-    { name: 'extract_entities', strict: true },
-  );
+  const structuredLlm = createNanoLlm(
+    config,
+    'extractEntities',
+  ).withStructuredOutput(ExtractEntityResponseSchema, {
+    name: 'extract_entities',
+    strict: true,
+  });
 
   // When collecting mid-intent, include the previous bot question so the
   // extractor can resolve ambiguous values (e.g. "Arokart" → company when the
   // bot just asked "Can you share your company name?").
   const { activeIntent, missingFields, askedOptionalFields } = state;
-  const inMidIntent = !!(activeIntent && (missingFields?.length || askedOptionalFields));
+  const inMidIntent = !!(
+    activeIntent &&
+    (missingFields?.length || askedOptionalFields)
+  );
   const lastBotMessage = inMidIntent ? getLastAssistantMessage(state) : null;
 
   const messages = lastBotMessage
-    ? [new SystemMessage(buildSystemPrompt(state)), new AIMessage(lastBotMessage), new HumanMessage(userContent)]
-    : [new SystemMessage(buildSystemPrompt(state)), new HumanMessage(userContent)];
+    ? [
+        new SystemMessage(buildSystemPrompt(state)),
+        new AIMessage(lastBotMessage),
+        new HumanMessage(userContent),
+      ]
+    : [
+        new SystemMessage(buildSystemPrompt(state)),
+        new HumanMessage(userContent),
+      ];
 
   const { entities } = await structuredLlm.invoke(messages);
 
@@ -79,5 +112,9 @@ export const extractEntities: GraphNode<typeof State> = async (state, config) =>
     entities.map(({ key, value }) => [key, value]),
   );
 
+  log.debug(
+    { input: userContent.slice(0, 80), extracted: entityMap },
+    'entities extracted',
+  );
   return { entities: entityMap };
 };

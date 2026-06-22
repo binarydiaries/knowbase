@@ -1,6 +1,9 @@
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { ChatOpenAI } from '@langchain/openai';
+import { logger } from '../../../utils/logger.utils';
 import { createCostCallback } from './cost';
+
+const log = logger.child({ module: 'graph', util: 'llm' });
 
 export type LlmProvider = 'openai' | 'anthropic' | 'gemini';
 
@@ -8,10 +11,22 @@ export type LlmProvider = 'openai' | 'anthropic' | 'gemini';
  * Extract cost context from LangGraph config and build the callbacks array.
  * Returns undefined (no-op) when orgId is absent so tests work without config.
  */
-function costCallbacks(modelName: string, config?: RunnableConfig | null, nodeName?: string) {
+function costCallbacks(
+  modelName: string,
+  config?: RunnableConfig | null,
+  nodeName?: string,
+) {
   const { orgId, agentId, thread_id } = config?.configurable ?? {};
   if (!orgId) return undefined;
-  return [createCostCallback({ orgId, agentId, conversationId: thread_id, modelName, nodeName })];
+  return [
+    createCostCallback({
+      orgId,
+      agentId,
+      conversationId: thread_id,
+      modelName,
+      nodeName,
+    }),
+  ];
 }
 
 /**
@@ -33,8 +48,9 @@ export function createLlm(
     case 'anthropic':
     case 'gemini':
       // Future providers — fall back to OpenAI until adapters are added
-      console.warn(
-        `[llm] provider "${provider}" not yet supported, falling back to openai`,
+      log.warn(
+        { provider },
+        'provider not yet supported, falling back to openai',
       );
       return new ChatOpenAI({
         model,
@@ -58,7 +74,10 @@ export function createLlm(
  *
  * Pass `config` + `nodeName` to automatically record token usage.
  */
-export function createStreamingNanoLlm(config?: RunnableConfig | null, nodeName?: string) {
+export function createStreamingNanoLlm(
+  config?: RunnableConfig | null,
+  nodeName?: string,
+) {
   const model = 'gpt-4.1-nano';
   return new ChatOpenAI({
     model,
@@ -74,7 +93,10 @@ export function createStreamingNanoLlm(config?: RunnableConfig | null, nodeName?
  *
  * Pass `config` + `nodeName` to automatically record token usage.
  */
-export function createNanoLlm(config?: RunnableConfig | null, nodeName?: string) {
+export function createNanoLlm(
+  config?: RunnableConfig | null,
+  nodeName?: string,
+) {
   const model = 'gpt-4.1-nano';
   return new ChatOpenAI({
     model,

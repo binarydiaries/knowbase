@@ -30,6 +30,7 @@ import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
 import { validateEnv } from './utils/env.utils';
+import { logger } from './utils/logger.utils';
 
 validateEnv();
 
@@ -126,6 +127,7 @@ const app = Sentry.withElysia(new Elysia())
   .use(AdminOrgsOverview)
   .listen(process.env.PORT ?? 3000);
 
-console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+logger.info(
+  { hostname: app.server?.hostname, port: app.server?.port },
+  'Elysia is running',
 );

@@ -1,7 +1,3 @@
-import { logger } from './logger.utils';
-
-const log = logger.child({ module: 'startup' });
-
 const REQUIRED_VARS = [
   'DATABASE_URL',
   'REDIS_URL',
@@ -14,15 +10,13 @@ const REQUIRED_VARS = [
 export function validateEnv(): void {
   const missing = REQUIRED_VARS.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    log.error({ missing }, 'missing required environment variables');
+    console.error(`[startup] Missing required environment variables:\n  ${missing.join('\n  ')}`);
     process.exit(1);
   }
 
   const encKey = process.env.TOKEN_ENCRYPTION_KEY!;
   if (Buffer.from(encKey, 'hex').length !== 32) {
-    log.error(
-      'TOKEN_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)',
-    );
+    console.error('[startup] TOKEN_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)');
     process.exit(1);
   }
 }

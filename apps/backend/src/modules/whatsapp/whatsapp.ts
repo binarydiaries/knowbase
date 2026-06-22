@@ -6,15 +6,12 @@ import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
-import { logger } from '../../utils/logger.utils';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from './connectionService';
 import { generateOrgVerifyToken, verifyOrgVerifyToken } from './verifyToken';
-
-const log = logger.child({ module: 'whatsapp' });
 
 const BadRequestResponse = z.object({
   code: z.string(),
@@ -57,10 +54,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
   .post(
     '/webhook/whatsapp',
     async ({ body }) => {
-      log.debug({ body }, 'webhook received');
-      void processInboundMessage(body).catch((err) =>
-        log.error({ err }, 'processInboundMessage failed'),
-      );
+      void processInboundMessage(body).catch(console.error);
       return new Response('OK', { status: 200 });
     },
     { body: t.Any() },
@@ -388,21 +382,13 @@ async function processInboundMessage(body: unknown) {
     }[];
   };
 
-  if (payload.object !== 'whatsapp_business_account') {
-    log.debug({ object: payload.object }, 'ignoring non-whatsapp payload');
-    return;
-  }
+  if (payload.object !== 'whatsapp_business_account') return;
 
   for (const entry of payload.entry ?? []) {
     for (const change of entry.changes ?? []) {
       const value = change.value;
       const phoneNumberId = value?.metadata?.phone_number_id;
       const messages = value?.messages ?? [];
-
-      log.debug(
-        { phoneNumberId, messageCount: messages.length },
-        'processing webhook change',
-      );
 
       for (const msg of messages) {
         if (
@@ -411,52 +397,20 @@ async function processInboundMessage(body: unknown) {
           !msg.text?.body ||
           !phoneNumberId
         ) {
-          log.debug(
-            {
-              type: msg.type,
-              hasFrom: !!msg.from,
-              hasText: !!msg.text?.body,
-              phoneNumberId,
-            },
-            'skipping unsupported/incomplete message',
-          );
           continue;
         }
 
         const result =
           await ChannelService.findByWhatsappPhoneNumberId(phoneNumberId);
-        if (!result?.enabled || !result.agent) {
-          log.warn(
-            { phoneNumberId, found: !!result, enabled: result?.enabled },
-            'no enabled channel bound to phoneNumberId — message dropped',
-          );
-          continue;
-        }
+        if (!result?.enabled || !result.agent) continue;
 
-        log.debug(
-          {
-            channelId: result.id,
-            orgId: result.agent.orgId,
-            senderPhone: msg.from,
-            messageId: msg.id,
-          },
-          'dispatching to ChatV2Service.sendWhatsApp',
-        );
-
-        try {
-          await ChatV2Service.sendWhatsApp({
-            channelId: result.id,
-            orgId: result.agent.orgId,
-            senderPhone: msg.from,
-            message: msg.text.body,
-            messageId: msg.id,
-          });
-        } catch (err) {
-          log.error(
-            { err, channelId: result.id, messageId: msg.id },
-            'sendWhatsApp failed',
-          );
-        }
+        await ChatV2Service.sendWhatsApp({
+          channelId: result.id,
+          orgId: result.agent.orgId,
+          senderPhone: msg.from,
+          message: msg.text.body,
+          messageId: msg.id,
+        });
       }
     }
   }

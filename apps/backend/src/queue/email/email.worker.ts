@@ -1,12 +1,9 @@
 import { type Job, Worker } from 'bullmq';
 import { clerkClient } from 'elysia-clerk';
 import { EmailService } from '../../common/email/service';
-import { logger } from '../../utils/logger.utils';
 import { connection } from '../connection';
 import { emailQueue } from './email.queue';
 import type { IEmailJob } from './email.types';
-
-const log = logger.child({ module: 'email-worker' });
 
 async function getClerkUserEmail(userId: string): Promise<string | null> {
   try {
@@ -26,11 +23,7 @@ export const emailWorker = new Worker(
     const data = job.data;
 
     if (data.type === 'send-email') {
-      await EmailService.send({
-        to: data.to,
-        subject: data.subject,
-        html: data.html,
-      });
+      await EmailService.send({ to: data.to, subject: data.subject, html: data.html });
       return;
     }
 
@@ -39,20 +32,14 @@ export const emailWorker = new Worker(
     if (!to) return;
 
     if (data.type === 'document-indexed') {
-      await EmailService.sendDocumentIndexed({
-        to,
-        documentTitle: data.documentTitle,
-      });
+      await EmailService.sendDocumentIndexed({ to, documentTitle: data.documentTitle });
     } else {
-      await EmailService.sendDocumentFailed({
-        to,
-        documentTitle: data.documentTitle,
-      });
+      await EmailService.sendDocumentFailed({ to, documentTitle: data.documentTitle });
     }
   },
   { connection },
 );
 
 emailWorker.on('failed', (job, err) => {
-  log.error({ jobId: job?.id, err }, 'job failed');
+  console.error(`[email-worker] job ${job?.id} failed:`, err.message);
 });

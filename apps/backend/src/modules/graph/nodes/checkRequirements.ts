@@ -1,5 +1,8 @@
 import type { GraphNode } from '@langchain/langgraph';
+import { logger } from '../../../utils/logger.utils';
 import type { State } from '../state';
+
+const log = logger.child({ module: 'graph', node: 'checkRequirements' });
 
 export const checkRequirements: GraphNode<typeof State> = (state) => {
   const { activeIntent, entities } = state;
@@ -13,11 +16,22 @@ export const checkRequirements: GraphNode<typeof State> = (state) => {
     return value === undefined || value === null || value === '';
   });
 
-  const optionalMissing = (activeIntent.optionalFields ?? []).filter((field) => {
-    const value = entities[field];
-    return value === undefined || value === null || value === '';
-  });
+  const optionalMissing = (activeIntent.optionalFields ?? []).filter(
+    (field) => {
+      const value = entities[field];
+      return value === undefined || value === null || value === '';
+    },
+  );
 
-  console.log('[DEBUG checkRequirements] intent=%s entities=%s required=%s → missing=%s optionalMissing=%s', activeIntent.name, JSON.stringify(entities), JSON.stringify(activeIntent.requiredFields), JSON.stringify(missing), JSON.stringify(optionalMissing));
+  log.debug(
+    {
+      intent: activeIntent.name,
+      entities,
+      required: activeIntent.requiredFields,
+      missing,
+      optionalMissing,
+    },
+    'requirements checked',
+  );
   return { missingFields: missing, optionalMissingFields: optionalMissing };
 };

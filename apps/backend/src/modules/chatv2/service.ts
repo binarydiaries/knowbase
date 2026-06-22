@@ -2,6 +2,7 @@ import { toUIMessageStream } from '@ai-sdk/langchain';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
 import { logger } from '../../utils/logger.utils';
+import { connection as redis } from '../../queue/connection';
 import type {
   IChannelSlackConfig,
   IChannelWebConfig,
@@ -125,6 +126,7 @@ export abstract class ChatV2Service {
     channelId,
     orgId,
     senderPhone,
+    senderName,
     message,
     messageId,
     ip,
@@ -132,6 +134,7 @@ export abstract class ChatV2Service {
     channelId: string;
     orgId: string;
     senderPhone: string;
+    senderName?: string;
     message: string;
     messageId?: string;
     ip?: string;
@@ -229,22 +232,20 @@ export abstract class ChatV2Service {
       )
       .catch((err) => log.error({ err }, 'WA typing indicator request failed'));
 
+    // ── Seed entities from channel identity ───────────────────────────────
+    // WhatsApp Cloud API sends digits-only phone (e.g. "919876543210") — prefix + unconditionally.
+    const channelEntities: Record<string, string> = { phone: `+${senderPhone}` };
+    if (senderName) channelEntities.name = senderName;
+
     // ── Invoke graph ──────────────────────────────────────────────────────
     log.debug(
       { channelId, orgId, thread_id, agentId: channel.agentId },
       'invoking graph',
     );
     const finalState = await graph.invoke(
-      { messages: new HumanMessage(message) },
+      { messages: new HumanMessage(message), entities: channelEntities },
       {
-        configurable: {
-          agentId: channel.agentId,
-          orgId,
-          channelId,
-          thread_id,
-          isPaid,
-          ip,
-        },
+        configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
       },
     );
 
@@ -307,6 +308,7 @@ export abstract class ChatV2Service {
     message,
     slackChannelId,
     threadTs,
+    slackUserId,
     ip,
   }: {
     channelId: string;
@@ -314,6 +316,7 @@ export abstract class ChatV2Service {
     message: string;
     slackChannelId: string;
     threadTs: string;
+    slackUserId?: string;
     ip?: string;
   }) {
     log.debug(
@@ -355,6 +358,37 @@ export abstract class ChatV2Service {
       'Content-Type': 'application/json',
     };
 
+    // ── Seed entities from Slack profile (best-effort, cached 1h) ────────
+    const channelEntities: Record<string, string> = {};
+    if (slackUserId) {
+      const cacheKey = `user:profile:${slackUserId}`;
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          Object.assign(channelEntities, JSON.parse(cached));
+        } else {
+          const profileRes = await fetch(
+            `https://slack.com/api/users.info?user=${encodeURIComponent(slackUserId)}`,
+            { headers: { Authorization: `Bearer ${connection.botToken}` } },
+          );
+          const profileData = (await profileRes.json()) as {
+            ok: boolean;
+            user?: { real_name?: string; profile?: { email?: string; phone?: string } };
+          };
+          if (profileData.ok && profileData.user) {
+            const u = profileData.user;
+            if (u.real_name) channelEntities.name = u.real_name;
+            if (u.profile?.email) channelEntities.email = u.profile.email;
+            if (u.profile?.phone) channelEntities.phone = u.profile.phone;
+          }
+          // Cache even if empty (missing_scope) to avoid hammering old tokens
+          await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', 3600);
+        }
+      } catch {
+        // Best-effort — proceed without profile; bot asks for fields as normal
+      }
+    }
+
     // ── Thinking placeholder ──────────────────────────────────────────────
     let placeholderTs: string | null = null;
     try {
@@ -393,7 +427,7 @@ export abstract class ChatV2Service {
     let assistantText = '';
     try {
       const finalState = await graph.invoke(
-        { messages: new HumanMessage(message) },
+        { messages: new HumanMessage(message), entities: channelEntities },
         {
           configurable: {
             agentId: channel.agentId,

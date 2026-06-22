@@ -206,6 +206,8 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       'app_mentions:read',
       'channels:history',
       'groups:history',
+      'users:read',
+      'users:read.email',
     ].join(',');
 
     const url = new URL('https://slack.com/oauth/v2/authorize');
@@ -515,6 +517,7 @@ async function processInboundEvent(payload: {
         message: event.text,
         slackChannelId,
         threadTs,
+        slackUserId: event.user,
       });
     } catch (err) {
       log.error({ err, channelId: result.id }, 'sendSlack failed');
@@ -553,6 +556,7 @@ async function processInboundEvent(payload: {
         message: cleanMessage,
         slackChannelId,
         threadTs,
+        slackUserId: event.user,
       });
     } catch (err) {
       log.error({ err, channelId: result.id }, 'sendSlack failed');

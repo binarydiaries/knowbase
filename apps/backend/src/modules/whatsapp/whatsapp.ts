@@ -377,6 +377,7 @@ async function processInboundMessage(body: unknown) {
       changes?: {
         value?: {
           metadata?: { phone_number_id?: string };
+          contacts?: { profile?: { name?: string } }[];
           messages?: {
             id?: string;
             from?: string;
@@ -403,6 +404,7 @@ async function processInboundMessage(body: unknown) {
         { phoneNumberId, messageCount: messages.length },
         'processing webhook change',
       );
+      const senderName = value?.contacts?.[0]?.profile?.name;
 
       for (const msg of messages) {
         if (
@@ -448,6 +450,7 @@ async function processInboundMessage(body: unknown) {
             channelId: result.id,
             orgId: result.agent.orgId,
             senderPhone: msg.from,
+            senderName,
             message: msg.text.body,
             messageId: msg.id,
           });

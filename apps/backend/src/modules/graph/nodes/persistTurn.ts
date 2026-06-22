@@ -44,18 +44,21 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
         metadata: null,
         systemMetadata: state.finalQuery ? { finalQuery: state.finalQuery } : null,
       },
-      {
-        conversationId: thread_id,
-        role: 'assistant',
-        content: assistantText,
-        metadata: {
-          confidenceScore,
-          sources,
-          sentiment,
+    ]).then(() =>
+      MessageService.addMessages([
+        {
+          conversationId: thread_id,
+          role: 'assistant',
+          content: assistantText,
+          metadata: {
+            confidenceScore,
+            sources,
+            sentiment,
+          },
+          systemMetadata: null,
         },
-        systemMetadata: null,
-      },
-    ]),
+      ])
+    ),
   ]);
 
   // Clear per-turn RAG state so stale chunks/query don't bleed into the next turn

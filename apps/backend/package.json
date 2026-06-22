@@ -21,6 +21,7 @@
   "dependencies": {
     "@ai-sdk/langchain": "^2.0.204",
     "@ai-sdk/openai": "^3.0.1",
+    "@elysia/opentelemetry": "^1.4.12",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "1.4.11",
     "@kelviq/node-sdk": "^2.6.0",
@@ -29,6 +30,8 @@
     "@langchain/langgraph-checkpoint-postgres": "^1.0.2",
     "@langchain/openai": "^1.4.7",
     "@langchain/textsplitters": "^1.0.1",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.219.0",
+    "@opentelemetry/sdk-trace-node": "^2.8.0",
     "@paralleldrive/cuid2": "^3.0.6",
     "@sentry/elysia": "^10.51.0",
     "ai": "^6.0.3",

@@ -242,35 +242,46 @@ export abstract class ChatV2Service {
       { channelId, orgId, thread_id, agentId: channel.agentId },
       'invoking graph',
     );
-    const finalState = await graph.invoke(
-      { messages: new HumanMessage(message), entities: channelEntities },
-      {
-        configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
-      },
-    );
-
-    const lastAI = [...finalState.messages]
-      .reverse()
-      .find((m) => AIMessage.isInstance(m));
-    const assistantText =
-      typeof lastAI?.content === 'string' ? lastAI.content : '';
-
-    if (!assistantText) {
-      log.warn(
+    let assistantText = '';
+    try {
+      const finalState = await graph.invoke(
+        { messages: new HumanMessage(message), entities: channelEntities },
         {
-          channelId,
-          orgId,
-          thread_id,
-          hasLastAI: !!lastAI,
-          contentType: typeof lastAI?.content,
+          configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
         },
-        'graph produced empty assistantText — WhatsApp reply will be blank',
       );
-    } else {
-      log.debug(
-        { channelId, orgId, thread_id, length: assistantText.length },
-        'graph produced assistant reply',
-      );
+      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      if (lastAI) {
+        if (typeof lastAI.content === 'string') {
+          assistantText = lastAI.content;
+        } else if (Array.isArray(lastAI.content)) {
+          const block = lastAI.content.find((cb: { type: string }) => cb.type === 'text') as
+            | { type: 'text'; text: string }
+            | undefined;
+          assistantText = block?.text ?? '';
+        }
+      }
+
+      if (!assistantText) {
+        log.warn(
+          {
+            channelId,
+            orgId,
+            thread_id,
+            hasLastAI: !!lastAI,
+            contentType: typeof lastAI?.content,
+          },
+          'graph produced empty assistantText — WhatsApp reply will be blank',
+        );
+      } else {
+        log.debug(
+          { channelId, orgId, thread_id, length: assistantText.length },
+          'graph produced assistant reply',
+        );
+      }
+    } catch (err) {
+      log.error({ err, channelId, orgId, thread_id }, 'graph.invoke failed');
+      assistantText = 'Sorry, something went wrong. Please try again.';
     }
 
     // ── Send reply ────────────────────────────────────────────────────────
@@ -439,10 +450,17 @@ export abstract class ChatV2Service {
           },
         },
       );
-      const lastAI = [...finalState.messages]
-        .reverse()
-        .find((m) => AIMessage.isInstance(m));
-      assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      if (lastAI) {
+        if (typeof lastAI.content === 'string') {
+          assistantText = lastAI.content;
+        } else if (Array.isArray(lastAI.content)) {
+          const block = lastAI.content.find((cb: { type: string }) => cb.type === 'text') as
+            | { type: 'text'; text: string }
+            | undefined;
+          assistantText = block?.text ?? '';
+        }
+      }
 
       if (!assistantText) {
         log.warn(

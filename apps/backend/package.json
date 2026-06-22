@@ -32,6 +32,7 @@
     "@langchain/textsplitters": "^1.0.1",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.219.0",
+    "@opentelemetry/resources": "^2.8.0",
     "@opentelemetry/sdk-trace-node": "^2.8.0",
     "@paralleldrive/cuid2": "^3.0.6",
     "@sentry/elysia": "^10.51.0",

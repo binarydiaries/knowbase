@@ -55,6 +55,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const app = Sentry.withElysia(new Elysia())
   .use(
     opentelemetry({
+      serviceName: 'agenvik-backend-api',
       spanProcessors: [createOtelSpanProcessor()],
     }),
   )

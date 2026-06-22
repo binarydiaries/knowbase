@@ -34,22 +34,21 @@ const GraphBehaviourSchema = BehaviourSchema.extend({
   updatedAt: z.coerce.date(),
 });
 
+const entitiesChannel = new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
+  inputSchema: z.record(z.string(), z.unknown()),
+  reducer: (current, next) => ({ ...current, ...next }),
+});
+
 export const InputState = new StateSchema({
   messages: MessagesValue,
-  entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
-    inputSchema: z.record(z.string(), z.unknown()),
-    reducer: (current, next) => ({ ...current, ...next }),
-  }),
+  entities: entitiesChannel,
 });
 
 export const State = new StateSchema({
   behaviour: GraphBehaviourSchema,
   messages: MessagesValue,
   intents: z.array(GraphIntentWithActionsSchema).default([]),
-  entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
-    inputSchema: z.record(z.string(), z.unknown()),
-    reducer: (current, next) => ({ ...current, ...next }),
-  }),
+  entities: entitiesChannel,
   intent: z.string().default(INTENT_QUESTION_ANSWERING),
   activeIntent: GraphIntentWithActionsSchema.optional(),
   finalQuery: z.string().optional(),

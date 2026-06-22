@@ -28,5 +28,5 @@
   "dependencies": {
     "lucide-astro": "^0.556.0"
   },
-  "version": "0.7.0.0"
+  "version": "0.7.0.1"
 }

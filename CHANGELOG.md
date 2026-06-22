@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.0.1] — 2026-06-22
+
+### Fixed
+- **Environment detection** — Corrected `ENV_KEY` check from `'production'` to `'prod'` across the Kelviq payment provider, Sentry initialization in the API server, and the BullMQ worker. Prevents silent sandbox-mode fallback in production deployments.
+
+### Added
+- **TODOS.md** — Added project-level backlog file tracking the deferred web widget identity passthrough feature (channel identity injection Approach C, pending security design).
+
+---
+
 ## [0.7.0] — 2026-06-18
 
 ### Added

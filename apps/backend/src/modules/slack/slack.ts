@@ -173,6 +173,8 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       'app_mentions:read',
       'channels:history',
       'groups:history',
+      'users:read',
+      'users:read.email',
     ].join(',');
 
     const url = new URL('https://slack.com/oauth/v2/authorize');
@@ -432,6 +434,7 @@ async function processInboundEvent(payload: {
       message: event.text,
       slackChannelId,
       threadTs,
+      slackUserId: event.user,
     });
   } else if (event.type === 'app_mention') {
     const result = await ChannelService.findBySlackChannelId(
@@ -451,6 +454,7 @@ async function processInboundEvent(payload: {
       message: cleanMessage,
       slackChannelId,
       threadTs,
+      slackUserId: event.user,
     });
   }
 }

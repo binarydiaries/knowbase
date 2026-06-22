@@ -36,6 +36,10 @@ const GraphBehaviourSchema = BehaviourSchema.extend({
 
 export const InputState = new StateSchema({
   messages: MessagesValue,
+  entities: new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
+    inputSchema: z.record(z.string(), z.unknown()),
+    reducer: (current, next) => ({ ...current, ...next }),
+  }),
 });
 
 export const State = new StateSchema({

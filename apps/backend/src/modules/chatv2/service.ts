@@ -1,13 +1,18 @@
 import { toUIMessageStream } from '@ai-sdk/langchain';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
-import type { IChannelSlackConfig, IChannelWebConfig, IChannelWhatsAppConfig } from '../channel/model';
+import { withSpan } from '../../utils/tracer';
+import type {
+  IChannelSlackConfig,
+  IChannelWebConfig,
+  IChannelWhatsAppConfig,
+} from '../channel/model';
 import { ChannelService } from '../channel/service';
-import { SubscriptionService } from '../subscription/service';
-import { SlackConnectionService } from '../slack/connectionService';
-import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 import { graph } from '../graph/graph';
 import { suppressPipelineNodes } from '../graph/utils/stream';
+import { SlackConnectionService } from '../slack/connectionService';
+import { SubscriptionService } from '../subscription/service';
+import { WhatsAppConnectionService } from '../whatsapp/connectionService';
 
 export class NotFoundError extends Error {
   constructor(message: string) {
@@ -27,7 +32,9 @@ export class MessageLimitReachedError extends Error {
   constructor(
     message: string,
     readonly payload: Awaited<
-      ReturnType<typeof SubscriptionService.assertMessagesPerMonthLimitNotReached>
+      ReturnType<
+        typeof SubscriptionService.assertMessagesPerMonthLimitNotReached
+      >
     >,
   ) {
     super(message);
@@ -41,7 +48,8 @@ export abstract class ChatV2Service {
    * Returns isPaid so callers can pass it to the graph config without a second query.
    */
   static async assertMessageLimit(orgId: string): Promise<{ isPaid: boolean }> {
-    const result = await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
+    const result =
+      await SubscriptionService.assertMessagesPerMonthLimitNotReached(orgId);
     if (!result.allowed) {
       throw new MessageLimitReachedError(
         SubscriptionService.getMessageLimitReachedMessage(result),
@@ -96,7 +104,14 @@ export abstract class ChatV2Service {
             { messages: new HumanMessage(message) },
             {
               version: 'v2',
-              configurable: { agentId, orgId, channelId, thread_id: conversationId, isPaid, ip },
+              configurable: {
+                agentId,
+                orgId,
+                channelId,
+                thread_id: conversationId,
+                isPaid,
+                ip,
+              },
             },
           ),
         ),
@@ -151,7 +166,11 @@ export abstract class ChatV2Service {
       fetch(waUrl, {
         method: 'POST',
         headers: waHeaders,
-        body: JSON.stringify({ messaging_product: 'whatsapp', status: 'read', message_id: messageId }),
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          status: 'read',
+          message_id: messageId,
+        }),
       }).catch((e) => console.error('[WA seen] error:', e));
     }
 
@@ -183,8 +202,11 @@ export abstract class ChatV2Service {
       },
     );
 
-    const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
-    const assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+    const lastAI = [...finalState.messages]
+      .reverse()
+      .find((m) => AIMessage.isInstance(m));
+    const assistantText =
+      typeof lastAI?.content === 'string' ? lastAI.content : '';
 
     // ── Send reply ────────────────────────────────────────────────────────
     await fetch(waUrl, {
@@ -230,7 +252,11 @@ export abstract class ChatV2Service {
 
     // threadTs is stable per Slack thread — use as thread_id directly
     const thread_id = threadTs;
-    console.log('[DEBUG sendSlack] thread_id=%s message=%s', thread_id, message.slice(0, 80));
+    console.log(
+      '[DEBUG sendSlack] thread_id=%s message=%s',
+      thread_id,
+      message.slice(0, 80),
+    );
 
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
 
@@ -245,10 +271,21 @@ export abstract class ChatV2Service {
       const res = await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, text: '_Thinking…_', thread_ts: threadTs }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: '_Thinking…_',
+          thread_ts: threadTs,
+        }),
       });
-      const data = (await res.json()) as { ok: boolean; ts?: string; error?: string };
-      console.log('[DEBUG sendSlack] thinking placeholder:', data.ok ? `posted ts=${data.ts}` : `failed error=${data.error}`);
+      const data = (await res.json()) as {
+        ok: boolean;
+        ts?: string;
+        error?: string;
+      };
+      console.log(
+        '[DEBUG sendSlack] thinking placeholder:',
+        data.ok ? `posted ts=${data.ts}` : `failed error=${data.error}`,
+      );
       if (data.ok && data.ts) placeholderTs = data.ts;
     } catch (e) {
       console.error('[DEBUG sendSlack] thinking placeholder exception:', e);
@@ -258,15 +295,37 @@ export abstract class ChatV2Service {
     console.log('[DEBUG sendSlack] invoking graph agentId=%s', channel.agentId);
     let assistantText = '';
     try {
-      const finalState = await graph.invoke(
-        { messages: new HumanMessage(message) },
-        {
-          configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
+      const finalState = await withSpan(
+        'chatv2.sendSlack.graphInvoke',
+        async (span) => {
+          span.setAttributes({
+            'chat.agentId': channel.agentId,
+            'chat.orgId': orgId,
+            'chat.threadId': thread_id,
+          });
+          return graph.invoke(
+            { messages: new HumanMessage(message) },
+            {
+              configurable: {
+                agentId: channel.agentId,
+                orgId,
+                channelId,
+                thread_id,
+                isPaid,
+                ip,
+              },
+            },
+          );
         },
       );
-      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      const lastAI = [...finalState.messages]
+        .reverse()
+        .find((m) => AIMessage.isInstance(m));
       assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
-      console.log('[DEBUG sendSlack] graph done assistantText=%s', assistantText.slice(0, 120));
+      console.log(
+        '[DEBUG sendSlack] graph done assistantText=%s',
+        assistantText.slice(0, 120),
+      );
     } catch (err) {
       console.error('[DEBUG sendSlack] graph.invoke failed:', err);
       assistantText = 'Sorry, something went wrong. Please try again.';
@@ -277,15 +336,29 @@ export abstract class ChatV2Service {
       const updateRes = await fetch('https://slack.com/api/chat.update', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, ts: placeholderTs, text: assistantText }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          ts: placeholderTs,
+          text: assistantText,
+        }),
       });
-      const updateData = (await updateRes.json()) as { ok: boolean; error?: string };
-      console.log('[DEBUG sendSlack] chat.update:', updateData.ok ? 'ok' : `failed error=${updateData.error}`);
+      const updateData = (await updateRes.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+      console.log(
+        '[DEBUG sendSlack] chat.update:',
+        updateData.ok ? 'ok' : `failed error=${updateData.error}`,
+      );
     } else {
       await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: slackHeaders,
-        body: JSON.stringify({ channel: slackChannelId, text: assistantText, thread_ts: threadTs }),
+        body: JSON.stringify({
+          channel: slackChannelId,
+          text: assistantText,
+          thread_ts: threadTs,
+        }),
       });
     }
   }
@@ -312,7 +385,13 @@ export abstract class ChatV2Service {
             { messages: new HumanMessage(message) },
             {
               version: 'v2',
-              configurable: { agentId, orgId, channelId, thread_id: conversationId, isPaid },
+              configurable: {
+                agentId,
+                orgId,
+                channelId,
+                thread_id: conversationId,
+                isPaid,
+              },
             },
           ),
         ),

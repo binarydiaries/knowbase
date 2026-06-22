@@ -1,8 +1,6 @@
 import { opentelemetry } from '@elysia/opentelemetry';
 import cors from '@elysiajs/cors';
 import openapi from '@elysiajs/openapi';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import * as Sentry from '@sentry/elysia';
 import { Elysia } from 'elysia';
 import { helmet } from 'elysia-helmet';
@@ -33,6 +31,7 @@ import { Subscription } from './modules/subscription/subscription';
 import { UsageCharts } from './modules/usage/usage';
 import { WhatsApp } from './modules/whatsapp/whatsapp';
 import { validateEnv } from './utils/env.utils';
+import { createOtelSpanProcessor } from './utils/otel';
 
 validateEnv();
 
@@ -56,17 +55,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const app = Sentry.withElysia(new Elysia())
   .use(
     opentelemetry({
-      spanProcessors: [
-        new BatchSpanProcessor(
-          new OTLPTraceExporter({
-            url: 'https://otel-collector.agenvik.com/v1/traces',
-            headers: {
-              // Authorization: `Bearer ${Bun.env.AXIOM_TOKEN}`,
-              // 'X-Axiom-Dataset': Bun.env.AXIOM_DATASET,
-            },
-          }),
-        ),
-      ],
+      spanProcessors: [createOtelSpanProcessor()],
     }),
   )
   .use(

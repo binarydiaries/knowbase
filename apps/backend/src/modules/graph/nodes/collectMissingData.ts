@@ -1,50 +1,81 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { GraphNode } from '@langchain/langgraph';
+import { withSpan } from '../../../utils/tracer';
 import type { State } from '../state';
 import { createStreamingNanoLlm } from '../utils/llm';
 
-export const collectMissingData: GraphNode<typeof State> = async (state, config) => {
-  const { missingFields, optionalMissingFields, askedOptionalFields, entities, behaviour } = state;
+export const collectMissingData: GraphNode<typeof State> = (state, config) =>
+  withSpan('graph.collectMissingData', async (span) => {
+    const {
+      missingFields,
+      optionalMissingFields,
+      askedOptionalFields,
+      entities,
+      behaviour,
+    } = state;
 
-  const systemPrompt = behaviour
-    ? `${behaviour.systemPrompt}\nResponse tone: ${behaviour.tone}\nResponse verbosity: ${behaviour.verbosity}`
-    : 'You are a helpful assistant.';
+    const systemPrompt = behaviour
+      ? `${behaviour.systemPrompt}\nResponse tone: ${behaviour.tone}\nResponse verbosity: ${behaviour.verbosity}`
+      : 'You are a helpful assistant.';
 
-  const rawName = entities?.name as string | undefined;
-  const userName = rawName ? rawName.slice(0, 100).replace(/[\n\r]/g, ' ') : undefined;
-  const nameCtx = userName ? `The user's name is ${userName}. Address them by name naturally.` : '';
+    const rawName = entities?.name as string | undefined;
+    const userName = rawName
+      ? rawName.slice(0, 100).replace(/[\n\r]/g, ' ')
+      : undefined;
+    const nameCtx = userName
+      ? `The user's name is ${userName}. Address them by name naturally.`
+      : '';
 
-  console.log('[DEBUG collectMissingData] missingFields=%s optionalMissingFields=%s askedOptionalFields=%s', JSON.stringify(missingFields), JSON.stringify(optionalMissingFields), askedOptionalFields);
+    span.setAttributes({
+      'graph.missingFields': JSON.stringify(missingFields),
+      'graph.optionalMissingFields': JSON.stringify(optionalMissingFields),
+      'graph.askedOptionalFields': !!askedOptionalFields,
+    });
+    console.log(
+      '[DEBUG collectMissingData] missingFields=%s optionalMissingFields=%s askedOptionalFields=%s',
+      JSON.stringify(missingFields),
+      JSON.stringify(optionalMissingFields),
+      askedOptionalFields,
+    );
 
-  // Phase 1: collect required fields (batch when more than one)
-  if (missingFields.length > 0) {
-    const fieldList = missingFields.join(', ');
-    const userPrompt = missingFields.length === 1
-      ? `Ask naturally for the following in one friendly sentence: ${fieldList}. ${nameCtx}`
-      : `Ask naturally for ALL of the following in one friendly message (2 sentences max): ${fieldList}. ${nameCtx} Batch them together — do not ask one at a time.`;
+    // Phase 1: collect required fields (batch when more than one)
+    if (missingFields.length > 0) {
+      const fieldList = missingFields.join(', ');
+      const userPrompt =
+        missingFields.length === 1
+          ? `Ask naturally for the following in one friendly sentence: ${fieldList}. ${nameCtx}`
+          : `Ask naturally for ALL of the following in one friendly message (2 sentences max): ${fieldList}. ${nameCtx} Batch them together — do not ask one at a time.`;
 
-    console.log('[DEBUG collectMissingData] phase1 asking for:', fieldList);
-    const result = await createStreamingNanoLlm(config, 'collectMissingData').invoke([
-      new SystemMessage(systemPrompt),
-      new HumanMessage(userPrompt),
-    ]);
-    console.log('[DEBUG collectMissingData] phase1 result:', typeof result.content === 'string' ? result.content.slice(0, 120) : JSON.stringify(result.content).slice(0, 120));
-    return { messages: [result] };
-  }
+      span.setAttribute('graph.phase', 'required');
+      console.log('[DEBUG collectMissingData] phase1 asking for:', fieldList);
+      const result = await createStreamingNanoLlm(
+        config,
+        'collectMissingData',
+      ).invoke([new SystemMessage(systemPrompt), new HumanMessage(userPrompt)]);
+      console.log(
+        '[DEBUG collectMissingData] phase1 result:',
+        typeof result.content === 'string'
+          ? result.content.slice(0, 120)
+          : JSON.stringify(result.content).slice(0, 120),
+      );
+      return { messages: [result] };
+    }
 
-  // Phase 2: ask for optional fields once (soft ask, never blocks execution)
-  if (optionalMissingFields.length > 0 && !askedOptionalFields) {
-    const fieldList = optionalMissingFields.join(' and ');
-    const userPrompt = `Ask softly for the following optional information in one sentence. Make it clear it is optional and the user can skip it. ${nameCtx} Fields: ${fieldList}`;
+    // Phase 2: ask for optional fields once (soft ask, never blocks execution)
+    if (optionalMissingFields.length > 0 && !askedOptionalFields) {
+      const fieldList = optionalMissingFields.join(' and ');
+      const userPrompt = `Ask softly for the following optional information in one sentence. Make it clear it is optional and the user can skip it. ${nameCtx} Fields: ${fieldList}`;
 
-    console.log('[DEBUG collectMissingData] phase2 asking for:', fieldList);
-    const result = await createStreamingNanoLlm(config, 'collectMissingData').invoke([
-      new SystemMessage(systemPrompt),
-      new HumanMessage(userPrompt),
-    ]);
-    return { messages: [result], askedOptionalFields: true };
-  }
+      span.setAttribute('graph.phase', 'optional');
+      console.log('[DEBUG collectMissingData] phase2 asking for:', fieldList);
+      const result = await createStreamingNanoLlm(
+        config,
+        'collectMissingData',
+      ).invoke([new SystemMessage(systemPrompt), new HumanMessage(userPrompt)]);
+      return { messages: [result], askedOptionalFields: true };
+    }
 
-  console.log('[DEBUG collectMissingData] nothing to collect — returning {}');
-  return {};
-};
+    span.setAttribute('graph.phase', 'none');
+    console.log('[DEBUG collectMissingData] nothing to collect — returning {}');
+    return {};
+  });

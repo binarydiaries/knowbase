@@ -1,4 +1,10 @@
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import * as Sentry from '@sentry/elysia';
+import { createOtelSpanProcessor } from '../utils/otel';
+
+new NodeTracerProvider({
+  spanProcessors: [createOtelSpanProcessor()],
+}).register();
 
 if (process.env.ENV_KEY === 'prod') {
   Sentry.init({

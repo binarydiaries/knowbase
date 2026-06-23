@@ -1,6 +1,7 @@
 import { toUIMessageStream } from '@ai-sdk/langchain';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
+import { connection as redis } from '../../queue/connection';
 import { logger } from '../../utils/logger.utils';
 import type {
   IChannelSlackConfig,
@@ -125,6 +126,7 @@ export abstract class ChatV2Service {
     channelId,
     orgId,
     senderPhone,
+    senderName,
     message,
     messageId,
     ip,
@@ -132,6 +134,7 @@ export abstract class ChatV2Service {
     channelId: string;
     orgId: string;
     senderPhone: string;
+    senderName?: string;
     message: string;
     messageId?: string;
     ip?: string;
@@ -229,47 +232,67 @@ export abstract class ChatV2Service {
       )
       .catch((err) => log.error({ err }, 'WA typing indicator request failed'));
 
+    // ── Seed entities from channel identity ───────────────────────────────
+    // WhatsApp Cloud API sends digits-only phone (e.g. "919876543210") — prefix + unconditionally.
+    const channelEntities: Record<string, string> = {
+      phone: `+${senderPhone}`,
+    };
+    if (senderName) channelEntities.name = senderName;
+
     // ── Invoke graph ──────────────────────────────────────────────────────
     log.debug(
       { channelId, orgId, thread_id, agentId: channel.agentId },
       'invoking graph',
     );
-    const finalState = await graph.invoke(
-      { messages: new HumanMessage(message) },
-      {
-        configurable: {
-          agentId: channel.agentId,
-          orgId,
-          channelId,
-          thread_id,
-          isPaid,
-          ip,
-        },
-      },
-    );
-
-    const lastAI = [...finalState.messages]
-      .reverse()
-      .find((m) => AIMessage.isInstance(m));
-    const assistantText =
-      typeof lastAI?.content === 'string' ? lastAI.content : '';
-
-    if (!assistantText) {
-      log.warn(
+    let assistantText = '';
+    try {
+      const finalState = await graph.invoke(
+        { messages: new HumanMessage(message), entities: channelEntities },
         {
-          channelId,
-          orgId,
-          thread_id,
-          hasLastAI: !!lastAI,
-          contentType: typeof lastAI?.content,
+          configurable: {
+            agentId: channel.agentId,
+            orgId,
+            channelId,
+            thread_id,
+            isPaid,
+            ip,
+          },
         },
-        'graph produced empty assistantText — WhatsApp reply will be blank',
       );
-    } else {
-      log.debug(
-        { channelId, orgId, thread_id, length: assistantText.length },
-        'graph produced assistant reply',
-      );
+      const lastAI = [...finalState.messages]
+        .reverse()
+        .find((m) => AIMessage.isInstance(m));
+      if (lastAI) {
+        if (typeof lastAI.content === 'string') {
+          assistantText = lastAI.content;
+        } else if (Array.isArray(lastAI.content)) {
+          const block = lastAI.content.find(
+            (cb: { type: string }) => cb.type === 'text',
+          ) as { type: 'text'; text: string } | undefined;
+          assistantText = block?.text ?? '';
+        }
+      }
+
+      if (!assistantText) {
+        log.warn(
+          {
+            channelId,
+            orgId,
+            thread_id,
+            hasLastAI: !!lastAI,
+            contentType: typeof lastAI?.content,
+          },
+          'graph produced empty assistantText — WhatsApp reply will be blank',
+        );
+      } else {
+        log.debug(
+          { channelId, orgId, thread_id, length: assistantText.length },
+          'graph produced assistant reply',
+        );
+      }
+    } catch (err) {
+      log.error({ err, channelId, orgId, thread_id }, 'graph.invoke failed');
+      assistantText = 'Sorry, something went wrong. Please try again.';
     }
 
     // ── Send reply ────────────────────────────────────────────────────────
@@ -307,6 +330,7 @@ export abstract class ChatV2Service {
     message,
     slackChannelId,
     threadTs,
+    slackUserId,
     ip,
   }: {
     channelId: string;
@@ -314,6 +338,7 @@ export abstract class ChatV2Service {
     message: string;
     slackChannelId: string;
     threadTs: string;
+    slackUserId?: string;
     ip?: string;
   }) {
     log.debug(
@@ -355,6 +380,70 @@ export abstract class ChatV2Service {
       'Content-Type': 'application/json',
     };
 
+    // ── Seed entities from Slack profile (best-effort, cached) ────────────
+    const channelEntities: Record<string, string> = {};
+    if (slackUserId) {
+      const cacheKey = `user:profile:${slackUserId}`;
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          Object.assign(channelEntities, JSON.parse(cached));
+          log.debug(
+            { slackUserId, cached: channelEntities },
+            'slack profile loaded from cache',
+          );
+        } else {
+          const profileRes = await fetch(
+            `https://slack.com/api/users.info?user=${encodeURIComponent(slackUserId)}`,
+            { headers: { Authorization: `Bearer ${connection.botToken}` } },
+          );
+          const profileData = (await profileRes.json()) as {
+            ok: boolean;
+            error?: string;
+            user?: {
+              real_name?: string;
+              profile?: { email?: string; phone?: string };
+            };
+          };
+          log.debug(
+            {
+              slackUserId,
+              ok: profileData.ok,
+              error: profileData.error,
+              user: profileData.user,
+            },
+            'slack users.info response',
+          );
+          if (profileData.ok && profileData.user) {
+            const u = profileData.user;
+            if (u.real_name) channelEntities.name = u.real_name;
+            if (u.profile?.email) channelEntities.email = u.profile.email;
+            if (u.profile?.phone) channelEntities.phone = u.profile.phone;
+          }
+          log.debug(
+            { slackUserId, channelEntities },
+            'slack profile entities resolved',
+          );
+          // Cache successful lookups for 1h; cache empty/missing-scope results for only
+          // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
+          // requiring a manual Redis flush.
+          const hasEntities = Object.keys(channelEntities).length > 0;
+          await redis.set(
+            cacheKey,
+            JSON.stringify(channelEntities),
+            'EX',
+            hasEntities ? 3600 : 300,
+          );
+        }
+      } catch (err) {
+        log.error(
+          { err, slackUserId },
+          'slack profile fetch failed — proceeding without profile',
+        );
+        // Best-effort — proceed without profile; bot asks for fields as normal
+      }
+    }
+
     // ── Thinking placeholder ──────────────────────────────────────────────
     let placeholderTs: string | null = null;
     try {
@@ -393,7 +482,7 @@ export abstract class ChatV2Service {
     let assistantText = '';
     try {
       const finalState = await graph.invoke(
-        { messages: new HumanMessage(message) },
+        { messages: new HumanMessage(message), entities: channelEntities },
         {
           configurable: {
             agentId: channel.agentId,
@@ -408,7 +497,16 @@ export abstract class ChatV2Service {
       const lastAI = [...finalState.messages]
         .reverse()
         .find((m) => AIMessage.isInstance(m));
-      assistantText = typeof lastAI?.content === 'string' ? lastAI.content : '';
+      if (lastAI) {
+        if (typeof lastAI.content === 'string') {
+          assistantText = lastAI.content;
+        } else if (Array.isArray(lastAI.content)) {
+          const block = lastAI.content.find(
+            (cb: { type: string }) => cb.type === 'text',
+          ) as { type: 'text'; text: string } | undefined;
+          assistantText = block?.text ?? '';
+        }
+      }
 
       if (!assistantText) {
         log.warn(

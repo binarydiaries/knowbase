@@ -20,6 +20,7 @@ export abstract class MessageService {
           agent: { orgId },
         },
       },
+      orderBy: (table, { asc }) => [asc(table.createdAt)],
     });
   }
 }

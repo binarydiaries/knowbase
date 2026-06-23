@@ -377,6 +377,7 @@ export abstract class ChatV2Service {
         const cached = await redis.get(cacheKey);
         if (cached) {
           Object.assign(channelEntities, JSON.parse(cached));
+          log.debug({ slackUserId, cached: channelEntities }, 'slack profile loaded from cache');
         } else {
           const profileRes = await fetch(
             `https://slack.com/api/users.info?user=${encodeURIComponent(slackUserId)}`,
@@ -384,18 +385,25 @@ export abstract class ChatV2Service {
           );
           const profileData = (await profileRes.json()) as {
             ok: boolean;
+            error?: string;
             user?: { real_name?: string; profile?: { email?: string; phone?: string } };
           };
+          log.debug(
+            { slackUserId, ok: profileData.ok, error: profileData.error, user: profileData.user },
+            'slack users.info response',
+          );
           if (profileData.ok && profileData.user) {
             const u = profileData.user;
             if (u.real_name) channelEntities.name = u.real_name;
             if (u.profile?.email) channelEntities.email = u.profile.email;
             if (u.profile?.phone) channelEntities.phone = u.profile.phone;
           }
+          log.debug({ slackUserId, channelEntities }, 'slack profile entities resolved');
           // Cache even if empty (missing_scope) to avoid hammering old tokens
           await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', 3600);
         }
-      } catch {
+      } catch (err) {
+        log.error({ err, slackUserId }, 'slack profile fetch failed — proceeding without profile');
         // Best-effort — proceed without profile; bot asks for fields as normal
       }
     }

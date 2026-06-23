@@ -207,6 +207,18 @@ export abstract class SubscriptionService {
     return { allowed: flagEnabled && this.planHasLeadGeneration(plan), plan };
   }
 
+  static planHasApiCallAction(plan: PlanName): boolean {
+    return plan !== 'free';
+  }
+
+  static async assertApiCallActionAccess(orgId: string) {
+    const [plan, flagEnabled] = await Promise.all([
+      this.getPlan(orgId),
+      FeatureFlagService.isEnabled('api_call_action', orgId),
+    ]);
+    return { allowed: flagEnabled && this.planHasApiCallAction(plan), plan };
+  }
+
   static planHasPaidChannels(plan: PlanName): boolean {
     return plan !== 'free';
   }

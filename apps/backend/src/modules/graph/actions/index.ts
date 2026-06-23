@@ -1,6 +1,7 @@
-import type { ActionContext, IActionResult } from './types';
+import { apiTrigger } from './apiTrigger';
 import { saveLead } from './saveLead';
 import { sendEmail } from './sendEmail';
+import type { ActionContext, IActionResult } from './types';
 
 export type { ActionContext, IActionResult };
 
@@ -13,4 +14,5 @@ type ActionHandler = (ctx: ActionContext) => Promise<IActionResult>;
 export const actionHandlers: Record<string, ActionHandler> = {
   save_lead: saveLead,
   send_email: sendEmail,
+  api_trigger: apiTrigger,
 };

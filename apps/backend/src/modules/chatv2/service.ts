@@ -370,11 +370,14 @@ export abstract class ChatV2Service {
     };
 
     // ── Seed entities from Slack profile (best-effort, cached 1h) ────────
+    // TEMP: SLACK_PROFILE_CACHE_DISABLED=true bypasses the cache entirely while
+    // we're debugging the profile-seeding flow. Remove this flag once confirmed.
+    const cacheDisabled = process.env.SLACK_PROFILE_CACHE_DISABLED === 'true';
     const channelEntities: Record<string, string> = {};
     if (slackUserId) {
       const cacheKey = `user:profile:${slackUserId}`;
       try {
-        const cached = await redis.get(cacheKey);
+        const cached = cacheDisabled ? null : await redis.get(cacheKey);
         if (cached) {
           Object.assign(channelEntities, JSON.parse(cached));
           log.debug({ slackUserId, cached: channelEntities }, 'slack profile loaded from cache');
@@ -399,11 +402,13 @@ export abstract class ChatV2Service {
             if (u.profile?.phone) channelEntities.phone = u.profile.phone;
           }
           log.debug({ slackUserId, channelEntities }, 'slack profile entities resolved');
-          // Cache successful lookups for 1h; cache empty/missing-scope results for only
-          // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
-          // requiring a manual Redis flush.
-          const hasEntities = Object.keys(channelEntities).length > 0;
-          await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', hasEntities ? 3600 : 300);
+          if (!cacheDisabled) {
+            // Cache successful lookups for 1h; cache empty/missing-scope results for only
+            // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
+            // requiring a manual Redis flush.
+            const hasEntities = Object.keys(channelEntities).length > 0;
+            await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', hasEntities ? 3600 : 300);
+          }
         }
       } catch (err) {
         log.error({ err, slackUserId }, 'slack profile fetch failed — proceeding without profile');

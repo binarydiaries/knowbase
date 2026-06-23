@@ -399,8 +399,11 @@ export abstract class ChatV2Service {
             if (u.profile?.phone) channelEntities.phone = u.profile.phone;
           }
           log.debug({ slackUserId, channelEntities }, 'slack profile entities resolved');
-          // Cache even if empty (missing_scope) to avoid hammering old tokens
-          await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', 3600);
+          // Cache successful lookups for 1h; cache empty/missing-scope results for only
+          // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
+          // requiring a manual Redis flush.
+          const hasEntities = Object.keys(channelEntities).length > 0;
+          await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', hasEntities ? 3600 : 300);
         }
       } catch (err) {
         log.error({ err, slackUserId }, 'slack profile fetch failed — proceeding without profile');

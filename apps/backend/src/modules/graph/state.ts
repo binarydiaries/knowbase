@@ -1,10 +1,7 @@
 import { MessagesValue, ReducedValue, StateSchema } from '@langchain/langgraph';
 import { z } from 'zod';
 import { BehaviourSchema } from '../behaviour/model';
-import {
-  IntentActionSchema,
-  IntentWithActionsSchema,
-} from '../intent/model';
+import { IntentActionSchema, IntentWithActionsSchema } from '../intent/model';
 import { INTENT_QUESTION_ANSWERING } from './intents';
 
 // Checkpoint round-trip: coerce date strings back to Date objects.
@@ -34,10 +31,13 @@ const GraphBehaviourSchema = BehaviourSchema.extend({
   updatedAt: z.coerce.date(),
 });
 
-const entitiesChannel = new ReducedValue(z.record(z.string(), z.unknown()).default({}), {
-  inputSchema: z.record(z.string(), z.unknown()),
-  reducer: (current, next) => ({ ...current, ...next }),
-});
+const entitiesChannel = new ReducedValue(
+  z.record(z.string(), z.unknown()).default({}),
+  {
+    inputSchema: z.record(z.string(), z.unknown()),
+    reducer: (current, next) => ({ ...current, ...next }),
+  },
+);
 
 export const InputState = new StateSchema({
   messages: MessagesValue,

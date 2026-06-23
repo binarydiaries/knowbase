@@ -1,8 +1,8 @@
 import { toUIMessageStream } from '@ai-sdk/langchain';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { createUIMessageStreamResponse } from 'ai';
-import { logger } from '../../utils/logger.utils';
 import { connection as redis } from '../../queue/connection';
+import { logger } from '../../utils/logger.utils';
 import type {
   IChannelSlackConfig,
   IChannelWebConfig,
@@ -234,7 +234,9 @@ export abstract class ChatV2Service {
 
     // ── Seed entities from channel identity ───────────────────────────────
     // WhatsApp Cloud API sends digits-only phone (e.g. "919876543210") — prefix + unconditionally.
-    const channelEntities: Record<string, string> = { phone: `+${senderPhone}` };
+    const channelEntities: Record<string, string> = {
+      phone: `+${senderPhone}`,
+    };
     if (senderName) channelEntities.name = senderName;
 
     // ── Invoke graph ──────────────────────────────────────────────────────
@@ -247,17 +249,26 @@ export abstract class ChatV2Service {
       const finalState = await graph.invoke(
         { messages: new HumanMessage(message), entities: channelEntities },
         {
-          configurable: { agentId: channel.agentId, orgId, channelId, thread_id, isPaid, ip },
+          configurable: {
+            agentId: channel.agentId,
+            orgId,
+            channelId,
+            thread_id,
+            isPaid,
+            ip,
+          },
         },
       );
-      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      const lastAI = [...finalState.messages]
+        .reverse()
+        .find((m) => AIMessage.isInstance(m));
       if (lastAI) {
         if (typeof lastAI.content === 'string') {
           assistantText = lastAI.content;
         } else if (Array.isArray(lastAI.content)) {
-          const block = lastAI.content.find((cb: { type: string }) => cb.type === 'text') as
-            | { type: 'text'; text: string }
-            | undefined;
+          const block = lastAI.content.find(
+            (cb: { type: string }) => cb.type === 'text',
+          ) as { type: 'text'; text: string } | undefined;
           assistantText = block?.text ?? '';
         }
       }
@@ -369,18 +380,18 @@ export abstract class ChatV2Service {
       'Content-Type': 'application/json',
     };
 
-    // ── Seed entities from Slack profile (best-effort, cached 1h) ────────
-    // TEMP: SLACK_PROFILE_CACHE_DISABLED=true bypasses the cache entirely while
-    // we're debugging the profile-seeding flow. Remove this flag once confirmed.
-    const cacheDisabled = process.env.SLACK_PROFILE_CACHE_DISABLED === 'true';
+    // ── Seed entities from Slack profile (best-effort, cached) ────────────
     const channelEntities: Record<string, string> = {};
     if (slackUserId) {
       const cacheKey = `user:profile:${slackUserId}`;
       try {
-        const cached = cacheDisabled ? null : await redis.get(cacheKey);
+        const cached = await redis.get(cacheKey);
         if (cached) {
           Object.assign(channelEntities, JSON.parse(cached));
-          log.debug({ slackUserId, cached: channelEntities }, 'slack profile loaded from cache');
+          log.debug(
+            { slackUserId, cached: channelEntities },
+            'slack profile loaded from cache',
+          );
         } else {
           const profileRes = await fetch(
             `https://slack.com/api/users.info?user=${encodeURIComponent(slackUserId)}`,
@@ -389,10 +400,18 @@ export abstract class ChatV2Service {
           const profileData = (await profileRes.json()) as {
             ok: boolean;
             error?: string;
-            user?: { real_name?: string; profile?: { email?: string; phone?: string } };
+            user?: {
+              real_name?: string;
+              profile?: { email?: string; phone?: string };
+            };
           };
           log.debug(
-            { slackUserId, ok: profileData.ok, error: profileData.error, user: profileData.user },
+            {
+              slackUserId,
+              ok: profileData.ok,
+              error: profileData.error,
+              user: profileData.user,
+            },
             'slack users.info response',
           );
           if (profileData.ok && profileData.user) {
@@ -401,17 +420,26 @@ export abstract class ChatV2Service {
             if (u.profile?.email) channelEntities.email = u.profile.email;
             if (u.profile?.phone) channelEntities.phone = u.profile.phone;
           }
-          log.debug({ slackUserId, channelEntities }, 'slack profile entities resolved');
-          if (!cacheDisabled) {
-            // Cache successful lookups for 1h; cache empty/missing-scope results for only
-            // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
-            // requiring a manual Redis flush.
-            const hasEntities = Object.keys(channelEntities).length > 0;
-            await redis.set(cacheKey, JSON.stringify(channelEntities), 'EX', hasEntities ? 3600 : 300);
-          }
+          log.debug(
+            { slackUserId, channelEntities },
+            'slack profile entities resolved',
+          );
+          // Cache successful lookups for 1h; cache empty/missing-scope results for only
+          // 5min so a scope fix (e.g. reconnecting Slack) self-heals quickly instead of
+          // requiring a manual Redis flush.
+          const hasEntities = Object.keys(channelEntities).length > 0;
+          await redis.set(
+            cacheKey,
+            JSON.stringify(channelEntities),
+            'EX',
+            hasEntities ? 3600 : 300,
+          );
         }
       } catch (err) {
-        log.error({ err, slackUserId }, 'slack profile fetch failed — proceeding without profile');
+        log.error(
+          { err, slackUserId },
+          'slack profile fetch failed — proceeding without profile',
+        );
         // Best-effort — proceed without profile; bot asks for fields as normal
       }
     }
@@ -466,14 +494,16 @@ export abstract class ChatV2Service {
           },
         },
       );
-      const lastAI = [...finalState.messages].reverse().find((m) => AIMessage.isInstance(m));
+      const lastAI = [...finalState.messages]
+        .reverse()
+        .find((m) => AIMessage.isInstance(m));
       if (lastAI) {
         if (typeof lastAI.content === 'string') {
           assistantText = lastAI.content;
         } else if (Array.isArray(lastAI.content)) {
-          const block = lastAI.content.find((cb: { type: string }) => cb.type === 'text') as
-            | { type: 'text'; text: string }
-            | undefined;
+          const block = lastAI.content.find(
+            (cb: { type: string }) => cb.type === 'text',
+          ) as { type: 'text'; text: string } | undefined;
           assistantText = block?.text ?? '';
         }
       }

@@ -3,9 +3,9 @@ import { ConversationService } from '../../conversation/service';
 import { MessageService } from '../../message/service';
 import { OrgUsageMonthlyService } from '../../subscription/usage';
 import type { State } from '../state';
+import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 import { computeConfidenceScore } from '../utils/retrieval';
 import { scoreSentiment } from '../utils/scoring';
-import { getLastAssistantMessage, getLastUserMessage } from '../utils/messages';
 
 export const persistTurn: GraphNode<typeof State> = async (state, config) => {
   const { thread_id, orgId, isPaid } = config?.configurable ?? {};
@@ -27,7 +27,9 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
     : null;
 
   const sentiment =
-    isPaid && assistantText ? await scoreSentiment(assistantText, config) : null;
+    isPaid && assistantText
+      ? await scoreSentiment(assistantText, config)
+      : null;
 
   await Promise.all([
     OrgUsageMonthlyService.incrementAssistantMessages(orgId),
@@ -42,7 +44,9 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
         role: 'user',
         content: userText,
         metadata: null,
-        systemMetadata: state.finalQuery ? { finalQuery: state.finalQuery } : null,
+        systemMetadata: state.finalQuery
+          ? { finalQuery: state.finalQuery }
+          : null,
       },
     ]).then(() =>
       MessageService.addMessages([
@@ -57,7 +61,7 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
           },
           systemMetadata: null,
         },
-      ])
+      ]),
     ),
   ]);
 

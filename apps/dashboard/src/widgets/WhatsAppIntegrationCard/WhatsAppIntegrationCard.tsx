@@ -19,6 +19,7 @@ import { client } from '@/services/client.gen';
 import { useWhatsAppConnection, type WhatsAppPhoneNumber } from '@/store/useWhatsAppConnection.ts';
 import { getErrorMessage } from '@/utils/errorHelper.ts';
 import { WhatsAppSetupPanel } from './WhatsAppSetupPanel.tsx';
+import { WhatsAppUpdateTokenPanel } from './WhatsAppUpdateTokenPanel.tsx';
 
 interface ConnectionResponse {
   connected: boolean;
@@ -28,6 +29,7 @@ interface ConnectionResponse {
 
 export function WhatsAppIntegrationCard() {
   const [panelOpen, setPanelOpen] = useState(false);
+  const [tokenPanelOpen, setTokenPanelOpen] = useState(false);
   const { connected, phoneNumbers, setConnection, clearConnection } = useWhatsAppConnection();
   const { isPaid, isLoading: planLoading } = useClerkPlan();
 
@@ -136,14 +138,19 @@ export function WhatsAppIntegrationCard() {
             </div>
             <Separator />
             <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={testMutation.isPending}
-                onClick={() => testMutation.mutate()}
-              >
-                {testMutation.isPending ? 'Testing…' : 'Test Connection'}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={testMutation.isPending}
+                  onClick={() => testMutation.mutate()}
+                >
+                  {testMutation.isPending ? 'Testing…' : 'Test Connection'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setTokenPanelOpen(true)}>
+                  Update Token
+                </Button>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -164,6 +171,10 @@ export function WhatsAppIntegrationCard() {
 
       <Sheet open={panelOpen} onOpenChange={setPanelOpen}>
         {panelOpen && <WhatsAppSetupPanel onClose={() => setPanelOpen(false)} />}
+      </Sheet>
+
+      <Sheet open={tokenPanelOpen} onOpenChange={setTokenPanelOpen}>
+        {tokenPanelOpen && <WhatsAppUpdateTokenPanel onClose={() => setTokenPanelOpen(false)} />}
       </Sheet>
     </>
   );

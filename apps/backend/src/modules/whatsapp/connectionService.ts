@@ -38,6 +38,17 @@ export abstract class WhatsAppConnectionService {
     return decryptRow(row);
   }
 
+  static async updateToken(orgId: string, accessToken: string) {
+    const existing = await db.query.whatsappConnections.findFirst({ where: { orgId } });
+    if (!existing) return null;
+    const [row] = await db
+      .update(whatsappConnections)
+      .set({ accessToken: encryptToken(accessToken) })
+      .where(eq(whatsappConnections.orgId, orgId))
+      .returning();
+    return decryptRow(row);
+  }
+
   static async delete(orgId: string) {
     await db
       .delete(whatsappConnections)

@@ -240,6 +240,59 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     },
   )
 
+  // POST /whatsapp/connection/token — rotate access token only, keep businessAccountId/bindings as-is
+  .post(
+    '/whatsapp/connection/token',
+    async ({ body, orgId, status }) => {
+      const connection = await WhatsAppConnectionService.findByOrg(orgId);
+      if (!connection) {
+        return status(404, {
+          code: 'NOT_FOUND',
+          message: 'No WhatsApp connection found',
+        });
+      }
+
+      const { accessToken } = body;
+
+      // Verify the new token works against the existing WABA before storing it
+      const phoneRes = await fetch(
+        `https://graph.facebook.com/v19.0/${connection.businessAccountId}/phone_numbers?fields=display_phone_number,id`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (!phoneRes.ok) {
+        return status(400, {
+          code: 'BAD_REQUEST',
+          message: 'Invalid access token — could not reach WhatsApp Business Account',
+        });
+      }
+      const phoneData = (await phoneRes.json()) as {
+        data: { id: string; display_phone_number: string }[];
+      };
+      const phoneNumbers = phoneData.data.map((p) => ({
+        phoneNumberId: p.id,
+        displayPhone: p.display_phone_number,
+      }));
+
+      // Re-subscribe WABA to our app (best-effort, in case the old token's subscription lapsed)
+      await fetch(
+        `https://graph.facebook.com/v19.0/${connection.businessAccountId}/subscribed_apps`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      ).catch(() => {});
+
+      await WhatsAppConnectionService.updateToken(orgId, accessToken);
+
+      return { businessAccountId: connection.businessAccountId, phoneNumbers };
+    },
+    {
+      body: t.Object({
+        accessToken: t.String(),
+      }),
+    },
+  )
+
   // DELETE /whatsapp/connection — org-level disconnect
   .delete('/whatsapp/connection', async ({ orgId, status }) => {
     const connection = await WhatsAppConnectionService.findByOrg(orgId);

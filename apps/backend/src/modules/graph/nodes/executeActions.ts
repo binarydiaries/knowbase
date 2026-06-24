@@ -11,7 +11,7 @@ import { actionHandlers, type IActionResult } from '../actions';
 import { ConfigSchema } from '../config';
 import { INTENT_QUESTION_ANSWERING } from '../intents';
 import type { State } from '../state';
-import { createStreamingNanoLlm } from '../utils/llm';
+import { createNanoLlm } from '../utils/llm';
 
 const DEFAULT_SUCCESS = 'Done! Your request has been submitted.';
 const DEFAULT_FAILURE =
@@ -61,7 +61,7 @@ async function phraseApiTriggerResponse(
     : `The lookup failed (error: ${result.error ?? 'unknown'}).\nInstructions: ${responseInstructions}\nTell the user the lookup didn't work in 1-2 friendly sentences, without exposing technical details.`;
 
   try {
-    const llmResult = await createStreamingNanoLlm(
+    const llmResult = await createNanoLlm(
       config,
       'executeActions',
     ).invoke([

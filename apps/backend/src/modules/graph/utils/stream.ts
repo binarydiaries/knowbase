@@ -20,12 +20,19 @@
  *   rewriteQuery     — query rewriting (plain text, internal only)
  *   persistTurn      — calls scoreSentiment internally (structured JSON)
  *   enrichConversation — calls labelTopic internally (structured JSON)
+ *   executeActions   — may call an LLM internally to phrase an api_trigger
+ *                       result (plain text, internal only — see below)
  *
  * Special case — executeActions:
- *   This node constructs an AIMessage directly (no LLM call), so no
- *   on_chat_model_stream ever fires for it.  We intercept the on_chain_end
- *   for that node and synthesise a fake on_chat_model_stream so the
- *   success/failure message reaches the client.
+ *   This node always emits its final message by constructing/returning an
+ *   AIMessage from the node itself (never by letting a raw on_chat_model_stream
+ *   reach the client) — we intercept the on_chain_end for that node and
+ *   synthesise a fake on_chat_model_stream so the success/failure/phrased
+ *   message reaches the client exactly once. executeActions may ALSO make a
+ *   real internal LLM call to phrase an api_trigger response; that call's own
+ *   on_chat_model_stream events must be suppressed via the blocklist below,
+ *   otherwise the message reaches the client twice (once from the real
+ *   stream, once from the synthesised one).
  */
 
 const PIPELINE_NODES = new Set([
@@ -34,6 +41,7 @@ const PIPELINE_NODES = new Set([
   'detectIntent',       // structured JSON — intent classification
   'persistTurn',        // calls scoreSentiment (structured JSON) internally
   'enrichConversation', // calls labelTopic (structured JSON) internally
+  'executeActions',     // may call an LLM internally to phrase api_trigger results
   // ragGraph
   'rewriteQuery',       // internal text rewrite, not user-visible
 ]);

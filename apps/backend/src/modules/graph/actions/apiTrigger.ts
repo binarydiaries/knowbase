@@ -1,68 +1,18 @@
-import dns from 'node:dns/promises';
-import { isIP } from 'node:net';
+import { assertSafeUrl } from '../../../utils/ssrfGuard.utils';
+import {
+  interpolate,
+  interpolateRecord,
+} from '../../../utils/templating.utils';
 import { ApiTriggerConfigSchema } from '../../intent/model';
 import type { ActionContext, IActionResult } from './types';
 
 const REQUEST_TIMEOUT_MS = 8000;
-const MAX_RESPONSE_BYTES = 100_000;
 
-// Blocks SSRF against cloud metadata endpoints, loopback, and private ranges.
-function isBlockedIp(ip: string): boolean {
-  const version = isIP(ip);
-  if (version === 4) {
-    const [a, b] = ip.split('.').map(Number);
-    if (a === 127) return true; // loopback
-    if (a === 10) return true; // private
-    if (a === 169 && b === 254) return true; // link-local / cloud metadata
-    if (a === 172 && b >= 16 && b <= 31) return true; // private
-    if (a === 192 && b === 168) return true; // private
-    if (a === 0) return true;
-    return false;
-  }
-  if (version === 6) {
-    const normalized = ip.toLowerCase();
-    if (normalized === '::1') return true; // loopback
-    if (normalized.startsWith('fe80:')) return true; // link-local
-    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true; // unique local
-    return false;
-  }
-  return true; // unparseable — treat as blocked
-}
-
-async function assertSafeUrl(rawUrl: string): Promise<void> {
-  const parsed = new URL(rawUrl);
-  if (parsed.protocol !== 'https:') {
-    throw new Error('api_trigger: only HTTPS URLs are allowed');
-  }
-
-  const addresses = await dns.lookup(parsed.hostname, { all: true });
-  if (addresses.length === 0) {
-    throw new Error('api_trigger: could not resolve host');
-  }
-  if (addresses.some((a) => isBlockedIp(a.address))) {
-    throw new Error('api_trigger: target host resolves to a blocked address');
-  }
-}
-
-function interpolate(
-  template: string,
-  entities: Record<string, string | null>,
-): string {
-  return template.replace(
-    /\{\{(\w+)\}\}/g,
-    (match, key) => entities[key] ?? match,
-  );
-}
-
-function interpolateRecord(
-  record: Record<string, string> | undefined,
-  entities: Record<string, string | null>,
-): Record<string, string> | undefined {
-  if (!record) return undefined;
-  return Object.fromEntries(
-    Object.entries(record).map(([k, v]) => [k, interpolate(v, entities)]),
-  );
-}
+// Hard cap on the raw response body. Kept small because every byte here can
+// end up inside an LLM prompt (see executeActions' phraseApiTriggerResponse) —
+// an oversized customer API response would otherwise translate directly into
+// runaway LLM token cost.
+const MAX_RESPONSE_BYTES = 20_000;
 
 export async function apiTrigger(ctx: ActionContext): Promise<IActionResult> {
   const parsed = ApiTriggerConfigSchema.safeParse(ctx.config);
@@ -80,7 +30,7 @@ export async function apiTrigger(ctx: ActionContext): Promise<IActionResult> {
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: `api_trigger: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
 

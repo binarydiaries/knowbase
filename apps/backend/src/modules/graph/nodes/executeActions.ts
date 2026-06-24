@@ -3,6 +3,7 @@ import {
   HumanMessage,
   SystemMessage,
 } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import type { GraphNode } from '@langchain/langgraph';
 import type { z } from 'zod';
 import type { IntentActionSchema } from '../../intent/model';
@@ -16,6 +17,11 @@ const DEFAULT_SUCCESS = 'Done! Your request has been submitted.';
 const DEFAULT_FAILURE =
   'Something went wrong. Please try again or contact support at hello@agenvik.com.';
 
+// Caps how much of the API response gets embedded in the LLM prompt,
+// independent of apiTrigger's own response-size cap — bounds LLM token cost
+// even when the underlying API response is allowed through.
+const MAX_DATA_CHARS_FOR_PROMPT = 4000;
+
 /**
  * For api_trigger actions, the result data shape is arbitrary (whatever the
  * customer's API returns), so a static success/failure string can't phrase
@@ -25,7 +31,7 @@ const DEFAULT_FAILURE =
 async function phraseApiTriggerResponse(
   actions: z.infer<typeof IntentActionSchema>[],
   results: Record<string, IActionResult>,
-  config?: Record<string, unknown>,
+  config: RunnableConfig,
 ): Promise<string | undefined> {
   const apiAction = actions.find(
     (a) =>
@@ -45,8 +51,13 @@ async function phraseApiTriggerResponse(
     apiAction.config as { responseInstructions: string }
   ).responseInstructions;
 
+  let dataPreview = JSON.stringify(result.data);
+  if (dataPreview && dataPreview.length > MAX_DATA_CHARS_FOR_PROMPT) {
+    dataPreview = `${dataPreview.slice(0, MAX_DATA_CHARS_FOR_PROMPT)}... (truncated)`;
+  }
+
   const userPrompt = result.success
-    ? `Data: ${JSON.stringify(result.data)}\nInstructions: ${responseInstructions}\nAnswer the user naturally in 1-2 sentences based on the data.`
+    ? `Data: ${dataPreview}\nInstructions: ${responseInstructions}\nAnswer the user naturally in 1-2 sentences based on the data.`
     : `The lookup failed (error: ${result.error ?? 'unknown'}).\nInstructions: ${responseInstructions}\nTell the user the lookup didn't work in 1-2 friendly sentences, without exposing technical details.`;
 
   try {
@@ -165,7 +176,7 @@ export const executeActions: GraphNode<typeof State> = async (
   const phrasedMessage = await phraseApiTriggerResponse(
     activeIntent.actions,
     results,
-    config.configurable,
+    config,
   );
   const message =
     phrasedMessage?.trim() ||

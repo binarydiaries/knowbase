@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.8.0] — 2026-06-24
+
+### Added
+- **API Call Action** — Intents can now trigger an outbound HTTP call to a customer's own backend (e.g. order tracking, CRM lookups) as part of an action sequence. Dashboard ships a dedicated `ApiCallDrawer` with method/headers/body templating (`{{entity}}` interpolation) and a `TestConnectionPanel` to validate the request before going live. Server-side requests are protected by a new `ssrfGuard.utils.ts` (blocks private/loopback/link-local targets, validates redirects). Gated behind the `api_call_action` feature flag, Starter+.
+- **Channel-identity-seeded lead capture** — WhatsApp and Slack now seed `name`/`email`/`phone` lead-capture fields from the channel's own identity (WhatsApp profile name + number; Slack `users.info`, cached 1h in Redis) before asking the user, via a new `entities` field on the graph's `InputState`.
+
+### Fixed
+- **Slack webhook signature verification** — was computing the HMAC over a re-serialized `JSON.stringify(body)` instead of the literal raw bytes Slack signed, causing verification to fail on nearly every real event. Route now reads the raw body as text exactly once (`parse: 'text'`) and verifies against those exact bytes.
+- **Silent message-send failures on WhatsApp/Slack** — outgoing API calls (WhatsApp send/seen-receipt/typing, Slack `chat.postMessage`/`chat.update`) never checked response status, so failures were swallowed with no trace. All call sites now check status and log structured errors via a new shared pino logger (debug locally, info+ in prod, `LOG_LEVEL`-overridable).
+- **Scrambled conversation order** — user/assistant messages were bulk-inserted with identical `createdAt` timestamps, causing out-of-order display in the dashboard. Messages are now inserted sequentially and fetched with an explicit order.
+- **Unbound-channel and empty-reply visibility** — inbound WhatsApp/Slack messages with no enabled channel bound, and empty LLM graph replies, now log a warning instead of failing silently.
+
+### Internal
+- Added a sandboxed payment-provider integration (price catalogue, subscription + status sync) behind a feature flag, not yet customer-facing.
+
+---
+
 ## [0.7.0] — 2026-06-18
 
 ### Added

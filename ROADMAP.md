@@ -12,6 +12,8 @@ Agenvik is targeting **SMBs and startups** in India. The platform already has a 
 
 | Feature | Version | Date |
 |---------|---------|------|
+| API Call Action (custom backend integrations, e.g. order tracking) | v0.8.0 | Jun 24, 2026 |
+| Channel-identity-seeded lead capture (WhatsApp/Slack) | v0.8.0 | Jun 24, 2026 |
 | Optional Lead Capture Fields (soft-ask, never block) | v0.7.0 | Jun 18, 2026 |
 | Batched Field Collection (ask all required fields at once) | v0.7.0 | Jun 18, 2026 |
 | Name Personalization in chat responses | v0.7.0 | Jun 18, 2026 |

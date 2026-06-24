@@ -7,10 +7,33 @@ const pageURL = `${siteURL}/changelog`;
 
 const releases = [
   {
+    version: '0.8.0',
+    date: 'June 24, 2026',
+    isoDate: '2026-06-24',
+    isLatest: true,
+    entries: [
+      {
+        type: 'new',
+        title: 'API call action',
+        description: 'Connect your agent to your own backend — order tracking, CRM lookups, anything with an HTTP endpoint. Build the request in the dashboard and test it live before you turn it on.',
+      },
+      {
+        type: 'new',
+        title: 'Smarter lead capture on WhatsApp & Slack',
+        description: "Your agent now recognizes who it's talking to. It pulls the visitor's name and contact details straight from their WhatsApp/Slack profile, so it skips questions it already has the answer to.",
+      },
+      {
+        type: 'fixed',
+        title: 'WhatsApp & Slack reliability',
+        description: 'Fixed a Slack signature-verification bug that was silently dropping real messages, plus hardened both channels so a failed send now gets logged and retried instead of vanishing.',
+      },
+    ],
+  },
+  {
     version: '0.6.0',
     date: 'May 26, 2026',
     isoDate: '2026-05-26',
-    isLatest: true,
+    isLatest: false,
     entries: [
       {
         type: 'new',
@@ -131,11 +154,11 @@ const jsonLd = [
     '@id': pageURL,
     url: pageURL,
     name: 'Agenvik Changelog — Release Notes & New Features',
-    description: 'Full release history for Agenvik: every new feature, improvement, and fix across all versions. Latest release: v0.6.0 (May 26, 2026) — PDF knowledge source, website URL source, training reminder, conversation filter.',
+    description: 'Full release history for Agenvik: every new feature, improvement, and fix across all versions. Latest release: v0.8.0 (June 24, 2026) — API call action, smarter lead capture on WhatsApp & Slack, reliability fixes.',
     isPartOf: { '@id': `${siteURL}/#website` },
     about: { '@id': `${siteURL}/#organization` },
     publisher: { '@id': `${siteURL}/#organization` },
-    dateModified: '2026-05-26',
+    dateModified: '2026-06-24',
     datePublished: '2026-05-20',
     speakable: {
       '@type': 'SpeakableSpecification',
@@ -160,8 +183,8 @@ const jsonLd = [
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description: 'AI agent platform — build agents from PDFs, text, Q&A, and websites. Deploy on your site, WhatsApp, or Slack without writing code.',
-    softwareVersion: '0.6.0',
-    datePublished: '2026-05-26',
+    softwareVersion: '0.8.0',
+    datePublished: '2026-06-24',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -192,7 +215,7 @@ const jsonLd = [
 
 <Layout
   title="Agenvik Changelog — Release Notes & New Features"
-  description="Full release history for Agenvik. Latest: v0.6.0 (May 26, 2026) — PDF knowledge source, website URL crawling, training reminder, conversation filter. See every version since launch."
+  description="Full release history for Agenvik. Latest: v0.8.0 (June 24, 2026) — API call action, smarter lead capture on WhatsApp & Slack, reliability fixes. See every version since launch."
   jsonLd={jsonLd}
 >
   <main id="main-content" class="relative w-full bg-white pt-[68px]">
@@ -228,10 +251,10 @@ const jsonLd = [
       <div id="latest-release-summary" class="mb-16 max-w-2xl mx-auto bg-[#301B69]/4 border border-[#301B69]/10 rounded-2xl p-6">
         <p class="text-xs font-semibold uppercase tracking-widest text-[#301B69]/40 mb-2">Latest release</p>
         <p class="text-sm font-semibold text-[#301B69] mb-1">
-          Agenvik v0.6.0 — released May 26, 2026
+          Agenvik v0.8.0 — released June 24, 2026
         </p>
         <p class="text-sm text-[#301B69]/60 leading-relaxed">
-          This release adds PDF and website URL knowledge sources so agents can be trained directly from uploaded documents or any public webpage. It also introduces a training reminder for new users and a conversation filter in the dashboard.
+          This release lets agents call your own backend through a new API call action, so things like order tracking and CRM lookups can run mid-conversation. WhatsApp and Slack lead capture is now smarter — agents recognize returning contacts and skip questions they already know the answer to — and we fixed a Slack signature bug that was dropping real messages.
         </p>
       </div>
 

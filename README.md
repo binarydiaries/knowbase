@@ -120,6 +120,7 @@ Feature flags are managed at runtime via the admin dashboard (**Admin → System
 |----------|---------|---------|
 | `url_crawling` | `false` | Allows organisations to add website URLs as knowledge sources. When disabled, the "Website URL" option is hidden in the dashboard and the `/documents/url/preview` and `/documents/url` API endpoints return 403. |
 | `lead_generation` | `false` | Enables the lead capture action type. When disabled, lead capture is skipped on the backend even if an agent has the action configured, and the Lead Generation card is hidden in the dashboard. |
+| `api_call_action` | `false` | Enables the API call action type (e.g. order tracking), gated to the Starter plan and above. When disabled, `api_trigger` intents are rejected with a 403 on create/update, and the API Call Action row is hidden in the dashboard Actions card. |
 | `whatsapp` | `false` | Shows the WhatsApp integration option in the dashboard channel settings and integrations page. |
 | `slack` | `false` | Shows the Slack integration option in the dashboard channel settings and integrations page. |
 

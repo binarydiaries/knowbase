@@ -52,7 +52,8 @@ function buildSystemPrompt(state: typeof State.State): string {
   } = state;
 
   if (activeIntent && missingFields && missingFields.length > 0) {
-    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user for: ${missingFields.join(', ')}. The user's reply is likely providing these values — label them with the matching keys.`;
+    const exactKeys = missingFields.map((f) => `"${f}"`).join(', ');
+    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user for: ${missingFields.join(', ')}. The user's reply is likely providing these values. Use the EXACT key name(s) ${exactKeys} as given — do not rename, snake_case, or otherwise alter them, even if they differ from the examples above.`;
   }
 
   if (
@@ -61,7 +62,8 @@ function buildSystemPrompt(state: typeof State.State): string {
     optionalMissingFields &&
     optionalMissingFields.length > 0
   ) {
-    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user if they'd like to share optional information: ${optionalMissingFields.join(', ')}. If the user's reply provides any of these values or clearly answers with a value for one of them, extract it using the matching key.`;
+    const exactKeys = optionalMissingFields.map((f) => `"${f}"`).join(', ');
+    return `${BASE_SYSTEM_PROMPT}\n\nContext: The assistant just asked the user if they'd like to share optional information: ${optionalMissingFields.join(', ')}. If the user's reply provides any of these values or clearly answers with a value for one of them, use the EXACT key name(s) ${exactKeys} as given — do not rename, snake_case, or otherwise alter them, even if they differ from the examples above.`;
   }
 
   return BASE_SYSTEM_PROMPT;

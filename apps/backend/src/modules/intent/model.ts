@@ -36,7 +36,7 @@ export const IntentActionType = z.enum([
   'calendar_booking',
 ]);
 
-const ApiTriggerConfigSchema = z.object({
+export const ApiTriggerConfigSchema = z.object({
   method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
   url: z.string().url(),
   headers: z.record(z.string(), z.string()).optional(),

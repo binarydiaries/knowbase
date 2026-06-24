@@ -57,6 +57,16 @@ export const UpdateIntentBody = z
   })
   .refine(noOverlap, { message: overlapMessage, path: ['optionalFields'] });
 
+export const TestApiTriggerBody = z.object({
+  agentId: z.string(),
+  fieldName: fieldNameItem,
+  testValue: z.string().min(1).max(200),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+  url: z.string().url(),
+  headers: z.record(z.string(), z.string()).optional(),
+  bodyTemplate: z.record(z.string(), z.string()).optional(),
+});
+
 // ── Response schemas ──────────────────────────────────────────────────────────
 
 const OneIntentResponse = z.object({ intent: IntentWithActionsSchema });
@@ -64,6 +74,11 @@ const ManyIntentsResponse = z.object({
   intents: z.array(IntentWithActionsSchema),
 });
 const DeleteIntentResponse = z.object({ success: z.boolean() });
+const TestApiTriggerResponse = z.object({
+  success: z.boolean(),
+  data: z.unknown().optional(),
+  error: z.string().optional(),
+});
 
 // ── Elysia model plugin ───────────────────────────────────────────────────────
 
@@ -76,4 +91,6 @@ export const IntentModel = new Elysia().model({
   OneIntentResponse,
   ManyIntentsResponse,
   DeleteIntentResponse,
+  TestApiTriggerBody,
+  TestApiTriggerResponse,
 });

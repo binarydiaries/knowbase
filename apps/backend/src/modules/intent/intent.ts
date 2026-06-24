@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import z from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
+import { apiTrigger } from '../graph/actions/apiTrigger';
 import { AgentService } from '../agent/service';
 import { SubscriptionService } from '../subscription/service';
 import { IntentModel } from './intentModel';
@@ -94,6 +95,48 @@ export const Intent = new Elysia({ prefix: '/intents', tags: ['Intents'] })
       body: 'CreateIntentBody',
       response: {
         200: 'OneIntentResponse',
+        403: 'LeadGenerationForbiddenResponse',
+        404: 'NotFoundResponse',
+      },
+    },
+  )
+  .post(
+    '/test-api-trigger',
+    async ({ body, orgId, status }) => {
+      const access = await SubscriptionService.assertApiCallActionAccess(orgId);
+      if (!access.allowed) {
+        return status(403, {
+          code: 'PLAN_LIMIT_REACHED',
+          message:
+            'API call actions are available on the Starter plan and above. Upgrade your plan to use this feature.',
+        });
+      }
+
+      const agent = await AgentService.single({ id: body.agentId, orgId });
+      if (!agent) {
+        return status(404, { code: 'NOT_FOUND', message: 'Agent not found' });
+      }
+
+      const result = await apiTrigger({
+        agentId: body.agentId,
+        orgId,
+        channelId: 'test',
+        conversationId: 'test',
+        entities: { [body.fieldName]: body.testValue },
+        config: {
+          method: body.method,
+          url: body.url,
+          headers: body.headers,
+          bodyTemplate: body.bodyTemplate,
+        },
+      });
+
+      return result;
+    },
+    {
+      body: 'TestApiTriggerBody',
+      response: {
+        200: 'TestApiTriggerResponse',
         403: 'LeadGenerationForbiddenResponse',
         404: 'NotFoundResponse',
       },

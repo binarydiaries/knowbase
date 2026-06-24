@@ -188,11 +188,13 @@ export function ApiCallDrawer({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { control, handleSubmit, reset, trigger, getValues } =
+  const { control, handleSubmit, reset, trigger, getValues, watch } =
     useForm<FormValues>({
       resolver: zodResolver(schema),
       defaultValues: intent ? intentToFormValues(intent) : defaultValues(),
     });
+
+  const fieldName = watch('fieldName');
 
   const [testValue, setTestValue] = useState('');
   const [testResult, setTestResult] = useState<TestApiTriggerResult | null>(
@@ -365,14 +367,19 @@ export function ApiCallDrawer({
           <div className="flex flex-col gap-2 rounded-lg border p-4">
             <FieldLabel>Test connection</FieldLabel>
             <p className="text-xs text-muted-foreground">
-              Send a real request with a sample value to confirm the URL,
-              headers, and body template work before saving.
+              Enter a sample value for{' '}
+              <code className="rounded bg-muted px-1 py-0.5">
+                {fieldName || 'fieldName'}
+              </code>{' '}
+              to send a real test request with that value filled in, so you
+              can confirm the URL, headers, and body template all work before
+              saving.
             </p>
             <div className="flex gap-2">
               <Input
                 value={testValue}
                 onChange={(e) => setTestValue(e.target.value)}
-                placeholder="Sample value, e.g. ORD-1234"
+                placeholder={`Value for ${fieldName || 'fieldName'}, e.g. ORD-1234`}
               />
               <Button
                 type="button"

@@ -1,0 +1,282 @@
+AGENVIK — COMPLETE PRODUCT BRIEF FOR NOTEBOOKLM DEMO VIDEO
+===========================================================
+
+TAGLINE
+-------
+Build AI-powered support chatbots trained on your knowledge — deployed across web, WhatsApp, and Slack in minutes.
+
+
+WHAT IS AGENVIK?
+----------------
+Agenvik is a SaaS platform that lets any business create an AI chatbot trained on their own content.
+You upload your documentation, FAQs, product info, or any text — and Agenvik trains an AI agent on it.
+That agent can then answer customer questions accurately, 24/7, across multiple channels.
+
+No AI expertise required. No coding required. Works out of the box.
+
+
+WHO IS IT FOR?
+--------------
+- SaaS companies wanting to automate repetitive customer support questions
+- E-commerce stores answering product and shipping FAQs
+- Agencies building branded chatbots for clients
+- Internal teams building knowledge assistants for HR, operations, or IT
+
+
+THE CORE PROBLEM IT SOLVES
+--------------------------
+Businesses answer the same 20 questions thousands of times a year.
+Their team wastes hours on repetitive queries.
+They lose leads because no one is available after hours.
+And generic AI chatbots like ChatGPT don't know anything specific about their product.
+
+Agenvik solves this by letting businesses teach an AI exactly what it needs to know —
+using their own content — and then deploying it everywhere their customers are.
+
+
+HOW IT WORKS — THE SIMPLE FLOW
+--------------------------------
+Step 1: Create an agent (give it a name and description)
+Step 2: Add knowledge sources (upload documents, paste text, add Q&A pairs, or crawl a URL)
+Step 3: Click "Train" — Agenvik indexes and embeds all your content using AI
+Step 4: Customize behavior (tone, verbosity, system prompt, fallback message)
+Step 5: Enable channels (web widget, WhatsApp, Slack)
+Step 6: Your agent is live — answering questions instantly
+
+The entire setup takes less than 10 minutes.
+
+
+KNOWLEDGE SOURCES (What you can upload)
+-----------------------------------------
+Agenvik supports 4 types of knowledge sources:
+
+1. TEXT — Plain text input, up to 10,000 characters
+   Use for: About us pages, policies, product descriptions
+
+2. Q&A — Up to 50 question-answer pairs (20,000 chars total)
+   Use for: FAQs, common support tickets, sales objections
+
+3. PDF — File upload up to 50MB, fully parsed and indexed
+   Use for: Product manuals, documentation, reports, whitepapers
+
+4. URL — Crawl a web page and extract its content automatically (premium feature)
+   Use for: Help center articles, blog posts, landing pages
+
+Each document goes through a status pipeline:
+Ready → Queue → Indexing → Indexed (or Failed if there's an error)
+
+The agent only answers from indexed sources — it never hallucinates beyond what you gave it.
+
+
+AGENT BEHAVIOR CUSTOMIZATION
+------------------------------
+Each agent has a Behavior configuration with:
+
+- System Prompt: The core instruction to the AI (20-500 chars)
+  Default: "You are a helpful support assistant. Answer using the provided sources only."
+
+- Tone: friendly / professional / neutral
+  Controls how the agent communicates with users
+
+- Verbosity: short / balanced / detailed
+  Controls how long the agent's answers are
+
+- Fallback Message: What the agent says when it doesn't know (5-120 chars)
+  Default: "I don't know the answer to that based on the information I have."
+
+- Guardrails (optional): Hard constraints on what the agent must never do or say
+
+
+CHANNELS — DEPLOY EVERYWHERE
+------------------------------
+One agent, multiple channels. Each channel is independently enabled/configured.
+
+1. WEB WIDGET — Embed on any website
+   Config options: Display name, subtitle, welcome message, suggestion questions (up to 6),
+   input placeholder text, primary colour, allowed domains (whitelist), avatar image
+   Deployment: Paste a script tag into your site HTML
+
+2. WHATSAPP — Business messaging
+   Connect your WhatsApp Business phone number
+   Agent answers customer messages automatically
+   Requires WhatsApp integration setup in Integrations page
+
+3. SLACK — Workspace integration
+   Two modes: "channel mode" (answers in a channel) or "mention mode" (answers when @mentioned)
+   OAuth connection flow via Integrations page
+
+4. INSTAGRAM — Direct messages (coming soon)
+
+Channel statuses: inactive / active / error
+
+
+CONVERSATIONS & ANALYTICS
+---------------------------
+Every conversation is stored and analysed.
+
+Conversation data captured:
+- Full message history (user + assistant turns)
+- Channel source (web/WhatsApp/Slack)
+- Country of the user (auto-detected)
+- Topic of the conversation (AI-extracted)
+- Entities mentioned (AI-extracted)
+- Confidence score per message (how sure the AI was)
+- Source documents used to answer (which chunks were retrieved)
+- Sentiment per message (positive / neutral / negative)
+
+Analytics dashboard shows (on paid plans):
+- Total conversations and messages (all-time)
+- Daily conversation trend chart
+- Messages by channel (web vs WhatsApp vs Slack)
+- Top agents by message count
+- Sentiment breakdown (% positive / neutral / negative)
+- Top topics across all conversations
+- Country distribution of users
+- Average confidence score
+- Average messages per conversation
+
+This tells businesses: what their customers are asking, how well the agent performs,
+and where they need to add more knowledge.
+
+
+LEAD GENERATION (Starter plan and above)
+-----------------------------------------
+The agent can capture lead information mid-conversation.
+
+Lead fields captured:
+- Name
+- Email
+- Phone
+- Company
+- Custom fields (extensible)
+
+Leads are linked to the conversation where they were captured,
+and to the channel and agent. Viewable in the Leads tab.
+
+
+USAGE TRACKING
+--------------
+Each plan comes with hard limits tracked in real time:
+
+- Active agents (number of agents you can create)
+- Knowledge sources per agent
+- Messages per month (across all channels)
+- Training runs per day (how many times you can retrain)
+
+The Usage page shows:
+- Current usage vs limits for all four metrics
+- Daily message trend chart
+- Message breakdown by agent
+- Knowledge source count by agent
+
+When a plan limit is hit, the agent is locked (read-only) until upgraded or the period resets.
+
+
+SUBSCRIPTION PLANS
+------------------
+Four tiers: Free → Starter → Growth → Pro
+
+Free plan: Basic agent creation, limited messages, no analytics, no lead generation
+Starter: Adds analytics, lead generation actions
+Growth: Higher message/agent/source limits
+Pro: Highest limits + advanced features
+
+Billing managed via Razorpay (payment gateway). Subscription status, renewal date,
+and plan upgrade all managed from the Subscriptions page.
+
+
+ADMIN FEATURES (for internal team)
+------------------------------------
+- Feature flags: Enable/disable features globally or per organisation
+- Organisation overview: See all orgs, their plans, usage
+- AI cost tracking: Monitor OpenAI API spend by org
+- Queue monitor: Real-time BullMQ job status (indexing, email jobs)
+- Demo bookings: CRM for tracking demo calls
+
+
+LIVE PREVIEW
+------------
+The dashboard includes a live web widget preview on the right side of the agent configuration page.
+Any change to channel config (name, colour, welcome message) instantly reflects in the preview.
+You can chat with your own agent in the preview before going live.
+
+
+TECHNICAL HIGHLIGHTS (for technical audiences)
+------------------------------------------------
+- RAG (Retrieval-Augmented Generation): Documents are chunked, embedded with OpenAI text-embedding-3-small,
+  stored as vectors in PostgreSQL (pgvector). At query time, semantic search finds relevant chunks,
+  which are injected as context into the LLM prompt.
+- Streaming responses: Chat replies stream token by token for a fast, real-time feel
+- Background processing: Document indexing runs in a BullMQ queue (async, non-blocking)
+- Multi-tenancy: Every resource is scoped to an organisation (Clerk org ID)
+- Self-improving: Each training run re-indexes all documents, picking up new content
+
+
+DEMO VIDEO SCENE BREAKDOWN
+----------------------------
+Scene 1 — Dashboard overview (20s)
+  Show: The agents list page. At least 2-3 agents visible.
+  Narration: "This is Agenvik. Each card is an AI agent trained on different knowledge."
+
+Scene 2 — Creating a new agent (30s)
+  Show: Click "New Agent" → enter name "Product Support" → add description → click Create
+  Show: Agent config page loads with empty knowledge sources
+  Narration: "Creating an agent takes seconds. Give it a name, and you're in."
+
+Scene 3 — Adding knowledge sources (40s)
+  Show: Add a Text source → type some content → Save
+  Show: Add a PDF → upload a file → watch status change to "Ready"
+  Show: Add a Q&A pair → fill in question + answer
+  Narration: "Feed it your content — paste text, upload PDFs, add FAQ pairs."
+
+Scene 4 — Training the agent (20s)
+  Show: Click the "Train" button
+  Show: Status changes: Ready → Queue → Indexing → Indexed
+  Narration: "Hit Train. Agenvik indexes everything and makes it searchable by AI."
+
+Scene 5 — Customize behavior (20s)
+  Show: Behavior card — change tone to "Professional", verbosity to "Short"
+  Show: Edit system prompt briefly
+  Narration: "Control how your agent talks — tone, length, personality."
+
+Scene 6 — Live preview chat (40s)
+  Show: Right panel web widget preview
+  Show: Type a question that's answered by the uploaded document
+  Show: Agent answers accurately, streaming the response
+  Narration: "Ask it a question. It answers from your content — not from the open internet."
+
+Scene 7 — Enable web channel (30s)
+  Show: Channels section → Web → toggle Enabled → configure display name and colour
+  Show: Copy embed script
+  Narration: "Enable the web channel, copy one line of code, paste it on your site."
+
+Scene 8 — Analytics (30s, paid feature)
+  Show: Analytics page — conversation trends, sentiment chart, top topics
+  Narration: "See what your customers are asking, how satisfied they are, and where your agent needs improvement."
+
+Scene 9 — CTA (10s)
+  Show: Agenvik logo + "Start for free at agenvik.com"
+
+
+COMPETITOR DIFFERENTIATION
+---------------------------
+vs. generic chatbot builders (Intercom, Freshdesk bot):
+  - Those use scripted decision trees. Agenvik uses real AI trained on YOUR content.
+
+vs. plain ChatGPT:
+  - ChatGPT doesn't know your product. Agenvik does — and it stays within your knowledge base.
+
+vs. single-channel tools:
+  - Most tools only do web chat. Agenvik adds WhatsApp and Slack from the same agent config.
+
+vs. building your own RAG:
+  - Months of engineering work. Agenvik is ready in 10 minutes.
+
+
+KEY METRICS TO MENTION IN VIDEO
+---------------------------------
+- Setup time: Under 10 minutes from signup to live agent
+- Supported channels: Web, WhatsApp, Slack (Instagram coming)
+- Knowledge source types: 4 (Text, Q&A, PDF, URL)
+- Response: Streamed in real-time
+- Accuracy: Grounded in your documents — no hallucination beyond your content

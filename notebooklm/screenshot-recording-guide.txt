@@ -1,0 +1,403 @@
+AGENVIK DEMO VIDEO — SCREENSHOT & SCREEN RECORDING GUIDE
+===========================================================
+
+BEFORE YOU START — SETUP CHECKLIST
+------------------------------------
+Do this BEFORE recording anything. Having real data ready makes the demo look professional.
+
+[ ] Create 3 agents with these names:
+    - "Product Support"       (description: "Answers questions about our product features and pricing")
+    - "HR Assistant"          (description: "Handles employee handbook and policy questions")
+    - "Sales Bot"             (description: "Qualifies leads and answers pre-sales questions")
+
+[ ] In "Product Support" agent, add these knowledge sources:
+    - Text source titled "About Us" — write 2-3 paragraphs about a fictional SaaS company
+    - Q&A source titled "Common FAQs" — add 5 real Q&A pairs (billing, password reset, integrations, etc.)
+    - PDF source — upload any PDF (a real product manual or even a public whitepaper)
+    - Make sure at least 2 sources are "Indexed" (already trained)
+
+[ ] In "Product Support" web channel:
+    - Display name: "Product Support"
+    - Subtitle: "Powered by Agenvik"
+    - Welcome message: "Hi! 👋 How can I help you today?"
+    - Add 3 suggestion questions:
+      "How do I reset my password?"
+      "What's included in the Pro plan?"
+      "How do I integrate with Slack?"
+    - Primary color: #301B69 (or your brand color)
+
+[ ] Train the "Product Support" agent so documents show "Indexed" status
+
+[ ] Have at least 5-10 conversations in the Conversations tab
+    (chat with your own agent a few times to populate it)
+
+[ ] Browser: Use Chrome or Edge. Clean profile. No other tabs visible in recording.
+
+[ ] Browser zoom: Set to 90% (Ctrl+- once) for more content to show
+
+[ ] Screen resolution: 1920x1080 minimum
+
+[ ] Close notifications: Enable Do Not Disturb on your OS
+
+[ ] Window: Maximize the browser window before recording
+
+
+=============================================================
+SECTION A — SCREENSHOTS (static images)
+=============================================================
+
+These are for the THUMBNAIL, SLIDES, and PROMOTIONAL graphics.
+
+---
+
+SCREENSHOT 1: Agents List (Hero screenshot)
+URL: /agents
+What to do:
+  - Have all 3 agents visible on screen (grid layout)
+  - Make sure none are "Archived" or "Locked"
+  - The "Product Support" agent should show a recent "Updated X ago"
+What makes it good:
+  - Shows the clean card grid
+  - Shows colorful agent icons (each gets a random color/icon — Sparkles, Brain, Zap)
+  - Professional, clean dashboard look
+Caption idea: "Manage all your AI agents in one place"
+
+---
+
+SCREENSHOT 2: Agent Config Page — Full View
+URL: /agents/[agentId]
+What to do:
+  - Open "Product Support" agent
+  - Make sure left panel shows: Knowledge Sources (with indexed docs), Behavior card, Channels
+  - Make sure right panel shows the web widget preview with the chat bubble visible
+  - Do NOT have any drawers/modals open
+What makes it good:
+  - Shows the split layout — config left, preview right
+  - Shows real documents in the knowledge sources list
+Caption idea: "Configure your agent and preview it in real-time"
+
+---
+
+SCREENSHOT 3: Knowledge Sources — Indexed Status
+URL: /agents/[agentId] → Knowledge Sources card
+What to do:
+  - Scroll to the Knowledge Sources card
+  - Have at least 3 documents showing different types (text, Q&A, PDF)
+  - At least 2 should show "Indexed" badge (green)
+  - One should show "Ready" badge (grey)
+What makes it good:
+  - Shows the variety of source types
+  - Shows the status badges — makes the indexing pipeline tangible
+Caption idea: "Upload PDFs, text, FAQs, and URLs — all searchable by AI"
+
+---
+
+SCREENSHOT 4: Live Preview Chat
+URL: /agents/[agentId] → right panel
+What to do:
+  - In the preview widget, type a question that the agent CAN answer
+    (something covered in your Q&A or Text source)
+  - Wait for the full response to appear
+  - Take screenshot when the response is complete and visible
+What makes it good:
+  - Shows a real answer, not empty state
+  - The response should look natural and helpful
+  - The chat bubble UI is clean and modern
+Caption idea: "Test your agent before going live — right in the dashboard"
+
+---
+
+SCREENSHOT 5: Behavior Card
+URL: /agents/[agentId] → Behavior card
+What to do:
+  - Scroll to the Behavior card
+  - Set Tone to "Professional", Verbosity to "Balanced"
+  - Make the system prompt visible (at least first 2 lines)
+  - Make sure the Fallback Message field is visible
+What makes it good:
+  - Shows the customization depth
+  - Professional tone selector is visually clear
+Caption idea: "Control exactly how your agent speaks to customers"
+
+---
+
+SCREENSHOT 6: Analytics Dashboard
+URL: /analytics
+What to do:
+  - Make sure you're on a paid plan (or have data)
+  - Set date range to "Last 30 days"
+  - Scroll down to show at least: Overview cards + Conversations Daily chart + Sentiment chart
+  - Take a tall screenshot or two separate ones (top + bottom)
+What makes it good:
+  - Charts with real data look impressive
+  - Overview cards show total conversations, messages, confidence
+Caption idea: "See what your customers are asking — and how well your agent performs"
+
+---
+
+SCREENSHOT 7: Conversations Thread
+URL: /conversations/[conversationId]
+What to do:
+  - Click on a conversation that has at least 4-5 message exchanges
+  - The right panel should show the full thread
+  - Look for a message where the agent gave a detailed, accurate answer
+What makes it good:
+  - Shows the real Q&A in action
+  - Message metadata (confidence, source) visible if you hover
+Caption idea: "Every conversation stored — review, search, and analyze"
+
+---
+
+SCREENSHOT 8: Web Channel Config
+URL: /agents/[agentId] → Channels → Web
+What to do:
+  - Expand the Web channel accordion
+  - Make sure it's "Enabled" (toggle on)
+  - Show the config fields: display name, subtitle, suggestion questions, color picker
+  - The right panel should show the preview reflecting these settings
+What makes it good:
+  - Shows the customization options
+  - Color picker and branding make it feel professional
+Caption idea: "Customize the widget to match your brand"
+
+
+=============================================================
+SECTION B — SCREEN RECORDINGS (video clips)
+=============================================================
+
+Record each clip separately. Keep each under 60 seconds.
+You will edit these together later.
+
+---
+
+CLIP 1: Dashboard overview — 20 seconds
+URL: /agents
+What to record:
+  1. Start with the agents list visible (3 agents in grid)
+  2. Slowly scroll down if there are more agents
+  3. Hover over one agent card (it slightly lifts/shadows on hover)
+  4. End on the full grid view
+Narration: "This is Agenvik. Each card is an AI agent trained on different knowledge.
+You can have as many as your plan allows — one per product, department, or client."
+Recording tip: Move mouse slowly and deliberately. No fast movements.
+
+---
+
+CLIP 2: Create a new agent — 30 seconds
+URL: /agents
+What to record:
+  1. Click the "New Agent" button (top right of agents page)
+  2. The CreateAgentDialog opens — a modal with Name + Description fields
+  3. Slowly type the name: "Customer Support"
+  4. Click into Description, type: "Handles product questions and billing support"
+  5. Click the Create/Save button
+  6. The new agent card appears in the grid
+Narration: "Creating an agent takes seconds. Give it a name, an optional description,
+and you're in. Agenvik sets up everything else automatically."
+Recording tip: Type slowly and clearly. Don't rush.
+
+---
+
+CLIP 3: Adding knowledge sources — 45 seconds
+URL: /agents/[agentId] → Knowledge Sources card
+What to record:
+  1. Show the Knowledge Sources card with existing sources
+  2. Click "Add" or the "+" button (choose Text type)
+  3. Type a title: "Product Overview"
+  4. Paste or type 2-3 sentences of content
+  5. Click Save
+  6. The new source appears in the list with "Ready" status badge
+  7. Optional: also show clicking "PDF" type and the upload area
+Narration: "Feed it your content. Paste text, upload a PDF, add FAQ pairs,
+or crawl a URL. Every source becomes part of what your agent knows."
+Recording tip: Have the content pre-copied so you can paste it quickly.
+
+---
+
+CLIP 4: Training the agent — 25 seconds
+URL: /agents/[agentId] → Knowledge Sources card
+What to record:
+  1. Show documents in "Ready" status (grey badge)
+  2. Click the "Train" button
+  3. Watch badges change: Ready → Queue → Indexing
+  4. If you can wait, show "Indexed" (green) — otherwise cut here
+  Tip: If indexing is slow, record beforehand and cut between "Queue" and "Indexed"
+Narration: "Hit Train. Agenvik processes all your sources — chunking, embedding,
+and indexing them as searchable vector data. Once indexed, your agent is ready."
+Recording tip: Zoom in on the status badges so viewers can see the change clearly.
+
+---
+
+CLIP 5: Behavior customization — 20 seconds
+URL: /agents/[agentId] → Behavior card
+What to record:
+  1. Scroll to the Behavior card
+  2. Click the Tone dropdown — show options: Friendly, Professional, Neutral
+  3. Select "Professional"
+  4. Click the Verbosity dropdown — show options: Short, Balanced, Detailed
+  5. Select "Short"
+  6. Click into the System Prompt field — highlight the existing text briefly
+Narration: "Control how your agent talks. Choose the tone, the answer length,
+and write a custom system prompt to shape its personality and boundaries."
+Recording tip: Pause 1 second on each dropdown option before selecting.
+
+---
+
+CLIP 6: Live preview chat — THE KEY CLIP — 40 seconds
+URL: /agents/[agentId] → right panel (web widget preview)
+What to record:
+  1. Show the web widget preview on the right side
+  2. The suggestion questions are visible (3 clickable prompts)
+  3. Click one suggestion question OR type a real question in the input
+     Use: one of the questions covered in your Q&A source
+     Example: "How do I reset my password?"
+  4. Watch the response stream in real-time (token by token)
+  5. Let the full response appear
+  6. Read/pause on the completed response
+  7. Optionally type a follow-up question
+Narration: "Ask it a real question. Watch it answer from your exact content —
+streamed in real-time. Not a generic answer. Not a made-up answer. Yours."
+Recording tip: This is the most important clip. Use a question you KNOW has a
+good answer in the knowledge base. Test it before recording.
+
+---
+
+CLIP 7: Enable web channel and copy embed code — 25 seconds
+URL: /agents/[agentId] → Channels accordion → Web
+What to record:
+  1. Scroll to the Channels section
+  2. Click to expand "Web" channel
+  3. Show the toggle is OFF (disabled)
+  4. Click the toggle to enable it
+  5. Show the channel config: display name, color, suggestion questions
+  6. Scroll down to find the embed code / script tag
+  7. Click "Copy" on the embed code
+Narration: "Enable the web channel with one toggle. Configure your branding.
+Copy one line of code. Paste it on your site. That's it — you're live."
+Recording tip: Move slowly through the config fields. Don't rush past the color picker.
+
+---
+
+CLIP 8: Conversations inbox — 20 seconds
+URL: /conversations
+What to record:
+  1. Open the Conversations page
+  2. Show the list of conversations on the left
+  3. Click on one conversation to open the thread
+  4. Show the back-and-forth messages in the right panel
+  5. Scroll slowly through the messages
+Narration: "Every conversation is stored. See exactly what customers asked
+and how your agent responded. Review, audit, and find gaps to improve."
+Recording tip: Choose a conversation with clean, helpful answers.
+
+---
+
+CLIP 9: Analytics page — 30 seconds
+URL: /analytics
+What to record:
+  1. Land on Analytics page — show the 4 overview stat cards
+  2. Slowly scroll down through the charts
+  3. Pause on the Conversations Daily chart (2 seconds)
+  4. Pause on the Sentiment chart (2 seconds)
+  5. Pause on the Top Topics chart (2 seconds)
+  6. Show the date range and agent filter dropdowns at the top
+Narration: "Analytics shows you what your customers are asking, how your agent
+is performing, and where you need to add more knowledge. All in one place."
+Recording tip: Only record this if you have real data. With empty charts it looks bad.
+If you don't have data yet, skip this clip or generate conversations first.
+
+
+=============================================================
+SECTION C — WHAT GOOD DATA LOOKS LIKE (pre-recording prep)
+=============================================================
+
+Before recording, make your dashboard look like a real company's:
+
+Knowledge Sources to add to "Product Support":
+  Source 1 (Text):
+    Title: "Company Overview"
+    Content: Write about your actual company or a fictional SaaS product.
+    Include: what the product does, who it's for, pricing tiers.
+
+  Source 2 (Q&A):
+    Title: "Frequently Asked Questions"
+    Add these pairs:
+    Q: How do I reset my password?
+    A: Go to the login page and click "Forgot password". Enter your email
+       and we'll send a reset link within 2 minutes.
+
+    Q: What payment methods do you accept?
+    A: We accept all major credit cards (Visa, Mastercard, Amex) and UPI payments.
+
+    Q: Can I cancel my subscription anytime?
+    A: Yes. Go to Settings → Billing → Cancel Subscription. You'll retain access
+       until the end of your billing period.
+
+    Q: How many agents can I create?
+    A: The Free plan includes 1 agent. Starter includes 3. Growth includes 10. Pro is unlimited.
+
+    Q: Is there a free trial?
+    A: Yes! The Free plan is free forever. No credit card required to start.
+
+  Source 3 (PDF):
+    Upload any PDF — a product brochure, terms of service, or public whitepaper.
+
+After adding sources: click Train and wait for "Indexed" status.
+
+For Conversations: open the preview, ask 10-15 different questions to generate
+conversation history before recording the Conversations and Analytics clips.
+
+
+=============================================================
+SECTION D — TECHNICAL RECORDING SETTINGS
+=============================================================
+
+Recommended tool: Loom (loom.com) — free, easy, auto-uploads
+Alternative: OBS Studio (free, local recording, more control)
+Mac built-in: Shift+Cmd+5 → Record Selected Portion
+
+Settings:
+  - Resolution: 1920x1080
+  - Frame rate: 30fps minimum (60fps preferred)
+  - Audio: Record your voice with a headset mic (not laptop mic — too much echo)
+  - Cursor: Make cursor visible and slightly larger (Accessibility settings on Mac/Windows)
+  - Cursor highlight: Use Loom's cursor spotlight or ScreenBrush for Mac
+
+Before each clip:
+  - Navigate to the right URL
+  - Pause 2 seconds before doing anything (gives editing room)
+  - Speak your narration line clearly BEFORE starting the action
+  - Pause 2 seconds at the end (gives editing room)
+
+Mouse movement tips:
+  - Move slowly — fast mouse movements are hard to follow on video
+  - Don't hover randomly — hover intentionally on elements you're talking about
+  - When clicking something important, pause briefly AFTER the click to let the result show
+
+
+=============================================================
+SECTION E — FINAL VIDEO STRUCTURE
+=============================================================
+
+Edit order of clips:
+  0:00 — Logo + tagline slide (make in Canva: "Agenvik — Train once. Deploy everywhere.")
+  0:03 — CLIP 1: Dashboard overview
+  0:23 — CLIP 2: Create new agent
+  0:53 — CLIP 3: Adding knowledge sources
+  1:38 — CLIP 4: Training the agent
+  2:03 — CLIP 5: Behavior customization
+  2:23 — CLIP 6: Live preview chat (HERO moment)
+  3:03 — CLIP 7: Enable web channel
+  3:28 — CLIP 8: Conversations inbox
+  3:48 — CLIP 9: Analytics
+  4:18 — CTA slide (Canva: "Start free at agenvik.com")
+  Total: ~4:30
+
+For a 90-second cut:
+  Use clips 1 (trimmed), 3 (trimmed), 6 (full), 7 (trimmed), CTA
+  This is the version to post on LinkedIn and Twitter.
+
+Free editing tools:
+  - CapCut (web or desktop) — easiest, good auto-captions
+  - DaVinci Resolve — professional, free forever
+  - Descript — edit by editing the transcript (great for removing filler words)

@@ -31,3 +31,16 @@ package-lock.json
 .claude/settings.local.json
 .codex
 .gstack/
+
+# Local credentials and database backups
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.sql.gz
+dump.rdb
+out/

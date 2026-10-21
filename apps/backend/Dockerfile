@@ -2,10 +2,10 @@ FROM oven/bun AS build
 
 WORKDIR /app
 
-# ✅ ADD THIS
+# Legacy build-time migrations require this value. Supply development credentials
+# only until migrations are moved to a separate release step; never print it.
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
-RUN echo "DATABASE_URL=$DATABASE_URL"
 
 # Cache packages installation
 COPY package.json package.json

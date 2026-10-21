@@ -1,34 +1,25 @@
-> **Customize this file**: Tailor this template to your project by noting specific contribution types you're looking for, adding a Code of Conduct, or adjusting the writing guidelines to match your style.
+# Contribute to Agenvik documentation
 
-# Contribute to the documentation
+Product guides use Mintlify MDX. Start with the [repository contribution guide](../../CONTRIBUTING.md) for the development workflow and community expectations.
 
-Thank you for your interest in contributing to our documentation! This guide will help you get started.
+## Make a change
 
-## How to contribute
+1. Create a branch or fork the repository.
+2. Edit the relevant MDX page, or add a page and register it in `docs.json`.
+3. Run `mint dev` from `apps/docs` and review the page in the browser.
+4. Run `mint broken-links` and check navigation, code samples, and images.
+5. Open a pull request explaining the user-facing change.
 
-### Option 1: Edit directly on GitHub
-
-1. Navigate to the page you want to edit
-2. Click the "Edit this file" button (the pencil icon)
-3. Make your changes and submit a pull request
-
-### Option 2: Local development
-
-1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
-3. Create a branch for your changes
-4. Make changes
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
-7. Commit your changes and submit a pull request
-
-For the current documentation structure, start with the [Agenvik docs landing page](index.mdx).
+The docs preview normally uses port 3000, which is also the backend API's default. Run one at a time or configure a different preview port.
 
 ## Writing guidelines
 
-- **Use active voice**: "Run the command" not "The command should be run"
-- **Address the reader directly**: Use "you" instead of "the user"
-- **Keep sentences concise**: Aim for one idea per sentence
-- **Lead with the goal**: Start instructions with what the user wants to accomplish
-- **Use consistent terminology**: Don't alternate between synonyms for the same concept
-- **Include examples**: Show, don't just tell
+- Address the reader as "you" and use active voice.
+- Lead with the task the reader wants to complete.
+- Use **bold** for UI labels and backticks for commands, paths, and configuration keys.
+- Use consistent terms: agent, knowledge source, channel, conversation, and workspace.
+- Distinguish hosted product instructions from local development and deployment instructions.
+- Explain provider setup, feature flags, or plan requirements where they affect a task.
+- Use synthetic data in examples and screenshots; remove credentials and customer content.
+
+Keep guides focused, preserve working links, and verify installation snippets against the embed implementation. Report vulnerabilities privately through [SECURITY.md](../../SECURITY.md).

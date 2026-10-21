@@ -1,12 +1,15 @@
 import type { GraphNode } from '@langchain/langgraph';
 import { ConversationService } from '../../conversation/service';
-import { getLastUserMessage } from '../utils/messages';
 import type { State } from '../state';
+import { getLastUserMessage } from '../utils/messages';
 
-export const initConversation: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id, agentId, channelId } = config?.configurable ?? {};
+export const initConversation: GraphNode<typeof State> = async (
+  state,
+  config,
+) => {
+  const { thread_id, orgId, agentId, channelId } = config?.configurable ?? {};
 
-  if (!thread_id || !agentId || !channelId) return {};
+  if (!thread_id || !orgId || !agentId || !channelId) return {};
 
   const userMessage = getLastUserMessage(state);
 
@@ -22,10 +25,13 @@ export const initConversation: GraphNode<typeof State> = async (state, config) =
       lastMessageAt: new Date(),
     });
   } else {
-    await ConversationService.update(thread_id, {
-      lastUserQuestion: userMessage,
-      lastMessageAt: new Date(),
-    });
+    await ConversationService.update(
+      { id: thread_id, orgId, agentId, channelId },
+      {
+        lastUserQuestion: userMessage,
+        lastMessageAt: new Date(),
+      },
+    );
   }
 
   return {};

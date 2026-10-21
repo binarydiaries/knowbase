@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
       }),
       tailwindcss(),
       sentryVitePlugin({
-        authToken: env.VITE_SENTRY_AUTH_TOKEN,
+        authToken: env.SENTRY_AUTH_TOKEN,
         org: 'binarydiaries',
         project: 'dashboard',
       }),

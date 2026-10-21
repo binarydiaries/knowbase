@@ -26,21 +26,21 @@
 ## Tech Stack
 
 ### Backend (`apps/backend`)
-- **Runtime/framework**: Bun 1.2.12 + Elysia 1.4.x
+- **Runtime/framework**: Bun 1.4.3 + Elysia 1.4.x
 - **Database**: PostgreSQL via Drizzle ORM (beta)
 - **Cache/Queue**: Redis + BullMQ
 - **Auth**: Clerk (`elysia-clerk`)
-- **AI**: OpenAI via Vercel AI SDK (`@ai-sdk/openai`, `ai`)
-- **Payments**: Razorpay
+- **AI**: LangGraph and LangChain with OpenAI; Vercel AI SDK for streamed responses
+- **Payments**: Razorpay or Kelviq
 - **Email**: Resend
 - **Validation**: Zod 4.x
 - **ID generation**: `@paralleldrive/cuid2`
 
-### Frontend (dashboard / client / landing)
+### Frontend (dashboard / client)
 - **Framework**: React 19 + Vite (rolldown-vite)
 - **Styling**: Tailwind CSS 4.x (primary color `#301B69`)
 - **UI primitives**: Radix UI via `@knowbase/ui`
-- **Routing**: TanStack Router (dashboard), React Router DOM 7 (landing)
+- **Routing**: TanStack Router (dashboard)
 - **State**: Zustand 5 (dashboard)
 - **Server state**: TanStack Query
 - **Forms**: React Hook Form + Zod
@@ -48,9 +48,11 @@
 - **Auth**: Clerk (`@clerk/clerk-react`)
 - **Charts**: Recharts
 
+The landing site uses Astro and MDX. Product documentation uses Mintlify.
+
 ### Monorepo tooling
 - **Monorepo**: Turborepo 2.7.2
-- **Package manager**: Bun 1.2.12 (required — do not use npm/yarn/pnpm)
+- **Package manager**: Bun 1.4.3 (required — do not use npm/yarn/pnpm)
 - **Linter/formatter**: Biome 2.3.11 (replaces ESLint + Prettier)
 - **Type checker**: TypeScript 5.9.2
 
@@ -60,8 +62,8 @@
 
 ### Prerequisites
 - Bun ≥ 1.2.12
-- Node.js ≥ 22
-- PostgreSQL (running locally or via Docker)
+- Node.js ≥ 22.22
+- PostgreSQL with pgvector (running locally or via Docker)
 - Redis (running locally or via Docker)
 
 ### Environment setup
@@ -85,7 +87,7 @@ bun run build             # Build all apps
 bun run build:dashboard   # Build single app
 bun run lint              # Biome check (all files)
 bun run lint:fix          # Biome check + auto-fix
-bun run check-types       # TypeScript type-check all apps
+bun run check-types       # Backend, dashboard, and client TypeScript checks
 ```
 
 ### Backend-specific commands (run from `apps/backend/`)
@@ -130,7 +132,7 @@ export abstract class AgentService {
 
 ### Multi-tenancy
 
-Every query is scoped by `orgId` (Clerk organisation ID). All database tables include an indexed `orgId` column via shared column utilities in `src/utils/columns.utils.ts`.
+Organization identity comes from Clerk's authenticated session. Some tables store `orgId` directly; others require a join through their owning agent or conversation. Validate ownership before accessing resources, and scope persisted conversation state as well as database queries. Do not assume every table has an `orgId` column.
 
 ### Database schema (`src/db/schema/`)
 
@@ -143,8 +145,8 @@ Primary keys use CUID2 (`createId()`). All tables have `createdAt`/`updatedAt` w
 1. Documents are stored via `document` module
 2. `indexing` module chunks text (LangChain `TextSplitter`) and generates embeddings (`text-embedding-3-small`)
 3. Embeddings stored in `embeddings` table as pgvector
-4. `chat/context.ts` performs semantic search to build RAG context
-5. `chat/service.ts` runs the LLM call with streamed response
+4. `modules/graph/nodes/vectorSearch.ts` retrieves relevant knowledge chunks
+5. The LangGraph RAG subgraph generates responses, streamed through `modules/chatv2/service.ts`
 
 ### Background jobs
 
@@ -203,8 +205,8 @@ Components use **CVA** (`class-variance-authority`) for variant styling. Dark mo
 - Prefer `type` imports for types
 - Use Zod schemas as the source of truth for API shapes
 
-### No tests
-There is currently no test suite. The backend `test` script is a placeholder.
+### Security tests
+Run `bun run test` with `TEST_DATABASE_URL` and `TEST_REDIS_URL` pointing to disposable, migrated PostgreSQL and Redis instances. See `apps/backend/README.md` for the setup. Tests use synthetic data and do not call paid providers.
 
 ---
 
@@ -290,7 +292,7 @@ The backend ships two Dockerfiles (multi-stage Bun builds targeting distroless):
 | `apps/backend/Dockerfile` | API server (`server` binary) |
 | `apps/backend/Worker.Dockerfile` | BullMQ worker (`worker-server` binary) |
 
-Database migrations run automatically during the Docker build step.
+Build every Dockerfile from the repository root. Images never receive database credentials. Apply migrations as a separate release step (`bun run --cwd apps/backend db:release`) before rolling out the API and worker.
 
 ---
 

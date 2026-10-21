@@ -1,18 +1,21 @@
-import { createHmac } from 'node:crypto';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { clerkClient } from 'elysia-clerk';
 import { z } from 'zod';
 import { AuthGuard } from '../../common/authGuard/authGuard';
 import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
+import { connection as redis } from '../../queue/connection';
 import { logger } from '../../utils/logger.utils';
 import type { IChannelSlackConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
 import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { SlackConnectionService } from './connectionService';
+import { consumeSlackOAuthState, issueSlackOAuthState } from './oauthState';
+import { verifySlackSignature } from './signature';
 
 const log = logger.child({ module: 'slack' });
 
@@ -38,20 +41,12 @@ export const Slack = new Elysia({ tags: ['Slack'] })
       const contentType = headers['content-type'] ?? '';
       const sig = headers['x-slack-signature'] ?? '';
       const ts = headers['x-slack-request-timestamp'] ?? '';
+      if (!verifySlackSignature(sig, ts, rawBody)) {
+        return new Response('Invalid signature', { status: 403 });
+      }
 
       // ── Slash commands (application/x-www-form-urlencoded) ────────────────
       if (contentType.includes('application/x-www-form-urlencoded')) {
-        if (!verifySlackSignature(sig, ts, rawBody)) {
-          log.warn(
-            { contentType },
-            'slash command signature verification failed',
-          );
-          return new Response(
-            JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-            { status: 403, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
-
         // Acknowledge immediately to beat Slack's 3-second timeout
         return new Response('{}', {
           status: 200,
@@ -74,6 +69,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
           thread_ts?: string;
         };
         team_id?: string;
+        event_id?: string;
       };
       try {
         payload = JSON.parse(rawBody);
@@ -85,7 +81,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         );
       }
 
-      // URL verification — no signature check required by Slack on this event
+      // URL verification is covered by the same signature check as other events.
       if (payload.type === 'url_verification') {
         log.debug('url_verification challenge received');
         return new Response(JSON.stringify({ challenge: payload.challenge }), {
@@ -94,21 +90,20 @@ export const Slack = new Elysia({ tags: ['Slack'] })
         });
       }
 
-      if (!verifySlackSignature(sig, ts, rawBody)) {
-        log.warn(
-          { type: payload.type, teamId: payload.team_id },
-          'event signature verification failed',
-        );
-        return new Response(
-          JSON.stringify({ code: 'FORBIDDEN', message: 'Invalid signature' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } },
-        );
-      }
-
       log.debug(
         { type: payload.type, teamId: payload.team_id },
         'webhook event received',
       );
+      if (!payload.event_id)
+        return new Response('Missing event ID', { status: 400 });
+      const claimed = await redis.set(
+        `webhook:slack:${payload.team_id}:${payload.event_id}`,
+        '1',
+        'EX',
+        86400,
+        'NX',
+      );
+      if (!claimed) return new Response('OK');
       void processInboundEvent(payload).catch((err) =>
         log.error({ err }, 'processInboundEvent failed'),
       );
@@ -120,11 +115,35 @@ export const Slack = new Elysia({ tags: ['Slack'] })
   // ─── OAuth callback — browser redirect after Slack approval ──────────────
   .get(
     '/slack/oauth/callback',
-    async ({ query }) => {
-      const { code, state: orgId } = query;
+    async ({ query, cookie }) => {
+      const { code, state } = query;
 
-      if (!code || !orgId) {
+      if (!code || !state) {
         return new Response('Missing code or state', { status: 400 });
+      }
+
+      const browserSecret = cookie.agenvik_slack_oauth.value;
+      const pending =
+        typeof browserSecret === 'string'
+          ? await consumeSlackOAuthState(redis, state, browserSecret)
+          : null;
+      if (!pending)
+        return new Response('Invalid or expired OAuth state', { status: 403 });
+      cookie.agenvik_slack_oauth.remove();
+      const { orgId, userId } = pending;
+      const memberships =
+        await clerkClient.organizations.getOrganizationMembershipList({
+          organizationId: orgId,
+          userId: [userId],
+        });
+      if (
+        !memberships.data.some(
+          (membership) => membership.publicUserData?.userId === userId,
+        )
+      ) {
+        return new Response('Organization membership required', {
+          status: 403,
+        });
       }
 
       const params = new URLSearchParams({
@@ -194,11 +213,23 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     response: {
       400: 'BadRequestResponse',
       404: 'NotFoundResponse',
+      403: 'BadRequestResponse',
     },
   })
 
   // GET /slack/oauth/start — return OAuth URL for frontend redirect
-  .get('/slack/oauth/start', ({ orgId }) => {
+  .get('/slack/oauth/start', async ({ orgId, userId, cookie }) => {
+    const pending = await issueSlackOAuthState(redis, orgId, userId);
+    cookie.agenvik_slack_oauth.set({
+      value: pending.browserSecret,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: !['http://localhost', 'http://127.0.0.1'].some((origin) =>
+        (process.env.API_BASE ?? '').startsWith(`${origin}:`),
+      ),
+      path: '/slack/oauth/callback',
+      maxAge: pending.maxAge,
+    });
     const scopes = [
       'channels:read',
       'groups:read',
@@ -213,7 +244,7 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     const url = new URL('https://slack.com/oauth/v2/authorize');
     url.searchParams.set('client_id', process.env.SLACK_CLIENT_ID ?? '');
     url.searchParams.set('scope', scopes);
-    url.searchParams.set('state', orgId);
+    url.searchParams.set('state', pending.state);
     url.searchParams.set('redirect_uri', process.env.SLACK_REDIRECT_URI ?? '');
 
     return { url: url.toString() };
@@ -406,30 +437,10 @@ export const Slack = new Elysia({ tags: ['Slack'] })
     return { channel: ChannelService.transformChannel(updated) };
   });
 
-// ─── Webhook signature verification ─────────────────────────────────────────
-function verifySlackSignature(
-  sig: string,
-  ts: string,
-  rawBody: string,
-): boolean {
-  if (!sig || !ts) return false;
-
-  const age = Math.floor(Date.now() / 1000) - parseInt(ts, 10);
-  if (Number.isNaN(age) || age > 300) return false;
-
-  const signingSecret = process.env.SLACK_SIGNING_SECRET;
-  if (!signingSecret) return false;
-
-  const expected = `v0=${createHmac('sha256', signingSecret)
-    .update(`v0:${ts}:${rawBody}`)
-    .digest('hex')}`;
-
-  return expected === sig;
-}
-
 // ─── Process inbound Slack Events API event ──────────────────────────────────
 async function processInboundEvent(payload: {
   type?: string;
+  team_id?: string;
   event?: {
     type?: string;
     user?: string;
@@ -446,6 +457,9 @@ async function processInboundEvent(payload: {
     return;
   }
 
+  if (!payload.team_id) return;
+  const workspace = await SlackConnectionService.findByTeamId(payload.team_id);
+  if (!workspace) return;
   const event = payload.event;
   log.debug(
     {
@@ -492,6 +506,7 @@ async function processInboundEvent(payload: {
     const result = await ChannelService.findBySlackChannelId(
       slackChannelId,
       'channel',
+      workspace.orgId,
     );
     if (!result?.enabled || !result.agent) {
       log.warn(
@@ -526,6 +541,7 @@ async function processInboundEvent(payload: {
     const result = await ChannelService.findBySlackChannelId(
       slackChannelId,
       'mention',
+      workspace.orgId,
     );
     if (!result?.enabled || !result.agent) {
       log.warn(

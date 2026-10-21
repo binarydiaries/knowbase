@@ -1,6 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../../db';
+import { agents } from '../../db/schema/agents';
 import { conversations } from '../../db/schema/conversations';
+import type { ConversationScope } from '../chatv2/session';
 
 export abstract class ConversationService {
   static single({ id, orgId }: { id: string; orgId: string }) {
@@ -66,18 +68,35 @@ export abstract class ConversationService {
   }
 
   static async create(data: typeof conversations.$inferInsert) {
-    const [doc] = await db.insert(conversations).values(data).returning();
+    const [doc] = await db
+      .insert(conversations)
+      .values(data)
+      .onConflictDoNothing()
+      .returning();
     return doc;
   }
 
   static async update(
-    conversationId: string,
+    scope: ConversationScope & { id: string },
     data: Partial<typeof conversations.$inferInsert>,
   ) {
     const [doc] = await db
       .update(conversations)
       .set(data)
-      .where(eq(conversations.id, conversationId))
+      .where(
+        and(
+          eq(conversations.id, scope.id),
+          eq(conversations.agentId, scope.agentId),
+          eq(conversations.channelId, scope.channelId),
+          inArray(
+            conversations.agentId,
+            db
+              .select({ id: agents.id })
+              .from(agents)
+              .where(eq(agents.orgId, scope.orgId)),
+          ),
+        ),
+      )
       .returning();
     return doc;
   }

@@ -8,9 +8,10 @@ import { computeConfidenceScore } from '../utils/retrieval';
 import { scoreSentiment } from '../utils/scoring';
 
 export const persistTurn: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id, orgId, isPaid } = config?.configurable ?? {};
+  const { thread_id, orgId, agentId, channelId, isPaid } =
+    config?.configurable ?? {};
 
-  if (!thread_id || !orgId) return {};
+  if (!thread_id || !orgId || !agentId || !channelId) return {};
 
   const userText = getLastUserMessage(state);
   const assistantText = getLastAssistantMessage(state);
@@ -34,9 +35,12 @@ export const persistTurn: GraphNode<typeof State> = async (state, config) => {
   await Promise.all([
     OrgUsageMonthlyService.incrementAssistantMessages(orgId),
 
-    ConversationService.update(thread_id, {
-      lastAssistantUtterance: assistantText,
-    }),
+    ConversationService.update(
+      { id: thread_id, orgId, agentId, channelId },
+      {
+        lastAssistantUtterance: assistantText,
+      },
+    ),
 
     MessageService.addMessages([
       {

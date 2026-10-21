@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a focused improvement to Agenvik.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe who needs this and what they do today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include alternatives and relevant examples.
+    validations:
+      required: true
+  - type: textarea
+    id: contribution
+    attributes:
+      label: Additional context
+      description: Mention whether you would like to help implement it.

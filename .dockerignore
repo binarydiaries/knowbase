@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/.turbo
+**/dist
+**/out
+**/*.log
+**/*.pem
+**/*.key
+**/*.dump
+**/dump.rdb
+.codex
+.gstack

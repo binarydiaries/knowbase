@@ -80,7 +80,10 @@ export const IndexingForbiddenResponse = z.union([
   TrainingLimitReachedResponse,
 ]);
 
-export const ChatForbiddenResponse = MessageLimitReachedResponse;
+export const ChatForbiddenResponse = z.union([
+  MessageLimitReachedResponse,
+  z.object({ code: z.literal('FORBIDDEN'), message: z.string() }),
+]);
 
 export const LeadGenerationForbiddenResponse = z.object({
   code: z.enum(['PLAN_LIMIT_REACHED']),

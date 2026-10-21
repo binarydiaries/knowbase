@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem in Agenvik.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, follow SECURITY.md. Remove API keys, personal data, and customer content before posting."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Include your commit, deployment type, and affected app.
+      placeholder: "Commit abc123, local dashboard"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic data and include a minimal example.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and relevant logs
+      description: Include OS, browser, Bun version, and sanitized logs where relevant.

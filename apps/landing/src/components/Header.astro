@@ -1,7 +1,8 @@
 ---
 import { Image } from 'astro:assets';
 import logoSrc from '../assets/images/TextLogo.svg';
-import { Home, Hospital, Users, GraduationCap, ChevronDown, Menu, X } from '@lucide/astro';
+import { Home, Hospital, Users, GraduationCap, ChevronDown, CodeXml, Menu, X } from '@lucide/astro';
+import { githubUrl } from '../data/project';
 
 type ActivePage = 'home' | 'features' | 'pricing' | 'blog' | 'use-cases';
 
@@ -104,6 +105,16 @@ const solutions = [
       >
         Blog
       </a>
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Agenvik source code on GitHub (opens in a new tab)"
+        class="hidden lg:inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-4"
+      >
+        <CodeXml size={16} aria-hidden="true" />
+        GitHub
+      </a>
     </nav>
 
     <div class="flex items-center gap-3">
@@ -180,6 +191,16 @@ const solutions = [
       </a>
       <a href="/blog" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
         Blog
+      </a>
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Agenvik source code on GitHub (opens in a new tab)"
+        class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium"
+      >
+        <CodeXml size={16} aria-hidden="true" />
+        GitHub
       </a>
       <a href="/book-demo" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">
         Book a Demo

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://agenvik.com/security-policy#vulnerability-disclosure
+    about: Please follow the private reporting instructions before disclosing a vulnerability.
+  - name: Product documentation
+    url: https://agenvik.com/docs
+    about: Setup and usage guides for the hosted product.

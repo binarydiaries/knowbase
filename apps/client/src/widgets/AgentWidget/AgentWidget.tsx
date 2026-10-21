@@ -1,7 +1,7 @@
 import { useChat } from '@ai-sdk/react';
 import { Agent } from '@knowbase/ui/widgets/Agent/Agent';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { baseUrl } from '@/services/chat.ts';
 import type { ChannelSchema } from '@/types/ChannelSchema.ts';
 import { parseChatError } from '@/utils/chatError.ts';
@@ -22,6 +22,7 @@ const AgentWidgetContent = ({
 }: IAgentWidgetContentProps) => {
   const channelConfig = channelSchema.additional.config;
   const initialMessageId = useId();
+  const session = useRef<Promise<string> | null>(null);
   const [isUsageExhausted, setIsUsageExhausted] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string>();
 
@@ -37,13 +38,30 @@ const AgentWidgetContent = ({
     messages: initialMessage ? [initialMessage] : [],
     transport: new DefaultChatTransport({
       api: baseUrl,
-      prepareSendMessagesRequest({ messages, id }) {
+      async prepareSendMessagesRequest({ messages }) {
+        if (!session.current) {
+          session.current = fetch(`${baseUrl}/session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channelId: channelSchema.id, parentOrigin }),
+          })
+            .then(async (response) => {
+              if (!response.ok)
+                throw new Error('Unable to start this conversation.');
+              return (await response.json()).conversationToken as string;
+            })
+            .catch((error) => {
+              session.current = null;
+              throw error;
+            });
+        }
+        const conversationToken = await session.current;
         const lastMessage = messages[messages.length - 1];
         const messageText = lastMessage.parts.find((v) => v.type === 'text');
         return {
           body: {
             message: messageText?.text,
-            conversationId: id,
+            conversationToken,
             channelId: channelSchema?.id,
             ...(parentOrigin ? { parentOrigin } : {}),
           },

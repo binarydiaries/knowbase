@@ -1,48 +1,35 @@
-# Astro Starter Kit: Basics
+# Agenvik website
 
-```sh
-bun create astro@latest -- --template basics
+The marketing website and blog at [agenvik.com](https://agenvik.com) use Astro, MDX, and Tailwind CSS. This app can run independently of the dashboard and backend.
+
+## Run locally
+
+From the repository root:
+
+```bash
+bun install --frozen-lockfile
+cp apps/landing/.env.example apps/landing/.env
+bun run --cwd apps/landing dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Open `http://localhost:4321`. The example environment sets a local site URL and staging robots behavior. Set `LANDING_URL` to the canonical site origin for a production build, and configure `PUBLIC_APP_URL` and `PUBLIC_API_BASE` for your deployment.
 
-## 🚀 Project Structure
+Analytics and reCAPTCHA need their own public keys. The chat widget needs `PUBLIC_EMBED_URL` and `PUBLIC_CHANNEL_ID`; these can remain unset when you are working only on site content. Every `PUBLIC_` value can be included in generated pages, so use public configuration only.
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```bash
+bun run build:landing
+bun run --cwd apps/landing preview
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Astro generates static output in `dist/`. Review the generated site and environment settings before publishing it.
 
-## 🧞 Commands
+## Content and layout
 
-All commands are run from the root of the project, from a terminal:
+- `src/pages`: site routes.
+- `src/components`: shared header, footer, and page sections.
+- `src/layouts`: metadata and shared page layouts.
+- `src/content/blog`: MDX posts.
+- `src/data/project.ts`: canonical GitHub repository link used by the header and footer.
+- `public`: static assets.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-.
+Use descriptive link text, keyboard-accessible interactions, and meaningful alternative text. Check desktop and mobile layouts when changing navigation. See [CONTRIBUTING.md](../../CONTRIBUTING.md).

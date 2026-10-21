@@ -1,14 +1,24 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.4.3 AS builder
 
 WORKDIR /app
-
-# Copy everything FIRST (important for workspaces)
+COPY package.json bun.lock ./
+COPY apps/backend/package.json apps/backend/package.json
+COPY apps/client/package.json apps/client/package.json
+COPY apps/dashboard/package.json apps/dashboard/package.json
+COPY apps/embed/package.json apps/embed/package.json
+COPY apps/landing/package.json apps/landing/package.json
+COPY packages/ui/package.json packages/ui/package.json
+RUN bun install --frozen-lockfile --ignore-scripts --network-concurrency 4
 COPY . .
 
-# Install ALL workspace deps properly
-RUN bun install --frozen-lockfile
-
 # Build
+ARG VITE_API_BASE
+ARG VITE_EMBED_BASE
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ARG VITE_ADMIN_EMAILS
+ARG VITE_LANDING_URL
+ARG VITE_AMPLITUDE_API_KEY
+ARG VITE_ENV_KEY
 RUN bun run build:dashboard
 
 

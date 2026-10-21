@@ -6,6 +6,7 @@ import { ErrorModel } from '../../common/models/error';
 import { db } from '../../db';
 import { agents } from '../../db/schema/agents';
 import { channels } from '../../db/schema/channels';
+import { connection as redis } from '../../queue/connection';
 import { logger } from '../../utils/logger.utils';
 import type { IChannelWhatsAppConfig } from '../channel/model';
 import { ChannelService } from '../channel/service';
@@ -13,6 +14,7 @@ import { ChatV2Service } from '../chatv2/service';
 import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from './connectionService';
 import { generateOrgVerifyToken, verifyOrgVerifyToken } from './verifyToken';
+import { createWhatsAppWebhook } from './webhook';
 
 const log = logger.child({ module: 'whatsapp' });
 
@@ -53,17 +55,14 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     },
   )
 
-  // ─── POST /webhook/whatsapp — Inbound messages from Meta ──────────────────
-  .post(
-    '/webhook/whatsapp',
-    async ({ body }) => {
-      log.debug({ body }, 'webhook received');
-      void processInboundMessage(body).catch((err) =>
-        log.error({ err }, 'processInboundMessage failed'),
-      );
-      return new Response('OK', { status: 200 });
-    },
-    { body: t.Any() },
+  .use(
+    createWhatsAppWebhook(async (payload) => {
+      try {
+        await processInboundMessage(payload);
+      } catch (err) {
+        log.error({ err }, 'processInboundMessage failed');
+      }
+    }),
   )
 
   // ─── Authenticated endpoints ───────────────────────────────────────────────
@@ -73,6 +72,7 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
     response: {
       400: 'BadRequestResponse',
       404: 'NotFoundResponse',
+      403: 'BadRequestResponse',
     },
   })
 
@@ -262,7 +262,8 @@ export const WhatsApp = new Elysia({ tags: ['WhatsApp'] })
       if (!phoneRes.ok) {
         return status(400, {
           code: 'BAD_REQUEST',
-          message: 'Invalid access token — could not reach WhatsApp Business Account',
+          message:
+            'Invalid access token — could not reach WhatsApp Business Account',
         });
       }
       const phoneData = (await phoneRes.json()) as {
@@ -462,6 +463,7 @@ async function processInboundMessage(body: unknown) {
       for (const msg of messages) {
         if (
           msg.type !== 'text' ||
+          !msg.id ||
           !msg.from ||
           !msg.text?.body ||
           !phoneNumberId
@@ -498,6 +500,15 @@ async function processInboundMessage(body: unknown) {
           'dispatching to ChatV2Service.sendWhatsApp',
         );
 
+        const deliveryKey = `webhook:whatsapp:${phoneNumberId}:${msg.id}`;
+        const claimed = await redis.set(
+          deliveryKey,
+          'processing',
+          'EX',
+          86400,
+          'NX',
+        );
+        if (!claimed) continue;
         try {
           await ChatV2Service.sendWhatsApp({
             channelId: result.id,
@@ -508,6 +519,7 @@ async function processInboundMessage(body: unknown) {
             messageId: msg.id,
           });
         } catch (err) {
+          await redis.del(deliveryKey);
           log.error(
             { err, channelId: result.id, messageId: msg.id },
             'sendWhatsApp failed',

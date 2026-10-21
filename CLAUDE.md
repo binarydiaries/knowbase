@@ -26,7 +26,7 @@
 ## Tech Stack
 
 ### Backend (`apps/backend`)
-- **Runtime/framework**: Bun 1.2.12 + Elysia 1.4.x
+- **Runtime/framework**: Bun 1.4.3 + Elysia 1.4.x
 - **Database**: PostgreSQL via Drizzle ORM (beta)
 - **Cache/Queue**: Redis + BullMQ
 - **Auth**: Clerk (`elysia-clerk`)
@@ -52,7 +52,7 @@ The landing site uses Astro and MDX. Product documentation uses Mintlify.
 
 ### Monorepo tooling
 - **Monorepo**: Turborepo 2.7.2
-- **Package manager**: Bun 1.2.12 (required — do not use npm/yarn/pnpm)
+- **Package manager**: Bun 1.4.3 (required — do not use npm/yarn/pnpm)
 - **Linter/formatter**: Biome 2.3.11 (replaces ESLint + Prettier)
 - **Type checker**: TypeScript 5.9.2
 
@@ -62,7 +62,7 @@ The landing site uses Astro and MDX. Product documentation uses Mintlify.
 
 ### Prerequisites
 - Bun ≥ 1.2.12
-- Node.js ≥ 22.12
+- Node.js ≥ 22.22
 - PostgreSQL with pgvector (running locally or via Docker)
 - Redis (running locally or via Docker)
 
@@ -87,7 +87,7 @@ bun run build             # Build all apps
 bun run build:dashboard   # Build single app
 bun run lint              # Biome check (all files)
 bun run lint:fix          # Biome check + auto-fix
-bun run check-types       # Currently has no workspace implementations; frontend builds perform type checking
+bun run check-types       # Backend, dashboard, and client TypeScript checks
 ```
 
 ### Backend-specific commands (run from `apps/backend/`)
@@ -205,8 +205,8 @@ Components use **CVA** (`class-variance-authority`) for variant styling. Dark mo
 - Prefer `type` imports for types
 - Use Zod schemas as the source of truth for API shapes
 
-### No tests
-There is currently no test suite. The backend `test` script is a placeholder.
+### Security tests
+Run `bun run test` with `TEST_DATABASE_URL` and `TEST_REDIS_URL` pointing to disposable, migrated PostgreSQL and Redis instances. See `apps/backend/README.md` for the setup. Tests use synthetic data and do not call paid providers.
 
 ---
 
@@ -292,7 +292,7 @@ The backend ships two Dockerfiles (multi-stage Bun builds targeting distroless):
 | `apps/backend/Dockerfile` | API server (`server` binary) |
 | `apps/backend/Worker.Dockerfile` | BullMQ worker (`worker-server` binary) |
 
-Database migrations run automatically during the Docker build step.
+Build every Dockerfile from the repository root. Images never receive database credentials. Apply migrations as a separate release step (`bun run --cwd apps/backend db:release`) before rolling out the API and worker.
 
 ---
 

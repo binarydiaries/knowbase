@@ -2,7 +2,8 @@
   "name": "backend",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test tests && bun tests/http-boundaries.ts",
+    "db:release": "bun run db:migrate",
     "dev:app": "bun run --watch src/server.ts",
     "dev:worker": "bun run --watch src/queue/worker.ts",
     "dev": "bun run dev:app & bun run dev:worker",
@@ -14,9 +15,10 @@
     "start": "bun run start:app & bun run start:worker",
     "db:push": "npx drizzle-kit push",
     "db:generate": "npx drizzle-kit generate",
-    "db:migrate": "npx drizzle-kit migrate",
+    "db:migrate": "bunx --no-install drizzle-kit migrate",
     "studio": "npx drizzle-kit studio",
-    "smith": "bunx @langchain/langgraph-cli@latest dev"
+    "smith": "bunx @langchain/langgraph-cli@latest dev",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/langchain": "^2.0.204",

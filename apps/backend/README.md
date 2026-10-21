@@ -35,10 +35,37 @@ bun run studio       # Inspect your development database
 bun run build        # Compile API and worker binaries
 ```
 
-The `test` script is currently a placeholder. There is no complete backend test suite; describe how changes were verified in your pull request.
+## Security regression tests
+
+Use **disposable** PostgreSQL with pgvector and Redis 6.2+ instances. These tests write synthetic rows, checkpoint tables, and expiring Redis keys. They do not call OpenAI, Clerk, Meta, or Slack.
+
+```bash
+export TEST_DATABASE_URL=postgresql://postgres:local-password@localhost:5432/agenvik_test
+export TEST_REDIS_URL=redis://localhost:6379/1
+DATABASE_URL="$TEST_DATABASE_URL" bun run db:migrate
+bun run test
+bun run check-types
+```
+
+The suite covers visitor token tampering and expiry, cross-organization/agent/channel checkpoints and database writes, restored-agent authorization, raw-byte webhook signatures, and browser-bound, single-use Slack OAuth state. It also boots the complete API with synthetic provider keys and checks nine HTTP authorization and response boundaries. External provider happy paths require separate development-account tests.
 
 ## Deployment notes
 
-The existing Dockerfiles expect `apps/backend` as their build context, rather than the monorepo root. The API Dockerfile currently accepts a database URL through a build argument and environment variable, then runs migrations at build time. Use development credentials only: credentials can remain in intermediate build metadata, so move migrations to a separate release step before using sensitive credentials. The worker Dockerfile currently starts the indexing worker alone, while `src/queue/worker.ts` loads indexing and email workers. Review and adapt these files for your deployment.
+Build from the **repository root**, using the root `bun.lock`:
 
-Use development credentials when working locally. Review [SECURITY.md](../../SECURITY.md) before exposing an installation to users.
+```bash
+docker build -f apps/backend/Dockerfile -t agenvik-api .
+docker build -f apps/backend/Worker.Dockerfile -t agenvik-worker .
+```
+
+Images contain compiled binaries and run as a non-root user. Both indexing and email workers start from the worker image. Never pass database URLs or provider secrets as build arguments. Inject backend secrets only at runtime. Run pending migrations once as a separate release job with runtime database access:
+
+```bash
+bun run --cwd apps/backend db:release
+```
+
+Deploy the API and chat client together: the widget now obtains a signed conversation capability from `POST /chatv2/session` before sending messages. Old caller-selected conversation IDs are rejected. Existing transcripts remain available to their owners; legacy checkpoints are deliberately not resumed. Reload already-open widgets after the rollout.
+
+Set `WHATSAPP_APP_SECRET` to the Meta app secret before enabling inbound WhatsApp. Unsigned requests and missing secrets fail closed. Slack requires `SLACK_SIGNING_SECRET`, Redis 6.2+, and an HTTPS `API_BASE`; callbacks use an HTTP-only, secure, same-site cookie and a ten-minute authorization state.
+
+See [the deployment guide](../../docs/deployment.md) for Dokploy build contexts, public frontend build arguments, release ordering, and verification.

@@ -14,6 +14,11 @@ import { suppressPipelineNodes } from '../graph/utils/stream';
 import { SlackConnectionService } from '../slack/connectionService';
 import { SubscriptionService } from '../subscription/service';
 import { WhatsAppConnectionService } from '../whatsapp/connectionService';
+import {
+  issueWebSession,
+  scopedConversationId,
+  verifyWebSession,
+} from './session';
 
 const log = logger.child({ module: 'chatv2' });
 
@@ -62,40 +67,65 @@ export abstract class ChatV2Service {
     return { isPaid: result.plan !== 'free' };
   }
 
+  static async publicWebChannel(channelId: string, parentOrigin?: string) {
+    const channel = await ChannelService.singleById(channelId);
+    if (!channel || channel.type !== 'web' || !channel.enabled) {
+      throw new NotFoundError('Web channel not found or disabled');
+    }
+    const config = channel.config as IChannelWebConfig;
+    if (config.allowedDomains?.length) {
+      let allowed = false;
+      try {
+        allowed =
+          !!parentOrigin &&
+          config.allowedDomains.includes(new URL(parentOrigin).hostname);
+      } catch {}
+      if (!allowed) throw new DomainNotAllowedError();
+    }
+    return channel;
+  }
+
+  static async createWebSession(channelId: string, parentOrigin?: string) {
+    const channel = await ChatV2Service.publicWebChannel(
+      channelId,
+      parentOrigin,
+    );
+    return {
+      conversationToken: issueWebSession({
+        orgId: channel.orgId,
+        agentId: channel.agentId,
+        channelId: channel.id,
+      }),
+    };
+  }
+
   static async sendWeb({
     channelId,
-    conversationId,
+    conversationToken,
     message,
     parentOrigin,
     ip,
   }: {
     channelId: string;
+    conversationToken: string;
     message: string;
-    conversationId: string;
     parentOrigin?: string;
     ip?: string;
   }): Promise<Response> {
-    const channel = await ChannelService.singleById(channelId);
-
-    if (!channel) {
-      throw new NotFoundError('Channel not found');
-    }
-
-    if (channel.type === 'web') {
-      const config = channel.config as IChannelWebConfig;
-      const allowedDomains = config.allowedDomains ?? [];
-      if (allowedDomains.length > 0) {
-        let allowed = false;
-        if (parentOrigin) {
-          try {
-            allowed = allowedDomains.includes(new URL(parentOrigin).hostname);
-          } catch {
-            allowed = false;
-          }
-        }
-        if (!allowed) throw new DomainNotAllowedError();
-      }
-    }
+    const channel = await ChatV2Service.publicWebChannel(
+      channelId,
+      parentOrigin,
+    );
+    const visitor = verifyWebSession(
+      { orgId: channel.orgId, agentId: channel.agentId, channelId: channel.id },
+      conversationToken,
+    );
+    if (!visitor) throw new DomainNotAllowedError();
+    const conversationId = scopedConversationId(
+      { orgId: channel.orgId, agentId: channel.agentId, channelId: channel.id },
+      'web',
+      visitor,
+    );
 
     const { orgId, agentId } = channel;
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
@@ -167,10 +197,12 @@ export abstract class ChatV2Service {
       throw new NotFoundError('WhatsApp not connected for this org');
     }
 
-    // senderPhone is stable across all messages from the same user — use it
-    // directly as thread_id. The checkpointer tracks continuity; initConversation
-    // creates the DB record on the first turn and updates on subsequent ones.
-    const thread_id = senderPhone;
+    // Keep sender continuity within this organization, agent and channel.
+    const thread_id = scopedConversationId(
+      { orgId, agentId: channel.agentId, channelId },
+      'whatsapp',
+      senderPhone,
+    );
 
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
 
@@ -370,7 +402,11 @@ export abstract class ChatV2Service {
     }
 
     // threadTs is stable per Slack thread — use as thread_id directly
-    const thread_id = threadTs;
+    const thread_id = scopedConversationId(
+      { orgId, agentId: channel.agentId, channelId },
+      'slack',
+      JSON.stringify([slackChannelId, threadTs]),
+    );
     log.debug({ thread_id, message: message.slice(0, 80) }, 'thread resolved');
 
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
@@ -383,7 +419,7 @@ export abstract class ChatV2Service {
     // ── Seed entities from Slack profile (best-effort, cached) ────────────
     const channelEntities: Record<string, string> = {};
     if (slackUserId) {
-      const cacheKey = `user:profile:${slackUserId}`;
+      const cacheKey = `slack:user:profile:${orgId}:${connection.teamId}:${slackUserId}`;
       try {
         const cached = await redis.get(cacheKey);
         if (cached) {
@@ -602,12 +638,14 @@ export abstract class ChatV2Service {
     channelId,
     message,
     orgId,
+    userId,
   }: {
     agentId: string;
     conversationId: string;
     channelId: string;
     message: string;
     orgId: string;
+    userId: string;
   }) {
     const { isPaid } = await ChatV2Service.assertMessageLimit(orgId);
 
@@ -622,7 +660,11 @@ export abstract class ChatV2Service {
                 agentId,
                 orgId,
                 channelId,
-                thread_id: conversationId,
+                thread_id: scopedConversationId(
+                  { orgId, agentId, channelId },
+                  'preview',
+                  JSON.stringify([userId, conversationId]),
+                ),
                 isPaid,
               },
             },

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Unreleased] — 2026-10-21
+
+### Security
+- Isolate conversation checkpoints by organization, agent, channel, and ingress; use server-issued visitor capabilities for public web chat.
+- Verify WhatsApp webhook signatures before parsing or processing events; reject stale Slack signatures and deduplicate inbound events.
+- Bind Slack authorization to the initiating browser, user, and organization with expiring, single-use Redis state.
+- Recheck agent ownership on restored graph state and scope conversation updates to the owning organization.
+- Move database migrations out of Docker builds and refresh vulnerable dependencies.
+
+### Added
+- MIT license, contributor and security guides, issue templates, a project overview, and website source-code links.
+- Security regression tests using disposable PostgreSQL and Redis, plus CI release checks.
+
+### Fixed
+- Fresh database migration prerequisites and demo booking migration order; add the missing Slack schema migration.
+- Use the root workspace lockfile for container builds and include both email and indexing workers.
+
+---
+
 ## [0.8.0] — 2026-06-24
 
 ### Added

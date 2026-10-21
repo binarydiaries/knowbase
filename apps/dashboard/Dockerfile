@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.4.3 AS builder
 
 WORKDIR /app
 
@@ -6,9 +6,16 @@ WORKDIR /app
 COPY . .
 
 # Install ALL workspace deps properly
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Build
+ARG VITE_API_BASE
+ARG VITE_EMBED_BASE
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ARG VITE_ADMIN_EMAILS
+ARG VITE_LANDING_URL
+ARG VITE_AMPLITUDE_API_KEY
+ARG VITE_ENV_KEY
 RUN bun run build:dashboard
 
 

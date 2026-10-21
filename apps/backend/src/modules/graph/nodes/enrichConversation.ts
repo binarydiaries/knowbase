@@ -3,9 +3,9 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { GraphNode } from '@langchain/langgraph';
 import { z } from 'zod';
 import { ConversationService } from '../../conversation/service';
+import type { State } from '../state';
 import { createNanoLlm } from '../utils/llm';
 import { getLastUserMessage } from '../utils/messages';
-import type { State } from '../state';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -31,10 +31,10 @@ async function labelTopic(
   config?: RunnableConfig | null,
 ): Promise<string | null> {
   try {
-    const topicLlm = createNanoLlm(config, 'enrichConversation').withStructuredOutput(
-      TopicSchema,
-      { name: 'label_topic', strict: true },
-    );
+    const topicLlm = createNanoLlm(
+      config,
+      'enrichConversation',
+    ).withStructuredOutput(TopicSchema, { name: 'label_topic', strict: true });
     const { topic } = await topicLlm.invoke([
       new SystemMessage('In 2-5 words, what topic is this question about?'),
       new HumanMessage(`"${firstUserMessage}"`),
@@ -54,13 +54,18 @@ async function labelTopic(
  * Attaches country (via IP geo) and topic label (via nano LLM) to the conversation.
  * Only meaningful on the first turn; both lookups are best-effort.
  */
-export const enrichConversation: GraphNode<typeof State> = async (state, config) => {
-  const { thread_id, ip, isPaid } = config?.configurable ?? {};
+export const enrichConversation: GraphNode<typeof State> = async (
+  state,
+  config,
+) => {
+  const { thread_id, orgId, agentId, channelId, ip, isPaid } =
+    config?.configurable ?? {};
 
   // Only enrich on the first turn (1 HumanMessage + 1 AIMessage = length 2).
   // Country doesn't change mid-conversation; topic is set once per thread.
   const isNew = state.messages.length === 2;
-  if (!thread_id || !isPaid || !isNew) return {};
+  if (!thread_id || !orgId || !agentId || !channelId || !isPaid || !isNew)
+    return {};
 
   void (async () => {
     try {
@@ -75,7 +80,10 @@ export const enrichConversation: GraphNode<typeof State> = async (state, config)
       if (topic) updates.topic = topic;
 
       if (Object.keys(updates).length) {
-        await ConversationService.update(thread_id, updates);
+        await ConversationService.update(
+          { id: thread_id, orgId, agentId, channelId },
+          updates,
+        );
       }
     } catch {
       // Enrichment is always best-effort — never break the conversation

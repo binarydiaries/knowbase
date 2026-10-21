@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Clerk publishable keys are intentionally browser-visible; server keys are never allowed"
+regexTarget = "line"
+regexes = ['''^VITE_CLERK_PUBLISHABLE_KEY\s*=\s*["']?pk_(test|live)_[A-Za-z0-9+/=_-]+["']?\s*$''']

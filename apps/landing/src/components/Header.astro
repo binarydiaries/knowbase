@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logoSrc from '../assets/images/TextLogo.svg';
-import { Home, Hospital, Users, GraduationCap, ChevronDown, Github, Menu, X } from '@lucide/astro';
+import { Home, Hospital, Users, GraduationCap, ChevronDown, CodeXml, Menu, X } from '@lucide/astro';
 import { githubUrl } from '../data/project';
 
 type ActivePage = 'home' | 'features' | 'pricing' | 'blog' | 'use-cases';
@@ -112,7 +112,7 @@ const solutions = [
         aria-label="Agenvik source code on GitHub (opens in a new tab)"
         class="hidden lg:inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-4"
       >
-        <Github size={16} aria-hidden="true" />
+        <CodeXml size={16} aria-hidden="true" />
         GitHub
       </a>
     </nav>
@@ -199,7 +199,7 @@ const solutions = [
         aria-label="Agenvik source code on GitHub (opens in a new tab)"
         class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium"
       >
-        <Github size={16} aria-hidden="true" />
+        <CodeXml size={16} aria-hidden="true" />
         GitHub
       </a>
       <a href="/book-demo" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#301B69]/5 font-medium">

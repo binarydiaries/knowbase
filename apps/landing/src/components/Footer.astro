@@ -2,7 +2,7 @@
 import { Image, getImage } from 'astro:assets';
 import logoSrc from '../assets/images/TextLogo.svg';
 import footerBgSrc from '../assets/images/footer-bg.png';
-import { Github } from '@lucide/astro';
+import { CodeXml } from '@lucide/astro';
 import { githubUrl } from '../data/project';
 
 const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 });
@@ -116,7 +116,7 @@ const footerBg = await getImage({ src: footerBgSrc, format: 'webp', quality: 80 
           {' · '}
           <a href="/llms.txt" class="hover:text-[#301B69] transition-colors">llms.txt</a>
           {' · '}
-          <a href={githubUrl} target="_blank" rel="noopener noreferrer" aria-label="Agenvik source code on GitHub (opens in a new tab)" class="inline-flex items-center gap-1 align-middle hover:text-[#301B69] transition-colors"><Github size={14} aria-hidden="true" /> GitHub</a>
+          <a href={githubUrl} target="_blank" rel="noopener noreferrer" aria-label="Agenvik source code on GitHub (opens in a new tab)" class="inline-flex items-center gap-1 align-middle hover:text-[#301B69] transition-colors"><CodeXml size={14} aria-hidden="true" /> GitHub</a>
         </p>
       </div>
     </div>

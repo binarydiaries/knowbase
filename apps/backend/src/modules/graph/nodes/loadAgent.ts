@@ -4,10 +4,6 @@ import { ConfigSchema } from '../config';
 import type { State } from '../state';
 
 export const loadAgent: GraphNode<typeof State> = async (state, config) => {
-  if (state.behaviour?.id) {
-    return {};
-  }
-
   const { agentId, orgId } = ConfigSchema.parse(config.configurable);
 
   if (!agentId || !orgId) {
@@ -25,6 +21,8 @@ export const loadAgent: GraphNode<typeof State> = async (state, config) => {
   if (!agent) {
     throw new Error(`Agent ${agentId} not found or inactive`);
   }
+
+  if (state.behaviour?.agentId === agentId) return {};
 
   const behaviour = await db.query.behaviors.findFirst({
     where: { agentId },

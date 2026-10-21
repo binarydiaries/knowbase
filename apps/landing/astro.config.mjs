@@ -10,7 +10,7 @@ const {LANDING_URL} = loadEnv(process.env.NODE_ENV, process.cwd(), "");
 // https://astro.build/config
 export default defineConfig({
   site: LANDING_URL,
-  outputDir: 'static',
+  outDir: './dist',
   integrations: [sitemap({
     filter: (page) => !page.includes('/dashboard/')
   }), mdx()],

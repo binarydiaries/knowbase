@@ -18,8 +18,8 @@ export function validateEnv(): void {
     process.exit(1);
   }
 
-  const encKey = process.env.TOKEN_ENCRYPTION_KEY!;
-  if (Buffer.from(encKey, 'hex').length !== 32) {
+  const encKey = process.env.TOKEN_ENCRYPTION_KEY ?? '';
+  if (!/^[a-f\d]{64}$/i.test(encKey)) {
     log.error(
       'TOKEN_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)',
     );

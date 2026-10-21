@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS vector;--> statement-breakpoint
 CREATE TYPE "actionType" AS ENUM('lead_generation');--> statement-breakpoint
 CREATE TYPE "agentStatus" AS ENUM('active', 'archived');--> statement-breakpoint
 CREATE TYPE "tone" AS ENUM('friendly', 'professional', 'neutral');--> statement-breakpoint

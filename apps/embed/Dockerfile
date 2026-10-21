@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.4.3 AS builder
 
 WORKDIR /app
 
@@ -6,9 +6,10 @@ WORKDIR /app
 COPY . .
 
 # Install ALL workspace deps properly
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Build
+ARG VITE_CLIENT_BASE
 RUN bun run build:embed
 
 

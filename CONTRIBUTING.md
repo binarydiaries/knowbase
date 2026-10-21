@@ -27,13 +27,14 @@ Run the checks relevant to the files you changed:
 ```bash
 # Run from the repository root
 bun run lint
+bun run check-types
 bun run build:dashboard
 bun run build:client
 bun run build:landing
 bun run build:embed
 ```
 
-The dashboard and client builds include TypeScript checking. The backend currently has a placeholder `test` script, and the root `check-types` task has no workspace implementations. Do not treat either as a passing test suite. For backend changes, describe the tests or manual verification you performed and their limitations.
+Run the [backend security tests](apps/backend/README.md#security-regression-tests) with disposable PostgreSQL and Redis when changing chat, authentication, or integrations. They exercise real persistence and Redis state without calling paid providers. The dashboard and client builds also include TypeScript checking. Describe any external-provider verification and its limitations in your pull request.
 
 Add regression tests when they demonstrate a meaningful behavior or protect a security boundary. Do not change live accounts, production data, or paid service configuration to validate a contribution. For UI changes, include screenshots at desktop and mobile sizes using synthetic data. Report pre-existing check failures separately from failures introduced by your change.
 

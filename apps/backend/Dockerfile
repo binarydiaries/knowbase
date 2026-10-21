@@ -1,40 +1,14 @@
-FROM oven/bun AS build
-
+# Build from the repository root: docker build -f apps/backend/Dockerfile .
+FROM oven/bun:1.4.3 AS build
 WORKDIR /app
-
-# Legacy build-time migrations require this value. Supply development credentials
-# only until migrations are moved to a separate release step; never print it.
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
-
-# Cache packages installation
-COPY package.json package.json
-COPY bun.lock bun.lock
-
-RUN bun install
-
 COPY . .
+RUN bun install --frozen-lockfile --ignore-scripts
+WORKDIR /app/apps/backend
+RUN bun build --compile --minify-whitespace --minify-syntax --outfile server src/index.ts
 
-ENV NODE_ENV=production
-
-# ✅ RUN MIGRATIONS HERE (FAILS BUILD IF ERROR)
-RUN bun run db:migrate
-
-RUN bun build \
-	--compile \
-	--minify-whitespace \
-	--minify-syntax \
-	--outfile server \
-	src/index.ts
-
-FROM gcr.io/distroless/base
-
+FROM gcr.io/distroless/base-debian12:nonroot
 WORKDIR /app
-
-COPY --from=build /app/server server
-
+COPY --from=build /app/apps/backend/server ./server
 ENV NODE_ENV=production
-
 CMD ["./server"]
-
 EXPOSE 3000

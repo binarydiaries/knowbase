@@ -80,8 +80,8 @@ The API handles agent configuration and chat requests. BullMQ workers process in
 
 You need:
 
-- **Bun 1.2.12 or newer**; the repository declares `bun@1.2.12` as its package manager.
-- **Node.js 22.12 or newer** for frontend tooling.
+- **Bun 1.4.3**, matching the repository’s package manager and container builds.
+- **Node.js 22.22 or newer** for frontend tooling.
 - **PostgreSQL with pgvector** and a database you can migrate.
 - **Redis** for queues and caches.
 - Development accounts and keys for **OpenAI** and **Clerk**. Enable Clerk organizations for dashboard access.
@@ -200,10 +200,12 @@ Run these from the repository root:
 | `bun run build:client` | Type-check and build the chat client. |
 | `bun run build:landing` | Build the Astro website. |
 | `bun run build:embed` | Build the distributable `embed.js`. |
+| `bun run check-types` | Check backend, dashboard, and chat client TypeScript. |
+| `bun run test` | Run backend security tests against disposable PostgreSQL and Redis. |
 | `bun run lint` | Check supported files with Biome. |
 | `bun run lint:fix` | Apply Biome fixes; review the resulting diff. |
 
-There is no complete automated application test suite yet. The backend test command is a placeholder, and the root `check-types` task currently has no workspace implementations. Use the relevant builds and the checks described in [CONTRIBUTING.md](CONTRIBUTING.md); describe any verification gaps in your pull request.
+Run `bun run check-types` for the backend, dashboard, and client. Security regression tests cover conversation isolation with real PostgreSQL checkpoints, signed webhooks, and single-use Slack OAuth state with Redis. See [the test setup](apps/backend/README.md#security-regression-tests) and [CONTRIBUTING.md](CONTRIBUTING.md). External provider flows still require integration testing with development accounts.
 
 ## Feature flags
 

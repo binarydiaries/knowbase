@@ -1,10 +1,20 @@
 {
   "name": "knowbase",
   "private": true,
+  "description": "Agenvik — build AI agents from your knowledge base and deploy them across web, WhatsApp, and Slack.",
+  "license": "MIT",
+  "homepage": "https://agenvik.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binarydiaries/knowbase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/binarydiaries/knowbase/issues"
+  },
   "scripts": {
     "build": "turbo run build",
     "build:dashboard": "turbo run build --filter=dashboard",
-    "build:landing": "turbo run build --filter=landing2",
+    "build:landing": "turbo run build --filter=landing",
     "build:client": "turbo run build --filter=client",
     "build:embed": "turbo run build --filter=embed",
     "dev": "turbo run dev",

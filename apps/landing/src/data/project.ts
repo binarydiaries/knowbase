@@ -1,1 +1,1 @@
-export const githubUrl = 'https://github.com/binarydiaries/knowbase';
+export const githubUrl = 'https://github.com/keshavkatwe/agenvik';

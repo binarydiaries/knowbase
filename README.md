@@ -28,7 +28,7 @@
 
 Agenvik is an AI agent platform with a visual dashboard, a retrieval pipeline, and integrations for web chat, WhatsApp, and Slack. Add knowledge from text, Q&A, PDFs, or website content; configure the agent's behavior; then manage conversations and leads in one workspace.
 
-This repository contains the backend, dashboard, chat client, embed loader, marketing site, and documentation. It is a Bun and Turborepo monorepo written primarily in TypeScript. The repository and shared package names retain **KnowBase**, the project's original name.
+This repository contains the backend, dashboard, chat client, embed loader, marketing site, and documentation. It is a Bun and Turborepo monorepo written primarily in TypeScript. The internal shared UI package retains the `@knowbase/ui` name from the project's original name, **KnowBase**.
 
 **Project status:** actively developed. Some capabilities require feature flags, a paid plan, or external provider setup. The hosted product at [agenvik.com](https://agenvik.com) and your own deployment have separate configuration and operating costs. See [Security](SECURITY.md) before exposing a deployment to users.
 
@@ -89,8 +89,8 @@ You need:
 Use a development database and provider accounts. Local chat and indexing make billable OpenAI requests; the repository does not include an offline model or bundled authentication service.
 
 ```bash
-git clone https://github.com/binarydiaries/knowbase.git
-cd knowbase
+git clone https://github.com/keshavkatwe/agenvik.git
+cd agenvik
 bun install --frozen-lockfile
 
 cp apps/backend/.env.example apps/backend/.env
@@ -223,7 +223,7 @@ Flags and plan limits are separate controls. Enabling a dashboard option does no
 
 ## Contribute
 
-Start with the [contribution guide](CONTRIBUTING.md). Report reproducible bugs or propose improvements through [GitHub issues](https://github.com/binarydiaries/knowbase/issues). Documentation, accessibility, integration improvements, and meaningful regression tests are useful places to help.
+Start with the [contribution guide](CONTRIBUTING.md). Report reproducible bugs or propose improvements through [GitHub issues](https://github.com/keshavkatwe/agenvik/issues). Documentation, accessibility, integration improvements, and meaningful regression tests are useful places to help.
 
 Please follow the [code of conduct](CODE_OF_CONDUCT.md) and report vulnerabilities privately through [SECURITY.md](SECURITY.md).
 

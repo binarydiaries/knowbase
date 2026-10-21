@@ -20,22 +20,29 @@ await pool.query(`UPDATE channels SET config=$1 WHERE id='boot_web'`, [
     allowedDomains: [],
   }),
 ]);
-const server = Bun.spawn(['bun', 'src/server.ts'], {
-  cwd: `${import.meta.dir}/..`,
-  env: {
-    ...process.env,
-    PORT: '3010',
-    REDIS_URL: process.env.TEST_REDIS_URL,
-    OPENAI_API_KEY: 'synthetic-not-a-real-key',
-    CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('test.clerk.accounts.dev$').toString('base64')}`,
-    CLERK_SECRET_KEY: 'sk_test_synthetic_not_a_real_key',
-    TOKEN_ENCRYPTION_KEY: 'ab'.repeat(32),
-    WHATSAPP_APP_SECRET: 'synthetic-signing-secret',
-    SLACK_SIGNING_SECRET: 'synthetic-signing-secret',
+const server = Bun.spawn(
+  process.env.TEST_API_BINARY
+    ? [process.env.TEST_API_BINARY]
+    : ['bun', 'src/server.ts'],
+  {
+    cwd: `${import.meta.dir}/..`,
+    env: {
+      ...process.env,
+      PORT: '3010',
+      NODE_ENV: 'production',
+      WEB_CONCURRENCY: '1',
+      REDIS_URL: process.env.TEST_REDIS_URL,
+      OPENAI_API_KEY: 'synthetic-not-a-real-key',
+      CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('test.clerk.accounts.dev$').toString('base64')}`,
+      CLERK_SECRET_KEY: 'sk_test_synthetic_not_a_real_key',
+      TOKEN_ENCRYPTION_KEY: 'ab'.repeat(32),
+      WHATSAPP_APP_SECRET: 'synthetic-signing-secret',
+      SLACK_SIGNING_SECRET: 'synthetic-signing-secret',
+    },
+    stdout: Bun.file('/tmp/boot.log'),
+    stderr: Bun.file('/tmp/boot-errors.log'),
   },
-  stdout: Bun.file('/tmp/boot.log'),
-  stderr: Bun.file('/tmp/boot-errors.log'),
-});
+);
 const base = 'http://127.0.0.1:3010';
 try {
   let ready = false;

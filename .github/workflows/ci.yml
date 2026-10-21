@@ -37,6 +37,7 @@ jobs:
       - run: bun run --cwd apps/backend db:migrate
       - run: bun run test
       - run: bun run build
+      - run: TEST_API_BINARY=./out/server bun run --cwd apps/backend test:http
       - run: bun audit
   secrets:
     runs-on: ubuntu-latest

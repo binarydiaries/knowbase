@@ -7,8 +7,8 @@
     "dev:app": "bun run --watch src/server.ts",
     "dev:worker": "bun run --watch src/queue/worker.ts",
     "dev": "bun run dev:app & bun run dev:worker",
-    "build:app": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile out/server \\\n\tsrc/index.ts",
-    "build:worker": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile out/worker-server \\\n\tsrc/queue/worker.ts",
+    "build:app": "NODE_ENV=production bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile out/server \\\n\tsrc/index.ts",
+    "build:worker": "NODE_ENV=production bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile out/worker-server \\\n\tsrc/queue/worker.ts",
     "build": "bun run build:app && bun run build:worker",
     "start:app": "./out/server",
     "start:worker": "./out/worker-server",
@@ -18,7 +18,8 @@
     "db:migrate": "bunx --no-install drizzle-kit migrate",
     "studio": "npx drizzle-kit studio",
     "smith": "bunx @langchain/langgraph-cli@latest dev",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test:http": "bun tests/http-boundaries.ts"
   },
   "dependencies": {
     "@ai-sdk/langchain": "^2.0.204",

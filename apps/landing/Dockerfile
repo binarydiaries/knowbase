@@ -1,8 +1,15 @@
 # Build from the repository root.
 FROM oven/bun:1.4.3 AS builder
 WORKDIR /app
+COPY package.json bun.lock ./
+COPY apps/backend/package.json apps/backend/package.json
+COPY apps/client/package.json apps/client/package.json
+COPY apps/dashboard/package.json apps/dashboard/package.json
+COPY apps/embed/package.json apps/embed/package.json
+COPY apps/landing/package.json apps/landing/package.json
+COPY packages/ui/package.json packages/ui/package.json
+RUN bun install --frozen-lockfile --ignore-scripts --network-concurrency 4
 COPY . .
-RUN bun install --frozen-lockfile --ignore-scripts
 ARG LANDING_URL
 ARG PUBLIC_APP_URL
 ARG PUBLIC_API_BASE
